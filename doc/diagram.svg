@@ -1,0 +1,336 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1021pt" height="1136pt" viewBox="0.00 0.00 1020.70 1136.39">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1132.39)">
+<title>chat_architecture</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1132.39 1016.7,-1132.39 1016.7,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_user</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="469,-959.39 469,-1120.39 539,-1120.39 539,-959.39 469,-959.39"/>
+<text text-anchor="middle" x="504" y="-1103.79" font-family="Times,serif" font-size="14.00">User</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_frontend</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="422,-815.86 422,-924.59 586,-924.59 586,-815.86 422,-815.86"/>
+<text text-anchor="middle" x="504" y="-907.99" font-family="Times,serif" font-size="14.00">Frontend (BIG-AGI)</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_backend</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="37,-390.69 37,-781.06 925,-781.06 925,-390.69 37,-390.69"/>
+<text text-anchor="middle" x="481" y="-764.46" font-family="Times,serif" font-size="14.00">MCP Host (Backend)</text>
+</g>
+<g id="clust5" class="cluster">
+<title>cluster_mcp</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="45,-398.69 45,-514.69 219,-514.69 219,-398.69 45,-398.69"/>
+<text text-anchor="middle" x="132" y="-498.09" font-family="Times,serif" font-size="14.00">MCP Client</text>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_gcp</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="832,-218.28 832,-357.89 1000,-357.89 1000,-218.28 832,-218.28"/>
+<text text-anchor="middle" x="916" y="-341.29" font-family="Times,serif" font-size="14.00">GCP PRIVATE PROJECT</text>
+<text text-anchor="middle" x="916" y="-324.49" font-family="Times,serif" font-size="14.00">TENANT</text>
+</g>
+<g id="clust7" class="cluster">
+<title>cluster_environment</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="8,-8 8,-347.77 436,-347.77 436,-8 8,-8"/>
+<text text-anchor="middle" x="222" y="-331.17" font-family="Times,serif" font-size="14.00">ENVIRONMENT</text>
+</g>
+<g id="clust8" class="cluster">
+<title>cluster_samplehttpserver</title>
+<polygon fill="none" stroke="black" stroke-dasharray="5,2" points="16,-16 16,-192.6 270,-192.6 270,-16 16,-16"/>
+<text text-anchor="middle" x="143" y="-176" font-family="Times,serif" font-size="14.00">samplehttpserver</text>
+</g>
+<!-- user -->
+<g id="node1" class="node">
+<title>user</title>
+<path fill="lightblue" stroke="none" d="M519,-1087.59C519,-1087.59 489,-1087.59 489,-1087.59 483,-1087.59 477,-1081.59 477,-1075.59 477,-1075.59 477,-1057.99 477,-1057.99 477,-1051.99 483,-1045.99 489,-1045.99 489,-1045.99 519,-1045.99 519,-1045.99 525,-1045.99 531,-1051.99 531,-1057.99 531,-1057.99 531,-1075.59 531,-1075.59 531,-1081.59 525,-1087.59 519,-1087.59"/>
+<text text-anchor="middle" x="504" y="-1070.99" font-family="Times,serif" font-size="14.00">Chat</text>
+<text text-anchor="middle" x="504" y="-1054.19" font-family="Times,serif" font-size="14.00">👤</text>
+</g>
+<!-- ui -->
+<g id="node2" class="node">
+<title>ui</title>
+<g id="a_node2"><a xlink:title="Web/Mobile App">
+<path fill="lightblue" stroke="black" d="M519,-1008.99C519,-1008.99 489,-1008.99 489,-1008.99 483,-1008.99 477,-1002.99 477,-996.99 477,-996.99 477,-979.39 477,-979.39 477,-973.39 483,-967.39 489,-967.39 489,-967.39 519,-967.39 519,-967.39 525,-967.39 531,-973.39 531,-979.39 531,-979.39 531,-996.99 531,-996.99 531,-1002.99 525,-1008.99 519,-1008.99"/>
+<text text-anchor="middle" x="504" y="-992.39" font-family="Times,serif" font-size="14.00">UI</text>
+<text text-anchor="middle" x="504" y="-975.59" font-family="Times,serif" font-size="14.00">💻</text>
+</a>
+</g>
+</g>
+<!-- user&#45;&gt;ui -->
+<g id="edge1" class="edge">
+<title>user-&gt;ui</title>
+<path fill="none" stroke="black" d="M504,-1046.06C504,-1038.32 504,-1029.25 504,-1020.65"/>
+<polygon fill="black" stroke="black" points="507.5,-1020.9 504,-1010.9 500.5,-1020.9 507.5,-1020.9"/>
+</g>
+<!-- frontend -->
+<g id="node3" class="node">
+<title>frontend</title>
+<g id="a_node3"><a xlink:title="Handles user input and displays responses">
+<path fill="lightyellow" stroke="black" d="M569.19,-865.94C569.19,-865.94 549.86,-883.68 549.86,-883.68 545.44,-887.73 535.02,-891.79 529.02,-891.79 529.02,-891.79 478.98,-891.79 478.98,-891.79 472.98,-891.79 462.56,-887.73 458.14,-883.68 458.14,-883.68 438.81,-865.94 438.81,-865.94 434.39,-861.88 434.39,-853.77 438.81,-849.71 438.81,-849.71 458.14,-831.97 458.14,-831.97 462.56,-827.91 472.98,-823.86 478.98,-823.86 478.98,-823.86 529.02,-823.86 529.02,-823.86 535.02,-823.86 545.44,-827.91 549.86,-831.97 549.86,-831.97 569.19,-849.71 569.19,-849.71 573.61,-853.77 573.61,-861.88 569.19,-865.94"/>
+<text text-anchor="middle" x="504" y="-862.02" font-family="Times,serif" font-size="14.00">FRONTEND</text>
+<text text-anchor="middle" x="504" y="-845.22" font-family="Times,serif" font-size="14.00">BIG-AGI</text>
+</a>
+</g>
+</g>
+<!-- ui&#45;&gt;frontend -->
+<g id="edge2" class="edge">
+<title>ui-&gt;frontend</title>
+<path fill="none" stroke="black" d="M504,-967.13C504,-950.16 504,-925.2 504,-903.52"/>
+<polygon fill="black" stroke="black" points="507.5,-903.73 504,-893.73 500.5,-903.73 507.5,-903.73"/>
+<text text-anchor="middle" x="521.5" y="-936.79" font-family="Times,serif" font-size="14.00">HTTP</text>
+</g>
+<!-- api_gateway -->
+<g id="node4" class="node">
+<title>api_gateway</title>
+<g id="a_node4"><a xlink:title="Receives requests from frontend">
+<path fill="lightgreen" stroke="black" d="M540.03,-748.26C540.03,-748.26 467.97,-748.26 467.97,-748.26 461.97,-748.26 455.97,-742.26 455.97,-736.26 455.97,-736.26 455.97,-718.66 455.97,-718.66 455.97,-712.66 461.97,-706.66 467.97,-706.66 467.97,-706.66 540.03,-706.66 540.03,-706.66 546.03,-706.66 552.03,-712.66 552.03,-718.66 552.03,-718.66 552.03,-736.26 552.03,-736.26 552.03,-742.26 546.03,-748.26 540.03,-748.26"/>
+<text text-anchor="middle" x="504" y="-731.66" font-family="Times,serif" font-size="14.00">API Gateway</text>
+<text text-anchor="middle" x="504" y="-714.86" font-family="Times,serif" font-size="14.00">(api_gateway)</text>
+</a>
+</g>
+</g>
+<!-- frontend&#45;&gt;api_gateway -->
+<g id="edge3" class="edge">
+<title>frontend-&gt;api_gateway</title>
+<path fill="none" stroke="black" d="M504,-823.43C504,-803.84 504,-779.23 504,-759.97"/>
+<polygon fill="black" stroke="black" points="507.5,-759.99 504,-749.99 500.5,-759.99 507.5,-759.99"/>
+<text text-anchor="middle" x="600.83" y="-793.26" font-family="Times,serif" font-size="14.00">HTTP POST /v1/chat/completions</text>
+</g>
+<!-- chat_handler -->
+<g id="node5" class="node">
+<title>chat_handler</title>
+<g id="a_node5"><a xlink:title="Manages chat sessions, history, and orchestrates interactions">
+<path fill="lightyellow" stroke="black" d="M569.19,-631.53C569.19,-631.53 547.48,-660.1 547.48,-660.1 543.85,-664.88 534.22,-669.66 528.22,-669.66 528.22,-669.66 479.78,-669.66 479.78,-669.66 473.78,-669.66 464.15,-664.88 460.52,-660.1 460.52,-660.1 438.81,-631.53 438.81,-631.53 435.18,-626.75 435.18,-617.2 438.81,-612.42 438.81,-612.42 460.52,-583.85 460.52,-583.85 464.15,-579.07 473.78,-574.29 479.78,-574.29 479.78,-574.29 528.22,-574.29 528.22,-574.29 534.22,-574.29 543.85,-579.07 547.48,-583.85 547.48,-583.85 569.19,-612.42 569.19,-612.42 572.82,-617.2 572.82,-626.75 569.19,-631.53"/>
+<text text-anchor="middle" x="504" y="-634.57" font-family="Times,serif" font-size="14.00">Chat Session</text>
+<text text-anchor="middle" x="504" y="-617.77" font-family="Times,serif" font-size="14.00">Handler</text>
+<text text-anchor="middle" x="504" y="-600.97" font-family="Times,serif" font-size="14.00">(chat.go)</text>
+</a>
+</g>
+</g>
+<!-- api_gateway&#45;&gt;chat_handler -->
+<g id="edge4" class="edge">
+<title>api_gateway-&gt;chat_handler</title>
+<path fill="none" stroke="black" d="M504,-706.5C504,-699.15 504,-690.41 504,-681.38"/>
+<polygon fill="black" stroke="black" points="507.5,-681.4 504,-671.4 500.5,-681.4 507.5,-681.4"/>
+</g>
+<!-- vertex_sdk -->
+<g id="node6" class="node">
+<title>vertex_sdk</title>
+<g id="a_node6"><a xlink:title="Connects to and interacts with the LLM">
+<path fill="lightgreen" stroke="black" d="M905.5,-465.09C905.5,-465.09 808.5,-465.09 808.5,-465.09 802.5,-465.09 796.5,-459.09 796.5,-453.09 796.5,-453.09 796.5,-435.49 796.5,-435.49 796.5,-429.49 802.5,-423.49 808.5,-423.49 808.5,-423.49 905.5,-423.49 905.5,-423.49 911.5,-423.49 917.5,-429.49 917.5,-435.49 917.5,-435.49 917.5,-453.09 917.5,-453.09 917.5,-459.09 911.5,-465.09 905.5,-465.09"/>
+<text text-anchor="middle" x="857" y="-448.49" font-family="Times,serif" font-size="14.00">VERTEX AI SDK</text>
+<text text-anchor="middle" x="857" y="-431.69" font-family="Times,serif" font-size="14.00">(vertex.go)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;vertex_sdk -->
+<g id="edge5" class="edge">
+<title>chat_handler-&gt;vertex_sdk</title>
+<path fill="none" stroke="black" d="M570.47,-613.64C622.49,-605.61 695.14,-589.19 751,-556.29 786.22,-535.55 817.29,-499.81 836.54,-474.49"/>
+<polygon fill="black" stroke="black" points="839.27,-476.68 842.42,-466.57 833.65,-472.51 839.27,-476.68"/>
+</g>
+<!-- db -->
+<g id="node7" class="node">
+<title>db</title>
+<g id="a_node7"><a xlink:title="Stores chat history and other data">
+<path fill="lightgrey" stroke="black" d="M352.84,-467.69C352.84,-470.56 325.12,-472.89 291,-472.89 256.88,-472.89 229.16,-470.56 229.16,-467.69 229.16,-467.69 229.16,-420.89 229.16,-420.89 229.16,-418.02 256.88,-415.69 291,-415.69 325.12,-415.69 352.84,-418.02 352.84,-420.89 352.84,-420.89 352.84,-467.69 352.84,-467.69"/>
+<path fill="none" stroke="black" d="M352.84,-467.69C352.84,-464.82 325.12,-462.49 291,-462.49 256.88,-462.49 229.16,-464.82 229.16,-467.69"/>
+<text text-anchor="middle" x="291" y="-448.49" font-family="Times,serif" font-size="14.00">Data Storage</text>
+<text text-anchor="middle" x="291" y="-431.69" font-family="Times,serif" font-size="14.00">(Not Implemented)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;db -->
+<g id="edge11" class="edge">
+<title>chat_handler-&gt;db</title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M447.59,-600.19C423.05,-589.45 394.94,-574.69 372.95,-556.29 348.35,-535.71 327.07,-506.3 312.36,-482.92"/>
+<polygon fill="black" stroke="black" points="315.47,-481.3 307.26,-474.61 309.51,-484.96 315.47,-481.3"/>
+<text text-anchor="middle" x="410.47" y="-535.29" font-family="Times,serif" font-size="14.00">Store History</text>
+</g>
+<!-- error_handler -->
+<g id="node8" class="node">
+<title>error_handler</title>
+<g id="a_node8"><a xlink:title="Handles errors and exceptions">
+<polygon fill="lightgrey" stroke="black" points="494.84,-465.09 371.16,-465.09 371.16,-461.09 367.16,-461.09 367.16,-457.09 371.16,-457.09 371.16,-431.49 367.16,-431.49 367.16,-427.49 371.16,-427.49 371.16,-423.49 494.84,-423.49 494.84,-465.09"/>
+<polyline fill="none" stroke="black" points="371.16,-461.09 375.16,-461.09 375.16,-457.09 371.16,-457.09"/>
+<polyline fill="none" stroke="black" points="371.16,-431.49 375.16,-431.49 375.16,-427.49 371.16,-427.49"/>
+<text text-anchor="middle" x="433" y="-448.49" font-family="Times,serif" font-size="14.00">Error Handler</text>
+<text text-anchor="middle" x="433" y="-431.69" font-family="Times,serif" font-size="14.00">(Not Implemented)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;error_handler -->
+<g id="edge12" class="edge">
+<title>chat_handler-&gt;error_handler</title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M473,-574.11C469.74,-568.24 466.68,-562.21 464.09,-556.29 452.73,-530.38 444.44,-499.24 439.29,-476.55"/>
+<polygon fill="black" stroke="black" points="442.76,-476.02 437.2,-467 435.92,-477.51 442.76,-476.02"/>
+<text text-anchor="middle" x="503.54" y="-535.29" font-family="Times,serif" font-size="14.00">Handle Errors</text>
+</g>
+<!-- monitoring -->
+<g id="node9" class="node">
+<title>monitoring</title>
+<g id="a_node9"><a xlink:title="Collects metrics and logs">
+<polygon fill="lightgrey" stroke="black" points="636.84,-465.09 513.16,-465.09 513.16,-461.09 509.16,-461.09 509.16,-457.09 513.16,-457.09 513.16,-431.49 509.16,-431.49 509.16,-427.49 513.16,-427.49 513.16,-423.49 636.84,-423.49 636.84,-465.09"/>
+<polyline fill="none" stroke="black" points="513.16,-461.09 517.16,-461.09 517.16,-457.09 513.16,-457.09"/>
+<polyline fill="none" stroke="black" points="513.16,-431.49 517.16,-431.49 517.16,-427.49 513.16,-427.49"/>
+<text text-anchor="middle" x="575" y="-448.49" font-family="Times,serif" font-size="14.00">Monitoring</text>
+<text text-anchor="middle" x="575" y="-431.69" font-family="Times,serif" font-size="14.00">(Not Implemented)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;monitoring -->
+<g id="edge13" class="edge">
+<title>chat_handler-&gt;monitoring</title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M534.22,-574.04C537.41,-568.18 540.43,-562.18 543,-556.29 554.34,-530.31 562.92,-499.18 568.32,-476.5"/>
+<polygon fill="black" stroke="black" points="571.68,-477.49 570.52,-466.96 564.86,-475.92 571.68,-477.49"/>
+<text text-anchor="middle" x="598.56" y="-535.29" font-family="Times,serif" font-size="14.00">Collect Metrics</text>
+</g>
+<!-- logging -->
+<g id="node10" class="node">
+<title>logging</title>
+<g id="a_node10"><a xlink:title="Logs application events">
+<polygon fill="lightgrey" stroke="black" points="778.84,-465.09 655.16,-465.09 655.16,-461.09 651.16,-461.09 651.16,-457.09 655.16,-457.09 655.16,-431.49 651.16,-431.49 651.16,-427.49 655.16,-427.49 655.16,-423.49 778.84,-423.49 778.84,-465.09"/>
+<polyline fill="none" stroke="black" points="655.16,-461.09 659.16,-461.09 659.16,-457.09 655.16,-457.09"/>
+<polyline fill="none" stroke="black" points="655.16,-431.49 659.16,-431.49 659.16,-427.49 655.16,-427.49"/>
+<text text-anchor="middle" x="717" y="-448.49" font-family="Times,serif" font-size="14.00">Logging</text>
+<text text-anchor="middle" x="717" y="-431.69" font-family="Times,serif" font-size="14.00">(Not Implemented)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;logging -->
+<g id="edge14" class="edge">
+<title>chat_handler-&gt;logging</title>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M562.6,-602.98C590.07,-592.49 621.96,-577.15 646,-556.29 671.74,-533.96 691.56,-500.04 703.64,-475.57"/>
+<polygon fill="black" stroke="black" points="706.7,-477.3 707.84,-466.76 700.38,-474.29 706.7,-477.3"/>
+<text text-anchor="middle" x="710.67" y="-535.29" font-family="Times,serif" font-size="14.00">Collect Logs</text>
+</g>
+<!-- mcp_protocol -->
+<g id="node11" class="node">
+<title>mcp_protocol</title>
+<g id="a_node11"><a xlink:title="Communicates with the external environment">
+<path fill="lightgreen" stroke="black" d="M199.34,-481.89C199.34,-481.89 64.66,-481.89 64.66,-481.89 58.66,-481.89 52.66,-475.89 52.66,-469.89 52.66,-469.89 52.66,-418.69 52.66,-418.69 52.66,-412.69 58.66,-406.69 64.66,-406.69 64.66,-406.69 199.34,-406.69 199.34,-406.69 205.34,-406.69 211.34,-412.69 211.34,-418.69 211.34,-418.69 211.34,-469.89 211.34,-469.89 211.34,-475.89 205.34,-481.89 199.34,-481.89"/>
+<text text-anchor="middle" x="132" y="-465.29" font-family="Times,serif" font-size="14.00">MCP</text>
+<text text-anchor="middle" x="132" y="-448.49" font-family="Times,serif" font-size="14.00">JSON RPC</text>
+<text text-anchor="middle" x="132" y="-431.69" font-family="Times,serif" font-size="14.00">SSE</text>
+<text text-anchor="middle" x="132" y="-414.89" font-family="Times,serif" font-size="14.00">(function_client_mcp.go)</text>
+</a>
+</g>
+</g>
+<!-- chat_handler&#45;&gt;mcp_protocol -->
+<g id="edge7" class="edge">
+<title>chat_handler-&gt;mcp_protocol</title>
+<g id="a_edge7"><a xlink:title="Registers and calls specific functions">
+<path fill="none" stroke="black" d="M436.98,-614.14C356.16,-604.73 226.36,-585.57 188.04,-556.29 167.56,-540.63 153.99,-515.42 145.34,-492.98"/>
+<polygon fill="black" stroke="black" points="148.67,-491.89 141.99,-483.66 142.08,-494.25 148.67,-491.89"/>
+</a>
+</g>
+<text text-anchor="middle" x="262.52" y="-543.69" font-family="Times,serif" font-size="14.00">REGISTER FUNCTIONS</text>
+<text text-anchor="middle" x="262.52" y="-526.89" font-family="Times,serif" font-size="14.00">CALL FUNCTIONS</text>
+</g>
+<!-- llm -->
+<g id="node12" class="node">
+<title>llm</title>
+<g id="a_node12"><a xlink:title="Large Language Model">
+<ellipse fill="lightgrey" stroke="black" cx="916" cy="-267.28" rx="41.01" ry="41.01"/>
+<text text-anchor="middle" x="916" y="-271.48" font-family="Times,serif" font-size="14.00">LLM</text>
+<text text-anchor="middle" x="916" y="-254.68" font-family="Times,serif" font-size="14.00">Gemini</text>
+</a>
+</g>
+</g>
+<!-- vertex_sdk&#45;&gt;llm -->
+<g id="edge6" class="edge">
+<title>vertex_sdk-&gt;llm</title>
+<path fill="none" stroke="black" d="M863.77,-423.22C872.44,-397.5 887.75,-352.08 899.56,-317.05"/>
+<polygon fill="black" stroke="black" points="902.74,-318.57 902.62,-307.98 896.11,-316.33 902.74,-318.57"/>
+<text text-anchor="middle" x="899.7" y="-370.09" font-family="Times,serif" font-size="14.00">gRPC</text>
+</g>
+<!-- mcp_server -->
+<g id="node13" class="node">
+<title>mcp_server</title>
+<g id="a_node13"><a xlink:title="Executes actions and reads resources">
+<path fill="lightyellow" stroke="black" d="M238.35,-274.92C238.35,-274.92 199.06,-307.33 199.06,-307.33 194.43,-311.15 183.8,-314.97 177.8,-314.97 177.8,-314.97 86.2,-314.97 86.2,-314.97 80.2,-314.97 69.57,-311.15 64.94,-307.33 64.94,-307.33 25.65,-274.92 25.65,-274.92 21.03,-271.1 21.03,-263.47 25.65,-259.65 25.65,-259.65 64.94,-227.24 64.94,-227.24 69.57,-223.42 80.2,-219.6 86.2,-219.6 86.2,-219.6 177.8,-219.6 177.8,-219.6 183.8,-219.6 194.43,-223.42 199.06,-227.24 199.06,-227.24 238.35,-259.65 238.35,-259.65 242.97,-263.47 242.97,-271.1 238.35,-274.92"/>
+<text text-anchor="middle" x="132" y="-279.88" font-family="Times,serif" font-size="14.00">MCP</text>
+<text text-anchor="middle" x="132" y="-263.08" font-family="Times,serif" font-size="14.00">SERVER</text>
+<text text-anchor="middle" x="132" y="-246.28" font-family="Times,serif" font-size="14.00">(servers/logs/main.go)</text>
+</a>
+</g>
+</g>
+<!-- mcp_protocol&#45;&gt;mcp_server -->
+<g id="edge8" class="edge">
+<title>mcp_protocol-&gt;mcp_server</title>
+<path fill="none" stroke="black" d="M132,-406.6C132,-383.47 132,-353.08 132,-326.68"/>
+<polygon fill="black" stroke="black" points="135.5,-326.77 132,-316.77 128.5,-326.77 135.5,-326.77"/>
+<text text-anchor="middle" x="152.61" y="-370.09" font-family="Times,serif" font-size="14.00">STDIO</text>
+</g>
+<!-- mcp_server&#45;&gt;mcp_server -->
+<g id="edge9" class="edge">
+<title>mcp_server-&gt;mcp_server</title>
+<g id="a_edge9"><a xlink:title="Reads resources from the environment">
+<path fill="none" stroke="black" d="M252.76,-271.72C260.76,-270.69 265.6,-269.21 265.6,-267.28 265.6,-265.35 260.76,-263.87 252.76,-262.84"/>
+<polygon fill="black" stroke="black" points="252.7,-268.21 243.06,-272.62 253.34,-275.18 252.7,-268.21"/>
+<polygon fill="black" stroke="black" points="253.34,-259.38 243.06,-261.95 252.7,-266.35 253.34,-259.38"/>
+</a>
+</g>
+<text text-anchor="middle" x="306.06" y="-271.48" font-family="Times,serif" font-size="14.00">READ</text>
+<text text-anchor="middle" x="306.06" y="-254.68" font-family="Times,serif" font-size="14.00">RESOURCES</text>
+</g>
+<!-- mcp_server&#45;&gt;mcp_server -->
+<g id="edge10" class="edge">
+<title>mcp_server-&gt;mcp_server</title>
+<g id="a_edge10"><a xlink:title="Executes actions in the environment">
+<path fill="none" stroke="black" d="M244.98,-279.59C297.61,-280.42 346.51,-276.32 346.51,-267.28 346.51,-258.25 297.61,-254.15 244.98,-254.98"/>
+<polygon fill="black" stroke="black" points="245.3,-276.09 235.22,-279.37 245.14,-283.09 245.3,-276.09"/>
+<polygon fill="black" stroke="black" points="245.14,-251.47 235.22,-255.2 245.3,-258.47 245.14,-251.47"/>
+</a>
+</g>
+<text text-anchor="middle" x="378.4" y="-271.48" font-family="Times,serif" font-size="14.00">EXECUTE</text>
+<text text-anchor="middle" x="378.4" y="-254.68" font-family="Times,serif" font-size="14.00">ACTIONS</text>
+</g>
+<!-- samplehttpserver -->
+<g id="node14" class="node">
+<title>samplehttpserver</title>
+<g id="a_node14"><a xlink:title="Generates sample HTTP logs">
+<polygon fill="lightgrey" stroke="black" points="253.55,-159.8 26.45,-159.8 26.45,-155.8 22.45,-155.8 22.45,-151.8 26.45,-151.8 26.45,-126.2 22.45,-126.2 22.45,-122.2 26.45,-122.2 26.45,-118.2 253.55,-118.2 253.55,-159.8"/>
+<polyline fill="none" stroke="black" points="26.45,-155.8 30.45,-155.8 30.45,-151.8 26.45,-151.8"/>
+<polyline fill="none" stroke="black" points="26.45,-126.2 30.45,-126.2 30.45,-122.2 26.45,-122.2"/>
+<text text-anchor="middle" x="140" y="-143.2" font-family="Times,serif" font-size="14.00">HTTP Server</text>
+<text text-anchor="middle" x="140" y="-126.4" font-family="Times,serif" font-size="14.00">(examples/samplehttpserver/main.go)</text>
+</a>
+</g>
+</g>
+<!-- mcp_server&#45;&gt;samplehttpserver -->
+<g id="edge15" class="edge">
+<title>mcp_server-&gt;samplehttpserver</title>
+<path fill="none" stroke="black" d="M134.98,-219.26C135.99,-203.26 137.1,-185.79 138.02,-171.32"/>
+<polygon fill="black" stroke="black" points="141.5,-171.7 138.64,-161.49 134.51,-171.25 141.5,-171.7"/>
+</g>
+<!-- access_log -->
+<g id="node15" class="node">
+<title>access_log</title>
+<g id="a_node15"><a xlink:title="Example log file">
+<path fill="lightgrey" stroke="black" d="M262.37,-76C262.37,-78.87 208.87,-81.2 143,-81.2 77.13,-81.2 23.63,-78.87 23.63,-76 23.63,-76 23.63,-29.2 23.63,-29.2 23.63,-26.33 77.13,-24 143,-24 208.87,-24 262.37,-26.33 262.37,-29.2 262.37,-29.2 262.37,-76 262.37,-76"/>
+<path fill="none" stroke="black" d="M262.37,-76C262.37,-73.13 208.87,-70.8 143,-70.8 77.13,-70.8 23.63,-73.13 23.63,-76"/>
+<text text-anchor="middle" x="143" y="-56.8" font-family="Times,serif" font-size="14.00">access.log</text>
+<text text-anchor="middle" x="143" y="-40" font-family="Times,serif" font-size="14.00">(examples/samplehttpserver/access.log)</text>
+</a>
+</g>
+</g>
+<!-- samplehttpserver&#45;&gt;access_log -->
+<g id="edge16" class="edge">
+<title>samplehttpserver-&gt;access_log</title>
+<path fill="none" stroke="black" d="M140.71,-118C140.98,-110.41 141.3,-101.47 141.61,-92.72"/>
+<polygon fill="black" stroke="black" points="145.1,-93.07 141.96,-82.95 138.1,-92.82 145.1,-93.07"/>
+</g>
+<!-- note -->
+<g id="node16" class="node">
+<title>note</title>
+<polygon fill="white" stroke="black" points="1006.7,-481.89 935.3,-481.89 935.3,-406.69 1012.7,-406.69 1012.7,-475.89 1006.7,-481.89"/>
+<polyline fill="none" stroke="black" points="1006.7,-481.89 1006.7,-475.89"/>
+<polyline fill="none" stroke="black" points="1012.7,-475.89 1006.7,-475.89"/>
+<text text-anchor="middle" x="974" y="-465.29" font-family="Times,serif" font-size="14.00">Generative</text>
+<text text-anchor="middle" x="974" y="-448.49" font-family="Times,serif" font-size="14.00">model can</text>
+<text text-anchor="middle" x="974" y="-431.69" font-family="Times,serif" font-size="14.00">generate</text>
+<text text-anchor="middle" x="974" y="-414.89" font-family="Times,serif" font-size="14.00">text</text>
+</g>
+<!-- note&#45;&gt;llm -->
+</g>
+</svg>

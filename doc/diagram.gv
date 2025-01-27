@@ -1,0 +1,79 @@
+digraph chat_architecture {
+    rankdir=TB;
+    node [shape=box, style="rounded,filled", fillcolor=lightblue];
+
+    subgraph cluster_user {
+        label = "User";
+        style = "dashed";
+        user [label="Chat\n👤", shape=plaintext];
+        ui [label="UI\n💻", tooltip="Web/Mobile App"];
+    }
+
+   subgraph application {
+       label = "Application";
+       style = "dashed";
+   }
+    subgraph cluster_frontend {
+        label = "Frontend (BIG-AGI)";
+        style = "dashed";
+        frontend [label="FRONTEND\nBIG-AGI", shape=hexagon, fillcolor=lightyellow, tooltip="Handles user input and displays responses"];
+    }
+
+    subgraph cluster_backend {
+        label = "MCP Host (Backend)";
+        style = "dashed";
+        api_gateway [label="API Gateway\n(api_gateway)", shape=box, fillcolor=lightgreen, tooltip="Receives requests from frontend"];
+        chat_handler [label="Chat Session\nHandler\n(chat.go)", shape=hexagon, fillcolor=lightyellow, tooltip="Manages chat sessions, history, and orchestrates interactions"];
+        vertex_sdk [label="VERTEX AI SDK\n(vertex.go)", shape=box, fillcolor=lightgreen, tooltip="Connects to and interacts with the LLM"];
+        db [label="Data Storage\n(Not Implemented)", shape=cylinder, fillcolor=lightgrey, tooltip="Stores chat history and other data"];
+        error_handler [label="Error Handler\n(Not Implemented)", shape=component, fillcolor=lightgrey, tooltip="Handles errors and exceptions"];
+        monitoring [label="Monitoring\n(Not Implemented)", shape=component, fillcolor=lightgrey, tooltip="Collects metrics and logs"];
+        logging [label="Logging\n(Not Implemented)", shape=component, fillcolor=lightgrey, tooltip="Logs application events"];
+    
+   subgraph cluster_mcp {
+        label = "MCP Client";
+        style = "dashed";
+        mcp_protocol [label="MCP\nJSON RPC\nSSE\n(function_client_mcp.go)", shape=box, fillcolor=lightgreen, tooltip="Communicates with the external environment"];
+    }
+   }
+    subgraph cluster_gcp {
+        label = "GCP PRIVATE PROJECT\nTENANT";
+        style = "dashed";
+        llm [label="LLM\nGemini", shape=circle, fillcolor=lightgrey, tooltip="Large Language Model"];
+    }
+    
+    subgraph cluster_environment {
+        label = "ENVIRONMENT";
+        style = "dashed";
+        mcp_server [label="MCP\nSERVER\n(servers/logs/main.go)", shape=hexagon, fillcolor=lightyellow, tooltip="Executes actions and reads resources"];
+         subgraph cluster_samplehttpserver {
+            label = "samplehttpserver";
+            style = "dashed";
+            samplehttpserver [label="HTTP Server\n(examples/samplehttpserver/main.go)", shape=component, fillcolor=lightgrey, tooltip="Generates sample HTTP logs"];
+            access_log [label="access.log\n(examples/samplehttpserver/access.log)", shape=cylinder, fillcolor=lightgrey, tooltip="Example log file"];
+        }
+    }
+
+ 
+
+    user -> ui [label=""];
+    ui -> frontend [label="HTTP"];
+    frontend -> api_gateway [label="HTTP POST /v1/chat/completions"];
+    api_gateway -> chat_handler [label=""];
+    chat_handler -> vertex_sdk [label=""];
+    vertex_sdk -> llm [label="gRPC"];
+    chat_handler -> mcp_protocol [label="REGISTER FUNCTIONS\nCALL FUNCTIONS", tooltip="Registers and calls specific functions"];
+    mcp_protocol -> mcp_server [label="STDIO"];
+    mcp_server -> mcp_server [label="READ\nRESOURCES", dir=both, tooltip="Reads resources from the environment"];
+    mcp_server -> mcp_server [label="EXECUTE\nACTIONS", dir=both, tooltip="Executes actions in the environment"];
+    chat_handler -> db [label="Store History", style=dashed];
+    chat_handler -> error_handler [label="Handle Errors", style=dashed];
+    chat_handler -> monitoring [label="Collect Metrics", style=dashed];
+    chat_handler -> logging [label="Collect Logs", style=dashed];
+    
+    mcp_server -> samplehttpserver [label=""];
+    samplehttpserver -> access_log [label=""];
+    
+    note [label="Generative\nmodel can\ngenerate\ntext", shape=note, style="filled", fillcolor=white];
+    note -> llm [style=invis];
+}
