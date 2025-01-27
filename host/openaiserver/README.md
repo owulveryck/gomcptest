@@ -70,41 +70,13 @@ The `FunctionCallStack` is used to handle function calls within a streaming cont
 1.  **Set up Google Cloud Credentials:** Be sure you have run `gcloud auth login` to authenticate with your Google Cloud account. The application uses the default application credentials to access the Vertex AI API.
 2.  **Set up Environment variables:**
     - `GCP_PROJECT`: The Google Cloud Project id.
+    - `MCP_SERVER`: The path to the compiled MCP server binary. This server is provided in the repository and needs to be compiled before use. Example: `/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/servers/logs/logs`
+    - `MCP_SERVER_ARGS`: Arguments to pass to the MCP server. Example: `-log /tmp/access.log` (see examples for an utility that generates sample logs)
     - You can also set up the following which have default values:
         - `GEMINI_MODEL`: The Gemini model to use which defaults to `gemini-2.0-pro`
         - `GCP_REGION`: GCP zone, default to `us-central1`
-        - `ANALYSE_PDF_PORT` port number on which the http server will start, default to `50051`
 3.  **Install the dependencies:** Run `go mod tidy`
 4.  **Run the server:** `go run main.go`
 5.  **Send requests:** Use HTTP requests to `/v1/chat/completions` to interact with the chat server.
 
-## Example Usage
-```bash
-curl http://localhost:8080/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemini-2.0-pro",
-    "messages": [
-      {
-        "role": "user",
-	"content": "what is the time?"
-      }
-    ]
-  }'
-```
-
-```bash
-curl http://localhost:8080/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemini-2.0-pro",
-    "stream": true,
-    "messages": [
-      {
-        "role": "user",
-        "content": "find the logs for server myserver between 2025-01-24 12:00:00 +0100 and 2025-01-24 13:00:00 +0100"
-      }
-    ]
-  }'
-```
 

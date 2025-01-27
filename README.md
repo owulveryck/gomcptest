@@ -150,10 +150,12 @@ This directory provides a dummy MCP server implementation for log extraction.
 
 1.  **Set up Google Cloud Credentials:** Ensure you have authenticated with your Google Cloud account using `gcloud auth login`.
 2.  **Set up Environment variables:**
-    -   `GCP_PROJECT`: The Google Cloud Project ID.
-    -   `GEMINI_MODEL` (optional): The Gemini model to use (defaults to `gemini-2.0-pro`).
-    -   `GCP_REGION` (optional): GCP zone (defaults to `us-central1`).
-    -   `ANALYSE_PDF_PORT` (optional): Port number for the HTTP server (defaults to `50051`).
+    - `GCP_PROJECT`: The Google Cloud Project id.
+    - `MCP_SERVER`: The path to the compiled MCP server binary. This server is provided in the repository and needs to be compiled before use. Example: `/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/servers/logs/logs`
+    - `MCP_SERVER_ARGS`: Arguments to pass to the MCP server. Example: `-log /tmp/access.log` (see examples for an utility that generates sample logs)
+    - You can also set up the following which have default values:
+        - `GEMINI_MODEL`: The Gemini model to use which defaults to `gemini-2.0-pro`
+        - `GCP_REGION`: GCP zone, default to `us-central1`
 3.  **Install dependencies:** Run `go mod tidy`.
 
 ### Running the Server

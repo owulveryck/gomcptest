@@ -14,7 +14,6 @@ type configuration struct {
 	GCPPRoject      string `envconfig:"GCP_PROJECT" required:"true"`
 	GeminiModel     string `envconfig:"GEMINI_MODEL" default:"gemini-2.0-pro"`
 	GCPRegion       string `envconfig:"GCP_REGION" default:"us-central1"`
-	Port            string `envconfig:"ANALYSE_PDF_PORT" default:"50051"`
 	MCPServerSample string `envconfig:"MCP_SERVER" default:"/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/servers/logs/logs"`
 	MCPServerArgs   string `envconfig:"MCP_SERVER_ARGS" default:"-log /tmp/access.log"`
 }
