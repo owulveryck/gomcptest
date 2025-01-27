@@ -1,0 +1,5 @@
+**/envrc
+host/openaiserver/.envrc
+
+servers/logs/logs
+host/openaiserver/openaiserver
