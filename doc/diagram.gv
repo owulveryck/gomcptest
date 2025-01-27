@@ -14,13 +14,13 @@ digraph chat_architecture {
        style = "dashed";
    }
     subgraph cluster_frontend {
-        label = "Frontend (BIG-AGI)";
+        label = "Frontend (BIG-AGI)\n(out of scope)";
         style = "dashed";
         frontend [label="FRONTEND\nBIG-AGI", shape=hexagon, fillcolor=lightyellow, tooltip="Handles user input and displays responses"];
     }
 
     subgraph cluster_backend {
-        label = "MCP Host (Backend)";
+        label = "MCP Host (Backend)\nhost/openaiserver";
         style = "dashed";
         api_gateway [label="API Gateway\n(api_gateway)", shape=box, fillcolor=lightgreen, tooltip="Receives requests from frontend"];
         chat_handler [label="Chat Session\nHandler\n(chat.go)", shape=hexagon, fillcolor=lightyellow, tooltip="Manages chat sessions, history, and orchestrates interactions"];
@@ -71,8 +71,8 @@ digraph chat_architecture {
     chat_handler -> monitoring [label="Collect Metrics", style=dashed];
     chat_handler -> logging [label="Collect Logs", style=dashed];
     
-    mcp_server -> samplehttpserver [label=""];
-    samplehttpserver -> access_log [label=""];
+    mcp_server -> access_log [label="read"];
+    samplehttpserver -> access_log [label="write"];
     
     note [label="Generative\nmodel can\ngenerate\ntext", shape=note, style="filled", fillcolor=white];
     note -> llm [style=invis];
