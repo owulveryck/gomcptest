@@ -115,6 +115,7 @@ The `FunctionCallStack` manages function calls within a streaming context. It us
 -   **Single Function Plugin:** Only one function plugin is currently supported.
 -   **Hardcoded Function:** The theatre example is not linked to any functionality.
 -   **MCP Communication:** The MCP server communication is only implemented via STDIO.
+-   **The model is hardcoded in the chat session** therefore it is not possible to change within the conversation
 
 ### 3. `internal/vertexai`
 
@@ -155,56 +156,13 @@ This directory provides a dummy MCP server implementation for log extraction.
     -   `ANALYSE_PDF_PORT` (optional): Port number for the HTTP server (defaults to `50051`).
 3.  **Install dependencies:** Run `go mod tidy`.
 
-### Running the Servers
+### Running the Server
 
-1.  **Run the MCP Log Server:**
+  ```bash
+  go run host/openaiserver/main.go
+  ```
 
-    ```bash
-    go run servers/logs/main.go -log examples/samplehttpserver/access.log
-    ```
-
-    (You can use the log file from the sample HTTP server.)
-
-2.  **Run the OpenAI Chat Server:**
-
-    ```bash
-    go run host/openaiserver/main.go
-    ```
-
-### Example Usage
-
-#### Send a request to the OpenAI Chat Server:
-
-```bash
-curl http://localhost:8080/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemini-2.0-pro",
-    "messages": [
-      {
-        "role": "user",
-	"content": "what is the time?"
-      }
-    ]
-  }'
-```
-
-#### Send a request with function calling:
-
-```bash
-curl http://localhost:8080/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemini-2.0-pro",
-    "stream": true,
-    "messages": [
-      {
-        "role": "user",
-        "content": "find the logs for server myserver between 2025-01-24 12:00:00 +0100 and 2025-01-24 13:00:00 +0100"
-      }
-    ]
-  }'
-```
+The host will launche the server at statup displaying its capabilities. Then you can use any client compatible with OpenAI v1 to chat.
 
 ## Notes
 
