@@ -7,28 +7,27 @@ import (
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
-	"github.com/kr/pretty"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-type FindMCPLogs struct {
+type MCPServerTool struct {
 	name   string
 	client *client.StdioMCPClient
 }
 
-func (findmcplogs *FindMCPLogs) GetGenaiTool() *genai.Tool {
+func (findmcplogs *MCPServerTool) GetGenaiTool() *genai.Tool {
 	ctx := context.Background()
 	var err error
-	findmcplogs.client, err = client.NewStdioMCPClient(config.MCPServerSample, strings.Split(config.MCPServerArgs, " "))
+	findmcplogs.client, err = client.NewStdioMCPClientLog(config.MCPServerSample, strings.Split(config.MCPServerArgs, " "))
 	if err != nil {
 		log.Fatal(err)
 	}
 	initRequest := mcp.InitializeRequest{}
 	initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
 	initRequest.Params.ClientInfo = mcp.Implementation{
-		Name:    "example-client",
+		Name:    "gomcptest-client",
 		Version: "1.0.0",
 	}
 
@@ -65,26 +64,8 @@ func (findmcplogs *FindMCPLogs) GetGenaiTool() *genai.Tool {
 			}
 		}
 		schema.Required = tool.InputSchema.Required
-		/*
-				* mcp.ToolInputSchema{
-			    Type:       "object",
-			    Properties: {
-			        "end_date": map[string]interface {}{
-			            "description": "The end date of the log extraction in the format 2025-01-24 12:00:00 +0100",
-			            "type":        "string",
-			        },
-			        "server_name": map[string]interface {}{
-			            "description": "The name of the server to get the logs from",
-			            "type":        "string",
-			        },
-			        "start_date": map[string]interface {}{
-			            "description": "The start date of the log extraction in the format 2025-01-24 12:00:00 +0100",
-			            "type":        "string",
-			        },
-			    },
-			    Required: {"start_date", "end_date", "server_name"},
-			}*/
 		// Creating schema
+		// Warning, we return only one function for the POC
 		return &genai.Tool{
 			FunctionDeclarations: []*genai.FunctionDeclaration{{
 				Name:        tool.Name,
@@ -96,20 +77,15 @@ func (findmcplogs *FindMCPLogs) GetGenaiTool() *genai.Tool {
 	return nil
 }
 
-func (findmcplogs *FindMCPLogs) Run(f genai.FunctionCall) (*genai.FunctionResponse, error) {
-	getLogRequest := mcp.CallToolRequest{}
-	serverName := f.Args["server_name"].(string)
-	startDate := f.Args["start_date"].(string)
-	endDate := f.Args["end_date"].(string)
-	getLogRequest.Params.Name = f.Name
-	getLogRequest.Params.Arguments = map[string]interface{}{
-		"server_name": serverName,
-		"start_date":  startDate,
-		"end_date":    endDate,
+func (findmcplogs *MCPServerTool) Run(f genai.FunctionCall) (*genai.FunctionResponse, error) {
+	request := mcp.CallToolRequest{}
+	request.Params.Name = f.Name
+	request.Params.Arguments = make(map[string]interface{})
+	for k, v := range f.Args {
+		request.Params.Arguments[k] = v.(string)
 	}
-	pretty.Print(getLogRequest)
 
-	result, err := findmcplogs.client.CallTool(context.Background(), getLogRequest)
+	result, err := findmcplogs.client.CallTool(context.Background(), request)
 	if err != nil {
 		log.Fatalf("Failed to call service: %v", err)
 	}
@@ -125,12 +101,12 @@ func (findmcplogs *FindMCPLogs) Run(f genai.FunctionCall) (*genai.FunctionRespon
 	}, nil
 }
 
-func (findmcplogs *FindMCPLogs) Name() string {
+func (findmcplogs *MCPServerTool) Name() string {
 	return findmcplogs.name
 }
 
-func NewMCPFindLogs() *FindMCPLogs {
-	return &FindMCPLogs{
-		name: "find_logs",
+func NewMCPServerTool() *MCPServerTool {
+	return &MCPServerTool{
+		name: "my_tooling",
 	}
 }

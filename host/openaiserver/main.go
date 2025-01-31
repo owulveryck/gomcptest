@@ -35,7 +35,7 @@ func main() {
 	cs := NewChatSession()
 	//	cs.AddFunction(NewFindTheaters())
 	// cs.AddFunction(NewFindLogs())
-	cs.AddFunction(NewMCPFindLogs())
+	cs.AddFunction(NewMCPServerTool())
 
 	mux := http.NewServeMux()
 	mux.Handle("/v1/chat/completions", http.HandlerFunc(cs.chatCompletionHandler))
