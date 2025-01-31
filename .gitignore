@@ -2,5 +2,7 @@
 host/openaiserver/.envrc
 servers/logs/logs
 !servers/logs/
-
+sandbox/
+servers/duckdbserver/duckdbserver
+tools/wrapper
 host/openaiserver/openaiserver

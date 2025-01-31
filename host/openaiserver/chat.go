@@ -135,8 +135,10 @@ func (cs *ChatSession) processStream(w http.ResponseWriter, r *http.Request, ite
 					log.Printf("Cannot execute function: %v", err)
 					break
 				}
-				// No need to catch the iterator here because it will handle it
-				cs.processStream(w, r, cs.cs.SendMessageStream(r.Context(), funResp))
+				if funResp != nil {
+					// No need to catch the iterator here because it will handle it
+					cs.processStream(w, r, cs.cs.SendMessageStream(r.Context(), funResp))
+				}
 			}
 			break
 		}

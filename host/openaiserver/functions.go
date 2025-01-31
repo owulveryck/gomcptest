@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -14,12 +15,12 @@ type callable interface {
 
 func (cs *ChatSession) AddFunction(c callable) {
 	if cs.model.Tools == nil {
-		cs.functionsInventory[c.Name()] = c
-		cs.model.Tools = []*genai.Tool{c.GetGenaiTool()}
-	} else {
-		cs.functionsInventory[c.Name()] = c
-		cs.model.Tools = append(cs.model.Tools, c.GetGenaiTool())
+		cs.functionsInventory = make(map[string]callable)
 	}
+	for _, fn := range c.GetGenaiTool().FunctionDeclarations {
+		cs.functionsInventory[fn.Name] = c
+	}
+	cs.model.Tools = []*genai.Tool{c.GetGenaiTool()}
 }
 
 func (cs *ChatSession) CallFunction(f genai.FunctionCall) (*genai.FunctionResponse, error) {
@@ -30,5 +31,5 @@ func (cs *ChatSession) CallFunction(f genai.FunctionCall) (*genai.FunctionRespon
 			return v.Run(f)
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("no function matching the name found")
 }
