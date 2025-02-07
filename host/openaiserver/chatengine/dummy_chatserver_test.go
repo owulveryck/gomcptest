@@ -2,6 +2,7 @@ package chatengine
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -22,7 +23,7 @@ func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) {
 	panic("not implemented") // TODO: Implement
 }
 
-func (dummyengine *dummyEngine) SendStreamingChatRequest(_ ChatCompletionRequest) (<-chan ChatCompletionResponse, error) {
+func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan ChatCompletionResponse, error) {
 	go func() {
 		for i, v := range "It Works!" {
 			dummyengine.c <- ChatCompletionResponse{
@@ -49,7 +50,7 @@ func (dummyengine *dummyEngine) SendStreamingChatRequest(_ ChatCompletionRequest
 	return dummyengine.c, nil
 }
 
-func (dummyengine *dummyEngine) ModelList() ListModelsResponse {
+func (dummyengine *dummyEngine) ModelList(_ context.Context) ListModelsResponse {
 	return ListModelsResponse{
 		Object: "list",
 		Data: []Model{
@@ -76,7 +77,7 @@ func (dummyengine *dummyEngine) ModelList() ListModelsResponse {
 }
 
 // Returns the *Model identified by ID or nil if not found
-func (dummyengine *dummyEngine) ModelDetail(modelID string) *Model {
+func (dummyengine *dummyEngine) ModelDetail(_ context.Context, modelID string) *Model {
 	if modelID == "gpt-4o" {
 		return &Model{
 			ID:      "gpt-4o",
@@ -88,7 +89,7 @@ func (dummyengine *dummyEngine) ModelDetail(modelID string) *Model {
 	return nil
 }
 
-func (dummyengine *dummyEngine) HandleCompletionRequest(_ ChatCompletionRequest) (ChatCompletionResponse, error) {
+func (dummyengine *dummyEngine) HandleCompletionRequest(_ context.Context, _ ChatCompletionRequest) (ChatCompletionResponse, error) {
 	return ChatCompletionResponse{
 		ID:      "chatcmpl-abc123",
 		Object:  "chat.completion",

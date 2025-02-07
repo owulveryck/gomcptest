@@ -8,7 +8,7 @@ import (
 
 // listModels handles the listing of available models.
 func (o *OpenAIV1WithToolHandler) listModels(w http.ResponseWriter, r *http.Request) {
-	models := o.c.ModelList()
+	models := o.c.ModelList(r.Context())
 
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(models); err != nil {
@@ -26,7 +26,7 @@ func (o *OpenAIV1WithToolHandler) getModelDetails(w http.ResponseWriter, r *http
 		return
 	}
 
-	model := o.c.ModelDetail(modelName)
+	model := o.c.ModelDetail(r.Context(), modelName)
 
 	if model == nil {
 		o.notFound(w, r)

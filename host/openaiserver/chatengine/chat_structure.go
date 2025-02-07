@@ -1,6 +1,12 @@
 package chatengine
 
-import "strings"
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
+	"fmt"
+	"strings"
+)
 
 type ChatMessage struct {
 	Role    string `json:"role"`
@@ -20,6 +26,30 @@ type ChatCompletionRequest struct {
 	StreamOptions struct {
 		IncludeUsage bool `json:"include_usage"`
 	} `json:"stream_options"`
+}
+
+// ComputePreviousChecksum computes a SHA256 checksum of the ChatCompletionRequest,
+// excluding the last message in the Messages slice.  If the Messages slice
+// is empty, it computes the checksum of the request as is.
+func ComputePreviousChecksum(req ChatCompletionRequest) ([]byte, error) {
+	// Create a copy to avoid modifying the original request.
+	reqCopy := req
+
+	// Remove the last message if there are any messages.
+	if len(reqCopy.Messages) > 0 {
+		reqCopy.Messages = reqCopy.Messages[:len(reqCopy.Messages)-1]
+	}
+
+	// Encode the modified request using gob.
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(reqCopy); err != nil {
+		return nil, fmt.Errorf("failed to encode request: %w", err)
+	}
+
+	// Compute the SHA256 checksum of the encoded data.
+	hash := sha256.Sum256(buf.Bytes())
+	return hash[:], nil
 }
 
 // ChatCompletionMessage represents a single message in the chat conversation.

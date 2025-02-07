@@ -1,6 +1,7 @@
 package chatengine
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -15,11 +16,17 @@ type ChatServer interface {
 	// functionality as a tool during chat completions.
 	AddMCPTool(client.MCPClient)
 	// ModelList providing a list of available models.
-	ModelList() ListModelsResponse
+	ModelList(context.Context) ListModelsResponse
 	// ModelsDetail provides details for a specific model.
-	ModelDetail(modelID string) *Model
-	HandleCompletionRequest(ChatCompletionRequest) (ChatCompletionResponse, error)
-	SendStreamingChatRequest(ChatCompletionRequest) (<-chan ChatCompletionResponse, error)
+	ModelDetail(ctx context.Context, modelID string) *Model
+	HandleCompletionRequest(context.Context, ChatCompletionRequest) (ChatCompletionResponse, error)
+	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan ChatCompletionResponse, error)
+}
+
+func NewOpenAIV1WithToolHandler(c ChatServer) *OpenAIV1WithToolHandler {
+	return &OpenAIV1WithToolHandler{
+		c: c,
+	}
 }
 
 type OpenAIV1WithToolHandler struct {
@@ -48,12 +55,12 @@ func (o *OpenAIV1WithToolHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (o *OpenAIV1WithToolHandler) notFound(w http.ResponseWriter, r *http.Request) {
+func (o *OpenAIV1WithToolHandler) notFound(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	_, _ = fmt.Fprintf(w, "Not Found")
 }
 
-func (o *OpenAIV1WithToolHandler) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
+func (o *OpenAIV1WithToolHandler) methodNotAllowed(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	_, _ = fmt.Fprintf(w, "Method Not Allowed")
 }
