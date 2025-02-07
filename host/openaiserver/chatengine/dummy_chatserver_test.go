@@ -4,13 +4,50 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
+	"github.com/mark3labs/mcp-go/client"
 	"github.com/stretchr/testify/assert"
 )
 
 // from the examples of https://platform.openai.com/docs/api-reference/models
-type dummyEngine struct{}
+type dummyEngine struct {
+	c chan ChatCompletionResponse
+}
+
+// AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
+// functionality as a tool during chat completions.
+func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) {
+	panic("not implemented") // TODO: Implement
+}
+
+func (dummyengine *dummyEngine) SendStreamingChatRequest(_ ChatCompletionRequest) (<-chan ChatCompletionResponse, error) {
+	go func() {
+		for i, v := range "It Works!" {
+			dummyengine.c <- ChatCompletionResponse{
+				ID:      strconv.Itoa(i),
+				Object:  "chat.completion.chunk",
+				Created: 0,
+				Model:   "",
+				Choices: []Choice{
+					{
+						Index: 0,
+						Message: ChatMessage{
+							Role:    "assistant",
+							Content: v,
+						},
+						Logprobs:     nil,
+						FinishReason: "",
+					},
+				},
+				Usage: CompletionUsage{},
+			}
+		}
+		dummyengine.c <- ChatCompletionResponse{}
+	}()
+	return dummyengine.c, nil
+}
 
 func (dummyengine *dummyEngine) ModelList() ListModelsResponse {
 	return ListModelsResponse{
