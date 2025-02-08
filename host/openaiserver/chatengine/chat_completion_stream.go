@@ -3,6 +3,7 @@ package chatengine
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -33,6 +34,7 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 		}
 		fmt.Fprintf(w, "data: %s\n\n", responseJSON)
 	}
+	log.Println("Finished")
 	fmt.Fprintf(w, " [DONE]\n\n")
 	flusher.Flush()
 }
