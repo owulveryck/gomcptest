@@ -23,7 +23,7 @@ func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) {
 	panic("not implemented") // TODO: Implement
 }
 
-func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan ChatCompletionResponse, error) {
+func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error) {
 	go func() {
 		for i, v := range "It Works!" {
 			dummyengine.c <- ChatCompletionResponse{

@@ -20,7 +20,7 @@ type ChatServer interface {
 	// ModelsDetail provides details for a specific model.
 	ModelDetail(ctx context.Context, modelID string) *Model
 	HandleCompletionRequest(context.Context, ChatCompletionRequest) (ChatCompletionResponse, error)
-	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan ChatCompletionResponse, error)
+	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error)
 }
 
 func NewOpenAIV1WithToolHandler(c ChatServer) *OpenAIV1WithToolHandler {

@@ -1,4 +1,4 @@
-package main
+package chatengine
 
 import (
 	"encoding/base64"

@@ -21,16 +21,17 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 		http.Error(w, "Error: cannot stream response "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	enc := json.NewEncoder(w)
 	for res := range c {
 		if res.ID == "" {
 			break
 		}
-		err := enc.Encode(res)
+
+		responseJSON, err := json.Marshal(res)
 		if err != nil {
 			http.Error(w, "Error: cannot stream response "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+		fmt.Fprintf(w, "data: %s\n\n", responseJSON)
 	}
 	fmt.Fprintf(w, " [DONE]\n\n")
 	flusher.Flush()
