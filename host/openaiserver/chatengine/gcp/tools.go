@@ -77,14 +77,15 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		return nil, err
 	}
 	var content string
-	// TODO
-	res := result.Content[0].(map[string]interface{})
-	content = res["text"].(string)
+	response := make(map[string]any, len(result.Content))
+	for i := range result.Content {
+		res := result.Content[i].(map[string]interface{})
+		content = res["text"].(string)
+		response["result"+strconv.Itoa(i)] = content
+	}
 	return &genai.FunctionResponse{
-		Name: f.Name,
-		Response: map[string]any{
-			"logs": content,
-		},
+		Name:     f.Name,
+		Response: response,
 	}, nil
 }
 
