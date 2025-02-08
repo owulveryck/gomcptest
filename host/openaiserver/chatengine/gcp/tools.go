@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -40,7 +39,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
 			FunctionDeclarations: []*genai.FunctionDeclaration{
 				{
-					Name:        serverName + "/" + tool.Name,
+					Name:        serverName + "_" + tool.Name,
 					Description: tool.Description,
 					Parameters:  schema,
 				},
@@ -62,7 +61,7 @@ type MCPServerTool struct {
 
 func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCall) (*genai.FunctionResponse, error) {
 	request := mcp.CallToolRequest{}
-	parts := strings.SplitN(f.Name, "/", 2) // Split into two parts: ["a", "b/c/d"]
+	parts := strings.SplitN(f.Name, "_", 2) // Split into two parts: ["a", "b/c/d"]
 	if len(parts) > 1 {
 		request.Params.Name = parts[1]
 	} else {
@@ -78,9 +77,9 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		return nil, err
 	}
 	var content string
+	// TODO
 	res := result.Content[0].(map[string]interface{})
 	content = res["text"].(string)
-	log.Println(content)
 	return &genai.FunctionResponse{
 		Name: f.Name,
 		Response: map[string]any{

@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
@@ -42,7 +43,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	message := req.Messages[len(req.Messages)-1]
 	resp, err := cs.SendMessage(ctx, genai.Text(message.Content.(string)))
 	if err != nil {
-		return chatengine.ChatCompletionResponse{}, err
+		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
 	}
 	res, err := toChatResponse(resp, "chat.completion")
 	return *res, err
