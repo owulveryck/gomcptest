@@ -14,7 +14,7 @@ import (
 type ChatServer interface {
 	// AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
 	// functionality as a tool during chat completions.
-	AddMCPTool(client.MCPClient)
+	AddMCPTool(client.MCPClient) error
 	// ModelList providing a list of available models.
 	ModelList(context.Context) ListModelsResponse
 	// ModelsDetail provides details for a specific model.

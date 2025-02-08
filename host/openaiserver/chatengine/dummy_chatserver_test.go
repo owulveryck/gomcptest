@@ -19,7 +19,7 @@ type dummyEngine struct {
 
 // AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
 // functionality as a tool during chat completions.
-func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) {
+func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) error {
 	panic("not implemented") // TODO: Implement
 }
 

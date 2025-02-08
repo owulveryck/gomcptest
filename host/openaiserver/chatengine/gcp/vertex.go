@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"cloud.google.com/go/vertexai/genai"
-	"github.com/mark3labs/mcp-go/client"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"google.golang.org/api/iterator"
 )
@@ -19,12 +18,6 @@ func NewChatSession() *ChatSession {
 		model:              vertexAIClient.Client.GenerativeModel(config.GeminiModel),
 		functionsInventory: make(map[string]callable),
 	}
-}
-
-// AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
-// functionality as a tool during chat completions.
-func (chatsession *ChatSession) AddMCPTool(c client.MCPClient) {
-	panic("not implemented") // TODO: Implement
 }
 
 func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (chatengine.ChatCompletionResponse, error) {
