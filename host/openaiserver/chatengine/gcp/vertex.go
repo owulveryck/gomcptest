@@ -9,14 +9,14 @@ import (
 )
 
 type ChatSession struct {
-	model              *genai.GenerativeModel
-	functionsInventory map[string]callable
+	model   *genai.GenerativeModel
+	servers []*MCPServerTool
 }
 
 func NewChatSession() *ChatSession {
 	return &ChatSession{
-		model:              vertexAIClient.Client.GenerativeModel(config.GeminiModel),
-		functionsInventory: make(map[string]callable),
+		model:   vertexAIClient.Client.GenerativeModel(config.GeminiModel),
+		servers: make([]*MCPServerTool, 0),
 	}
 }
 
