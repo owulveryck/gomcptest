@@ -12,6 +12,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+var _ ChatServer = &ChatSession{}
+
 type ChatSession struct {
 	cs                 *genai.ChatSession
 	model              *genai.GenerativeModel
@@ -25,7 +27,7 @@ func NewChatSession() *ChatSession {
 	}
 }
 
-func (cs *ChatSession) chatCompletionHandler(w http.ResponseWriter, r *http.Request) {
+func (cs *ChatSession) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return

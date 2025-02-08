@@ -46,7 +46,7 @@ func main() {
 
 	// Add tool
 	tool := mcp.NewTool("query_file",
-		mcp.WithDescription("runs a SQL query through duckdb to extrat the information of a file"),
+		mcp.WithDescription("runs a SQL query through duckdb to extract the information of a file. The file can be local (containing '/'), or remote on hugginface (starting with 'hf:'). It may also contain wildcards ('*')"),
 		mcp.WithString("query",
 			mcp.Required(),
 			mcp.Description("The SQL query to execute (compatible with DUCKDB)"),
