@@ -1,6 +1,8 @@
 package gcp
 
 import (
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -9,7 +11,7 @@ import (
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
-func toChatResponse(resp *genai.GenerateContentResponse, object string) chatengine.ChatCompletionResponse {
+func toChatResponse(resp *genai.GenerateContentResponse, object string) (*chatengine.ChatCompletionResponse, error) {
 	var res chatengine.ChatCompletionResponse
 	res.ID = uuid.New().String()
 	res.Created = time.Now().Unix()
@@ -25,8 +27,13 @@ func toChatResponse(resp *genai.GenerateContentResponse, object string) chatengi
 		}
 		if cand.Content != nil {
 			for _, part := range cand.Content.Parts {
-				if p, ok := part.(genai.Text); ok {
-					b.WriteString(string(p))
+				switch part.(type) {
+				case genai.Text:
+					b.WriteString(string(part.(genai.Text)))
+				case genai.FunctionCall:
+					log.Println("TODO calling " + part.(genai.FunctionCall).Name)
+				default:
+					return nil, fmt.Errorf("unsupported type")
 				}
 			}
 			res.Choices[i] = chatengine.Choice{
@@ -40,7 +47,7 @@ func toChatResponse(resp *genai.GenerateContentResponse, object string) chatengi
 			}
 		}
 	}
-	return res
+	return &res, nil
 }
 
 func toChatStreamResponse(resp *genai.GenerateContentResponse, object string) chatengine.ChatCompletionStreamResponse {

@@ -21,7 +21,6 @@ func NewChatSession() *ChatSession {
 }
 
 func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (chatengine.ChatCompletionResponse, error) {
-	var res chatengine.ChatCompletionResponse
 	cs := chatsession.model.StartChat()
 	if len(req.Messages) > 1 {
 		cs.History = make([]*genai.Content, len(req.Messages)-1)
@@ -43,10 +42,10 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	message := req.Messages[len(req.Messages)-1]
 	resp, err := cs.SendMessage(ctx, genai.Text(message.Content.(string)))
 	if err != nil {
-		return res, err
+		return chatengine.ChatCompletionResponse{}, err
 	}
-	res = toChatResponse(resp, "chat.completion")
-	return res, nil
+	res, err := toChatResponse(resp, "chat.completion")
+	return *res, err
 }
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
