@@ -2,34 +2,37 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/mark3labs/mcp-go/client"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
-type configuration struct {
-	MCPServer     string `envconfig:"MCP_SERVER" default:"/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/servers/logs/logs"`
-	MCPServerArgs string `envconfig:"MCP_SERVER_ARGS" default:"-log /tmp/access.log"`
-}
-
 func main() {
-	var config configuration
-	err := envconfig.Process("", &config)
-	if err != nil {
-		log.Fatal(err)
-	}
+	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
+	flag.Parse()
+
 	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
-	if config.MCPServer != "" {
-		mcpClient, err := client.NewStdioMCPClientLog(config.MCPServer, strings.Split(config.MCPServerArgs, " "))
-		if err != nil {
-			log.Fatal(err)
+	servers := extractServers(*mcpServers)
+	for i := range servers {
+		var mcpClient client.MCPClient
+		var err error
+		if len(servers[i]) > 1 {
+			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil, servers[i][1:]...)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 		}
 		err = openAIHandler.AddTools(context.Background(), mcpClient)
 		if err != nil {
