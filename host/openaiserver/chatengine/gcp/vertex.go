@@ -45,7 +45,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	if err != nil {
 		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
 	}
-	res, err := toChatResponse(resp, "chat.completion")
+	res, err := chatsession.processChatResponse(ctx, resp, cs)
 	return *res, err
 }
 

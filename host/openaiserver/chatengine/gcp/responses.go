@@ -1,8 +1,8 @@
 package gcp
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -11,12 +11,12 @@ import (
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
-func toChatResponse(resp *genai.GenerateContentResponse, object string) (*chatengine.ChatCompletionResponse, error) {
+func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *genai.GenerateContentResponse, genaiCS *genai.ChatSession) (*chatengine.ChatCompletionResponse, error) {
 	var res chatengine.ChatCompletionResponse
 	res.ID = uuid.New().String()
 	res.Created = time.Now().Unix()
 	res.Model = config.GeminiModel
-	res.Object = object
+	res.Object = "chat.completion"
 	res.Choices = make([]chatengine.Choice, len(resp.Candidates))
 	var b strings.Builder
 
@@ -31,7 +31,15 @@ func toChatResponse(resp *genai.GenerateContentResponse, object string) (*chaten
 				case genai.Text:
 					b.WriteString(string(part.(genai.Text)))
 				case genai.FunctionCall:
-					log.Println("TODO calling " + part.(genai.FunctionCall).Name)
+					res, err := chatsession.Call(ctx, part.(genai.FunctionCall))
+					if err != nil {
+						return nil, fmt.Errorf("error in calling function %v: %v", part.(genai.FunctionCall).Name, err)
+					}
+					result, err := genaiCS.SendMessage(ctx, res)
+					if err != nil {
+						return nil, fmt.Errorf("error in sendig the result of the function %v: %v", part.(genai.FunctionCall).Name, err)
+					}
+					return chatsession.processChatResponse(ctx, result, genaiCS)
 				default:
 					return nil, fmt.Errorf("unsupported type")
 				}

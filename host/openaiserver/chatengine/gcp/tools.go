@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -21,7 +22,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		return err
 	}
 	// define servername
-	serverName := "server" + strconv.Itoa(len(chatsession.servers))
+	serverName := strconv.Itoa(len(chatsession.servers))
 	for _, tool := range tools.Tools {
 		schema := &genai.Schema{
 			Type:       genai.TypeObject,
@@ -47,7 +48,6 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		})
 	}
 	chatsession.servers = append(chatsession.servers, &MCPServerTool{
-		name:      serverName,
 		mcpClient: mcpClient,
 	})
 
@@ -55,7 +55,6 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 }
 
 type MCPServerTool struct {
-	name      string
 	mcpClient client.MCPClient
 }
 
@@ -89,6 +88,18 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	}, nil
 }
 
-func (mcpServerTool *MCPServerTool) Name() string {
-	return mcpServerTool.name
+func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall) (*genai.FunctionResponse, error) {
+	// find the correct server
+	parts := strings.SplitN(fn.Name, "_", 2) // Split into two parts: ["a", "b/c/d"]
+	if len(parts) != 2 {
+		return nil, errors.New("expected function call in form of serverNumber_functionname")
+	}
+	srvNumber, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return nil, errors.New("expected a number for server number, but got " + parts[0])
+	}
+	if srvNumber > len(chatsession.servers) {
+		return nil, fmt.Errorf("unexpected server number: got %v, but there are only %v servers registered", srvNumber, len(chatsession.servers))
+	}
+	return chatsession.servers[0].Run(ctx, fn)
 }
