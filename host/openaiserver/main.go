@@ -10,14 +10,15 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/ollama"
 )
 
 func main() {
 	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
 	flag.Parse()
 
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
+	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(ollama.NewEngine())
 	servers := extractServers(*mcpServers)
 	for i := range servers {
 		log.Println("Registering server", servers[i])
