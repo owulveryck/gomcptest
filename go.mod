@@ -6,6 +6,7 @@ toolchain go1.23.5
 
 require (
 	cloud.google.com/go/vertexai v0.13.3
+	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mark3labs/mcp-go v0.8.2
 	github.com/stretchr/testify v1.9.0
@@ -26,7 +27,6 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/s2a-go v0.1.8 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
