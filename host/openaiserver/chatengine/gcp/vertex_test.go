@@ -111,7 +111,7 @@ func TestHandleCompletionRequest_server(t *testing.T) {
 			{Role: "assistant", Content: "You are a helpful assistant."},
 			{Role: "user", Content: "Hello! My name is olivier"},
 			{Role: "assistant", Content: "Hello! Pleased to meet you"},
-			{Role: "user", Content: "What is my name?"},
+			{Role: "user", Content: "Send me some greetings, you know my name"},
 		},
 	}
 
@@ -153,5 +153,7 @@ func TestHandleCompletionRequest_server(t *testing.T) {
 	// Convert to JSON for deep comparison
 
 	// Check if the message content contains "olivier" case insensitive
+	t.Logf("%#v", resp)
 	assert.Contains(t, strings.ToLower(resp.Choices[0].Message.Content.(string)), "olivier")
+	assert.Contains(t, strings.ToLower(resp.Choices[0].Message.Content.(string)), "42")
 }

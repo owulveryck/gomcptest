@@ -13,6 +13,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
+const serverPrefix = "server"
+
 // AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
 // functionality as a tool during chat completions.
 func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
@@ -22,7 +24,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		return err
 	}
 	// define servername
-	serverName := strconv.Itoa(len(chatsession.servers))
+	serverName := serverPrefix + strconv.Itoa(len(chatsession.servers))
 	for _, tool := range tools.Tools {
 		schema := &genai.Schema{
 			Type:       genai.TypeObject,
@@ -94,9 +96,19 @@ func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall)
 	if len(parts) != 2 {
 		return nil, errors.New("expected function call in form of serverNumber_functionname")
 	}
-	srvNumber, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return nil, errors.New("expected a number for server number, but got " + parts[0])
+	var srvNumber int
+	var err error
+	// Trim the prefix
+	if strings.HasPrefix(parts[0], serverPrefix) {
+		trimmed := strings.TrimPrefix(parts[0], serverPrefix)
+
+		// Convert to integer
+		srvNumber, err = strconv.Atoi(trimmed)
+		if err != nil {
+			return nil, fmt.Errorf("error converting to integer: %v", err)
+		}
+	} else {
+		return nil, errors.New("bad server name: " + parts[0])
 	}
 	if srvNumber > len(chatsession.servers) {
 		return nil, fmt.Errorf("unexpected server number: got %v, but there are only %v servers registered", srvNumber, len(chatsession.servers))
