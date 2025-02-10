@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -14,7 +15,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// checkEnvVars verifies that the required environment variables are set and not empty.
+func checkEnvVars() bool {
+	requiredVars := []string{"GCP_PROJECT", "GCP_REGION", "GEMINI_MODEL"}
+	for _, v := range requiredVars {
+		if value, exists := os.LookupEnv(v); !exists || value == "" {
+			return false
+		}
+	}
+	return true
+}
+
 func TestHandleCompletionRequest_simple(t *testing.T) {
+	if !checkEnvVars() {
+		t.SkipNow()
+	}
 	cs := &ChatSession{
 		model:   vertexAIClient.Client.GenerativeModel(config.GeminiModel),
 		servers: []*MCPServerTool{},
@@ -70,6 +85,9 @@ func TestHandleCompletionRequest_simple(t *testing.T) {
 }
 
 func TestHandleCompletionRequest_server(t *testing.T) {
+	if !checkEnvVars() {
+		t.SkipNow()
+	}
 	c, err := client.NewStdioMCPClient(
 		"../testbin/sampleMCP",
 		[]string{}, // Empty ENV

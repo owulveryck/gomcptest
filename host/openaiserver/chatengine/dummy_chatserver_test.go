@@ -15,7 +15,7 @@ import (
 
 // from the examples of https://platform.openai.com/docs/api-reference/models
 type dummyEngine struct {
-	c chan ChatCompletionResponse
+	c chan ChatCompletionStreamResponse
 }
 
 // AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
@@ -27,15 +27,15 @@ func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) error {
 func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error) {
 	go func() {
 		for i, v := range "It Works!" {
-			dummyengine.c <- ChatCompletionResponse{
+			dummyengine.c <- ChatCompletionStreamResponse{
 				ID:      strconv.Itoa(i),
 				Object:  "chat.completion.chunk",
 				Created: 0,
 				Model:   "",
-				Choices: []Choice{
+				Choices: []ChatCompletionStreamChoice{
 					{
 						Index: 0,
-						Message: ChatMessage{
+						Delta: ChatMessage{
 							Role:    "assistant",
 							Content: v,
 						},
@@ -43,10 +43,9 @@ func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ Ch
 						FinishReason: "",
 					},
 				},
-				Usage: CompletionUsage{},
 			}
 		}
-		dummyengine.c <- ChatCompletionResponse{}
+		dummyengine.c <- ChatCompletionStreamResponse{}
 	}()
 	return dummyengine.c, nil
 }
