@@ -1,3 +1,4 @@
+//go:generate go build -o testbin/sampleMCP ./testbin
 package chatengine
 
 import (
