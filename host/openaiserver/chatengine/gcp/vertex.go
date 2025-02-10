@@ -80,9 +80,9 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			if err != nil {
 				return
 			}
-			res := toChatStreamResponse(resp, "chat.completion.chunk")
+			res, err := chatsession.processChatStreamResponse(ctx, resp, cs)
 			select {
-			case c <- res:
+			case c <- *res:
 				if done {
 					return
 				}

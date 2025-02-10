@@ -22,6 +22,9 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 		http.Error(w, "Error: cannot stream response "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Send HTTP 200 before starting the stream
+	w.WriteHeader(http.StatusOK)
+	flusher.Flush()
 	for res := range c {
 		if res.ID == "" {
 			break
@@ -32,9 +35,13 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 			http.Error(w, "Error: cannot stream response "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, "data: %s\n\n", responseJSON)
+		// Write the response without fmt.Fprintf
+		_, err = w.Write([]byte("data: " + string(responseJSON) + "\n\n"))
+		if err != nil {
+			log.Println(err)
+		}
+		flusher.Flush()
 	}
-	log.Println("Finished")
 	fmt.Fprintf(w, " [DONE]\n\n")
 	flusher.Flush()
 }

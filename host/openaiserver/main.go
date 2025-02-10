@@ -41,7 +41,8 @@ func main() {
 	}
 
 	fmt.Println("Server starting on port 8080")
-	http.Handle("/", GzipMiddleware(openAIHandler)) // Wrap the handler with the gzip middleware
+	// http.Handle("/", GzipMiddleware(openAIHandler)) // Wrap the handler with the gzip middleware
+	http.Handle("/", openAIHandler) // Wrap the handler with the gzip middleware
 
 	log.Fatal(http.ListenAndServe(":8080", nil)) // Use nil to use the default ServeMux
 }
