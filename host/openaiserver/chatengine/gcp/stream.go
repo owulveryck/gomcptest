@@ -31,6 +31,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		c:           c,
 		cs:          cs,
 		chatsession: chatsession,
+		fnCallStack: newFunctionCallStack(),
 	}
 	go func(ctx context.Context, parts []genai.Part, c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession) {
 		defer close(c)

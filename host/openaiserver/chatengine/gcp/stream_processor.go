@@ -16,6 +16,7 @@ type streamProcessor struct {
 	c           chan<- chatengine.ChatCompletionStreamResponse
 	cs          *genai.ChatSession
 	chatsession *ChatSession
+	fnCallStack *functionCallStack
 }
 
 func (s *streamProcessor) sendMessageStream(ctx context.Context, parts ...genai.Part) *genai.GenerateContentResponseIterator {
@@ -43,11 +44,8 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 				case genai.Text:
 					b.WriteString(string(v))
 				case genai.FunctionCall:
-					result, err := s.chatsession.Call(ctx, v)
-					if err != nil {
-						return fmt.Errorf("error in function call: %v", err)
-					}
-					return s.processIterator(ctx, s.sendMessageStream(ctx, result))
+					s.fnCallStack.push(v)
+					return nil
 				default:
 					return fmt.Errorf("unsupported type: %T", part)
 				}
@@ -74,14 +72,26 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
+			if s.fnCallStack.size() > 0 {
+				v := s.fnCallStack.pop()
+				result, err := s.chatsession.Call(ctx, *v)
+				if err != nil {
+					return fmt.Errorf("error in function call: %#v, error: %w", v, err)
+				}
+				err = s.processIterator(ctx, s.sendMessageStream(ctx, result))
+				if err != nil {
+					return fmt.Errorf("error in sending message %#v, error: %w", result, err)
+				}
+			}
+
 			return nil
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("error in processing %w", err)
 		}
 		err = s.processContentResponse(ctx, resp)
 		if err != nil {
-			return err
+			return fmt.Errorf("error in processing content response: %w", err)
 		}
 	}
 }
