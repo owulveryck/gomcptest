@@ -68,29 +68,33 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	message := req.Messages[len(req.Messages)-1]
 	genaiMessageParts := toGenaiPart(&message)
 	c := make(chan chatengine.ChatCompletionStreamResponse)
-	go func(c chan chatengine.ChatCompletionStreamResponse) {
-		defer close(c)
-		iter := cs.SendMessageStream(ctx, genaiMessageParts...)
-		done := false
-		for {
-			resp, err := iter.Next()
-			if err == iterator.Done {
-				done = true
-			}
-			if err != nil {
-				return
-			}
-			res, err := chatsession.processChatStreamResponse(ctx, resp, cs)
-			select {
-			case c <- *res:
-				if done {
-					return
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}(c)
-
+	go chatsession.sendStream(ctx, genaiMessageParts, c, cs)
 	return c, nil
+}
+
+func (chatsession *ChatSession) sendStream(ctx context.Context, parts []genai.Part, c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession) {
+	defer close(c)
+	iter := cs.SendMessageStream(ctx, parts...)
+	done := false
+	for {
+		resp, err := iter.Next()
+		if err == iterator.Done {
+			done = true
+		}
+		if err != nil {
+			return
+		}
+		res, err := chatsession.processChatStreamResponse(ctx, resp, cs)
+		if err != nil {
+			return
+		}
+		select {
+		case c <- *res:
+			if done {
+				return
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }
