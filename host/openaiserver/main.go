@@ -2,47 +2,48 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/kelseyhightower/envconfig"
-	"github.com/owulveryck/gomcptest/internal/vertexai"
-)
+	"github.com/mark3labs/mcp-go/client"
 
-type configuration struct {
-	GCPPRoject      string `envconfig:"GCP_PROJECT" required:"true"`
-	GeminiModel     string `envconfig:"GEMINI_MODEL" default:"gemini-2.0-pro"`
-	GCPRegion       string `envconfig:"GCP_REGION" default:"us-central1"`
-	MCPServerSample string `envconfig:"MCP_SERVER" default:"/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/servers/logs/logs"`
-	MCPServerArgs   string `envconfig:"MCP_SERVER_ARGS" default:"-log /tmp/access.log"`
-}
-
-var (
-	config         configuration
-	vertexAIClient *vertexai.AI
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
 func main() {
-	err := envconfig.Process("", &config)
-	if err != nil {
-		log.Fatal(err)
+	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
+	flag.Parse()
+
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
+	servers := extractServers(*mcpServers)
+	for i := range servers {
+		log.Println("Registering server", servers[i])
+		var mcpClient client.MCPClient
+		var err error
+		if len(servers[i]) > 1 {
+			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil, servers[i][1:]...)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+		}
+		err = openAIHandler.AddTools(context.Background(), mcpClient)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	ctx := context.Background()
-	vertexAIClient = vertexai.NewAI(ctx, config.GCPPRoject, config.GCPRegion, config.GeminiModel)
-
-	cs := NewChatSession()
-	//	cs.AddFunction(NewFindTheaters())
-	// cs.AddFunction(NewFindLogs())
-	cs.AddFunction(NewMCPServerTool())
-
-	mux := http.NewServeMux()
-	mux.Handle("/v1/chat/completions", http.HandlerFunc(cs.chatCompletionHandler))
-	mux.Handle("/v1/models", http.HandlerFunc(modelsHandler))
-	mux.Handle("/v1/models/", http.HandlerFunc(modelDetailHandler))
-
 	fmt.Println("Server starting on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
-	_ = vertexAIClient
+	// http.Handle("/", GzipMiddleware(openAIHandler)) // Wrap the handler with the gzip middleware
+	http.Handle("/", openAIHandler) // Wrap the handler with the gzip middleware
+
+	log.Fatal(http.ListenAndServe(":8080", nil)) // Use nil to use the default ServeMux
 }

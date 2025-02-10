@@ -6,3 +6,4 @@ sandbox/
 servers/duckdbserver/duckdbserver
 tools/wrapper
 host/openaiserver/openaiserver
+host/openaiserver/chatengine/testbin/sampleMCP

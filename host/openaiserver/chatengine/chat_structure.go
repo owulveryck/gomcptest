@@ -1,10 +1,11 @@
-package main
+package chatengine
 
 import (
-	"log"
+	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
+	"fmt"
 	"strings"
-
-	"cloud.google.com/go/vertexai/genai"
 )
 
 type ChatMessage struct {
@@ -25,6 +26,30 @@ type ChatCompletionRequest struct {
 	StreamOptions struct {
 		IncludeUsage bool `json:"include_usage"`
 	} `json:"stream_options"`
+}
+
+// ComputePreviousChecksum computes a SHA256 checksum of the ChatCompletionRequest,
+// excluding the last message in the Messages slice.  If the Messages slice
+// is empty, it computes the checksum of the request as is.
+func ComputePreviousChecksum(req ChatCompletionRequest) ([]byte, error) {
+	// Create a copy to avoid modifying the original request.
+	reqCopy := req
+
+	// Remove the last message if there are any messages.
+	if len(reqCopy.Messages) > 0 {
+		reqCopy.Messages = reqCopy.Messages[:len(reqCopy.Messages)-1]
+	}
+
+	// Encode the modified request using gob.
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(reqCopy); err != nil {
+		return nil, fmt.Errorf("failed to encode request: %w", err)
+	}
+
+	// Compute the SHA256 checksum of the encoded data.
+	hash := sha256.Sum256(buf.Bytes())
+	return hash[:], nil
 }
 
 // ChatCompletionMessage represents a single message in the chat conversation.
@@ -81,48 +106,6 @@ func (c *ChatCompletionMessage) getContent() string {
 	}
 }
 
-// toGenaiPart
-// Todo: generate images and blog
-func (c *ChatCompletionMessage) toGenaiPart() []genai.Part {
-	if c.Content == nil {
-		return nil
-	}
-
-	switch v := c.Content.(type) {
-	case string:
-		return []genai.Part{genai.Text(v)}
-	case []interface{}:
-		returnedParts := make([]genai.Part, 0)
-		for _, item := range v {
-			if m, ok := item.(map[string]interface{}); ok {
-				if imgurl, ok := m["image_url"].(map[string]interface{}); ok {
-					if value, ok := imgurl["url"].(string); ok {
-						mime, data, err := ExtractImageData(value)
-						if err != nil {
-							log.Fatal(err)
-						}
-						returnedParts = append(returnedParts, genai.Blob{
-							Data:     data,
-							MIMEType: mime,
-						})
-					}
-				}
-				if text, ok := m["text"].(map[string]interface{}); ok {
-					if value, ok := text["value"].(string); ok {
-						returnedParts = append(returnedParts, genai.Text(value))
-					}
-				}
-				if text, ok := m["text"].(string); ok {
-					returnedParts = append(returnedParts, genai.Text(text))
-				}
-			}
-		}
-		return returnedParts
-	default:
-		return nil
-	}
-}
-
 // Define a struct to represent a single chunk of the streamed response
 type ChatCompletionStreamResponse struct {
 	ID      string                       `json:"id"`
@@ -156,7 +139,12 @@ type Choice struct {
 }
 
 type CompletionUsage struct {
-	PromptTokens     int `json:"prompt_tokens"`
-	CompletionTokens int `json:"completion_tokens"`
-	TotalTokens      int `json:"total_tokens"`
+	PromptTokens            int `json:"prompt_tokens"`
+	CompletionTokens        int `json:"completion_tokens"`
+	TotalTokens             int `json:"total_tokens"`
+	CompletionTokensDetails struct {
+		ReasoningTokens          int `json:"reasoning_tokens"`
+		AcceptedPredictionTokens int `json:"accepted_prediction_tokens"`
+		RejectedPredictionTokens int `json:"rejected_prediction_tokens"`
+	} `json:"completion_tokens_details"`
 }
