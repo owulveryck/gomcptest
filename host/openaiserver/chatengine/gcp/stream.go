@@ -2,10 +2,10 @@ package gcp
 
 import (
 	"context"
+	"log"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
-	"google.golang.org/api/iterator"
 )
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
@@ -27,33 +27,17 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	message := req.Messages[len(req.Messages)-1]
 	genaiMessageParts := toGenaiPart(&message)
 	c := make(chan chatengine.ChatCompletionStreamResponse)
-	go chatsession.sendStream(ctx, genaiMessageParts, c, cs)
-	return c, nil
-}
-
-func (chatsession *ChatSession) sendStream(ctx context.Context, parts []genai.Part, c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession) {
-	defer close(c)
-	iter := cs.SendMessageStream(ctx, parts...)
-	done := false
-	for {
-		resp, err := iter.Next()
-		if err == iterator.Done {
-			done = true
-		}
-		if err != nil {
-			return
-		}
-		res, err := chatsession.processChatStreamResponse(ctx, resp, cs)
-		if err != nil {
-			return
-		}
-		select {
-		case c <- *res:
-			if done {
-				return
-			}
-		case <-ctx.Done():
-			return
-		}
+	sp := &streamProcessor{
+		c:           c,
+		cs:          cs,
+		chatsession: chatsession,
 	}
+	go func(ctx context.Context, parts []genai.Part, c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession) {
+		defer close(c)
+		err := sp.processIterator(ctx, sp.sendMessageStream(ctx, genaiMessageParts...))
+		if err != nil {
+			log.Println(err)
+		}
+	}(ctx, genaiMessageParts, c, cs)
+	return c, nil
 }

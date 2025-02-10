@@ -20,6 +20,7 @@ func main() {
 	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
 	servers := extractServers(*mcpServers)
 	for i := range servers {
+		log.Println("Registering server", servers[i])
 		var mcpClient client.MCPClient
 		var err error
 		if len(servers[i]) > 1 {

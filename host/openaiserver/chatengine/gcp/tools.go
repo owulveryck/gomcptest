@@ -113,5 +113,5 @@ func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall)
 	if srvNumber > len(chatsession.servers) {
 		return nil, fmt.Errorf("unexpected server number: got %v, but there are only %v servers registered", srvNumber, len(chatsession.servers))
 	}
-	return chatsession.servers[0].Run(ctx, fn)
+	return chatsession.servers[srvNumber].Run(ctx, fn)
 }
