@@ -84,6 +84,9 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		content = res["text"].(string)
 		response["result"+strconv.Itoa(i)] = content
 	}
+	if result.IsError {
+		return nil, errors.New(content)
+	}
 	return &genai.FunctionResponse{
 		Name:     f.Name,
 		Response: response,

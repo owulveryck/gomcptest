@@ -7,13 +7,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/mark3labs/mcp-go/client"
 	"github.com/ollama/ollama/api"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
 type Engine struct {
-	client *api.Client
+	servers []*MCPServerTool
+	tools   []api.Tool
+	client  *api.Client
 }
 
 func NewEngine() *Engine {
@@ -22,14 +23,10 @@ func NewEngine() *Engine {
 		log.Fatal(err)
 	}
 	return &Engine{
-		client: client,
+		client:  client,
+		servers: make([]*MCPServerTool, 0),
+		tools:   make([]api.Tool, 0),
 	}
-}
-
-// AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
-// functionality as a tool during chat completions.
-func (engine *Engine) AddMCPTool(_ client.MCPClient) error {
-	panic("not implemented") // TODO: Implement
 }
 
 // ModelList providing a list of available models.
@@ -87,12 +84,18 @@ func (engine *Engine) SendStreamingChatRequest(ctx context.Context, req chatengi
 	request := &api.ChatRequest{
 		Model:    req.Model,
 		Messages: messages,
+		Tools:    engine.tools,
 	}
 
 	c := make(chan chatengine.ChatCompletionStreamResponse)
 	go func(ctx context.Context, c chan chatengine.ChatCompletionStreamResponse) {
 		defer close(c)
 		respFunc := func(resp api.ChatResponse) error {
+			if resp.Message.ToolCalls != nil {
+				for _, tool := range resp.Message.ToolCalls {
+					log.Printf("tool call: %#v", tool)
+				}
+			}
 			c <- chatengine.ChatCompletionStreamResponse{
 				ID:      uuid.New().String(),
 				Object:  "chat.completion.chunk",

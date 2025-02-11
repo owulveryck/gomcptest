@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mark3labs/mcp-go v0.8.2
+	github.com/ollama/ollama v0.5.7
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.25.0
 	google.golang.org/api v0.211.0
