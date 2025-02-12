@@ -133,15 +133,14 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 
 func formatFunctionCall(fn genai.FunctionCall) string {
 	var b strings.Builder
-	// find the correct server
-	parts := strings.SplitN(fn.Name, "_", 2) // Split into two parts: ["a", "b/c/d"]
-	if len(parts) >= 2 {
-		b.WriteString(fmt.Sprintf("Calling `%v` from `%v`, with args:\n", parts[1], parts[0]))
+	parts := strings.SplitN(fn.Name, "_", 2)
+	if len(parts) == 2 {
+		fmt.Fprintf(&b, "Calling `%v` from `%v`, with args:\n", parts[1], parts[0])
 	} else {
-		b.WriteString(fmt.Sprintf("Calling `%v`, with args:\n", fn.Name))
+		fmt.Fprintf(&b, "Calling `%v`, with args:\n", fn.Name)
 	}
 	for k, v := range fn.Args {
-		b.WriteString(fmt.Sprintf("  - `%v`: `%v`\n", k, v))
+		fmt.Fprintf(&b, "  - `%v`: `%v`\n", k, v)
 	}
 	return b.String()
 }

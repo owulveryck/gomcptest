@@ -18,9 +18,11 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 	res.Model = config.GeminiModel
 	res.Object = "chat.completion"
 	res.Choices = make([]chatengine.Choice, len(resp.Candidates))
-	var b strings.Builder
+
+	var functionCalls []genai.FunctionCall
 
 	for i, cand := range resp.Candidates {
+		var b strings.Builder
 		finishReason := ""
 		if cand.FinishReason > 0 {
 			finishReason = "stop"
@@ -31,15 +33,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 				case genai.Text:
 					b.WriteString(string(v))
 				case genai.FunctionCall:
-					res, err := chatsession.Call(ctx, v)
-					if err != nil {
-						return nil, fmt.Errorf("error in calling function %v: %v", v.Name, err)
-					}
-					result, err := genaiCS.SendMessage(ctx, res)
-					if err != nil {
-						return nil, fmt.Errorf("error in sendig the result of the function %v: %v", part.(genai.FunctionCall).Name, err)
-					}
-					return chatsession.processChatResponse(ctx, result, genaiCS)
+					functionCalls = append(functionCalls, v)
 				default:
 					return nil, fmt.Errorf("unsupported type: %T", part)
 				}
@@ -50,10 +44,24 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 					Role:    cand.Content.Role,
 					Content: b.String(),
 				},
-				Logprobs:     nil,
 				FinishReason: finishReason,
 			}
 		}
 	}
+
+	// Handle function calls iteratively
+	for _, functionCall := range functionCalls {
+		result, err := chatsession.Call(ctx, functionCall)
+		if err != nil {
+			return nil, fmt.Errorf("error executing function %v: %w", functionCall.Name, err)
+		}
+		resp, err := genaiCS.SendMessage(ctx, result)
+		if err != nil {
+			return nil, fmt.Errorf("error sending function result %v: %w", functionCall.Name, err)
+		}
+		// Process new response
+		return chatsession.processChatResponse(ctx, resp, genaiCS)
+	}
+
 	return &res, nil
 }
