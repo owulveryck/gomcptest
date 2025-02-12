@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -10,7 +11,13 @@ import (
 )
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
-	cs := chatsession.model.StartChat()
+	var generativemodel *genai.GenerativeModel
+	var modelIsPresent bool
+	if generativemodel, modelIsPresent = chatsession.generativemodels[req.Model]; !modelIsPresent {
+		return nil, errors.New("cannot find model")
+	}
+
+	cs := generativemodel.StartChat()
 
 	// Populate chat history if available
 	if len(req.Messages) > 1 {

@@ -43,7 +43,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 	res := &chatengine.ChatCompletionStreamResponse{
 		ID:      s.completionID, // Use the pre-generated ID
 		Created: time.Now().Unix(),
-		Model:   config.GeminiModel,
+		//		Model:   config.GeminiModel,
 		Object:  "chat.completion.chunk",
 		Choices: make([]chatengine.ChatCompletionStreamChoice, len(resp.Candidates)),
 	}
@@ -93,8 +93,8 @@ func (s *streamProcessor) sendChunk(_ context.Context, content string) {
 	s.c <- chatengine.ChatCompletionStreamResponse{
 		ID:      s.completionID,
 		Created: time.Now().Unix(),
-		Model:   config.GeminiModel,
-		Object:  "chat.completion.chunk",
+		//		Model:   config.GeminiModel,
+		Object: "chat.completion.chunk",
 		Choices: []chatengine.ChatCompletionStreamChoice{
 			{
 				Index: 0,

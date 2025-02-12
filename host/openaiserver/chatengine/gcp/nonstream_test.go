@@ -17,7 +17,7 @@ import (
 
 // checkEnvVars verifies that the required environment variables are set and not empty.
 func checkEnvVars() bool {
-	requiredVars := []string{"GCP_PROJECT", "GCP_REGION", "GEMINI_MODEL"}
+	requiredVars := []string{"GCP_PROJECT", "GCP_REGION", "GEMINI_MODELS"}
 	for _, v := range requiredVars {
 		if value, exists := os.LookupEnv(v); !exists || value == "" {
 			return false
@@ -30,13 +30,14 @@ func TestHandleCompletionRequest_simple(t *testing.T) {
 	if !checkEnvVars() {
 		t.SkipNow()
 	}
-	cs := &ChatSession{
-		model:   vertexAIClient.Client.GenerativeModel(config.GeminiModel),
-		servers: []*MCPServerTool{},
-	}
+	cs := NewChatSession(context.Background(), Configuration{
+		GCPProject:   os.Getenv("GCP_PROJECT"),
+		GeminiModels: []string{"gemini-2.0-flash"},
+		GCPRegion:    os.Getenv("GCP_REGION"),
+	})
 
 	req := chatengine.ChatCompletionRequest{
-		Model: "gemini-2.0-flash-exp",
+		Model: "gemini-2.0-flash",
 		Messages: []chatengine.ChatCompletionMessage{
 			{Role: "assistant", Content: "You are a helpful assistant."},
 			{Role: "user", Content: "Hello! My name is olivier"},
@@ -114,10 +115,11 @@ func TestHandleCompletionRequest_server(t *testing.T) {
 		t.Fatalf("Failed to initialize: %v", err)
 	}
 
-	cs := &ChatSession{
-		model:   vertexAIClient.Client.GenerativeModel(config.GeminiModel),
-		servers: []*MCPServerTool{},
-	}
+	cs := NewChatSession(context.Background(), Configuration{
+		GCPProject:   os.Getenv("GCP_PROJECT"),
+		GeminiModels: []string{"gemini-2.0-flash"},
+		GCPRegion:    os.Getenv("GCP_REGION"),
+	})
 	err = cs.AddMCPTool(c)
 	if err != nil {
 		t.Fatal(err)

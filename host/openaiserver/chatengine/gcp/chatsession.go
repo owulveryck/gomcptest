@@ -1,17 +1,28 @@
 package gcp
 
 import (
+	"context"
+	"log"
+
 	"cloud.google.com/go/vertexai/genai"
 )
 
 type ChatSession struct {
-	model   *genai.GenerativeModel
-	servers []*MCPServerTool
+	generativemodels map[string]*genai.GenerativeModel
+	servers          []*MCPServerTool
 }
 
-func NewChatSession() *ChatSession {
+func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
+	client, err := genai.NewClient(ctx, config.GCPProject, config.GCPRegion)
+	if err != nil {
+		log.Fatalf("Failed to create the client: %v", err)
+	}
+	genaimodels := make(map[string]*genai.GenerativeModel, len(config.GeminiModels))
+	for _, model := range config.GeminiModels {
+		genaimodels[model] = client.GenerativeModel(model)
+	}
 	return &ChatSession{
-		model:   vertexAIClient.Client.GenerativeModel(config.GeminiModel),
-		servers: make([]*MCPServerTool, 0),
+		generativemodels: genaimodels,
+		servers:          make([]*MCPServerTool, 0),
 	}
 }
