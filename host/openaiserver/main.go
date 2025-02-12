@@ -10,11 +10,28 @@ import (
 
 	"github.com/mark3labs/mcp-go/client"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
 func main() {
+	var gcpconfig gcp.Configuration
+	ctx := context.Background()
+
+	err := envconfig.Process("", &gcpconfig)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	if len(gcpconfig.GeminiModels) == 0 {
+		slog.Error("please specify at least one model")
+		os.Exit(1)
+	}
+	for _, model := range gcpconfig.GeminiModels {
+		slog.Info("model", "model", model)
+	}
+
 	opts := &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	}
@@ -27,7 +44,7 @@ func main() {
 	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
 	flag.Parse()
 
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig))
 	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(ollama.NewEngine())
 	servers := extractServers(*mcpServers)
 	for i := range servers {
@@ -51,7 +68,7 @@ func main() {
 			}
 
 		}
-		err = openAIHandler.AddTools(context.Background(), mcpClient)
+		err = openAIHandler.AddTools(ctx, mcpClient)
 		if err != nil {
 			logger.Error("Failed to add tools", "error", err)
 			os.Exit(1)
@@ -64,7 +81,7 @@ func main() {
 	// http.Handle("/", GzipMiddleware(openAIHandler)) // Wrap the handler with the gzip middleware
 	http.Handle("/", openAIHandler) // Wrap the handler with the gzip middleware
 
-	err := http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		slog.Error("Failed to start web server", "error", err)
 		os.Exit(1)

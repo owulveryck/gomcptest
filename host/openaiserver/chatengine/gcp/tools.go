@@ -40,31 +40,33 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
-		if chatsession.model.Tools == nil {
-			chatsession.model.Tools = make([]*genai.Tool, 1)
-			chatsession.model.Tools[0] = &genai.Tool{
-				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+		for _, generativemodel := range chatsession.generativemodels {
+			if generativemodel.Tools == nil {
+				generativemodel.Tools = make([]*genai.Tool, 1)
+				generativemodel.Tools[0] = &genai.Tool{
+					FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+				}
 			}
-		}
-		chatsession.model.Tools[0].FunctionDeclarations = append(chatsession.model.Tools[0].FunctionDeclarations,
-			&genai.FunctionDeclaration{
-				Name:        serverName + "_" + tool.Name,
-				Description: tool.Description,
-				Parameters:  schema,
-			})
-		slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
-		/*
-			// Creating schema
-			chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
-				FunctionDeclarations: []*genai.FunctionDeclaration{
-					{
-						Name:        serverName + "_" + tool.Name,
-						Description: tool.Description,
-						Parameters:  schema,
+			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
+				&genai.FunctionDeclaration{
+					Name:        serverName + "_" + tool.Name,
+					Description: tool.Description,
+					Parameters:  schema,
+				})
+			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
+			/*
+				// Creating schema
+				chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
+					FunctionDeclarations: []*genai.FunctionDeclaration{
+						{
+							Name:        serverName + "_" + tool.Name,
+							Description: tool.Description,
+							Parameters:  schema,
+						},
 					},
-				},
-			})
-		*/
+				})
+			*/
+		}
 	}
 	chatsession.servers = append(chatsession.servers, &MCPServerTool{
 		mcpClient: mcpClient,

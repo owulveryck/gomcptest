@@ -15,7 +15,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 	var res chatengine.ChatCompletionResponse
 	res.ID = uuid.New().String()
 	res.Created = time.Now().Unix()
-	res.Model = config.GeminiModel
+	//	res.Model = config.GeminiModel
 	res.Object = "chat.completion"
 	res.Choices = make([]chatengine.Choice, len(resp.Candidates))
 

@@ -5,11 +5,34 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/vertexai/genai"
+	"github.com/google/uuid"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
 func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (chatengine.ChatCompletionResponse, error) {
-	cs := chatsession.model.StartChat()
+	var generativemodel *genai.GenerativeModel
+	var modelIsPresent bool
+	if generativemodel, modelIsPresent = chatsession.generativemodels[req.Model]; !modelIsPresent {
+		return chatengine.ChatCompletionResponse{
+			ID:      uuid.New().String(),
+			Object:  "chat.completion",
+			Created: 0,
+			Model:   "system",
+			Choices: []chatengine.Choice{
+				{
+					Index: 0,
+					Message: chatengine.ChatMessage{
+						Role:    "system",
+						Content: "Error, model is not present",
+					},
+					Logprobs:     nil,
+					FinishReason: "",
+				},
+			},
+			Usage: chatengine.CompletionUsage{},
+		}, nil
+	}
+	cs := generativemodel.StartChat()
 	if len(req.Messages) > 1 {
 		cs.History = make([]*genai.Content, len(req.Messages)-1)
 		for i := 0; i < len(req.Messages)-1; i++ {
