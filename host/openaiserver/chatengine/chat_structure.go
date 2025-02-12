@@ -78,7 +78,7 @@ type ChatCompletionFunctionCall struct {
 }
 
 // getContent returns the string content of the message or a concatenation of text elements
-func (c *ChatCompletionMessage) getContent() string {
+func (c *ChatCompletionMessage) GetContent() string {
 	if c.Content == nil {
 		return ""
 	}

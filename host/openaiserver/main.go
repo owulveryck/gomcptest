@@ -18,6 +18,7 @@ func main() {
 	flag.Parse()
 
 	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession())
+	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(ollama.NewEngine())
 	servers := extractServers(*mcpServers)
 	for i := range servers {
 		log.Println("Registering server", servers[i])
