@@ -9,7 +9,7 @@ import (
 )
 
 type configuration struct {
-	GCPPRoject  string `envconfig:"GCP_PROJECT" required:"true"`
+	GCPProject  string `envconfig:"GCP_PROJECT" required:"true"`
 	GeminiModel string `envconfig:"GEMINI_MODEL" default:"gemini-2.0-pro"`
 	GCPRegion   string `envconfig:"GCP_REGION" default:"us-central1"`
 }
@@ -26,5 +26,5 @@ func init() {
 	}
 
 	ctx := context.Background()
-	vertexAIClient = vertexai.NewAI(ctx, config.GCPPRoject, config.GCPRegion, config.GeminiModel)
+	vertexAIClient = vertexai.NewAI(ctx, config.GCPProject, config.GCPRegion, config.GeminiModel)
 }
