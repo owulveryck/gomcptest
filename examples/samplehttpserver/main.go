@@ -109,8 +109,8 @@ func main() {
 	loggedHandler := logRequest(http.DefaultServeMux)
 
 	// Start the server
-	log.Println("Server starting on port 8080")
-	err := http.ListenAndServe(":8080", loggedHandler)
+	log.Println("Server starting on port 8888")
+	err := http.ListenAndServe(":8888", loggedHandler)
 	if err != nil {
 		log.Fatal("Server failed to start:", err)
 	}

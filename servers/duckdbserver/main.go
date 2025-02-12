@@ -1,15 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"context"
-	"flag"
 	"fmt"
-	"log"
-	"os"
 	"os/exec"
-	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -21,22 +16,6 @@ var (
 )
 
 func main() {
-	flag.StringVar(&accessLogPath, "log", "/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/examples/samplehttpserver/access.log", "Path to the access log file")
-
-	flag.Parse()
-	logFilePath = "/tmp/my_log.txt"
-
-	err := logToFile(logFilePath, "Starting the application")
-	if err != nil {
-		log.Fatalf("Error logging: %v", err)
-	}
-
-	err = logToFile(logFilePath, "Another log entry")
-	if err != nil {
-		log.Fatalf("Error logging: %v", err)
-	}
-
-	fmt.Println("Logs written to:", logFilePath)
 	//
 	// Create MCP server
 	s := server.NewMCPServer(
@@ -45,11 +24,35 @@ func main() {
 	)
 
 	// Add tool
-	tool := mcp.NewTool("query_file",
-		mcp.WithDescription("runs a SQL query through duckdb to extract the information of a file. The file can be local (containing '/'), or remote on hugginface (starting with 'hf:'). It may also contain wildcards ('*')"),
+	tool := mcp.NewTool("duckdb",
+		mcp.WithDescription(`The duckdb tool allows you to execute SQL queries against data stored in various file formats. It uses DuckDB, an in-process SQL OLAP database management system, to efficiently process and extract information from these files. This tool is particularly useful for analyzing and manipulating data directly from files without needing to load them into a separate database.
+
+**File Access and Formats:**
+
+The duckdb tool can access data from the following file types and locations:
+
+*   **Local Files:** Specify the complete path to a file on the local filesystem (e.g., /path/to/my_data.csv).
+*   **Remote Files on Hugging Face:**  Access files stored on the Hugging Face Hub by prefixing the file path with hf: (e.g., hf://username/repository/data/my_data.parquet).
+*   **Supported File Formats:** The tool automatically detects and handles the following file formats:
+    *   CSV
+    *   Parquet
+    *   JSON
+
+*   **Wildcards:** You can use wildcards (*) in the file path to query multiple files at once (e.g., /path/to/data/sales_*.csv). This is useful for querying data that is split across multiple files with a consistent naming pattern.
+
+**Important Considerations for Querying:**
+
+*   **DuckDB Compatibility:** Ensure that your SQL query is compatible with DuckDB's SQL dialect. Refer to the DuckDB documentation for specific syntax and supported functions.
+*   **File Structure:** You should be aware of the structure of the data within the file(s) you are querying (e.g., column names, data types) in order to write effective SQL queries.
+*   **Error Handling:** If the query is invalid or if there are issues accessing the file, the tool will return an error.
+
+**Output:**
+
+The tool returns a dictionary containing the results of the SQL query. The structure of the dictionary will depend on the specific query that was executed. It will typically include column names and the corresponding data retrieved by the query.
+			`),
 		mcp.WithString("query",
 			mcp.Required(),
-			mcp.Description("The SQL query to execute (compatible with DUCKDB)"),
+			mcp.Description("The SQL query to execute (compatible with DUCKDB). A SQL query (compatible with DuckDB syntax) that you want to execute. This query should be designed to retrieve the specific information you need from the target file(s)."),
 		),
 	)
 
@@ -67,13 +70,10 @@ func duckDBHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 	if !ok {
 		return mcp.NewToolResultError("query must be a string"), nil
 	}
-	logToFile(logFilePath, "running"+queryStr)
 	res, err := executeDuckDBQuery(queryStr)
 	if err != nil {
-		logToFile(logFilePath, err.Error())
-		return mcp.NewToolResultError("query_string encountered an error: " + err.Error()), nil
+		return mcp.NewToolResultError("duckdb encountered an error: " + err.Error()), nil
 	}
-	logToFile(logFilePath, "result"+res)
 
 	return mcp.NewToolResultText(res), nil
 }
@@ -93,26 +93,4 @@ func executeDuckDBQuery(queryStr string) (string, error) {
 	}
 
 	return out.String(), nil
-}
-
-func logToFile(filePath string, elements ...string) error {
-	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening file: %w", err)
-	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	defer writer.Flush() // Ensure all buffered data is written
-
-	timestamp := time.Now().Format(time.RFC3339)
-
-	for _, element := range elements {
-		_, err := fmt.Fprintf(writer, "%s - %s\n", timestamp, element)
-		if err != nil {
-			return fmt.Errorf("error writing to file: %w", err)
-		}
-	}
-
-	return nil
 }

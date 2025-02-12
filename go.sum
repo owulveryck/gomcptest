@@ -37,6 +37,8 @@ github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dv
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/mark3labs/mcp-go v0.8.2 h1:OtqqXlRqjXs6zuMhf1uiuQ2iqBrhMGgLpDeVDUWMKFc=
 github.com/mark3labs/mcp-go v0.8.2/go.mod h1:cjMlBU0cv/cj9kjlgmRhoJ5JREdS7YX83xeIG9Ko/jE=
+github.com/ollama/ollama v0.5.7 h1:YFxF3UYc3TbOH/j/OhJoxl4LOvPQRcuKUdI5txs/pkc=
+github.com/ollama/ollama v0.5.7/go.mod h1:bBFyCnwY8C8zCas/t9ParGkmKSSM6H31fV/37K9kifo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
