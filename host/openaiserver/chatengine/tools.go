@@ -2,7 +2,7 @@ package chatengine
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -20,10 +20,11 @@ func (o *OpenAIV1WithToolHandler) AddTools(ctx context.Context, client client.MC
 	if err != nil {
 		return err
 	}
-	fmt.Printf(
-		"Adding MCP server: %s %s\n\n",
-		initResult.ServerInfo.Name,
-		initResult.ServerInfo.Version,
+	slog.Info(
+		"Initialized",
+		slog.String("name", initResult.ServerInfo.Name),
+		slog.String("version", initResult.ServerInfo.Version),
 	)
+
 	return o.c.AddMCPTool(client)
 }

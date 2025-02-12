@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -26,7 +26,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 	}
 	// define servername
 	serverName := serverPrefix + strconv.Itoa(len(chatsession.servers))
-	for _, tool := range tools.Tools {
+	for i, tool := range tools.Tools {
 		schema := &genai.Schema{
 			Type:       genai.TypeObject,
 			Properties: make(map[string]*genai.Schema),
@@ -39,7 +39,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 			}
 		}
 		schema.Required = tool.InputSchema.Required
-		log.Println("So far, only one tool is supported, we cheat by adding appending functions to the tool")
+		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		if chatsession.model.Tools == nil {
 			chatsession.model.Tools = make([]*genai.Tool, 1)
 			chatsession.model.Tools[0] = &genai.Tool{
@@ -52,6 +52,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 				Description: tool.Description,
 				Parameters:  schema,
 			})
+		slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
 		/*
 			// Creating schema
 			chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{

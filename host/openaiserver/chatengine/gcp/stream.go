@@ -24,7 +24,10 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 				role = "model"
 			}
 
-			parts := toGenaiPart(&msg)
+			parts, err := toGenaiPart(&msg)
+			if err != nil || parts == nil {
+				return nil, fmt.Errorf("cannot process message: %w ", err)
+			}
 			if len(parts) == 0 {
 				return nil, fmt.Errorf("message %d has no content", i)
 			}
@@ -37,7 +40,10 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 
 	// Extract the last message for the current turn
 	message := req.Messages[len(req.Messages)-1]
-	genaiMessageParts := toGenaiPart(&message)
+	genaiMessageParts, err := toGenaiPart(&message)
+	if err != nil || genaiMessageParts == nil {
+		return nil, fmt.Errorf("cannot process message: %w ", err)
+	}
 	if len(genaiMessageParts) == 0 {
 		return nil, fmt.Errorf("last message has no content")
 	}
