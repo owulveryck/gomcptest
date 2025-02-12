@@ -61,12 +61,6 @@ func (lrw *loggingResponseWriter) Flush() {
 }
 
 func (o *OpenAIV1WithToolHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Capture le body de la requête
-	var reqBody bytes.Buffer
-	if r.Body != nil {
-		r.Body = io.NopCloser(io.TeeReader(r.Body, &reqBody))
-	}
-
 	// Crée un logger avec des informations de contexte
 	logger := slog.With(
 		slog.String("method", r.Method),
@@ -74,7 +68,21 @@ func (o *OpenAIV1WithToolHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		slog.String("remote_addr", r.RemoteAddr),
 	)
 
-	logger.Debug("Incoming HTTP request", slog.String("payload", reqBody.String()))
+	if slog.Default().Enabled(r.Context(), slog.LevelDebug) {
+		// Capture le body de la requête
+		var reqBody bytes.Buffer
+		if r.Body != nil {
+			_, err := io.Copy(&reqBody, r.Body)
+			if err != nil {
+				slog.Error("Failed to read request body", slog.String("error", err.Error()))
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			r.Body = io.NopCloser(bytes.NewBuffer(reqBody.Bytes())) // Reset the body for subsequent reads
+		}
+
+		logger.Debug("Incoming HTTP request", slog.String("payload", reqBody.String()))
+	}
 
 	// Remplace ResponseWriter pour intercepter la réponse, tout en supportant Flush()
 	lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}

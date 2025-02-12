@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/client"
 
@@ -15,28 +18,75 @@ import (
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
-func main() {
-	var gcpconfig gcp.Configuration
-	ctx := context.Background()
+// Config holds the configuration parameters.
+type Config struct {
+	Port     int    `envconfig:"PORT" default:"8080"`
+	LogLevel string `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
+}
 
-	err := envconfig.Process("", &gcpconfig)
+// loadGCPConfig loads and validates the GCP configuration from environment variables.
+func loadGCPConfig() (gcp.Configuration, error) {
+	var cfg gcp.Configuration
+	err := envconfig.Process("", &cfg)
 	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
+		return gcp.Configuration{}, fmt.Errorf("failed to process GCP configuration: %w", err)
 	}
-	if len(gcpconfig.GeminiModels) == 0 {
-		slog.Error("please specify at least one model")
-		os.Exit(1)
+	if len(cfg.GeminiModels) == 0 {
+		return gcp.Configuration{}, fmt.Errorf("at least one Gemini model must be specified")
 	}
-	for _, model := range gcpconfig.GeminiModels {
+	for _, model := range cfg.GeminiModels {
 		slog.Info("model", "model", model)
+	}
+	return cfg, nil
+}
+
+// createMCPClient creates an MCP client based on the provided server command and arguments.
+func createMCPClient(server []string) (client.MCPClient, error) {
+	if len(server) == 0 {
+		return nil, fmt.Errorf("server command cannot be empty")
+	}
+	var mcpClient client.MCPClient
+	var err error
+	if len(server) > 1 {
+		slog.Info("Registering", "command", server[0], "args", server[1:])
+		mcpClient, err = client.NewStdioMCPClientLog(server[0], nil, server[1:]...)
+	} else {
+		slog.Info("Registering", "command", server[0])
+		mcpClient, err = client.NewStdioMCPClientLog(server[0], nil)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to create MCP client: %w", err)
+	}
+	return mcpClient, nil
+}
+
+func main() {
+	var cfg Config
+	err := envconfig.Process("", &cfg)
+	if err != nil {
+		slog.Error("Failed to process configuration", "error", err)
+		os.Exit(1)
+	}
+
+	var logLevel slog.Level
+	switch strings.ToUpper(cfg.LogLevel) {
+	case "DEBUG":
+		logLevel = slog.LevelDebug
+	case "INFO":
+		logLevel = slog.LevelInfo
+	case "WARN":
+		logLevel = slog.LevelWarn
+	case "ERROR":
+		logLevel = slog.LevelError
+	default:
+		logLevel = slog.LevelInfo // Default to INFO if the value is invalid
+		log.Printf("Invalid debug level specified (%v), defaulting to INFO", cfg.LogLevel)
 	}
 
 	opts := &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+		Level: logLevel,
 	}
 
-	// handler := slog.NewJSONHandler(os.Stdout, opts)
 	handler := slog.NewTextHandler(os.Stdout, opts)
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
@@ -44,44 +94,38 @@ func main() {
 	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
 	flag.Parse()
 
+	gcpconfig, err := loadGCPConfig()
+	if err != nil {
+		slog.Error("Failed to load GCP config", "error", err)
+		os.Exit(1)
+	}
+
+	ctx := context.Background()
 	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig))
-	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(ollama.NewEngine())
+
 	servers := extractServers(*mcpServers)
 	for i := range servers {
 		logger := logger.WithGroup("server" + strconv.Itoa(i))
 		slog.SetDefault(logger)
-		var mcpClient client.MCPClient
-		var err error
-		if len(servers[i]) > 1 {
-			logger.Info("Registering", "command", servers[i][0], "args", servers[i][1:])
-			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil, servers[i][1:]...)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
-		} else {
-			logger.Info("Registering", "command", servers[i][0])
-			mcpClient, err = client.NewStdioMCPClientLog(servers[i][0], nil)
-			if err != nil {
-				logger.Error(err.Error())
-				os.Exit(1)
-			}
 
+		mcpClient, err := createMCPClient(servers[i])
+		if err != nil {
+			slog.Error("Failed to create MCP client", "error", err)
+			os.Exit(1)
 		}
+
 		err = openAIHandler.AddTools(ctx, mcpClient)
 		if err != nil {
-			logger.Error("Failed to add tools", "error", err)
+			slog.Error("Failed to add tools", "error", err)
 			os.Exit(1)
 		}
 	}
 	slog.SetDefault(logger)
 
-	port := "8080"
-	slog.Info("Starting web server", "port", 8080)
-	// http.Handle("/", GzipMiddleware(openAIHandler)) // Wrap the handler with the gzip middleware
-	http.Handle("/", openAIHandler) // Wrap the handler with the gzip middleware
+	slog.Info("Starting web server", "port", cfg.Port)
+	http.Handle("/", openAIHandler)
 
-	err = http.ListenAndServe(":"+port, nil)
+	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil)
 	if err != nil {
 		slog.Error("Failed to start web server", "error", err)
 		os.Exit(1)
