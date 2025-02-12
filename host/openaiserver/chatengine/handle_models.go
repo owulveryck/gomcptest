@@ -11,6 +11,7 @@ func (o *OpenAIV1WithToolHandler) listModels(w http.ResponseWriter, r *http.Requ
 	models := o.c.ModelList(r.Context())
 
 	enc := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
 	if err := enc.Encode(models); err != nil {
 		http.Error(w, "Error marshaling response", http.StatusInternalServerError)
 		return
@@ -32,6 +33,7 @@ func (o *OpenAIV1WithToolHandler) getModelDetails(w http.ResponseWriter, r *http
 		o.notFound(w, r)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(model); err != nil {
