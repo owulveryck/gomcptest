@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"mime"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/client"
@@ -26,14 +29,16 @@ type ChatServer interface {
 	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error)
 }
 
-func NewOpenAIV1WithToolHandler(c ChatServer) *OpenAIV1WithToolHandler {
+func NewOpenAIV1WithToolHandler(c ChatServer, imageBaseDir string) *OpenAIV1WithToolHandler {
 	return &OpenAIV1WithToolHandler{
-		c: c,
+		c:            c,
+		imageBaseDir: imageBaseDir,
 	}
 }
 
 type OpenAIV1WithToolHandler struct {
-	c ChatServer
+	c            ChatServer
+	imageBaseDir string
 }
 
 // loggingResponseWriter intercepte la réponse et supporte http.Flusher
@@ -103,6 +108,28 @@ func (o *OpenAIV1WithToolHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		} else if strings.HasPrefix(r.URL.Path, "/v1/models/") {
 			o.getModelDetails(lrw, r)
 			logger.Debug("HTTP response", slog.Int("status", lrw.statusCode), slog.String("reply", lrw.body.String()))
+			return
+		} else if strings.HasPrefix(r.URL.Path, "/images") {
+			// TODO: server the images from o.imageBaseDir, for example if the request is /images/1.png, serve the image from o.imageBaseDir/1.png (take care of multi-os, use filepath)
+			imageName := strings.TrimPrefix(r.URL.Path, "/images/")
+			imagePath := filepath.Join(o.imageBaseDir, imageName)
+
+			img, err := os.Open(imagePath)
+			if err != nil {
+				slog.Error("Failed to open image", slog.String("path", imagePath), slog.String("error", err.Error()))
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			defer img.Close()
+
+			contentType := mime.TypeByExtension(filepath.Ext(imageName))
+			w.Header().Set("Content-Type", contentType)
+
+			if _, err := io.Copy(w, img); err != nil {
+				slog.Error("Failed to serve image", slog.String("path", imagePath), slog.String("error", err.Error()))
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 		o.notFound(lrw, r)

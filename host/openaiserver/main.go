@@ -22,6 +22,7 @@ import (
 type Config struct {
 	Port     int    `envconfig:"PORT" default:"8080"`
 	LogLevel string `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
+	ImageDir string `envconfig:"IMAGE_DIR" required:"true"`
 }
 
 // loadGCPConfig loads and validates the GCP configuration from environment variables.
@@ -101,7 +102,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig))
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig), cfg.ImageDir)
 
 	servers := extractServers(*mcpServers)
 	for i := range servers {

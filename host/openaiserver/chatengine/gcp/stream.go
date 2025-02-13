@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
+	"time"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
@@ -57,7 +59,6 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 
 	// Create the channel for streaming responses
 	c := make(chan chatengine.ChatCompletionStreamResponse)
-
 	// Initialize the stream processor
 	sp := newStreamProcessor(c, cs, chatsession, newFunctionCallStack())
 
@@ -68,7 +69,6 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		// Create a child context that listens to the parent context
 		streamCtx, cancel := context.WithCancel(ctx)
 		defer cancel()
-
 		// Monitor for context cancellation
 		done := make(chan struct{})
 		go func() {
@@ -78,22 +78,53 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			case <-done: // Normal completion
 			}
 		}()
-
-		// Process the stream
-		stream := sp.sendMessageStream(streamCtx, genaiMessageParts...)
-		err := sp.processIterator(streamCtx, stream)
-
-		// Signal normal completion
-		close(done)
-
-		// Handle errors, but ignore io.EOF as it's expected
-		if err != nil && err != io.EOF {
-			// Check if the error is due to context cancellation
-			if ctx.Err() != nil {
-				err = ctx.Err() // Ensure we return the correct cancellation error
+		// Check if it is an image generation, if so, do it and return
+		if chatsession.imagemodels != nil {
+			slog.Debug("activating image experimental feature")
+			content := message.GetContent()
+			imagenmodel := checkImagegen(content, chatsession.imagemodels)
+			if imagenmodel != nil {
+				image, err := imagenmodel.generateImage(ctx, content, chatsession.imageBaseDir)
+				if err != nil {
+					sp.sendChunk(ctx, err.Error())
+				} else {
+					c <- chatengine.ChatCompletionStreamResponse{
+						ID:      sp.completionID,
+						Created: time.Now().Unix(),
+						//		Model:   config.GeminiModel,
+						Object: "chat.completion.chunk",
+						Choices: []chatengine.ChatCompletionStreamChoice{
+							{
+								Index: 0,
+								Delta: chatengine.ChatMessage{
+									Role: "assistant",
+									// TODO change this
+									Content: "![](http://localhost:" + chatsession.port + image + ")",
+								},
+							},
+						},
+					}
+				}
+				close(done)
+				return
 			}
 
-			fmt.Printf("Error from stream processing: %v\n", err)
+			// Process the stream
+			stream := sp.sendMessageStream(streamCtx, genaiMessageParts...)
+			err := sp.processIterator(streamCtx, stream)
+
+			// Signal normal completion
+			close(done)
+
+			// Handle errors, but ignore io.EOF as it's expected
+			if err != nil && err != io.EOF {
+				// Check if the error is due to context cancellation
+				if ctx.Err() != nil {
+					err = ctx.Err() // Ensure we return the correct cancellation error
+				}
+
+				fmt.Printf("Error from stream processing: %v\n", err)
+			}
 		}
 	}()
 
