@@ -127,6 +127,8 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 				if err != nil {
 					errMsg := fmt.Sprintf("\n**There has been an error processing the function call**: \n```text\n%s\n```\n", err.Error())
 					s.sendChunk(ctx, errMsg)
+				} else {
+					s.sendChunk(ctx, formatFunctionResponse(result.(*genai.FunctionResponse)))
 				}
 
 				err = s.processIterator(ctx, s.sendMessageStream(ctx, result))

@@ -137,3 +137,13 @@ func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall)
 	}
 	return chatsession.servers[srvNumber].Run(ctx, fn)
 }
+
+// on a new line, indented with a hyphen and a space.
+func formatFunctionResponse(resp *genai.FunctionResponse) string {
+	data := resp.Response
+	var sb strings.Builder
+	for key, value := range data {
+		sb.WriteString(fmt.Sprintf("- %s: %v\n", key, value))
+	}
+	return sb.String()
+}
