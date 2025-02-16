@@ -9,7 +9,10 @@ import (
 
 type ChatSession struct {
 	generativemodels map[string]*genai.GenerativeModel
+	imagemodels      map[string]*imagenAPI
 	servers          []*MCPServerTool
+	imageBaseDir     string
+	port             string
 }
 
 func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
@@ -21,8 +24,22 @@ func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
 	for _, model := range config.GeminiModels {
 		genaimodels[model] = client.GenerativeModel(model)
 	}
+	var imagemodels map[string]*imagenAPI
+	if len(config.ImagenModels) != 0 {
+		imagemodels = make(map[string]*imagenAPI, len(config.ImagenModels))
+		for _, model := range config.ImagenModels {
+			imagenapi, err := newImagenAPI(ctx, config, model)
+			if err != nil {
+				log.Fatal(err)
+			}
+			imagemodels[model] = imagenapi
+		}
+	}
 	return &ChatSession{
 		generativemodels: genaimodels,
 		servers:          make([]*MCPServerTool, 0),
+		imagemodels:      imagemodels,
+		imageBaseDir:     config.ImageDir,
+		port:             config.Port,
 	}
 }

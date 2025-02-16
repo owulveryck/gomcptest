@@ -3,6 +3,7 @@ package gcp
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
@@ -46,4 +47,13 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]genai.Part, error) {
 	default:
 		return []genai.Part{}, nil
 	}
+}
+
+func checkImagegen(s string, m map[string]*imagenAPI) *imagenAPI {
+	for k, v := range m {
+		if strings.Contains(s, k) {
+			return v
+		}
+	}
+	return nil
 }
