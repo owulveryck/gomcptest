@@ -1,0 +1,32 @@
+name: GoReleaser
+
+on:
+  push:
+    tags:
+      - "v*" # Trigger on tags matching v* (e.g., v1.0.0)
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23" # Or your project's Go version
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          args: release --rm-dist # Run GoReleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
