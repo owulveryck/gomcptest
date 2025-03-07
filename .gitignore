@@ -1,13 +1,13 @@
 **/envrc
 host/openaiserver/.envrc
-servers/logs/logs
-!servers/logs/
+tools/logs/logs
+!tools/logs/
 sandbox/
-servers/duckdbserver/duckdbserver
+tools/duckdbserver/duckdbserver
 tools/wrapper
 host/openaiserver/openaiserver
 host/openaiserver/chatengine/testbin/sampleMCP
 .envrc
 # Added by goreleaser init:
 dist/
-servers/bin
+tools/bin

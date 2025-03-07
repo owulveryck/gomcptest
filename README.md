@@ -1,6 +1,5 @@
 # gomcptest: Proof of Concept for MCP with Custom Host
 
-
 This project is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host. The code is primarily written from scratch to provide a clear understanding of the underlying mechanisms.
 
 ## Project Structure
@@ -8,6 +7,14 @@ This project is a proof of concept (POC) demonstrating how to implement a Model 
 ![diagram](https://github.com/user-attachments/assets/8a4aa410-cbf5-4a33-be04-7cc39a736953)
 
 -   **`host/openaiserver`**: Implements a custom host that mimics the OpenAI API, using Google Gemini and function calling. This is the core of the POC.
+-   **`tools`**: Contains various MCP-compatible tools that can be used with the host:
+    - **Bash**: Execute bash commands
+    - **Edit**: Edit file contents
+    - **GlobTool**: Find files matching glob patterns
+    - **GrepTool**: Search file contents with regular expressions
+    - **LS**: List directory contents
+    - **Replace**: Replace entire file contents
+    - **View**: View file contents
 
 ## Components
 
@@ -86,6 +93,41 @@ The `openaiserver` application is configured using environment variables. The fo
 
 -   Go >= 1.21
 -   `github.com/mark3labs/mcp-go`
+
+## Tools
+
+This repository includes several MCP-compatible tools that can be installed individually:
+
+### Installing Tools
+
+You can install the tools from the releases page or build them from source.
+
+#### From Releases
+
+Download the appropriate release for your platform from the [releases page](https://github.com/owulveryck/gomcptest/releases).
+
+#### Build from Source
+
+To build all tools from source:
+
+```bash
+# Navigate to the tools directory
+cd tools
+
+# Build all tools
+make all
+
+# Or build individual tools
+make Bash
+make Edit
+make GlobTool
+make GrepTool
+make LS
+make Replace
+make View
+```
+
+The built binaries will be available in the `tools/bin` directory.
 
 ## Notes
 
