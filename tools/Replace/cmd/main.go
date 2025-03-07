@@ -19,7 +19,7 @@ func main() {
 
 	// Add Replace tool
 	tool := mcp.NewTool("Replace",
-		mcp.WithDescription("Write a file to the local filesystem. Overwrites the existing file if there is one."),
+		mcp.WithDescription("Write a file to the local filesystem. Overwrites the existing file if there is one.\n\nBefore using this tool:\n\n1. Use the ReadFile tool to understand the file's contents and context\n\n2. Directory Verification (only applicable when creating new files):\n   - Use the LS tool to verify the parent directory exists and is the correct location"),
 		mcp.WithString("file_path",
 			mcp.Required(),
 			mcp.Description("The absolute path to the file to write (must be absolute, not relative)"),

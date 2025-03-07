@@ -24,7 +24,7 @@ func main() {
 
 	// Add GrepTool tool
 	tool := mcp.NewTool("GrepTool",
-		mcp.WithDescription("Fast content search tool that works with any codebase size"),
+		mcp.WithDescription("\n- Fast content search tool that works with any codebase size\n- Searches file contents using regular expressions\n- Supports full regex syntax (eg. \"log.*Error\", \"function\\s+\\w+\", etc.)\n- Filter files by pattern with the include parameter (eg. \"*.js\", \"*.{ts,tsx}\")\n- Returns matching file paths sorted by modification time\n- Use this tool when you need to find files containing specific patterns\n- When you are doing an open ended search that may require multiple rounds of globbing and grepping, use the Agent tool instead\n"),
 		mcp.WithString("pattern",
 			mcp.Required(),
 			mcp.Description("The regular expression pattern to search for in file contents"),
