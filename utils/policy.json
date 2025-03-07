@@ -1,0 +1,309 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:ch-014d268d27d89225e4-sa@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "organizations/89033304070/roles/CloudHealthAccess"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "organizations/89033304070/roles/CustomRole407"
+    },
+    {
+      "members": [
+        "serviceAccount:acpapi@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "organizations/89033304070/roles/acpapi"
+    },
+    {
+      "members": [
+        "serviceAccount:cmo-auto-key-rotate@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "organizations/89033304070/roles/automatickeyrotation"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/accesscontextmanager.policyReader"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-aiplatform.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.serviceAgent"
+    },
+    {
+      "members": [
+        "user:firdaous.elhalafi@octo.com"
+      ],
+      "role": "roles/appengine.appCreator"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-gae-service.iam.gserviceaccount.com"
+      ],
+      "role": "roles/appengine.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-artifactregistry.iam.gserviceaccount.com"
+      ],
+      "role": "roles/artifactregistry.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/bigquery.metadataViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-binaryauthorization.iam.gserviceaccount.com"
+      ],
+      "role": "roles/binaryauthorization.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:977022625984@cloudbuild.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.builds.builder"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-cloudbuild.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudbuild.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcf-admin-robot.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudfunctions.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudfunctions.viewer"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/cloudsql.viewer"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.networkViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@compute-system.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/container.clusterViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@container-engine-robot.iam.gserviceaccount.com"
+      ],
+      "role": "roles/container.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@container-analysis.iam.gserviceaccount.com"
+      ],
+      "role": "roles/containeranalysis.ServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@containerregistry.iam.gserviceaccount.com"
+      ],
+      "role": "roles/containerregistry.ServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dataflow.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@dataflow-service-producer-prod.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dataflow.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@dataproc-accounts.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dataproc.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-dialogflow.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dialogflow.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-discoveryengine.iam.gserviceaccount.com"
+      ],
+      "role": "roles/discoveryengine.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/dns.reader"
+    },
+    {
+      "members": [
+        "serviceAccount:977022625984@cloudservices.gserviceaccount.com",
+        "serviceAccount:bsjxygz-gcp-octo-lille@appspot.gserviceaccount.com",
+        "user:firdaous.elhalafi@octo.com",
+        "user:leo.jacquemin@octo.com",
+        "user:loic.kaczmarek@octo.com",
+        "user:olivier.wulveryck@octo.com",
+        "user:s.descarpentries@octo.com",
+        "user:valentin.alves@octo.com"
+      ],
+      "role": "roles/editor"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firebaserules.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-firestore.iam.gserviceaccount.com"
+      ],
+      "role": "roles/firestore.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/iam.securityReviewer"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/iam.serviceAccountTokenCreator"
+    },
+    {
+      "members": [
+        "user:firdaous.elhalafi@octo.com"
+      ],
+      "role": "roles/iap.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/logging.admin"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-logging.iam.gserviceaccount.com"
+      ],
+      "role": "roles/logging.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/monitoring.viewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-networkmanagement.iam.gserviceaccount.com"
+      ],
+      "role": "roles/networkmanagement.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-notebooks.iam.gserviceaccount.com"
+      ],
+      "role": "roles/notebooks.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:cmo-prod-acpapi@acn-ac3.iam.gserviceaccount.com",
+        "user:adrien.pigeot@octo.com",
+        "user:fabrice.goutel@octo.com"
+      ],
+      "role": "roles/owner"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/pubsub.publisher"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-pubsub.iam.gserviceaccount.com"
+      ],
+      "role": "roles/pubsub.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/recommender.iamViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@serverless-robot-prod.iam.gserviceaccount.com"
+      ],
+      "role": "roles/run.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@service-networking.iam.gserviceaccount.com"
+      ],
+      "role": "roles/servicenetworking.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/storage.objectViewer"
+    },
+    {
+      "members": [
+        "serviceAccount:acpm-prismacloudreader@bsjxygz-gcp-octo-lille.iam.gserviceaccount.com"
+      ],
+      "role": "roles/viewer"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-vpcaccess.iam.gserviceaccount.com"
+      ],
+      "role": "roles/vpcaccess.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-977022625984@gcp-sa-websecurityscanner.iam.gserviceaccount.com"
+      ],
+      "role": "roles/websecurityscanner.serviceAgent"
+    }
+  ],
+  "etag": "BwYuGFgkcbc=",
+  "version": 1
+}
