@@ -10,3 +10,4 @@ host/openaiserver/chatengine/testbin/sampleMCP
 .envrc
 # Added by goreleaser init:
 dist/
+servers/bin
