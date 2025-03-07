@@ -14,6 +14,76 @@ builds:
       - linux
       - windows
       - darwin
+      
+  - id: "bash"
+    dir: ./tools/Bash/cmd
+    binary: Bash
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "edit"
+    dir: ./tools/Edit/cmd
+    binary: Edit
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "globtool"
+    dir: ./tools/GlobTool/cmd
+    binary: GlobTool
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "greptool"
+    dir: ./tools/GrepTool/cmd
+    binary: GrepTool
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "ls"
+    dir: ./tools/LS/cmd
+    binary: LS
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "replace"
+    dir: ./tools/Replace/cmd
+    binary: Replace
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+      
+  - id: "view"
+    dir: ./tools/View/cmd
+    binary: View
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
 
 archives:
   - # this name template makes the OS and Arch compatible with the results of `uname`.
