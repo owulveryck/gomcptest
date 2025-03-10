@@ -50,10 +50,10 @@ func createMCPClient(server []string) (client.MCPClient, error) {
 	var err error
 	if len(server) > 1 {
 		slog.Info("Registering", "command", server[0], "args", server[1:])
-		mcpClient, err = client.NewStdioMCPClientLog(server[0], nil, server[1:]...)
+		mcpClient, err = client.NewStdioMCPClient(server[0], nil, server[1:]...)
 	} else {
 		slog.Info("Registering", "command", server[0])
-		mcpClient, err = client.NewStdioMCPClientLog(server[0], nil)
+		mcpClient, err = client.NewStdioMCPClient(server[0], nil)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MCP client: %w", err)

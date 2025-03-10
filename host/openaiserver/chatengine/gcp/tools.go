@@ -99,8 +99,12 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	var content string
 	response := make(map[string]any, len(result.Content))
 	for i := range result.Content {
-		res := result.Content[i].(map[string]interface{})
-		content = res["text"].(string)
+		var res mcp.TextContent
+		var ok bool
+		if res, ok = result.Content[i].(mcp.TextContent); !ok {
+			return nil, errors.New("Not implemented: type is not a text")
+		}
+		content = res.Text
 		response["result"+strconv.Itoa(i)] = content
 	}
 	if result.IsError {
