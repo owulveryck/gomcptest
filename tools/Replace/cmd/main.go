@@ -61,19 +61,19 @@ func replaceHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 		return mcp.NewToolResultError(fmt.Sprintf("Directory does not exist: %s", dir)), nil
 	}
 
+	// Check if file exists before writing
+	fileExisted := false
+	if _, err := os.Stat(filePath); err == nil {
+		fileExisted = true
+	}
+
 	// Write the file
-	err := os.WriteFile(filePath, []byte(content), 0644)
-	if err != nil {
+	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error writing file: %v", err)), nil
 	}
 
-	// Check if file existed before
-	_, err = os.Stat(filePath)
-	fileExisted := err == nil
-
 	if fileExisted {
 		return mcp.NewToolResultText(fmt.Sprintf("Successfully replaced existing file: %s", filePath)), nil
-	} else {
-		return mcp.NewToolResultText(fmt.Sprintf("Successfully created new file: %s", filePath)), nil
 	}
+	return mcp.NewToolResultText(fmt.Sprintf("Successfully created new file: %s", filePath)), nil
 }
