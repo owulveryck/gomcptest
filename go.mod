@@ -6,9 +6,10 @@ toolchain go1.23.5
 
 require (
 	cloud.google.com/go/vertexai v0.13.3
+	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mark3labs/mcp-go v0.8.2
+	github.com/mark3labs/mcp-go v0.11.2
 	github.com/ollama/ollama v0.5.7
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.25.0

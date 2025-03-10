@@ -1,0 +1,18 @@
+mode: set
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:13.13,37.45 4 0
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:37.45,39.3 1 0
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:42.100,44.9 2 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:44.9,46.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:48.2,49.9 2 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:49.9,51.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:54.2,54.31 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:54.31,56.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:59.2,60.48 2 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:60.48,62.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:65.2,66.45 2 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:66.45,68.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:71.2,71.70 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:71.70,73.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:75.2,75.17 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:75.17,77.3 1 1
+github.com/owulveryck/gomcptest/tools/Replace/cmd/main.go:78.2,78.95 1 1

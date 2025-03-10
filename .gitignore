@@ -11,3 +11,4 @@ host/openaiserver/chatengine/testbin/sampleMCP
 # Added by goreleaser init:
 dist/
 tools/bin
+**/cmd/cmd
