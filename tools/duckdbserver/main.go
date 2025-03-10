@@ -25,34 +25,47 @@ func main() {
 
 	// Add tool
 	tool := mcp.NewTool("duckdb",
-		mcp.WithDescription(`The duckdb tool allows you to execute SQL queries against data stored in various file formats. It uses DuckDB, an in-process SQL OLAP database management system, to efficiently process and extract information from these files. This tool is particularly useful for analyzing and manipulating data directly from files without needing to load them into a separate database.
+		mcp.WithDescription(`Execute SQL queries on files using DuckDB, an in-process analytical database engine that reads directly from files without importing.
 
-**File Access and Formats:**
+**Supported File Formats:**
+- CSV
+- Parquet
+- JSON
+- And many others supported by DuckDB
 
-The duckdb tool can access data from the following file types and locations:
+**Usage Examples:**
+1. Query local CSV file:
+   SELECT * FROM '/path/to/data.csv' LIMIT 10
 
-*   **Local Files:** Specify the complete path to a file on the local filesystem (e.g., /path/to/my_data.csv).
-*   **Remote Files on Hugging Face:**  Access files stored on the Hugging Face Hub by prefixing the file path with hf: (e.g., hf://username/repository/data/my_data.parquet).
-*   **Supported File Formats:** The tool automatically detects and handles the following file formats:
-    *   CSV
-    *   Parquet
-    *   JSON
+2. Filter data from Parquet file:
+   SELECT column1, column2 FROM '/path/to/data.parquet' WHERE condition
 
-*   **Wildcards:** You can use wildcards (*) in the file path to query multiple files at once (e.g., /path/to/data/sales_*.csv). This is useful for querying data that is split across multiple files with a consistent naming pattern.
+3. Aggregate data across multiple files:
+   SELECT category, SUM(amount) 
+   FROM '/path/to/data/*.csv' 
+   GROUP BY category
 
-**Important Considerations for Querying:**
+4. Join data from different file formats:
+   SELECT a.id, a.name, b.value
+   FROM '/path/to/users.csv' a
+   JOIN '/path/to/transactions.parquet' b
+   ON a.id = b.user_id
 
-*   **DuckDB Compatibility:** Ensure that your SQL query is compatible with DuckDB's SQL dialect. Refer to the DuckDB documentation for specific syntax and supported functions.
-*   **File Structure:** You should be aware of the structure of the data within the file(s) you are querying (e.g., column names, data types) in order to write effective SQL queries.
-*   **Error Handling:** If the query is invalid or if there are issues accessing the file, the tool will return an error.
+5. Load remote files (HTTP, S3, etc.):
+   SELECT * FROM 'https://example.com/data.csv'
 
-**Output:**
+**Capabilities:**
+- Powerful SQL analytics directly on files
+- Schema inference
+- Wildcard path patterns
+- Multi-file querying
+- Cross-format joins
+- Efficient columnar processing
 
-The tool returns a dictionary containing the results of the SQL query. The structure of the dictionary will depend on the specific query that was executed. It will typically include column names and the corresponding data retrieved by the query.
-			`),
+For more details on DuckDB's SQL syntax and functions, visit: https://duckdb.org/docs/sql/introduction`),
 		mcp.WithString("query",
 			mcp.Required(),
-			mcp.Description("The SQL query to execute (compatible with DUCKDB). A SQL query (compatible with DuckDB syntax) that you want to execute. This query should be designed to retrieve the specific information you need from the target file(s)."),
+			mcp.Description("SQL query to execute using DuckDB syntax. Query directly from files like '/path/to/data.csv' without needing to import data first."),
 		),
 	)
 
