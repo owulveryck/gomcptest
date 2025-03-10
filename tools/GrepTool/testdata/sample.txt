@@ -1,0 +1,29 @@
+This is a sample text file for testing the enhanced GrepTool.
+It contains multiple lines with different patterns.
+
+Here's a line with the word test in it.
+This line has TEST in uppercase.
+This line has the word testing with a suffix.
+The word pretest has test as a suffix.
+
+Here are some programming-like patterns:
+function testFunction() {
+  console.log("Hello world");
+  return "This is a test";
+}
+
+class TestClass {
+  constructor() {
+    this.name = "test";
+  }
+  
+  test() {
+    return this.name;
+  }
+}
+
+// This is a commented line with test in it
+
+No patterns on this line.
+
+Multiple test patterns test on test this line.

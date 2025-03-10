@@ -1,0 +1,8 @@
+This is a hidden file that would normally be ignored during searches.
+It contains the word test multiple times.
+test1
+test2
+test3
+
+This file is in a hidden directory (.hidden) and would not be found
+unless specifically looking for it.
