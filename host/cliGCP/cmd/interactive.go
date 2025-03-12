@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -56,7 +57,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		})
 		response, err := agent.ProcessTask(context.Background(), history)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
+			log.Printf("Error: %v / history: %v\n", err, history)
 			continue
 		}
 		history = append(history, &genai.Content{
@@ -65,6 +66,6 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		})
 
 		// Print the response
-		fmt.Println(response)
+		// fmt.Println(response)
 	}
 }
