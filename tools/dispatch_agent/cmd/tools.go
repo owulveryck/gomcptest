@@ -100,7 +100,10 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 		}
 
 		// Process the task using the already initialized agent
-		response, err := agent.ProcessTask(ctx, prompt)
+		response, err := agent.ProcessTask(ctx, []*genai.Content{{
+			Role:  "user",
+			Parts: []genai.Part{genai.Text(prompt)},
+		}})
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Error processing agent task: %v", err)), nil
 		}
