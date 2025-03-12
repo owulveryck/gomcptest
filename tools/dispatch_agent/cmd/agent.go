@@ -3,16 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
+	"log"
+	"strings"
 
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
+const serverPrefix = "server"
+
 // DispatchAgent handles tasks by directing them to appropriate tools
 type DispatchAgent struct {
-	chatSession *gcp.ChatSession
-	gcpConfig   gcp.Configuration
+	genaiClient      *genai.Client
+	generativemodels map[string]*genai.GenerativeModel
+	gcpConfig        gcp.Configuration
+	servers          []*MCPServerTool
 }
 
 // NewDispatchAgent creates a new dispatch agent with initialized configuration
@@ -26,32 +31,39 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 	// Configure logging
 	SetupLogging(cfg)
 
-	// Create GCP configuration - can be adjusted based on environment variables
-	gcpConfig := gcp.Configuration{
-		GCPProject:   os.Getenv("GCP_PROJECT"),
-		GCPRegion:    os.Getenv("GCP_REGION"),
-		GeminiModels: []string{os.Getenv("GEMINI_MODEL")},
-		ImageDir:     cfg.ImageDir,
-	}
-
-	// If environment variables aren't set, use default values
-	if gcpConfig.GCPProject == "" {
-		gcpConfig.GCPProject = "your-project"
-	}
-	if gcpConfig.GCPRegion == "" {
-		gcpConfig.GCPRegion = "us-central1"
-	}
-	if len(gcpConfig.GeminiModels) == 0 || gcpConfig.GeminiModels[0] == "" {
-		gcpConfig.GeminiModels = []string{"gemini-1.5-pro"}
+	gcpConfig, err := gcp.LoadConfig()
+	if err != nil {
+		return nil, err
 	}
 
 	// Initialize chat session
 	ctx := context.Background()
-	chatSession := gcp.NewChatSession(ctx, gcpConfig)
+	client, err := genai.NewClient(ctx, gcpConfig.GCPProject, gcpConfig.GCPRegion)
+	if err != nil {
+		return nil, err
+	}
+	genaimodels := make(map[string]*genai.GenerativeModel, len(gcpConfig.GeminiModels))
+	temperature := float32(0.2) // Lower temperature for more deterministic responses
+	for _, model := range gcpConfig.GeminiModels {
+		genaimodels[model] = client.GenerativeModel(model)
+		genaimodels[model].GenerationConfig.Temperature = &temperature
+		genaimodels[model].SystemInstruction = &genai.Content{
+			Role: "user",
+			Parts: []genai.Part{
+				genai.Text("You are a helpful agent with access to tools: View, GlobTool, GrepTool, LS. " +
+					"Your job is to help the user by performing tasks using these tools. " +
+					"You should not make up information. " +
+					"If you don't know something, say so and explain what you would need to know to help. " +
+					"You cannot modify files; you can only read and search them."),
+			},
+		}
+	}
 
 	return &DispatchAgent{
-		chatSession: chatSession,
-		gcpConfig:   gcpConfig,
+		genaiClient:      client,
+		generativemodels: genaimodels,
+		gcpConfig:        gcpConfig,
+		servers:          make([]*MCPServerTool, 0),
 	}, nil
 }
 
@@ -59,39 +71,47 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 func (agent *DispatchAgent) ProcessTask(ctx context.Context, prompt string) (string, error) {
 	// Set up the conversation with the LLM
 	defaultModel := agent.gcpConfig.GeminiModels[0]
-	messages := []chatengine.ChatCompletionMessage{
-		{
-			Role: "system",
-			Content: "You are a helpful agent with access to tools: View, GlobTool, GrepTool, LS. " +
-				"Your job is to help the user by performing tasks using these tools. " +
-				"You should not make up information. " +
-				"If you don't know something, say so and explain what you would need to know to help. " +
-				"You cannot modify files; you can only read and search them.",
-		},
-		{
-			Role:    "user",
-			Content: prompt,
-		},
-	}
-
-	// Create chat completion request
-	req := chatengine.ChatCompletionRequest{
-		Model:       defaultModel,
-		Messages:    messages,
-		Temperature: 0.2,   // Lower temperature for more deterministic responses
-		Stream:      false, // Non-streaming mode
-	}
-
-	// Send request to LLM
-	resp, err := agent.chatSession.HandleCompletionRequest(ctx, req)
+	cs := agent.generativemodels[defaultModel].StartChat()
+	res, err := cs.SendMessage(ctx, genai.Text(prompt), genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
 	}
-
-	// Process and return the response
-	if len(resp.Choices) > 0 {
-		return resp.Choices[0].Message.Content.(string), nil
+	output, functionCalls := processResponse(res)
+	fmt.Println(output)
+	for functionCalls != nil {
+		for _, fn := range functionCalls {
+			fmt.Printf("will call %v\n", fn)
+			functionResponse, err := agent.Call(ctx, fn)
+			if err != nil {
+				return "", fmt.Errorf("error in LLM request: %w", err)
+			}
+			res, err := cs.SendMessage(ctx, functionResponse)
+			output, functionCalls = processResponse(res)
+			fmt.Println(output)
+		}
 	}
 
-	return "No response generated from the LLM", nil
+	return output, nil
+}
+
+func processResponse(resp *genai.GenerateContentResponse) (string, []genai.FunctionCall) {
+	var functionCalls []genai.FunctionCall
+	var output strings.Builder
+	for _, cand := range resp.Candidates {
+		for _, part := range cand.Content.Parts {
+			switch part.(type) {
+			case genai.Text:
+				fmt.Fprintln(&output, part)
+			case genai.FunctionCall:
+				if functionCalls == nil {
+					functionCalls = []genai.FunctionCall{part.(genai.FunctionCall)}
+				} else {
+					functionCalls = append(functionCalls, part.(genai.FunctionCall))
+				}
+			default:
+				log.Fatalf("unhandled return %T", part)
+			}
+		}
+	}
+	return output.String(), functionCalls
 }
