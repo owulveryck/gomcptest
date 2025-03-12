@@ -83,20 +83,21 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	output.WriteString(out)
 	fmt.Println(out)
 	for functionCalls != nil {
-		for _, fn := range functionCalls {
+		functionResponses := make([]genai.Part, len(functionCalls))
+		for i, fn := range functionCalls {
 			fmt.Printf("will call %v\n", fn)
-			functionResponse, err := agent.Call(ctx, fn)
+			functionResponses[i], err = agent.Call(ctx, fn)
 			if err != nil {
 				return "", fmt.Errorf("error in LLM request (function Call): %w", err)
 			}
-			res, err := cs.SendMessage(ctx, functionResponse)
-			if err != nil {
-				return "", err
-			}
-			out, functionCalls = processResponse(res)
-			output.WriteString(out)
-			fmt.Println(out)
 		}
+		res, err := cs.SendMessage(ctx, functionResponses...)
+		if err != nil {
+			return "", err
+		}
+		out, functionCalls = processResponse(res)
+		output.WriteString(out)
+		fmt.Println(out)
 	}
 
 	return output.String(), nil
