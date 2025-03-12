@@ -50,11 +50,10 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 		genaimodels[model].SystemInstruction = &genai.Content{
 			Role: "user",
 			Parts: []genai.Part{
-				genai.Text("You are a helpful agent with access to tools: View, GlobTool, GrepTool, LS. " +
+				genai.Text("You are a helpful agent with access to tools" +
 					"Your job is to help the user by performing tasks using these tools. " +
 					"You should not make up information. " +
-					"If you don't know something, say so and explain what you would need to know to help. " +
-					"You cannot modify files; you can only read and search them."),
+					"If you don't know something, say so and explain what you would need to know to help."),
 			},
 		}
 	}
@@ -68,16 +67,21 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 }
 
 // ProcessTask handles the specified prompt and returns the agent's response
-func (agent *DispatchAgent) ProcessTask(ctx context.Context, prompt string) (string, error) {
+func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Content) (string, error) {
 	// Set up the conversation with the LLM
+	var output strings.Builder
 	defaultModel := agent.gcpConfig.GeminiModels[0]
 	cs := agent.generativemodels[defaultModel].StartChat()
-	res, err := cs.SendMessage(ctx, genai.Text(prompt), genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
+	cs.History = history[:len(history)-1]
+	lastMessage := history[len(history)-1]
+	parts := append(lastMessage.Parts, genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
+	res, err := cs.SendMessage(ctx, parts...)
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
 	}
-	output, functionCalls := processResponse(res)
-	fmt.Println(output)
+	out, functionCalls := processResponse(res)
+	output.WriteString(out)
+	fmt.Println(out)
 	for functionCalls != nil {
 		for _, fn := range functionCalls {
 			fmt.Printf("will call %v\n", fn)
@@ -86,12 +90,13 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, prompt string) (str
 				return "", fmt.Errorf("error in LLM request: %w", err)
 			}
 			res, err := cs.SendMessage(ctx, functionResponse)
-			output, functionCalls = processResponse(res)
-			fmt.Println(output)
+			out, functionCalls = processResponse(res)
+			output.WriteString(out)
+			fmt.Println(out)
 		}
 	}
 
-	return output, nil
+	return output.String(), nil
 }
 
 func processResponse(resp *genai.GenerateContentResponse) (string, []genai.FunctionCall) {

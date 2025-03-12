@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+
+	"cloud.google.com/go/vertexai/genai"
 )
 
 // RunInteractiveMode runs the agent in interactive mode (useful for testing)
@@ -14,6 +16,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 
 	// Read user input
 	scanner := bufio.NewScanner(os.Stdin)
+	history := make([]*genai.Content, 0)
 	for {
 		fmt.Print("> ")
 		if !scanner.Scan() {
@@ -26,11 +29,19 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		}
 
 		// Process the input
-		response, err := agent.ProcessTask(context.Background(), input)
+		history = append(history, &genai.Content{
+			Role:  "user",
+			Parts: []genai.Part{genai.Text(input)},
+		})
+		response, err := agent.ProcessTask(context.Background(), history)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
 		}
+		history = append(history, &genai.Content{
+			Role:  "model",
+			Parts: []genai.Part{genai.Text(response)},
+		})
 
 		// Print the response
 		fmt.Println(response)
