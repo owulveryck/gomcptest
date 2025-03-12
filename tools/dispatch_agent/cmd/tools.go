@@ -107,6 +107,9 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Error processing agent task: %v", err)), nil
 		}
+		if response == "" {
+			response = "success"
+		}
 
 		return mcp.NewToolResultText(response), nil
 	}

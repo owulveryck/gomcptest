@@ -165,7 +165,7 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error in Calling MCP Tool: %w", err)
 	}
 	var content string
 	response := make(map[string]any, len(result.Content))
@@ -179,7 +179,8 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		response["result"+strconv.Itoa(i)] = content
 	}
 	if result.IsError {
-		return nil, errors.New(content)
+		// in case of error, we process the result anyway
+		//		return nil, fmt.Errorf("Error in result: %v", content)
 	}
 	return &genai.FunctionResponse{
 		Name:     f.Name,
