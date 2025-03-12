@@ -1,6 +1,6 @@
 .PHONY: all build clean
 
-DIRS := Bash Edit GlobTool GrepTool LS Replace View 
+DIRS := Bash Edit GlobTool GrepTool LS Replace View dispatch_agent
 BINDIR := bin
 
 all: build
