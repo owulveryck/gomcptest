@@ -87,7 +87,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			fmt.Printf("will call %v\n", fn)
 			functionResponse, err := agent.Call(ctx, fn)
 			if err != nil {
-				return "", fmt.Errorf("error in LLM request: %w", err)
+				return "", fmt.Errorf("error in LLM request (function Call): %w", err)
 			}
 			res, err := cs.SendMessage(ctx, functionResponse)
 			if err != nil {
