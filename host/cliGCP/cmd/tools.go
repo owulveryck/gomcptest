@@ -125,18 +125,6 @@ func (agent *DispatchAgent) AddMCPTool(mcpClient client.MCPClient) error {
 					Parameters:  schema,
 				})
 			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
-			/*
-				// Creating schema
-				chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
-					FunctionDeclarations: []*genai.FunctionDeclaration{
-						{
-							Name:        serverName + "_" + tool.Name,
-							Description: tool.Description,
-							Parameters:  schema,
-						},
-					},
-				})
-			*/
 		}
 	}
 	agent.servers = append(agent.servers, &MCPServerTool{
