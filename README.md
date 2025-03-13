@@ -1,6 +1,25 @@
 # gomcptest: Proof of Concept for MCP with Custom Host
 
-This project is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host. The code is primarily written from scratch to provide a clear understanding of the underlying mechanisms.
+This project is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host to play with agentic systems. The code is primarily written from scratch to provide a clear understanding of the underlying mechanisms.
+
+## Goal
+
+The primary goal of this project is to enable easy testing of agentic systems through the Model Context Protocol. For example:
+
+- The `dispatch_agent` could be specialized to scan codebases for security vulnerabilities
+- Create code review agents that can analyze pull requests for potential issues
+- Build data analysis agents that process and visualize complex datasets
+- Develop automated documentation agents that can generate comprehensive docs from code
+
+These specialized agents can be easily tested and iterated upon using the tools provided in this repository.
+
+## Prerequisites
+
+- Go >= 1.21
+- Access to the Vertex AI API on Google Cloud Platform
+- `github.com/mark3labs/mcp-go`
+
+The tools use the default GCP login credentials configured by `gcloud auth login`.
 
 ## Project Structure
 
@@ -26,6 +45,48 @@ This project is a proof of concept (POC) demonstrating how to implement a Model 
 -   **Function Calling:** Allows Gemini to call external functions and incorporate their results into chat responses.
 -   **MCP Server Interaction:** Demonstrates interaction with a hypothetical MCP (Model Control Plane) server for tool execution.
 -   **Single Chat Session:** The application uses single chat session, and new conversation will not trigger a new session.
+
+## Building the Tools
+
+You can build all the tools using the included Makefile:
+
+```bash
+# Build all tools
+make all
+
+# Or build individual tools
+make Bash
+make Edit
+make GlobTool
+make GrepTool
+make LS
+make Replace
+make View
+```
+
+## Configuration
+
+Read the `.envrc` file in the `bin` directory to set up the required environment variables:
+
+```bash
+export GCP_PROJECT=your-project-id
+export GCP_REGION=your-region
+export GEMINI_MODELS=gemini-2.0-flash
+export IMAGEN_MODELS=imagen-3.0-generate-002
+export IMAGE_DIR=/tmp/images
+```
+
+## Testing the CLI
+
+You can test the CLI (a tool similar to _Claude Code_) from the `bin` directory with:
+
+```bash
+./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path .GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace"
+```
+
+## Caution
+
+⚠️ **WARNING**: These tools have the ability to execute commands and modify files on your system. They should preferably be used in a chroot or container environment to prevent potential damage to your system.
 
 ## Quickstart
 
@@ -88,46 +149,6 @@ The `openaiserver` application is configured using environment variables. The fo
 | `IMAGEN_MODELS` | Comma-separated list of Imagen models      |                           | No       |
 | `IMAGE_DIR`     | Directory to store images                    |                           | Yes      |
 | `PORT`         | The port the server listens on                | `8080`                    | No       |
-
-### Prerequisites
-
--   Go >= 1.21
--   `github.com/mark3labs/mcp-go`
-
-## Tools
-
-This repository includes several MCP-compatible tools that can be installed individually:
-
-### Installing Tools
-
-You can install the tools from the releases page or build them from source.
-
-#### From Releases
-
-Download the appropriate release for your platform from the [releases page](https://github.com/owulveryck/gomcptest/releases).
-
-#### Build from Source
-
-To build all tools from source:
-
-```bash
-# Navigate to the tools directory
-cd tools
-
-# Build all tools
-make all
-
-# Or build individual tools
-make Bash
-make Edit
-make GlobTool
-make GrepTool
-make LS
-make Replace
-make View
-```
-
-The built binaries will be available in the `tools/bin` directory.
 
 ## Notes
 

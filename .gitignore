@@ -12,3 +12,4 @@ host/openaiserver/chatengine/testbin/sampleMCP
 dist/
 tools/bin
 **/cmd/cmd
+bin/
