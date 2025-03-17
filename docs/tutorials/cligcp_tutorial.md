@@ -1,4 +1,4 @@
-# Using the cliGCP Command Line Interface
+# cliGCP Tutorial
 
 This tutorial guides you through setting up and using the cliGCP command line interface to interact with LLMs and MCP tools. By the end, you'll be able to run the CLI and perform basic tasks with it.
 
@@ -7,7 +7,7 @@ This tutorial guides you through setting up and using the cliGCP command line in
 - Go >= 1.21 installed on your system
 - Access to Google Cloud Platform with Vertex AI API enabled
 - GCP authentication set up via `gcloud auth login`
-- The gomcptest repository cloned and tools built (see the Getting Started tutorial)
+- The gomcptest repository cloned and tools built (see the [Getting Started](getting_started.md) guide)
 
 ## Step 1: Understand the cliGCP Tool
 
@@ -74,12 +74,6 @@ Let's try a few simple interactions:
 ```
 
 You should get a response introducing the agent.
-
-```
-> What's the current date?
-```
-
-The agent should respond with the current date and time.
 
 ## Step 6: Using Tools
 

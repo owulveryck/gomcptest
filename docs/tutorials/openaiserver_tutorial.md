@@ -1,4 +1,4 @@
-# Building Your First OpenAI-Compatible Server
+# OpenAI Server Tutorial
 
 This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest. By the end, you'll have a working server that can communicate with LLM models and execute MCP tools.
 
@@ -8,26 +8,18 @@ This tutorial will guide you step-by-step through running and configuring the Op
 - Access to Google Cloud Platform with Vertex AI API enabled
 - GCP authentication set up via `gcloud auth login`
 - Basic familiarity with terminal commands
+- The gomcptest repository cloned and tools built (see the [Getting Started](getting_started.md) guide)
 
-## Step 1: Clone the Repository
+## Step 1: Set Up Environment Variables
 
-If you haven't already, clone the gomcptest repository:
-
-```bash
-git clone https://github.com/owulveryck/gomcptest.git
-cd gomcptest
-```
-
-## Step 2: Set Up Environment Variables
-
-The OpenAI server requires several environment variables. Create a .env file in the host/openaiserver directory:
+The OpenAI server requires several environment variables. Create a .envrc file in the host/openaiserver directory:
 
 ```bash
 cd host/openaiserver
-touch .env
+touch .envrc
 ```
 
-Add the following content to the .env file, adjusting the values according to your setup:
+Add the following content to the .envrc file, adjusting the values according to your setup:
 
 ```
 # Server configuration
@@ -51,21 +43,10 @@ mkdir -p /tmp/images
 Load the environment variables:
 
 ```bash
-source .env
+source .envrc
 ```
 
-## Step 3: Build the MCP Tools
-
-The OpenAI server requires MCP tools to function properly. In a new terminal window, build the tools:
-
-```bash
-cd gomcptest
-make all
-```
-
-This will create the tool binaries in the bin directory.
-
-## Step 4: Start the OpenAI Server
+## Step 2: Start the OpenAI Server
 
 Now you can start the OpenAI-compatible server:
 
@@ -76,7 +57,7 @@ go run . -mcpservers "../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../b
 
 You should see output indicating that the server has started and registered the MCP tools.
 
-## Step 5: Test the Server with a Simple Request
+## Step 3: Test the Server with a Simple Request
 
 Open a new terminal window and use curl to test the server:
 
@@ -96,7 +77,7 @@ curl http://localhost:8080/v1/chat/completions \
 
 You should receive a response from the model explaining its capabilities.
 
-## Step 6: Test Function Calling
+## Step 4: Test Function Calling
 
 Now let's test function calling by asking the model to list files in a directory:
 
