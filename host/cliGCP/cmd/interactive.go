@@ -2,20 +2,23 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
+	"github.com/fatih/color"
 	"github.com/peterh/liner"
 )
 
 // RunInteractiveMode runs the agent in interactive mode (useful for testing)
 func RunInteractiveMode(agent *DispatchAgent) {
-	fmt.Println("Dispatch Agent Interactive Mode")
-	fmt.Println("Type 'exit' to quit")
+	titleColor := color.New(color.FgCyan, color.Bold)
+	promptColor := color.New(color.FgGreen, color.Bold)
+	errorColor := color.New(color.FgRed, color.Bold)
+
+	titleColor.Println("Dispatch Agent Interactive Mode")
+	titleColor.Println("Type 'exit' to quit")
 	// Initialize liner for command history
 	line := liner.NewLiner()
 	defer line.Close()
@@ -23,16 +26,17 @@ func RunInteractiveMode(agent *DispatchAgent) {
 	// Read user input
 	history := make([]*genai.Content, 0)
 	for {
-
-		input, err := line.Prompt("> ")
+		// Use plain prompt and colorize it separately
+		promptColor.Print("> ")
+		input, err := line.Prompt("")
 
 		if err == io.EOF || err == liner.ErrPromptAborted {
-			fmt.Println("\nExiting...")
+			titleColor.Println("\nExiting...")
 			break
 		}
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error reading input: %s\n", err)
+			errorColor.Fprintf(os.Stderr, "Error reading input: %s\n", err)
 			continue
 		}
 
@@ -46,7 +50,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 
 		// Handle exit command
 		if input == "exit" {
-			fmt.Println("Exiting...")
+			titleColor.Println("Exiting...")
 			break
 		}
 
@@ -57,7 +61,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		})
 		response, err := agent.ProcessTask(context.Background(), history)
 		if err != nil {
-			log.Printf("Error: %v / history: %v\n", err, history)
+			errorColor.Printf("Error: %v / history: %v\n", err, history)
 			continue
 		}
 		history = append(history, &genai.Content{
@@ -65,7 +69,6 @@ func RunInteractiveMode(agent *DispatchAgent) {
 			Parts: []genai.Part{genai.Text(response)},
 		})
 
-		// Print the response
-		// fmt.Println(response)
+		// Print the response is handled in ProcessTask
 	}
 }
