@@ -148,7 +148,7 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	}
 	request.Params.Arguments = make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = v.(string)
+		request.Params.Arguments[k] = fmt.Sprint(v)
 	}
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
