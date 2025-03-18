@@ -1,5 +1,5 @@
 baseURL: https://owulveryck.github.io/gomcptest
-title: gomcptest
+title: GoMCPTest
 
 # cSpell:ignore goldmark github hugo readingtime docsy subdir lastmod pygments linenos catmullrom norsk gu
 
@@ -40,21 +40,21 @@ permalinks:
 imaging:
   resampleFilter: CatmullRom
   quality: 75
-  anchor: smart
+  anchor: Smart
 
 # Language configuration
 languages:
   en:
     languageName: English
-    title: gomcptest
+    title: GoMCPTest
     params:
-      description: Model Context Protocol (MCP) with custom tools to play with agentic systems
+      description: Playground in Go to play with Model Context Protocol (MCP) with custom tools to play with agentic systems
   fr:
     languageName: Français
     contentDir: content/fr
-    title: gomcptest
+    title: GoMCPTest
     params:
-      description: Protocole de Contexte de Modèle (MCP) avec des outils personnalisés pour interagir avec des systèmes d'agents
+      description: Aire de jeux en Go pour tester les outils basés sur le Model Context Protocol (MCP) avec des outils personnalisés pour interagir avec des systèmes d'agents
       time_format_default: 02.01.2006
       time_format_blog: 02.01.2006
 
@@ -134,7 +134,7 @@ params:
   prism_syntax_highlighting: false
 
   copyright:
-    authors: gomcptest Authors | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+    authors: Olivier Wulveryck | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
     from_year: 2023
 
   # User interface configuration
@@ -157,9 +157,9 @@ params:
     feedback:
       enable: true
       # The responses that the user sees after clicking "yes" (the page was helpful) or "no" (the page was not helpful).
-      'yes': >-
+      "yes": >-
         Glad to hear it! Please <a href="https://github.com/owulveryck/gomcptest/issues/new">tell us how we can improve</a>.
-      'no': >-
+      "no": >-
         Sorry to hear that. Please <a href="https://github.com/owulveryck/gomcptest/issues/new">tell us how we can improve</a>.
 
     # Adds a reading time to the top of each doc.

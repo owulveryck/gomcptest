@@ -2,277 +2,278 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/docs/explanation/architecture/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/explanation/architecture/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/explanation/architecture/"
+                href="http://localhost:1313/gomcptest/fr/docs/explanation/architecture/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/explanation/architecture/"
+                href="http://localhost:1313/gomcptest/docs/explanation/architecture/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/how-to/create-custom-tool/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/how-to/create-custom-tool/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/how-to/create-custom-tool/"
+                href="http://localhost:1313/gomcptest/fr/docs/how-to/create-custom-tool/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/how-to/create-custom-tool/"
+                href="http://localhost:1313/gomcptest/docs/how-to/create-custom-tool/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/tutorials/getting-started/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/tutorials/getting-started/</loc>
     <lastmod>2025-03-18T13:49:08+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/tutorials/getting-started/"
+                href="http://localhost:1313/gomcptest/fr/docs/tutorials/getting-started/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/tutorials/getting-started/"
+                href="http://localhost:1313/gomcptest/docs/tutorials/getting-started/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/reference/tools/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/reference/tools/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/reference/tools/"
+                href="http://localhost:1313/gomcptest/fr/docs/reference/tools/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/reference/tools/"
+                href="http://localhost:1313/gomcptest/docs/reference/tools/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/tutorials/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/tutorials/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/tutorials/"
+                href="http://localhost:1313/gomcptest/fr/docs/tutorials/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/tutorials/"
+                href="http://localhost:1313/gomcptest/docs/tutorials/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/how-to/configure-openaiserver/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/how-to/configure-openaiserver/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/how-to/configure-openaiserver/"
+                href="http://localhost:1313/gomcptest/fr/docs/how-to/configure-openaiserver/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/how-to/configure-openaiserver/"
+                href="http://localhost:1313/gomcptest/docs/how-to/configure-openaiserver/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/how-to/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/how-to/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/how-to/"
+                href="http://localhost:1313/gomcptest/fr/docs/how-to/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/how-to/"
+                href="http://localhost:1313/gomcptest/docs/how-to/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/explanation/mcp-protocol/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/explanation/mcp-protocol/"
+                href="http://localhost:1313/gomcptest/fr/docs/explanation/mcp-protocol/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/explanation/mcp-protocol/"
+                href="http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/reference/openaiserver/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/reference/openaiserver/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/reference/openaiserver/"
+                href="http://localhost:1313/gomcptest/fr/docs/reference/openaiserver/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/reference/openaiserver/"
+                href="http://localhost:1313/gomcptest/docs/reference/openaiserver/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/tutorials/openaiserver-tutorial/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/tutorials/openaiserver-tutorial/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/tutorials/openaiserver-tutorial/"
+                href="http://localhost:1313/gomcptest/fr/docs/tutorials/openaiserver-tutorial/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/tutorials/openaiserver-tutorial/"
+                href="http://localhost:1313/gomcptest/docs/tutorials/openaiserver-tutorial/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/reference/cligcp/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/reference/cligcp/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/reference/cligcp/"
+                href="http://localhost:1313/gomcptest/fr/docs/reference/cligcp/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/reference/cligcp/"
+                href="http://localhost:1313/gomcptest/docs/reference/cligcp/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/tutorials/cligcp-tutorial/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/tutorials/cligcp-tutorial/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/tutorials/cligcp-tutorial/"
+                href="http://localhost:1313/gomcptest/fr/docs/tutorials/cligcp-tutorial/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/tutorials/cligcp-tutorial/"
+                href="http://localhost:1313/gomcptest/docs/tutorials/cligcp-tutorial/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/how-to/configure-cligcp/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/how-to/configure-cligcp/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/how-to/configure-cligcp/"
+                href="http://localhost:1313/gomcptest/fr/docs/how-to/configure-cligcp/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/how-to/configure-cligcp/"
+                href="http://localhost:1313/gomcptest/docs/how-to/configure-cligcp/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/explanation/tools-details/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/explanation/tools-details/</loc>
     <lastmod>2025-03-18T13:49:08+01:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/docs/reference/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/reference/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/reference/"
+                href="http://localhost:1313/gomcptest/fr/docs/reference/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/reference/"
+                href="http://localhost:1313/gomcptest/docs/reference/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/how-to/configure-bigagi/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/how-to/configure-bigagi/</loc>
+    <lastmod>2025-03-18T14:28:31+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/how-to/configure-bigagi/"
+                href="http://localhost:1313/gomcptest/fr/docs/how-to/configure-bigagi/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/how-to/configure-bigagi/"
+                href="http://localhost:1313/gomcptest/docs/how-to/configure-bigagi/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/explanation/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/explanation/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/explanation/"
+                href="http://localhost:1313/gomcptest/fr/docs/explanation/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/explanation/"
+                href="http://localhost:1313/gomcptest/docs/explanation/"
                 />
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>http://localhost:1313/gomcptest/categories/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/categories/"
+                href="http://localhost:1313/gomcptest/fr/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/categories/"
+                href="http://localhost:1313/gomcptest/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/docs/</loc>
+    <loc>http://localhost:1313/gomcptest/docs/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/docs/"
+                href="http://localhost:1313/gomcptest/fr/docs/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/docs/"
+                href="http://localhost:1313/gomcptest/docs/"
                 />
   </url><url>
-    <loc>http://localhost:1313/</loc>
+    <loc>http://localhost:1313/gomcptest/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/"
+                href="http://localhost:1313/gomcptest/fr/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/"
+                href="http://localhost:1313/gomcptest/"
                 />
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>http://localhost:1313/gomcptest/search/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/search/"
+                href="http://localhost:1313/gomcptest/fr/search/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/search/"
+                href="http://localhost:1313/gomcptest/search/"
                 />
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>http://localhost:1313/gomcptest/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
-                href="http://localhost:1313/fr/tags/"
+                href="http://localhost:1313/gomcptest/fr/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/tags/"
+                href="http://localhost:1313/gomcptest/tags/"
                 />
   </url>
 </urlset>
