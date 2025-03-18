@@ -1,0 +1,502 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="canonical" type="text/html" href="http://localhost:1313/docs/tutorials/">
+<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/docs/tutorials/index.xml">
+<meta name="robots" content="noindex, nofollow">
+
+
+<link rel="shortcut icon" href="/favicons/favicon.ico" >
+<link rel="apple-touch-icon" href="/favicons/apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicons/android-36x36.png" sizes="36x36">
+<link rel="icon" type="image/png" href="/favicons/android-48x48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicons/android-72x72.png" sizes="72x72">
+<link rel="icon" type="image/png" href="/favicons/android-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favicons/android-144x144.png" sizes="144x144">
+<link rel="icon" type="image/png" href="/favicons/android-192x192.png" sizes="192x192">
+
+<title>Tutorials | gomcptest</title>
+<meta name="description" content="Step-by-step guides to get you started with gomcptest">
+<meta property="og:url" content="http://localhost:1313/docs/tutorials/">
+  <meta property="og:site_name" content="gomcptest">
+  <meta property="og:title" content="Tutorials">
+  <meta property="og:description" content="Step-by-step guides to get you started with gomcptest">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="website">
+
+  <meta itemprop="name" content="Tutorials">
+  <meta itemprop="description" content="Step-by-step guides to get you started with gomcptest">
+  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
+  <meta itemprop="wordCount" content="42">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Tutorials">
+  <meta name="twitter:description" content="Step-by-step guides to get you started with gomcptest">
+<link href="/scss/main.css" rel="stylesheet">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-section">
+    <header>
+      <nav class="td-navbar js-navbar-scroll" data-bs-theme="dark">
+<div class="container-fluid flex-column flex-md-row">
+  <a class="navbar-brand" href="/"><span class="navbar-brand__logo navbar-logo"><svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" style="enable-background:new 0 0 500 500"><g><path style="fill:#fff" d="M116.8525 421.9722c-5.7041.0-10.3442-4.3127-10.3442-9.6129V88.183c0-5.3002 4.6401-9.6117 10.3442-9.6117H320.858c3.0347.0 9.3959.5498 11.7506 2.6302l.3545.3442 58.905 63.2912c2.3101 2.491 2.9202 8.4928 2.9202 11.3184v256.2039c0 5.3002-4.6407 9.6129-10.3436 9.6129H116.8525z"/><g><g><g><path style="fill:#767676" d="M384.4445 423.2066H116.852c-6.3839.0-11.5786-4.8658-11.5786-10.8474V88.1831c0-5.9804 5.1947-10.8461 11.5786-10.8461h204.0062c.377.0 9.2786.0329 12.568 2.9389l.3947.3833 58.9508 63.337c3.2135 3.4652 3.2514 11.7924 3.2514 12.1593v256.2036C396.0231 418.3408 390.8284 423.2066 384.4445 423.2066zM116.5079 411.9189c.0848.0278.1999.0531.3441.0531h267.5925c.1442.0.2581-.0253.3441-.0531V156.1556c-.0076-.9033-.3593-3.7347-.7034-5.0037l-57.6527-61.9416c-1.4651-.3176-4.4533-.6389-5.5742-.6389H116.852c-.143.0-.2594.024-.3441.0531V411.9189zm267.4533-261.149zM327.0321 89.371v.0013V89.371z"/></g></g></g><g><g><path style="fill:#5b7fc0" d="M189.0874 210.1754l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4473C177.5953 212.627 183.0601 210.1742 189.0874 210.1754zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 234.1722 197.0804 232.033z"/><path style="opacity:.3;fill:#fff" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/><g><defs><path id="SVGID_1_" d="M194.7376 237.6875c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 234.2399 196.1861 236.239 194.7376 237.6875z"/></defs><clipPath id="SVGID_2_"><use xlink:href="#SVGID_1_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_2_);fill:#fff" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/><path style="opacity:.13;clip-path:url(#SVGID_2_);fill:#020202" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/></g><g><defs><path id="SVGID_3_" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/></defs><clipPath id="SVGID_4_"><use xlink:href="#SVGID_3_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_4_);fill:#5b7fc0" d="M172.6595 215.6045c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8475-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 209.1953 176.6171 211.647 172.6595 215.6045z"/></g></g><rect x="198.8952" y="225.1043" style="fill:#5b7fc0" width="122.6266" height="13.8671"/></g><g><path style="fill:#d95140" d="M189.0874 155.7611l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.0249 2.454-11.4897 6.4116-15.4473C177.5953 158.2128 183.0601 155.7599 189.0874 155.7611zm7.993 21.8577c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.2508 181.7667 197.0816 179.758 197.0804 177.6188z"/><path style="opacity:.3;fill:#fff" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/><g><defs><path id="SVGID_5_" d="M194.7376 183.2733c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 179.8256 196.1861 181.8248 194.7376 183.2733z"/></defs><clipPath id="SVGID_6_"><use xlink:href="#SVGID_5_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_6_);fill:#fff" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/><path style="opacity:.13;clip-path:url(#SVGID_6_);fill:#020202" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/></g><g><defs><path id="SVGID_7_" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/></defs><clipPath id="SVGID_8_"><use xlink:href="#SVGID_7_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_8_);fill:#d95140" d="M172.6595 161.1903c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 154.7811 176.6171 157.2327 172.6595 161.1903z"/></g><rect x="198.8952" y="170.69" style="fill:#d95140" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#56a55c" d="M189.5379 264.6147l.0012-.0012c7.7751.0012 15.0294 4.1862 18.932 10.9235 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032-5.8394.0-11.3281-2.2733-15.458-6.4032-4.13-4.13-6.4032-9.6186-6.4056-15.4628.0012-6.0249 2.454-11.4897 6.4116-15.4472C178.0458 267.0663 183.5105 264.6135 189.5379 264.6147zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6538 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.7013 290.6202 197.5321 288.6115 197.5309 286.4723z"/><path style="opacity:.3;fill:#fff" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/><g><defs><path id="SVGID_9_" d="M195.1881 292.1268c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9941 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.5344 288.6792 196.6366 290.6783 195.1881 292.1268z"/></defs><clipPath id="SVGID_10_"><use xlink:href="#SVGID_9_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_10_);fill:#fff" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/><path style="opacity:.13;clip-path:url(#SVGID_10_);fill:#020202" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/></g><g><defs><path id="SVGID_11_" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/></defs><clipPath id="SVGID_12_"><use xlink:href="#SVGID_11_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_12_);fill:#56a55c" d="M173.11 270.0439c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7325-11.1497-10.9151-18.926-10.9151C182.5311 263.6346 177.0676 266.0863 173.11 270.0439z"/></g></g><rect x="199.3456" y="279.5436" style="fill:#56a55c" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#f1bc42" d="M189.0874 318.7208l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3305-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4472C177.5953 321.1724 183.0601 318.7196 189.0874 318.7208zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 342.7176 197.0804 340.5784z"/><path style="opacity:.3;fill:#fff" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/><g><defs><path id="SVGID_13_" d="M194.7376 346.2329c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 342.7853 196.1861 344.7844 194.7376 346.2329z"/></defs><clipPath id="SVGID_14_"><use xlink:href="#SVGID_13_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_14_);fill:#fff" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/><path style="opacity:.13;clip-path:url(#SVGID_14_);fill:#020202" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/></g><g><defs><path id="SVGID_15_" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/></defs><clipPath id="SVGID_16_"><use xlink:href="#SVGID_15_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_16_);fill:#f1bc42" d="M172.6595 324.15c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8474-1.0151-7.6327-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 317.7407 176.6171 320.1924 172.6595 324.15z"/></g></g><rect x="198.8952" y="333.6497" style="fill:#f1bc42" width="122.6266" height="13.8671"/></g></g></svg></span><span class="navbar-brand__name">gomcptest</span></a>
+  <div class="td-navbar-nav-scroll ms-md-auto" id="main_navbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="/docs/"><span>Docs</span></a>
+      </li>
+      <li class="nav-item dropdown d-none d-lg-block">
+        <div class="dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">English</a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="/fr/docs/tutorials/">Français</a></li>
+    </ul>
+</div></li>
+      </ul>
+  </div>
+  <div class="d-none d-lg-block">
+    <div class="td-search">
+  <div class="td-search__icon"></div>
+  <input type="search" class="td-search__input form-control td-search-input" placeholder="Search this site…" aria-label="Search this site…" autocomplete="off">
+</div>
+  </div>
+</div>
+</nav>
+    </header>
+    <div class="container-fluid td-outer">
+      <div class="td-main">
+        <div class="row flex-xl-nowrap">
+          <main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main">
+            
+
+
+
+
+<div class="td-content">
+<div class="pageinfo pageinfo-primary d-print-none">
+<p>
+This is the multi-page printable view of this section.
+<a href="#" onclick="print();return false;">Click here to print</a>.
+</p><p>
+<a href="/docs/tutorials/">Return to the regular view of this page</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">Tutorials</h1>
+<div class="lead">Step-by-step guides to get you started with gomcptest</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+	
+<li>1: <a href="#pg-fde8652c74594a64ff8ea9829ed8ccb8">Getting Started with gomcptest</a></li>
+
+
+    
+  
+    
+    
+	
+<li>2: <a href="#pg-d1e31c239e3f4bb5c0ff07585d9d378e">Building Your First OpenAI-Compatible Server</a></li>
+
+
+    
+  
+    
+    
+	
+<li>3: <a href="#pg-278c15abdb8d424b0feb1afd5bd2949e">Using the cliGCP Command Line Interface</a></li>
+
+
+    
+  
+
+    </ul>
+
+
+<div class="content">
+      
+
+<div class="pageinfo pageinfo-primary">
+<p>Tutorials are learning-oriented guides that take you through a series of steps to complete a project. They focus on learning by doing, and helping beginners get started with the system.</p>
+
+</div>
+
+<p>These tutorials will help you get familiar with gomcptest and its components.</p>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+    
+	<h1 id="pg-fde8652c74594a64ff8ea9829ed8ccb8">1 - Getting Started with gomcptest</h1>
+    <div class="lead">Get gomcptest up and running quickly with this beginner&rsquo;s guide</div>
+	<p>This tutorial will guide you through setting up the gomcptest system and configuring Google Cloud authentication for the project.</p>
+<h2 id="what-is-gomcptest">What is gomcptest?<a class="td-heading-self-link" href="#what-is-gomcptest" aria-label="Heading self-link"></a></h2>
+<p>gomcptest is a proof of concept (POC) implementation of the Model Context Protocol (MCP) with a custom-built host. It enables AI models like Google&rsquo;s Gemini to interact with their environment through a set of tools, creating powerful agentic systems.</p>
+<h3 id="key-components">Key Components<a class="td-heading-self-link" href="#key-components" aria-label="Heading self-link"></a></h3>
+<p>The project consists of three main parts:</p>
+<ol>
+<li>
+<p><strong>Host Components</strong>:</p>
+<ul>
+<li><strong>cliGCP</strong>: A command-line interface similar to Claude Code or ChatGPT, allowing direct interaction with AI models and tools</li>
+<li><strong>openaiserver</strong>: A server that implements the OpenAI API interface, enabling compatibility with existing OpenAI clients while using Google&rsquo;s Vertex AI behind the scenes</li>
+</ul>
+</li>
+<li>
+<p><strong>MCP Tools</strong>:</p>
+<ul>
+<li><strong>Bash</strong>: Execute shell commands</li>
+<li><strong>Edit/Replace</strong>: Modify file contents</li>
+<li><strong>GlobTool/GrepTool</strong>: Find files and search content</li>
+<li><strong>LS/View</strong>: Navigate and read the filesystem</li>
+<li><strong>dispatch_agent</strong>: Create sub-agents with specific tasks</li>
+</ul>
+</li>
+<li>
+<p><strong>MCP Protocol</strong>: The standardized communication layer that allows models to discover, invoke, and receive results from tools</p>
+</li>
+</ol>
+<h3 id="use-cases">Use Cases<a class="td-heading-self-link" href="#use-cases" aria-label="Heading self-link"></a></h3>
+<p>gomcptest enables a variety of agent-based applications:</p>
+<ul>
+<li>Code assistance and pair programming</li>
+<li>File system navigation and management</li>
+<li>Data analysis and processing</li>
+<li>Automated documentation</li>
+<li>Custom domain-specific agents</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>Go &gt;= 1.21 installed on your system</li>
+<li>Google Cloud account with access to Vertex AI API</li>
+<li><a href="https://cloud.google.com/sdk/docs/install">Google Cloud CLI</a> installed</li>
+<li>Basic familiarity with terminal/command line</li>
+</ul>
+<h2 id="setting-up-google-cloud-authentication">Setting up Google Cloud Authentication<a class="td-heading-self-link" href="#setting-up-google-cloud-authentication" aria-label="Heading self-link"></a></h2>
+<p>Before using gomcptest with Google Cloud Platform services like Vertex AI, you need to set up your authentication.</p>
+<h3 id="1-initialize-the-google-cloud-cli">1. Initialize the Google Cloud CLI<a class="td-heading-self-link" href="#1-initialize-the-google-cloud-cli" aria-label="Heading self-link"></a></h3>
+<p>If you haven&rsquo;t already configured the Google Cloud CLI, run:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud init
+</span></span></code></pre></div><p>This interactive command will guide you through:</p>
+<ul>
+<li>Logging into your Google account</li>
+<li>Selecting a Google Cloud project</li>
+<li>Setting default configurations</li>
+</ul>
+<h3 id="2-log-in-to-google-cloud">2. Log in to Google Cloud<a class="td-heading-self-link" href="#2-log-in-to-google-cloud" aria-label="Heading self-link"></a></h3>
+<p>Authenticate your gcloud CLI with your Google account:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud auth login
+</span></span></code></pre></div><p>This will open a browser window where you can sign in to your Google account.</p>
+<h3 id="3-set-up-application-default-credentials-adc">3. Set up Application Default Credentials (ADC)<a class="td-heading-self-link" href="#3-set-up-application-default-credentials-adc" aria-label="Heading self-link"></a></h3>
+<p>Application Default Credentials are used by client libraries to automatically find credentials when connecting to Google Cloud services:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud auth application-default login
+</span></span></code></pre></div><p>This command will:</p>
+<ol>
+<li>Open a browser window for authentication</li>
+<li>Store your credentials locally (typically in <code>~/.config/gcloud/application_default_credentials.json</code>)</li>
+<li>Configure your environment to use these credentials when accessing Google Cloud APIs</li>
+</ol>
+<p>These credentials will be used by gomcptest when interacting with Google Cloud services.</p>
+<h2 id="project-setup">Project Setup<a class="td-heading-self-link" href="#project-setup" aria-label="Heading self-link"></a></h2>
+<ol>
+<li>
+<p><strong>Clone the repository</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/owulveryck/gomcptest.git
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> gomcptest
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Build Tools</strong>: Compile all MCP-compatible tools</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make tools
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Choose Interface</strong>:</p>
+<ul>
+<li>Run the OpenAI-compatible server: See the <a href="../openaiserver-tutorial/">OpenAI Server Tutorial</a></li>
+<li>Use the CLI directly: See the <a href="../cligcp-tutorial/">cliGCP Tutorial</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="whats-next">What&rsquo;s Next<a class="td-heading-self-link" href="#whats-next" aria-label="Heading self-link"></a></h2>
+<p>After completing the basic setup:</p>
+<ul>
+<li>Explore the different tools in the <code>tools</code> directory</li>
+<li>Try creating agent tasks with gomcptest</li>
+<li>Check out the how-to guides for specific use cases</li>
+</ul>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-d1e31c239e3f4bb5c0ff07585d9d378e">2 - Building Your First OpenAI-Compatible Server</h1>
+    <div class="lead">Set up and run an OpenAI-compatible server with MCP tool support</div>
+	<p>This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest. By the end, you&rsquo;ll have a working server that can communicate with LLM models and execute MCP tools.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>Go &gt;= 1.21 installed</li>
+<li>Access to Google Cloud Platform with Vertex AI API enabled</li>
+<li>GCP authentication set up via <code>gcloud auth login</code></li>
+<li>Basic familiarity with terminal commands</li>
+<li>The gomcptest repository cloned and tools built (see the <a href="../getting-started/">Getting Started</a> guide)</li>
+</ul>
+<h2 id="step-1-set-up-environment-variables">Step 1: Set Up Environment Variables<a class="td-heading-self-link" href="#step-1-set-up-environment-variables" aria-label="Heading self-link"></a></h2>
+<p>The OpenAI server requires several environment variables. Create a .envrc file in the host/openaiserver directory:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/openaiserver
+</span></span><span style="display:flex;"><span>touch .envrc
+</span></span></code></pre></div><p>Add the following content to the .envrc file, adjusting the values according to your setup:</p>
+<pre tabindex="0"><code># Server configuration
+PORT=8080
+LOG_LEVEL=INFO
+IMAGE_DIR=/tmp/images
+
+# GCP configuration
+GCP_PROJECT=your-gcp-project-id
+GCP_REGION=us-central1
+GEMINI_MODELS=gemini-2.0-flash
+IMAGEN_MODELS=imagen-3.0-generate-002
+</code></pre><p>Ensure the image directory exists:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p /tmp/images
+</span></span></code></pre></div><p>Load the environment variables:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">source</span> .envrc
+</span></span></code></pre></div><h2 id="step-2-start-the-openai-server">Step 2: Start the OpenAI Server<a class="td-heading-self-link" href="#step-2-start-the-openai-server" aria-label="Heading self-link"></a></h2>
+<p>Now you can start the OpenAI-compatible server:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/openaiserver
+</span></span><span style="display:flex;"><span>go run . -mcpservers <span style="color:#4e9a06">&#34;../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../bin/Bash;../bin/Replace&#34;</span>
+</span></span></code></pre></div><p>You should see output indicating that the server has started and registered the MCP tools.</p>
+<h2 id="step-3-test-the-server-with-a-simple-request">Step 3: Test the Server with a Simple Request<a class="td-heading-self-link" href="#step-3-test-the-server-with-a-simple-request" aria-label="Heading self-link"></a></h2>
+<p>Open a new terminal window and use curl to test the server:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      {
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;role&#34;: &#34;user&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;content&#34;: &#34;Hello, what can you do?&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ]
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
+</span></span></code></pre></div><p>You should receive a response from the model explaining its capabilities.</p>
+<h2 id="step-4-test-function-calling">Step 4: Test Function Calling<a class="td-heading-self-link" href="#step-4-test-function-calling" aria-label="Heading self-link"></a></h2>
+<p>Now let&rsquo;s test function calling by asking the model to list files in a directory:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      {
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;role&#34;: &#34;user&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;content&#34;: &#34;List the files in the current directory&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ]
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
+</span></span></code></pre></div><p>The model should respond by calling the LS tool and returning the results.</p>
+<h2 id="what-youve-learned">What You&rsquo;ve Learned<a class="td-heading-self-link" href="#what-youve-learned" aria-label="Heading self-link"></a></h2>
+<p>In this tutorial, you&rsquo;ve:</p>
+<ol>
+<li>Set up the environment for the OpenAI-compatible server</li>
+<li>Built and registered MCP tools</li>
+<li>Started the server</li>
+<li>Tested basic chat completion</li>
+<li>Demonstrated function calling capabilities</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
+<p>Now that you have a working OpenAI-compatible server, you can:</p>
+<ul>
+<li>Explore the API by sending different types of requests</li>
+<li>Add custom tools to expand the server&rsquo;s capabilities</li>
+<li>Connect a client like the cliGCP to interact with the server</li>
+<li>Experiment with different Gemini models</li>
+</ul>
+<p>Check out the <a href="../../how-to/configure-openaiserver/">How to Configure the OpenAI Server</a> guide for more advanced configuration options.</p>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-278c15abdb8d424b0feb1afd5bd2949e">3 - Using the cliGCP Command Line Interface</h1>
+    <div class="lead">Set up and use the cliGCP command line interface to interact with LLMs and MCP tools</div>
+	<p>This tutorial guides you through setting up and using the cliGCP command line interface to interact with LLMs and MCP tools. By the end, you&rsquo;ll be able to run the CLI and perform basic tasks with it.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>Go &gt;= 1.21 installed on your system</li>
+<li>Access to Google Cloud Platform with Vertex AI API enabled</li>
+<li>GCP authentication set up via <code>gcloud auth login</code></li>
+<li>The gomcptest repository cloned and tools built (see the <a href="../getting-started/">Getting Started</a> guide)</li>
+</ul>
+<h2 id="step-1-understand-the-cligcp-tool">Step 1: Understand the cliGCP Tool<a class="td-heading-self-link" href="#step-1-understand-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
+<p>The cliGCP tool is a command-line interface similar to tools like Claude Code. It connects directly to the Google Cloud Platform&rsquo;s Vertex AI API to access Gemini models and can use local MCP tools to perform actions on your system.</p>
+<h2 id="step-2-build-the-cligcp-tool">Step 2: Build the cliGCP Tool<a class="td-heading-self-link" href="#step-2-build-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
+<p>First, build the cliGCP tool if you haven&rsquo;t already:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> gomcptest
+</span></span><span style="display:flex;"><span>make all  <span style="color:#8f5902;font-style:italic"># This builds all tools including cliGCP</span>
+</span></span></code></pre></div><p>If you only want to build cliGCP, you can run:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/cliGCP/cmd
+</span></span><span style="display:flex;"><span>go build -o ../../../bin/cliGCP
+</span></span></code></pre></div><h2 id="step-3-set-up-environment-variables">Step 3: Set Up Environment Variables<a class="td-heading-self-link" href="#step-3-set-up-environment-variables" aria-label="Heading self-link"></a></h2>
+<p>The cliGCP tool requires environment variables for GCP configuration. You can set these directly or create an .envrc file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> bin
+</span></span><span style="display:flex;"><span>touch .envrc
+</span></span></code></pre></div><p>Add the following content to the .envrc file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-2.0-flash
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/tmp/images
+</span></span></code></pre></div><p>Load the environment variables:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">source</span> .envrc
+</span></span></code></pre></div><h2 id="step-4-run-the-cligcp-tool">Step 4: Run the cliGCP Tool<a class="td-heading-self-link" href="#step-4-run-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
+<p>Now you can run the cliGCP tool with MCP tools:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> bin
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace&#34;</span>
+</span></span></code></pre></div><p>You should see a welcome message and a prompt where you can start interacting with the CLI.</p>
+<h2 id="step-5-simple-queries">Step 5: Simple Queries<a class="td-heading-self-link" href="#step-5-simple-queries" aria-label="Heading self-link"></a></h2>
+<p>Let&rsquo;s try a few simple interactions:</p>
+<pre tabindex="0"><code>&gt; Hello, who are you?
+</code></pre><p>You should get a response introducing the agent.</p>
+<h2 id="step-6-using-tools">Step 6: Using Tools<a class="td-heading-self-link" href="#step-6-using-tools" aria-label="Heading self-link"></a></h2>
+<p>Now let&rsquo;s try using some of the MCP tools:</p>
+<pre tabindex="0"><code>&gt; List the files in the current directory
+</code></pre><p>The CLI should call the LS tool and show you the files in the current directory.</p>
+<pre tabindex="0"><code>&gt; Search for files with &#34;go&#34; in the name
+</code></pre><p>The CLI will use the GlobTool to find files matching that pattern.</p>
+<pre tabindex="0"><code>&gt; Read the README.md file
+</code></pre><p>The CLI will use the View tool to show you the contents of the README.md file.</p>
+<h2 id="step-7-creating-a-simple-task">Step 7: Creating a Simple Task<a class="td-heading-self-link" href="#step-7-creating-a-simple-task" aria-label="Heading self-link"></a></h2>
+<p>Let&rsquo;s create a simple task that combines multiple tools:</p>
+<pre tabindex="0"><code>&gt; Create a new file called test.txt with the text &#34;Hello, world!&#34; and then verify it exists
+</code></pre><p>The CLI should:</p>
+<ol>
+<li>Use the Replace tool to create the file</li>
+<li>Use the LS tool to verify the file exists</li>
+<li>Use the View tool to show you the contents of the file</li>
+</ol>
+<h2 id="what-youve-learned">What You&rsquo;ve Learned<a class="td-heading-self-link" href="#what-youve-learned" aria-label="Heading self-link"></a></h2>
+<p>In this tutorial, you&rsquo;ve:</p>
+<ol>
+<li>Set up the cliGCP environment</li>
+<li>Run the CLI with MCP tools</li>
+<li>Performed basic interactions with the CLI</li>
+<li>Used various tools through the CLI to manipulate files</li>
+<li>Created a simple workflow combining multiple tools</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
+<p>Now that you&rsquo;re familiar with the cliGCP tool, you can:</p>
+<ul>
+<li>Explore more complex tasks that use multiple tools</li>
+<li>Try using the dispatch_agent for more complex operations</li>
+<li>Create custom tools and use them with the CLI</li>
+<li>Experiment with different Gemini models</li>
+</ul>
+<p>Check out the <a href="../../how-to/configure-cligcp/">How to Configure the cliGCP Tool</a> guide for advanced configuration options.</p>
+
+</div>
+
+
+
+    
+	
+  
+
+
+
+          </main>
+        </div>
+      </div>
+      <footer class="td-footer row d-print-none">
+  <div class="container-fluid">
+    <div class="row mx-md-2">
+      <div class="td-footer__left col-6 col-sm-4 order-sm-1">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub Issues" aria-label="GitHub Issues">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest/issues" aria-label="GitHub Issues">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__right col-6 col-sm-4 order-sm-3">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub" aria-label="GitHub">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest" aria-label="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__center col-12 col-sm-4 py-2 order-sm-2">
+        <span class="td-footer__copyright">&copy;
+    2023&ndash;2025
+    <span class="td-footer__authors">gomcptest Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <script src="/js/main.js"></script>
+<script defer src="/js/click-to-copy.js" crossorigin="anonymous"></script>
+<script src='/js/tabpane-persist.js'></script>
+
+  </body>
+</html>
