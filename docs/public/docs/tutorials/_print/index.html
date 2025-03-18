@@ -30,8 +30,7 @@
 
   <meta itemprop="name" content="Tutorials">
   <meta itemprop="description" content="Step-by-step guides to get you started with gomcptest">
-  <meta itemprop="datePublished" content="2017-01-05T00:00:00+00:00">
-  <meta itemprop="dateModified" content="2017-01-05T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
   <meta itemprop="wordCount" content="42">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Tutorials">
@@ -51,23 +50,13 @@
   <div class="td-navbar-nav-scroll ms-md-auto" id="main_navbar">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="/about/"><span>About</span></a>
-      </li>
-      <li class="nav-item">
         <a class="nav-link active" href="/docs/"><span>Docs</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/blog/"><span>Blog</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/community/"><span>Community</span></a>
       </li>
       <li class="nav-item dropdown d-none d-lg-block">
         <div class="dropdown">
   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">English</a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="/fa/">فارسی (Persian)</a></li>
-    <li><a class="dropdown-item" href="/no/">Norsk</a></li>
+    <li><a class="dropdown-item" href="/fr/docs/tutorials/">Français</a></li>
     </ul>
 </div></li>
       </ul>
@@ -140,22 +129,6 @@ This is the multi-page printable view of this section.
 
     
   
-    
-    
-	
-<li>4: <a href="#pg-4a691f57b79d38c62e2d25e510d27a9f">Multi-Bear Domicile Setup</a></li>
-
-
-    
-  
-    
-    
-	
-<li>5: <a href="#pg-ff59ed0924a4c9078704da8963f380fd">Another Tutorial</a></li>
-
-
-    
-  
 
     </ul>
 
@@ -192,29 +165,98 @@ This is the multi-page printable view of this section.
     
 	<h1 id="pg-fde8652c74594a64ff8ea9829ed8ccb8">1 - Getting Started with gomcptest</h1>
     <div class="lead">Get gomcptest up and running quickly with this beginner&rsquo;s guide</div>
-	<p>This tutorial will guide you through setting up the gomcptest system. This is a high-level overview - for detailed instructions on specific components, please see the dedicated tutorials:</p>
+	<p>This tutorial will guide you through setting up the gomcptest system and configuring Google Cloud authentication for the project.</p>
+<h2 id="what-is-gomcptest">What is gomcptest?<a class="td-heading-self-link" href="#what-is-gomcptest" aria-label="Heading self-link"></a></h2>
+<p>gomcptest is a proof of concept (POC) implementation of the Model Context Protocol (MCP) with a custom-built host. It enables AI models like Google&rsquo;s Gemini to interact with their environment through a set of tools, creating powerful agentic systems.</p>
+<h3 id="key-components">Key Components<a class="td-heading-self-link" href="#key-components" aria-label="Heading self-link"></a></h3>
+<p>The project consists of three main parts:</p>
+<ol>
+<li>
+<p><strong>Host Components</strong>:</p>
 <ul>
-<li><a href="../openaiserver-tutorial/">OpenAI Server Tutorial</a> - For setting up and using the OpenAI-compatible server</li>
-<li><a href="../cligcp-tutorial/">cliGCP Tutorial</a> - For using the command-line interface with Google Cloud Platform</li>
+<li><strong>cliGCP</strong>: A command-line interface similar to Claude Code or ChatGPT, allowing direct interaction with AI models and tools</li>
+<li><strong>openaiserver</strong>: A server that implements the OpenAI API interface, enabling compatibility with existing OpenAI clients while using Google&rsquo;s Vertex AI behind the scenes</li>
+</ul>
+</li>
+<li>
+<p><strong>MCP Tools</strong>:</p>
+<ul>
+<li><strong>Bash</strong>: Execute shell commands</li>
+<li><strong>Edit/Replace</strong>: Modify file contents</li>
+<li><strong>GlobTool/GrepTool</strong>: Find files and search content</li>
+<li><strong>LS/View</strong>: Navigate and read the filesystem</li>
+<li><strong>dispatch_agent</strong>: Create sub-agents with specific tasks</li>
+</ul>
+</li>
+<li>
+<p><strong>MCP Protocol</strong>: The standardized communication layer that allows models to discover, invoke, and receive results from tools</p>
+</li>
+</ol>
+<h3 id="use-cases">Use Cases<a class="td-heading-self-link" href="#use-cases" aria-label="Heading self-link"></a></h3>
+<p>gomcptest enables a variety of agent-based applications:</p>
+<ul>
+<li>Code assistance and pair programming</li>
+<li>File system navigation and management</li>
+<li>Data analysis and processing</li>
+<li>Automated documentation</li>
+<li>Custom domain-specific agents</li>
 </ul>
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
 <ul>
 <li>Go &gt;= 1.21 installed on your system</li>
-<li>Access to the Vertex AI API on Google Cloud Platform</li>
+<li>Google Cloud account with access to Vertex AI API</li>
+<li><a href="https://cloud.google.com/sdk/docs/install">Google Cloud CLI</a> installed</li>
 <li>Basic familiarity with terminal/command line</li>
 </ul>
-<h2 id="quick-overview">Quick Overview<a class="td-heading-self-link" href="#quick-overview" aria-label="Heading self-link"></a></h2>
+<h2 id="setting-up-google-cloud-authentication">Setting up Google Cloud Authentication<a class="td-heading-self-link" href="#setting-up-google-cloud-authentication" aria-label="Heading self-link"></a></h2>
+<p>Before using gomcptest with Google Cloud Platform services like Vertex AI, you need to set up your authentication.</p>
+<h3 id="1-initialize-the-google-cloud-cli">1. Initialize the Google Cloud CLI<a class="td-heading-self-link" href="#1-initialize-the-google-cloud-cli" aria-label="Heading self-link"></a></h3>
+<p>If you haven&rsquo;t already configured the Google Cloud CLI, run:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud init
+</span></span></code></pre></div><p>This interactive command will guide you through:</p>
+<ul>
+<li>Logging into your Google account</li>
+<li>Selecting a Google Cloud project</li>
+<li>Setting default configurations</li>
+</ul>
+<h3 id="2-log-in-to-google-cloud">2. Log in to Google Cloud<a class="td-heading-self-link" href="#2-log-in-to-google-cloud" aria-label="Heading self-link"></a></h3>
+<p>Authenticate your gcloud CLI with your Google account:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud auth login
+</span></span></code></pre></div><p>This will open a browser window where you can sign in to your Google account.</p>
+<h3 id="3-set-up-application-default-credentials-adc">3. Set up Application Default Credentials (ADC)<a class="td-heading-self-link" href="#3-set-up-application-default-credentials-adc" aria-label="Heading self-link"></a></h3>
+<p>Application Default Credentials are used by client libraries to automatically find credentials when connecting to Google Cloud services:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud auth application-default login
+</span></span></code></pre></div><p>This command will:</p>
 <ol>
-<li><strong>Setup</strong>: Clone the repository and set environment variables</li>
-<li><strong>Build Tools</strong>: Compile all MCP-compatible tools</li>
-<li><strong>Choose Interface</strong>: Run either the OpenAI-compatible server or use the CLI directly</li>
-<li><strong>Create Agents</strong>: Test with simple tasks, then move to more complex agent workflows</li>
+<li>Open a browser window for authentication</li>
+<li>Store your credentials locally (typically in <code>~/.config/gcloud/application_default_credentials.json</code>)</li>
+<li>Configure your environment to use these credentials when accessing Google Cloud APIs</li>
+</ol>
+<p>These credentials will be used by gomcptest when interacting with Google Cloud services.</p>
+<h2 id="project-setup">Project Setup<a class="td-heading-self-link" href="#project-setup" aria-label="Heading self-link"></a></h2>
+<ol>
+<li>
+<p><strong>Clone the repository</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/owulveryck/gomcptest.git
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> gomcptest
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Build Tools</strong>: Compile all MCP-compatible tools</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make tools
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Choose Interface</strong>:</p>
+<ul>
+<li>Run the OpenAI-compatible server: See the <a href="../openaiserver-tutorial/">OpenAI Server Tutorial</a></li>
+<li>Use the CLI directly: See the <a href="../cligcp-tutorial/">cliGCP Tutorial</a></li>
+</ul>
+</li>
 </ol>
 <h2 id="whats-next">What&rsquo;s Next<a class="td-heading-self-link" href="#whats-next" aria-label="Heading self-link"></a></h2>
 <p>After completing the basic setup:</p>
 <ul>
 <li>Explore the different tools in the <code>tools</code> directory</li>
-<li>Try creating more complex agent tasks</li>
+<li>Try creating agent tasks with gomcptest</li>
 <li>Check out the how-to guides for specific use cases</li>
 </ul>
 
@@ -241,7 +283,7 @@ This is the multi-page printable view of this section.
 <li>Access to Google Cloud Platform with Vertex AI API enabled</li>
 <li>GCP authentication set up via <code>gcloud auth login</code></li>
 <li>Basic familiarity with terminal commands</li>
-<li>The gomcptest repository cloned and tools built (see the <a href="/docs/getting-started/">Getting Started</a> guide)</li>
+<li>The gomcptest repository cloned and tools built (see the <a href="../getting-started/">Getting Started</a> guide)</li>
 </ul>
 <h2 id="step-1-set-up-environment-variables">Step 1: Set Up Environment Variables<a class="td-heading-self-link" href="#step-1-set-up-environment-variables" aria-label="Heading self-link"></a></h2>
 <p>The OpenAI server requires several environment variables. Create a .envrc file in the host/openaiserver directory:</p>
@@ -336,7 +378,7 @@ IMAGEN_MODELS=imagen-3.0-generate-002
 <li>Go &gt;= 1.21 installed on your system</li>
 <li>Access to Google Cloud Platform with Vertex AI API enabled</li>
 <li>GCP authentication set up via <code>gcloud auth login</code></li>
-<li>The gomcptest repository cloned and tools built (see the <a href="/docs/getting-started/">Getting Started</a> guide)</li>
+<li>The gomcptest repository cloned and tools built (see the <a href="../getting-started/">Getting Started</a> guide)</li>
 </ul>
 <h2 id="step-1-understand-the-cligcp-tool">Step 1: Understand the cliGCP Tool<a class="td-heading-self-link" href="#step-1-understand-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
 <p>The cliGCP tool is a command-line interface similar to tools like Claude Code. It connects directly to the Google Cloud Platform&rsquo;s Vertex AI API to access Gemini models and can use local MCP tools to perform actions on your system.</p>
@@ -411,640 +453,6 @@ IMAGEN_MODELS=imagen-3.0-generate-002
     
 	
   
-    
-    
-	
-    
-
-<div class="td-content" style="page-break-before: always">
-    
-	<h1 id="pg-4a691f57b79d38c62e2d25e510d27a9f">4 - Multi-Bear Domicile Setup</h1>
-    <div class="lead">A short lead description about this content page. It can be <strong>bold</strong> or <em>italic</em> and can be split over multiple paragraphs.</div>
-	
-
-<div class="pageinfo pageinfo-primary">
-<p>This is a placeholder page. Replace it with your own content.</p>
-
-</div>
-
-<p>Text can be <strong>bold</strong>, <em>italic</em>, or <del>strikethrough</del>. <a href="https://gohugo.io">Links</a> should be blue with no underlines (unless hovered over).</p>
-<p>There should be whitespace between paragraphs. Vape migas chillwave sriracha poutine try-hard distillery. Tattooed shabby chic small batch, pabst art party heirloom letterpress air plant pop-up. Sustainable chia skateboard art party banjo cardigan normcore affogato vexillologist quinoa meggings man bun master cleanse shoreditch readymade. Yuccie prism four dollar toast tbh cardigan iPhone, tumblr listicle live-edge VHS. Pug lyft normcore hot chicken biodiesel, actually keffiyeh thundercats photo booth pour-over twee fam food truck microdosing banh mi. Vice activated charcoal raclette unicorn live-edge post-ironic. Heirloom vexillologist coloring book, beard deep v letterpress echo park humblebrag tilde.</p>
-<p>90&rsquo;s four loko seitan photo booth gochujang freegan tumeric listicle fam ugh humblebrag. Bespoke leggings gastropub, biodiesel brunch pug fashion axe meh swag art party neutra deep v chia. Enamel pin fanny pack knausgaard tofu, artisan cronut hammock meditation occupy master cleanse chartreuse lumbersexual. Kombucha kogi viral truffaut synth distillery single-origin coffee ugh slow-carb marfa selfies. Pitchfork schlitz semiotics fanny pack, ugh artisan vegan vaporware hexagon. Polaroid fixie post-ironic venmo wolf ramps <strong>kale chips</strong>.</p>
-<blockquote>
-<p>There should be no margin above this first sentence.</p>
-<p>Blockquotes should be a lighter gray with a border along the left side in the secondary color.</p>
-<p>There should be no margin below this final sentence.</p>
-</blockquote>
-<h2 id="first-header-2">First Header 2<a class="td-heading-self-link" href="#first-header-2" aria-label="Heading self-link"></a></h2>
-<p>This is a normal paragraph following a header. Knausgaard kale chips snackwave microdosing cronut copper mug swag synth bitters letterpress glossier <strong>craft beer</strong>. Mumblecore bushwick authentic gochujang vegan chambray meditation jean shorts irony. Viral farm-to-table kale chips, pork belly palo santo distillery activated charcoal aesthetic jianbing air plant woke lomo VHS organic. Tattooed locavore succulents heirloom, small batch sriracha echo park DIY af. Shaman you probably haven&rsquo;t heard of them copper mug, crucifix green juice vape <em>single-origin coffee</em> brunch actually. Mustache etsy vexillologist raclette authentic fam. Tousled beard humblebrag asymmetrical. I love turkey, I love my job, I love my friends, I love Chardonnay!</p>
-<p>Deae legum paulatimque terra, non vos mutata tacet: dic. Vocant docuique me plumas fila quin afuerunt copia haec o neque.</p>
-<p>On big screens, paragraphs and headings should not take up the full container width, but we want tables, code blocks and similar to take the full width.</p>
-<p>Scenester tumeric pickled, authentic crucifix post-ironic fam freegan VHS pork belly 8-bit yuccie PBR&amp;B. <strong>I love this life we live in</strong>.</p>
-<h2 id="second-header-2">Second Header 2<a class="td-heading-self-link" href="#second-header-2" aria-label="Heading self-link"></a></h2>
-<blockquote>
-<p>This is a blockquote following a header. Bacon ipsum dolor sit amet t-bone doner shank drumstick, pork belly porchetta chuck sausage brisket ham hock rump pig. Chuck kielbasa leberkas, pork bresaola ham hock filet mignon cow shoulder short ribs biltong.</p>
-</blockquote>
-<h3 id="header-3">Header 3<a class="td-heading-self-link" href="#header-3" aria-label="Heading self-link"></a></h3>
-<pre tabindex="0"><code>This is a code block following a header.
-</code></pre><p>Next level leggings before they sold out, PBR&amp;B church-key shaman echo park. Kale chips occupy godard whatever pop-up freegan pork belly selfies. Gastropub Belinda subway tile woke post-ironic seitan. Shabby chic man bun semiotics vape, chia messenger bag plaid cardigan.</p>
-<h4 id="header-4">Header 4<a class="td-heading-self-link" href="#header-4" aria-label="Heading self-link"></a></h4>
-<ul>
-<li>This is an unordered list following a header.</li>
-<li>This is an unordered list following a header.</li>
-<li>This is an unordered list following a header.</li>
-</ul>
-<h5 id="header-5">Header 5<a class="td-heading-self-link" href="#header-5" aria-label="Heading self-link"></a></h5>
-<ol>
-<li>This is an ordered list following a header.</li>
-<li>This is an ordered list following a header.</li>
-<li>This is an ordered list following a header.</li>
-</ol>
-<h6 id="header-6">Header 6<a class="td-heading-self-link" href="#header-6" aria-label="Heading self-link"></a></h6>
-<table>
-  <thead>
-      <tr>
-          <th>What</th>
-          <th>Follows</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>There&rsquo;s a horizontal rule above and below this.</p>
-<hr>
-<p>Here is an unordered list:</p>
-<ul>
-<li>Liverpool F.C.</li>
-<li>Chelsea F.C.</li>
-<li>Manchester United F.C.</li>
-</ul>
-<p>And an ordered list:</p>
-<ol>
-<li>Michael Brecker</li>
-<li>Seamus Blake</li>
-<li>Branford Marsalis</li>
-</ol>
-<p>And an unordered task list:</p>
-<ul>
-<li><input checked="" disabled="" type="checkbox"> Create a Hugo theme</li>
-<li><input checked="" disabled="" type="checkbox"> Add task lists to it</li>
-<li><input disabled="" type="checkbox"> Take a vacation</li>
-</ul>
-<p>And a &ldquo;mixed&rdquo; task list:</p>
-<ul>
-<li><input disabled="" type="checkbox"> Pack bags</li>
-<li>?</li>
-<li><input disabled="" type="checkbox"> Travel!</li>
-</ul>
-<p>And a nested list:</p>
-<ul>
-<li>Jackson 5
-<ul>
-<li>Michael</li>
-<li>Tito</li>
-<li>Jackie</li>
-<li>Marlon</li>
-<li>Jermaine</li>
-</ul>
-</li>
-<li>TMNT
-<ul>
-<li>Leonardo</li>
-<li>Michelangelo</li>
-<li>Donatello</li>
-<li>Raphael</li>
-</ul>
-</li>
-</ul>
-<p>Definition lists can be used with Markdown syntax. Definition headers are bold.</p>
-<dl>
-<dt>Name</dt>
-<dd>Godzilla</dd>
-<dt>Born</dt>
-<dd>1952</dd>
-<dt>Birthplace</dt>
-<dd>Japan</dd>
-<dt>Color</dt>
-<dd>Green</dd>
-</dl>
-<hr>
-<p>Tables should have bold headings and alternating shaded rows.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Artist</th>
-          <th>Album</th>
-          <th>Year</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Michael Jackson</td>
-          <td>Thriller</td>
-          <td>1982</td>
-      </tr>
-      <tr>
-          <td>Prince</td>
-          <td>Purple Rain</td>
-          <td>1984</td>
-      </tr>
-      <tr>
-          <td>Beastie Boys</td>
-          <td>License to Ill</td>
-          <td>1986</td>
-      </tr>
-  </tbody>
-</table>
-<p>If a table is too wide, it should scroll horizontally.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Artist</th>
-          <th>Album</th>
-          <th>Year</th>
-          <th>Label</th>
-          <th>Awards</th>
-          <th>Songs</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Michael Jackson</td>
-          <td>Thriller</td>
-          <td>1982</td>
-          <td>Epic Records</td>
-          <td>Grammy Award for Album of the Year, American Music Award for Favorite Pop/Rock Album, American Music Award for Favorite Soul/R&amp;B Album, Brit Award for Best Selling Album, Grammy Award for Best Engineered Album, Non-Classical</td>
-          <td>Wanna Be Startin&rsquo; Somethin&rsquo;, Baby Be Mine, The Girl Is Mine, Thriller, Beat It, Billie Jean, Human Nature, P.Y.T. (Pretty Young Thing), The Lady in My Life</td>
-      </tr>
-      <tr>
-          <td>Prince</td>
-          <td>Purple Rain</td>
-          <td>1984</td>
-          <td>Warner Brothers Records</td>
-          <td>Grammy Award for Best Score Soundtrack for Visual Media, American Music Award for Favorite Pop/Rock Album, American Music Award for Favorite Soul/R&amp;B Album, Brit Award for Best Soundtrack/Cast Recording, Grammy Award for Best Rock Performance by a Duo or Group with Vocal</td>
-          <td>Let&rsquo;s Go Crazy, Take Me With U, The Beautiful Ones, Computer Blue, Darling Nikki, When Doves Cry, I Would Die 4 U, Baby I&rsquo;m a Star, Purple Rain</td>
-      </tr>
-      <tr>
-          <td>Beastie Boys</td>
-          <td>License to Ill</td>
-          <td>1986</td>
-          <td>Mercury Records</td>
-          <td>noawardsbutthistablecelliswide</td>
-          <td>Rhymin &amp; Stealin, The New Style, She&rsquo;s Crafty, Posse in Effect, Slow Ride, Girls, (You Gotta) Fight for Your Right, No Sleep Till Brooklyn, Paul Revere, Hold It Now, Hit It, Brass Monkey, Slow and Low, Time to Get Ill</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>Code snippets like <code>var foo = &quot;bar&quot;;</code> can be shown inline.</p>
-<p>Also, <code>this should vertically align</code> <del><code>with this</code></del> <del>and this</del>.</p>
-<p>Code can also be shown in a block element.</p>
-<pre tabindex="0"><code>foo := &#34;bar&#34;;
-bar := &#34;foo&#34;;
-</code></pre><p>Code can also use syntax highlighting.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">input</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#4e9a06">`var foo = &#34;bar&#34;;`</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">lexer</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">lexers</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;javascript&#34;</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">iterator</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">_</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">lexer</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Tokenise</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">nil</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">input</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">style</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">styles</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;github&#34;</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">formatter</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">html</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">New</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">html</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">WithLineNumbers</span><span style="color:#000;font-weight:bold">())</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">buff</span> <span style="color:#000">bytes</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Buffer</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">formatter</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Format</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">buff</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">style</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">iterator</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">fmt</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">buff</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">String</span><span style="color:#000;font-weight:bold">())</span>
-</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></div><pre tabindex="0"><code>Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
-</code></pre><p>Inline code inside table cells should still be distinguishable.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Language</th>
-          <th>Code</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Javascript</td>
-          <td><code>var foo = &quot;bar&quot;;</code></td>
-      </tr>
-      <tr>
-          <td>Ruby</td>
-          <td><code>foo = &quot;bar&quot;{</code></td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>Small images should be shown at their actual size.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg/240px-Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg" alt=""></p>
-<p>Large images should always scale down and fit in the content container.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg/1024px-Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg" alt=""></p>
-<p><em>The photo above of the Spruce Picea abies shoot with foliage buds: Bjørn Erik Pedersen, CC-BY-SA.</em></p>
-<h2 id="components">Components<a class="td-heading-self-link" href="#components" aria-label="Heading self-link"></a></h2>
-<h3 id="alerts">Alerts<a class="td-heading-self-link" href="#alerts" aria-label="Heading self-link"></a></h3>
-<p>
-
-<div class="alert alert-primary" role="alert">
-
-
-    This is an alert.
-
-</div>
-
-
-
-<div class="alert alert-primary" role="alert">
-<h4 class="alert-heading">Note</h4>
-
-    This is an alert with a title.
-
-</div>
-
-
-
-<div class="alert alert-primary" role="alert">
-<h4 class="alert-heading">Note</h4>
-
-    This is an alert with a title and <strong>Markdown</strong>.
-
-</div>
-
-
-
-<div class="alert alert-success" role="alert">
-
-
-    This is a successful alert.
-
-</div>
-
-
-
-<div class="alert alert-warning" role="alert">
-
-
-    This is a warning.
-
-</div>
-
-
-
-<div class="alert alert-warning" role="alert">
-<h4 class="alert-heading">Warning</h4>
-
-    This is a warning with a title.
-
-</div>
-</p>
-<h2 id="another-heading">Another Heading<a class="td-heading-self-link" href="#another-heading" aria-label="Heading self-link"></a></h2>
-<p>Add some sections here to see how the ToC looks like. Bacon ipsum dolor sit amet t-bone doner shank drumstick, pork belly porchetta chuck sausage brisket ham hock rump pig. Chuck kielbasa leberkas, pork bresaola ham hock filet mignon cow shoulder short ribs biltong.</p>
-<h3 id="this-document">This Document<a class="td-heading-self-link" href="#this-document" aria-label="Heading self-link"></a></h3>
-<p>Inguina genus: Anaphen post: lingua violente voce suae meus aetate diversi. Orbis unam nec flammaeque status deam Silenum erat et a ferrea. Excitus rigidum ait: vestro et Herculis convicia: nitidae deseruit coniuge Proteaque adiciam <em>eripitur</em>? Sitim noceat signa <em>probat quidem</em>. Sua longis <em>fugatis</em> quidem genae.</p>
-<h3 id="pixel-count">Pixel Count<a class="td-heading-self-link" href="#pixel-count" aria-label="Heading self-link"></a></h3>
-<p>Tilde photo booth wayfarers cliche lomo intelligentsia man braid kombucha vaporware farm-to-table mixtape portland. PBR&amp;B pickled cornhole ugh try-hard ethical subway tile. Fixie paleo intelligentsia pabst. Ennui waistcoat vinyl gochujang. Poutine salvia authentic affogato, chambray lumbersexual shabby chic.</p>
-<h3 id="contact-info">Contact Info<a class="td-heading-self-link" href="#contact-info" aria-label="Heading self-link"></a></h3>
-<p>Plaid hell of cred microdosing, succulents tilde pour-over. Offal shabby chic 3 wolf moon blue bottle raw denim normcore poutine pork belly.</p>
-<h3 id="external-links">External Links<a class="td-heading-self-link" href="#external-links" aria-label="Heading self-link"></a></h3>
-<p>Stumptown PBR&amp;B keytar plaid street art, forage XOXO pitchfork selvage affogato green juice listicle pickled everyday carry hashtag. Organic sustainable letterpress sartorial scenester intelligentsia swag bushwick. Put a bird on it stumptown neutra locavore. IPhone typewriter messenger bag narwhal. Ennui cold-pressed seitan flannel keytar, single-origin coffee adaptogen occupy yuccie williamsburg chillwave shoreditch forage waistcoat.</p>
-<pre tabindex="0"><code>This is the final element on the page and there should be no margin below this.
-</code></pre>
-</div>
-
-
-
-    
-	
-  
-    
-    
-	
-    
-
-<div class="td-content" style="page-break-before: always">
-    
-	<h1 id="pg-ff59ed0924a4c9078704da8963f380fd">5 - Another Tutorial</h1>
-    <div class="lead">A short lead description about this content page. It can be <strong>bold</strong> or <em>italic</em> and can be split over multiple paragraphs.</div>
-	
-
-<div class="pageinfo pageinfo-primary">
-<p>This is a placeholder page. Replace it with your own content.</p>
-
-</div>
-
-<p>Text can be <strong>bold</strong>, <em>italic</em>, or <del>strikethrough</del>. <a href="https://gohugo.io">Links</a> should be blue with no underlines (unless hovered over).</p>
-<p>There should be whitespace between paragraphs. Vape migas chillwave sriracha poutine try-hard distillery. Tattooed shabby chic small batch, pabst art party heirloom letterpress air plant pop-up. Sustainable chia skateboard art party banjo cardigan normcore affogato vexillologist quinoa meggings man bun master cleanse shoreditch readymade. Yuccie prism four dollar toast tbh cardigan iPhone, tumblr listicle live-edge VHS. Pug lyft normcore hot chicken biodiesel, actually keffiyeh thundercats photo booth pour-over twee fam food truck microdosing banh mi. Vice activated charcoal raclette unicorn live-edge post-ironic. Heirloom vexillologist coloring book, beard deep v letterpress echo park humblebrag tilde.</p>
-<p>90&rsquo;s four loko seitan photo booth gochujang freegan tumeric listicle fam ugh humblebrag. Bespoke leggings gastropub, biodiesel brunch pug fashion axe meh swag art party neutra deep v chia. Enamel pin fanny pack knausgaard tofu, artisan cronut hammock meditation occupy master cleanse chartreuse lumbersexual. Kombucha kogi viral truffaut synth distillery single-origin coffee ugh slow-carb marfa selfies. Pitchfork schlitz semiotics fanny pack, ugh artisan vegan vaporware hexagon. Polaroid fixie post-ironic venmo wolf ramps <strong>kale chips</strong>.</p>
-<blockquote>
-<p>There should be no margin above this first sentence.</p>
-<p>Blockquotes should be a lighter gray with a border along the left side in the secondary color.</p>
-<p>There should be no margin below this final sentence.</p>
-</blockquote>
-<h2 id="first-header-2">First Header 2<a class="td-heading-self-link" href="#first-header-2" aria-label="Heading self-link"></a></h2>
-<p>This is a normal paragraph following a header. Knausgaard kale chips snackwave microdosing cronut copper mug swag synth bitters letterpress glossier <strong>craft beer</strong>. Mumblecore bushwick authentic gochujang vegan chambray meditation jean shorts irony. Viral farm-to-table kale chips, pork belly palo santo distillery activated charcoal aesthetic jianbing air plant woke lomo VHS organic. Tattooed locavore succulents heirloom, small batch sriracha echo park DIY af. Shaman you probably haven&rsquo;t heard of them copper mug, crucifix green juice vape <em>single-origin coffee</em> brunch actually. Mustache etsy vexillologist raclette authentic fam. Tousled beard humblebrag asymmetrical. I love turkey, I love my job, I love my friends, I love Chardonnay!</p>
-<p>Deae legum paulatimque terra, non vos mutata tacet: dic. Vocant docuique me plumas fila quin afuerunt copia haec o neque.</p>
-<p>On big screens, paragraphs and headings should not take up the full container width, but we want tables, code blocks and similar to take the full width.</p>
-<p>Scenester tumeric pickled, authentic crucifix post-ironic fam freegan VHS pork belly 8-bit yuccie PBR&amp;B. <strong>I love this life we live in</strong>.</p>
-<h2 id="second-header-2">Second Header 2<a class="td-heading-self-link" href="#second-header-2" aria-label="Heading self-link"></a></h2>
-<blockquote>
-<p>This is a blockquote following a header. Bacon ipsum dolor sit amet t-bone doner shank drumstick, pork belly porchetta chuck sausage brisket ham hock rump pig. Chuck kielbasa leberkas, pork bresaola ham hock filet mignon cow shoulder short ribs biltong.</p>
-</blockquote>
-<h3 id="header-3">Header 3<a class="td-heading-self-link" href="#header-3" aria-label="Heading self-link"></a></h3>
-<pre tabindex="0"><code>This is a code block following a header.
-</code></pre><p>Next level leggings before they sold out, PBR&amp;B church-key shaman echo park. Kale chips occupy godard whatever pop-up freegan pork belly selfies. Gastropub Belinda subway tile woke post-ironic seitan. Shabby chic man bun semiotics vape, chia messenger bag plaid cardigan.</p>
-<h4 id="header-4">Header 4<a class="td-heading-self-link" href="#header-4" aria-label="Heading self-link"></a></h4>
-<ul>
-<li>This is an unordered list following a header.</li>
-<li>This is an unordered list following a header.</li>
-<li>This is an unordered list following a header.</li>
-</ul>
-<h5 id="header-5">Header 5<a class="td-heading-self-link" href="#header-5" aria-label="Heading self-link"></a></h5>
-<ol>
-<li>This is an ordered list following a header.</li>
-<li>This is an ordered list following a header.</li>
-<li>This is an ordered list following a header.</li>
-</ol>
-<h6 id="header-6">Header 6<a class="td-heading-self-link" href="#header-6" aria-label="Heading self-link"></a></h6>
-<table>
-  <thead>
-      <tr>
-          <th>What</th>
-          <th>Follows</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-      <tr>
-          <td>A table</td>
-          <td>A header</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>There&rsquo;s a horizontal rule above and below this.</p>
-<hr>
-<p>Here is an unordered list:</p>
-<ul>
-<li>Liverpool F.C.</li>
-<li>Chelsea F.C.</li>
-<li>Manchester United F.C.</li>
-</ul>
-<p>And an ordered list:</p>
-<ol>
-<li>Michael Brecker</li>
-<li>Seamus Blake</li>
-<li>Branford Marsalis</li>
-</ol>
-<p>And an unordered task list:</p>
-<ul>
-<li><input checked="" disabled="" type="checkbox"> Create a Hugo theme</li>
-<li><input checked="" disabled="" type="checkbox"> Add task lists to it</li>
-<li><input disabled="" type="checkbox"> Take a vacation</li>
-</ul>
-<p>And a &ldquo;mixed&rdquo; task list:</p>
-<ul>
-<li><input disabled="" type="checkbox"> Pack bags</li>
-<li>?</li>
-<li><input disabled="" type="checkbox"> Travel!</li>
-</ul>
-<p>And a nested list:</p>
-<ul>
-<li>Jackson 5
-<ul>
-<li>Michael</li>
-<li>Tito</li>
-<li>Jackie</li>
-<li>Marlon</li>
-<li>Jermaine</li>
-</ul>
-</li>
-<li>TMNT
-<ul>
-<li>Leonardo</li>
-<li>Michelangelo</li>
-<li>Donatello</li>
-<li>Raphael</li>
-</ul>
-</li>
-</ul>
-<p>Definition lists can be used with Markdown syntax. Definition headers are bold.</p>
-<dl>
-<dt>Name</dt>
-<dd>Godzilla</dd>
-<dt>Born</dt>
-<dd>1952</dd>
-<dt>Birthplace</dt>
-<dd>Japan</dd>
-<dt>Color</dt>
-<dd>Green</dd>
-</dl>
-<hr>
-<p>Tables should have bold headings and alternating shaded rows.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Artist</th>
-          <th>Album</th>
-          <th>Year</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Michael Jackson</td>
-          <td>Thriller</td>
-          <td>1982</td>
-      </tr>
-      <tr>
-          <td>Prince</td>
-          <td>Purple Rain</td>
-          <td>1984</td>
-      </tr>
-      <tr>
-          <td>Beastie Boys</td>
-          <td>License to Ill</td>
-          <td>1986</td>
-      </tr>
-  </tbody>
-</table>
-<p>If a table is too wide, it should scroll horizontally.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Artist</th>
-          <th>Album</th>
-          <th>Year</th>
-          <th>Label</th>
-          <th>Awards</th>
-          <th>Songs</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Michael Jackson</td>
-          <td>Thriller</td>
-          <td>1982</td>
-          <td>Epic Records</td>
-          <td>Grammy Award for Album of the Year, American Music Award for Favorite Pop/Rock Album, American Music Award for Favorite Soul/R&amp;B Album, Brit Award for Best Selling Album, Grammy Award for Best Engineered Album, Non-Classical</td>
-          <td>Wanna Be Startin&rsquo; Somethin&rsquo;, Baby Be Mine, The Girl Is Mine, Thriller, Beat It, Billie Jean, Human Nature, P.Y.T. (Pretty Young Thing), The Lady in My Life</td>
-      </tr>
-      <tr>
-          <td>Prince</td>
-          <td>Purple Rain</td>
-          <td>1984</td>
-          <td>Warner Brothers Records</td>
-          <td>Grammy Award for Best Score Soundtrack for Visual Media, American Music Award for Favorite Pop/Rock Album, American Music Award for Favorite Soul/R&amp;B Album, Brit Award for Best Soundtrack/Cast Recording, Grammy Award for Best Rock Performance by a Duo or Group with Vocal</td>
-          <td>Let&rsquo;s Go Crazy, Take Me With U, The Beautiful Ones, Computer Blue, Darling Nikki, When Doves Cry, I Would Die 4 U, Baby I&rsquo;m a Star, Purple Rain</td>
-      </tr>
-      <tr>
-          <td>Beastie Boys</td>
-          <td>License to Ill</td>
-          <td>1986</td>
-          <td>Mercury Records</td>
-          <td>noawardsbutthistablecelliswide</td>
-          <td>Rhymin &amp; Stealin, The New Style, She&rsquo;s Crafty, Posse in Effect, Slow Ride, Girls, (You Gotta) Fight for Your Right, No Sleep Till Brooklyn, Paul Revere, Hold It Now, Hit It, Brass Monkey, Slow and Low, Time to Get Ill</td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>Code snippets like <code>var foo = &quot;bar&quot;;</code> can be shown inline.</p>
-<p>Also, <code>this should vertically align</code> <del><code>with this</code></del> <del>and this</del>.</p>
-<p>Code can also be shown in a block element.</p>
-<pre tabindex="0"><code>foo := &#34;bar&#34;;
-bar := &#34;foo&#34;;
-</code></pre><p>Code can also use syntax highlighting.</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">input</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#4e9a06">`var foo = &#34;bar&#34;;`</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">lexer</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">lexers</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;javascript&#34;</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">iterator</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">_</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">lexer</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Tokenise</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">nil</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">input</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">style</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">styles</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;github&#34;</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">formatter</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">html</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">New</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">html</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">WithLineNumbers</span><span style="color:#000;font-weight:bold">())</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">buff</span> <span style="color:#000">bytes</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Buffer</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">formatter</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Format</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">buff</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">style</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">iterator</span><span style="color:#000;font-weight:bold">)</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#000">fmt</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Println</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">buff</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">String</span><span style="color:#000;font-weight:bold">())</span>
-</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
-</span></span></code></pre></div><pre tabindex="0"><code>Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
-</code></pre><p>Inline code inside table cells should still be distinguishable.</p>
-<table>
-  <thead>
-      <tr>
-          <th>Language</th>
-          <th>Code</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Javascript</td>
-          <td><code>var foo = &quot;bar&quot;;</code></td>
-      </tr>
-      <tr>
-          <td>Ruby</td>
-          <td><code>foo = &quot;bar&quot;{</code></td>
-      </tr>
-  </tbody>
-</table>
-<hr>
-<p>Small images should be shown at their actual size.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg/240px-Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg" alt=""></p>
-<p>Large images should always scale down and fit in the content container.</p>
-<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg/1024px-Picea_abies_shoot_with_buds%2C_Sogndal%2C_Norway.jpg" alt=""></p>
-<p><em>The photo above of the Spruce Picea abies shoot with foliage buds: Bjørn Erik Pedersen, CC-BY-SA.</em></p>
-<h2 id="components">Components<a class="td-heading-self-link" href="#components" aria-label="Heading self-link"></a></h2>
-<h3 id="alerts">Alerts<a class="td-heading-self-link" href="#alerts" aria-label="Heading self-link"></a></h3>
-<p>
-
-<div class="alert alert-primary" role="alert">
-
-
-    This is an alert.
-
-</div>
-
-
-
-<div class="alert alert-primary" role="alert">
-<h4 class="alert-heading">Note</h4>
-
-    This is an alert with a title.
-
-</div>
-
-
-
-<div class="alert alert-primary" role="alert">
-<h4 class="alert-heading">Note</h4>
-
-    This is an alert with a title and <strong>Markdown</strong>.
-
-</div>
-
-
-
-<div class="alert alert-success" role="alert">
-
-
-    This is a successful alert.
-
-</div>
-
-
-
-<div class="alert alert-warning" role="alert">
-
-
-    This is a warning.
-
-</div>
-
-
-
-<div class="alert alert-warning" role="alert">
-<h4 class="alert-heading">Warning</h4>
-
-    This is a warning with a title.
-
-</div>
-</p>
-<h2 id="another-heading">Another Heading<a class="td-heading-self-link" href="#another-heading" aria-label="Heading self-link"></a></h2>
-<p>Add some sections here to see how the ToC looks like. Bacon ipsum dolor sit amet t-bone doner shank drumstick, pork belly porchetta chuck sausage brisket ham hock rump pig. Chuck kielbasa leberkas, pork bresaola ham hock filet mignon cow shoulder short ribs biltong.</p>
-<h3 id="this-document">This Document<a class="td-heading-self-link" href="#this-document" aria-label="Heading self-link"></a></h3>
-<p>Inguina genus: Anaphen post: lingua violente voce suae meus aetate diversi. Orbis unam nec flammaeque status deam Silenum erat et a ferrea. Excitus rigidum ait: vestro et Herculis convicia: nitidae deseruit coniuge Proteaque adiciam <em>eripitur</em>? Sitim noceat signa <em>probat quidem</em>. Sua longis <em>fugatis</em> quidem genae.</p>
-<h3 id="pixel-count">Pixel Count<a class="td-heading-self-link" href="#pixel-count" aria-label="Heading self-link"></a></h3>
-<p>Tilde photo booth wayfarers cliche lomo intelligentsia man braid kombucha vaporware farm-to-table mixtape portland. PBR&amp;B pickled cornhole ugh try-hard ethical subway tile. Fixie paleo intelligentsia pabst. Ennui waistcoat vinyl gochujang. Poutine salvia authentic affogato, chambray lumbersexual shabby chic.</p>
-<h3 id="contact-info">Contact Info<a class="td-heading-self-link" href="#contact-info" aria-label="Heading self-link"></a></h3>
-<p>Plaid hell of cred microdosing, succulents tilde pour-over. Offal shabby chic 3 wolf moon blue bottle raw denim normcore poutine pork belly.</p>
-<h3 id="external-links">External Links<a class="td-heading-self-link" href="#external-links" aria-label="Heading self-link"></a></h3>
-<p>Stumptown PBR&amp;B keytar plaid street art, forage XOXO pitchfork selvage affogato green juice listicle pickled everyday carry hashtag. Organic sustainable letterpress sartorial scenester intelligentsia swag bushwick. Put a bird on it stumptown neutra locavore. IPhone typewriter messenger bag narwhal. Ennui cold-pressed seitan flannel keytar, single-origin coffee adaptogen occupy yuccie williamsburg chillwave shoreditch forage waistcoat.</p>
-<pre tabindex="0"><code>This is the final element on the page and there should be no margin below this.
-</code></pre>
-</div>
-
-
-
-    
-	
-  
 
 
 
@@ -1057,21 +465,9 @@ bar := &#34;foo&#34;;
       <div class="td-footer__left col-6 col-sm-4 order-sm-1">
         <ul class="td-footer__links-list">
   
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="User mailing list" aria-label="User mailing list">
-    <a target="_blank" rel="noopener" href="https://example.org/mail" aria-label="User mailing list">
-      <i class="fa fa-envelope"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Twitter" aria-label="Twitter">
-    <a target="_blank" rel="noopener" href="https://example.org/twitter" aria-label="Twitter">
-      <i class="fab fa-twitter"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Stack Overflow" aria-label="Stack Overflow">
-    <a target="_blank" rel="noopener" href="https://example.org/stack" aria-label="Stack Overflow">
-      <i class="fab fa-stack-overflow"></i>
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub Issues" aria-label="GitHub Issues">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest/issues" aria-label="GitHub Issues">
+      <i class="fab fa-github"></i>
     </a>
   </li>
   
@@ -1081,20 +477,8 @@ bar := &#34;foo&#34;;
         <ul class="td-footer__links-list">
   
   <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub" aria-label="GitHub">
-    <a target="_blank" rel="noopener" href="https://github.com/google/docsy" aria-label="GitHub">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest" aria-label="GitHub">
       <i class="fab fa-github"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Slack" aria-label="Slack">
-    <a target="_blank" rel="noopener" href="https://example.org/slack" aria-label="Slack">
-      <i class="fab fa-slack"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Developer mailing list" aria-label="Developer mailing list">
-    <a target="_blank" rel="noopener" href="https://example.org/mail" aria-label="Developer mailing list">
-      <i class="fa fa-envelope"></i>
     </a>
   </li>
   
@@ -1102,8 +486,8 @@ bar := &#34;foo&#34;;
 
       </div><div class="td-footer__center col-12 col-sm-4 py-2 order-sm-2">
         <span class="td-footer__copyright">&copy;
-    2018&ndash;2025
-    <span class="td-footer__authors">Docsy Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+    2023&ndash;2025
+    <span class="td-footer__authors">gomcptest Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
       </div>
     </div>
   </div>

@@ -30,6 +30,7 @@
 
   <meta itemprop="name" content="Explanation">
   <meta itemprop="description" content="Understanding-oriented content for gomcptest architecture and concepts">
+  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
   <meta itemprop="wordCount" content="35">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Explanation">
@@ -49,23 +50,13 @@
   <div class="td-navbar-nav-scroll ms-md-auto" id="main_navbar">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="/about/"><span>About</span></a>
-      </li>
-      <li class="nav-item">
         <a class="nav-link active" href="/docs/"><span>Docs</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/blog/"><span>Blog</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/community/"><span>Community</span></a>
       </li>
       <li class="nav-item dropdown d-none d-lg-block">
         <div class="dropdown">
   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">English</a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="/fa/">فارسی (Persian)</a></li>
-    <li><a class="dropdown-item" href="/no/">Norsk</a></li>
+    <li><a class="dropdown-item" href="/fr/docs/explanation/">Français</a></li>
     </ul>
 </div></li>
       </ul>
@@ -126,6 +117,14 @@ This is the multi-page printable view of this section.
     
 	
 <li>2: <a href="#pg-090f1260bedc244a0c4b89f7e6660bd9">Understanding the Model Context Protocol (MCP)</a></li>
+
+
+    
+  
+    
+    
+	
+<li>3: <a href="#pg-dfb825df92428ce7ba378cf65f53a5ca">Understanding the MCP Tools</a></li>
 
 
     
@@ -414,6 +413,231 @@ This is the multi-page printable view of this section.
     
 	
   
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-dfb825df92428ce7ba378cf65f53a5ca">3 - Understanding the MCP Tools</h1>
+    <div class="lead">Detailed explanation of the MCP tools architecture and implementation</div>
+	
+
+<div class="pageinfo pageinfo-primary">
+<p>This document explains the architecture and implementation of the MCP tools in gomcptest, how they work, and the design principles behind them.</p>
+
+</div>
+
+<h2 id="what-are-mcp-tools">What are MCP Tools?<a class="td-heading-self-link" href="#what-are-mcp-tools" aria-label="Heading self-link"></a></h2>
+<p>MCP (Model Context Protocol) tools are standalone executables that provide specific functions that can be invoked by AI models. They allow the AI to interact with its environment - performing tasks like reading and writing files, executing commands, or searching for information.</p>
+<p>In gomcptest, tools are implemented as independent Go executables that follow a standard protocol for receiving requests and returning results through standard input/output streams.</p>
+<h2 id="tool-architecture">Tool Architecture<a class="td-heading-self-link" href="#tool-architecture" aria-label="Heading self-link"></a></h2>
+<p>Each tool in gomcptest follows a consistent architecture:</p>
+<ol>
+<li><strong>Standard I/O Interface</strong>: Tools communicate via stdin/stdout using JSON-formatted requests and responses</li>
+<li><strong>Parameter Validation</strong>: Tools validate their input parameters according to a JSON schema</li>
+<li><strong>Stateless Execution</strong>: Each tool invocation is independent and does not maintain state</li>
+<li><strong>Controlled Access</strong>: Tools implement appropriate security measures and permission checks</li>
+<li><strong>Structured Results</strong>: Results are returned in a standardized JSON format</li>
+</ol>
+<h3 id="common-components">Common Components<a class="td-heading-self-link" href="#common-components" aria-label="Heading self-link"></a></h3>
+<p>Most tools share these common components:</p>
+<ul>
+<li><strong>Main Function</strong>: Parses JSON input, validates parameters, executes the core function, formats and returns the result</li>
+<li><strong>Parameter Structure</strong>: Defines the expected input parameters for the tool</li>
+<li><strong>Result Structure</strong>: Defines the format of the tool&rsquo;s output</li>
+<li><strong>Error Handling</strong>: Standardized error reporting and handling</li>
+<li><strong>Security Checks</strong>: Validation to prevent dangerous operations</li>
+</ul>
+<h2 id="tool-categories">Tool Categories<a class="td-heading-self-link" href="#tool-categories" aria-label="Heading self-link"></a></h2>
+<p>The tools in gomcptest can be categorized into several functional groups:</p>
+<h3 id="filesystem-navigation">Filesystem Navigation<a class="td-heading-self-link" href="#filesystem-navigation" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>LS</strong>: Lists files and directories, providing metadata and structure</li>
+<li><strong>GlobTool</strong>: Finds files matching specific patterns, making it easier to locate relevant files</li>
+<li><strong>GrepTool</strong>: Searches file contents using regular expressions, helping find specific information in codebases</li>
+</ul>
+<h3 id="content-management">Content Management<a class="td-heading-self-link" href="#content-management" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>View</strong>: Reads and displays file contents, allowing the model to analyze existing code or documentation</li>
+<li><strong>Edit</strong>: Makes targeted modifications to files, enabling precise changes without overwriting the entire file</li>
+<li><strong>Replace</strong>: Completely overwrites file contents, useful for generating new files or making major changes</li>
+</ul>
+<h3 id="system-interaction">System Interaction<a class="td-heading-self-link" href="#system-interaction" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>Bash</strong>: Executes shell commands, allowing the model to run commands, scripts, and programs</li>
+<li><strong>dispatch_agent</strong>: A meta-tool that can create specialized sub-agents for specific tasks</li>
+</ul>
+<h2 id="design-principles">Design Principles<a class="td-heading-self-link" href="#design-principles" aria-label="Heading self-link"></a></h2>
+<p>The tools in gomcptest were designed with several key principles in mind:</p>
+<h3 id="1-modularity">1. Modularity<a class="td-heading-self-link" href="#1-modularity" aria-label="Heading self-link"></a></h3>
+<p>Each tool is a standalone executable that can be developed, tested, and deployed independently. This modular approach allows for:</p>
+<ul>
+<li>Independent development cycles</li>
+<li>Targeted testing</li>
+<li>Simpler debugging</li>
+<li>Ability to add or replace tools without affecting the entire system</li>
+</ul>
+<h3 id="2-security">2. Security<a class="td-heading-self-link" href="#2-security" aria-label="Heading self-link"></a></h3>
+<p>Security is a major consideration in the tool design:</p>
+<ul>
+<li>Tools validate inputs to prevent injection attacks</li>
+<li>File operations are limited to appropriate directories</li>
+<li>Bash command execution is restricted with banned commands</li>
+<li>Timeouts prevent infinite operations</li>
+<li>Process isolation prevents one tool from affecting others</li>
+</ul>
+<h3 id="3-simplicity">3. Simplicity<a class="td-heading-self-link" href="#3-simplicity" aria-label="Heading self-link"></a></h3>
+<p>The tools are designed to be simple to understand and use:</p>
+<ul>
+<li>Clear, focused functionality for each tool</li>
+<li>Straightforward parameter structures</li>
+<li>Consistent result formats</li>
+<li>Well-documented behaviors and limitations</li>
+</ul>
+<h3 id="4-extensibility">4. Extensibility<a class="td-heading-self-link" href="#4-extensibility" aria-label="Heading self-link"></a></h3>
+<p>The system is designed to be easily extended:</p>
+<ul>
+<li>New tools can be added by following the standard protocol</li>
+<li>Existing tools can be enhanced with additional parameters</li>
+<li>Alternative implementations can replace existing tools</li>
+</ul>
+<h2 id="tool-protocol-details">Tool Protocol Details<a class="td-heading-self-link" href="#tool-protocol-details" aria-label="Heading self-link"></a></h2>
+<p>The communication protocol for tools follows this pattern:</p>
+<h3 id="input-format">Input Format<a class="td-heading-self-link" href="#input-format" aria-label="Heading self-link"></a></h3>
+<p>Tools receive JSON input on stdin in this format:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value1&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value2&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param3&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">123</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="output-format">Output Format<a class="td-heading-self-link" href="#output-format" aria-label="Heading self-link"></a></h3>
+<p>Tools return JSON output on stdout in one of these formats:</p>
+<h4 id="success">Success:<a class="td-heading-self-link" href="#success" aria-label="Heading self-link"></a></h4>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;result&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;text result&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><p>or</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;results&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">{</span><span style="color:#204a87;font-weight:bold">&#34;field1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value1&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">&#34;field2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value2&#34;</span><span style="color:#000;font-weight:bold">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">{</span><span style="color:#204a87;font-weight:bold">&#34;field1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value3&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">&#34;field2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value4&#34;</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h4 id="error">Error:<a class="td-heading-self-link" href="#error" aria-label="Heading self-link"></a></h4>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;error&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Error message&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;code&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;ERROR_CODE&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="implementation-examples">Implementation Examples<a class="td-heading-self-link" href="#implementation-examples" aria-label="Heading self-link"></a></h2>
+<h3 id="basic-tool-structure">Basic Tool Structure<a class="td-heading-self-link" href="#basic-tool-structure" aria-label="Heading self-link"></a></h3>
+<p>Most tools follow this basic structure:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;encoding/json&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;os&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// Parameters defines the expected input structure
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">Parameters</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Param1</span> <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;param1&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Param2</span> <span style="color:#204a87;font-weight:bold">int</span>    <span style="color:#4e9a06">`json:&#34;param2,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// Result defines the output structure
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">Result</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Result</span>  <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;result,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Error</span>   <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;error,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Code</span>    <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;code,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Parse input
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">params</span> <span style="color:#000">Parameters</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">decoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewDecoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdin</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">decoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Decode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">params</span><span style="color:#000;font-weight:bold">);</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Failed to parse input&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;INVALID_INPUT&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Validate parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">params</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Param1</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;&#34;</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;param1 is required&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;MISSING_PARAMETER&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Execute core functionality
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">result</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">executeTool</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">err</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Error</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#4e9a06">&#34;EXECUTION_ERROR&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Return result
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">output</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">Result</span><span style="color:#000;font-weight:bold">{</span><span style="color:#000">Result</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">result</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewEncoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdout</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Encode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">output</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">executeTool</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span> <span style="color:#000">Parameters</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">error</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Tool-specific logic here
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">return</span> <span style="color:#4e9a06">&#34;result&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">message</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">code</span> <span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">result</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">Result</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">Error</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">message</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">Code</span><span style="color:#000;font-weight:bold">:</span>  <span style="color:#000">code</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewEncoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdout</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Encode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">result</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="advanced-concepts">Advanced Concepts<a class="td-heading-self-link" href="#advanced-concepts" aria-label="Heading self-link"></a></h2>
+<h3 id="tool-composition">Tool Composition<a class="td-heading-self-link" href="#tool-composition" aria-label="Heading self-link"></a></h3>
+<p>The dispatch_agent tool demonstrates how tools can be composed to create more powerful capabilities. It:</p>
+<ol>
+<li>Accepts a high-level task description</li>
+<li>Plans a sequence of tool operations to accomplish the task</li>
+<li>Executes these operations using the available tools</li>
+<li>Synthesizes the results into a coherent response</li>
+</ol>
+<h3 id="error-propagation">Error Propagation<a class="td-heading-self-link" href="#error-propagation" aria-label="Heading self-link"></a></h3>
+<p>The tool error mechanism is designed to provide useful information back to the model:</p>
+<ul>
+<li>Error messages are human-readable and descriptive</li>
+<li>Error codes allow programmatic handling of specific error types</li>
+<li>Stacktraces and debugging information are not exposed to maintain security</li>
+</ul>
+<h3 id="performance-considerations">Performance Considerations<a class="td-heading-self-link" href="#performance-considerations" aria-label="Heading self-link"></a></h3>
+<p>Tools are designed with performance in mind:</p>
+<ul>
+<li>File operations use efficient libraries and patterns</li>
+<li>Search operations employ indexing and filtering when appropriate</li>
+<li>Large results can be paginated or truncated to prevent context overflows</li>
+<li>Resource-intensive operations have configurable timeouts</li>
+</ul>
+<h2 id="future-directions">Future Directions<a class="td-heading-self-link" href="#future-directions" aria-label="Heading self-link"></a></h2>
+<p>The tool architecture in gomcptest could evolve in several ways:</p>
+<ol>
+<li><strong>Streaming Results</strong>: Supporting incremental results for long-running operations</li>
+<li><strong>Tool Discovery</strong>: More sophisticated mechanisms for models to discover available tools</li>
+<li><strong>Tool Chaining</strong>: First-class support for composing multiple tools in sequences or pipelines</li>
+<li><strong>Interactive Tools</strong>: Tools that can engage in multi-step interactions with the model</li>
+<li><strong>Persistent State</strong>: Optional state maintenance for tools that benefit from context</li>
+</ol>
+<h2 id="conclusion">Conclusion<a class="td-heading-self-link" href="#conclusion" aria-label="Heading self-link"></a></h2>
+<p>The MCP tools in gomcptest provide a flexible, secure, and extensible foundation for enabling AI agents to interact with their environment. By understanding the architecture and design principles of these tools, developers can effectively utilize the existing tools, extend them with new capabilities, or create entirely new tools that integrate seamlessly with the system.</p>
+
+</div>
+
+
+
+    
+	
+  
 
 
 
@@ -426,21 +650,9 @@ This is the multi-page printable view of this section.
       <div class="td-footer__left col-6 col-sm-4 order-sm-1">
         <ul class="td-footer__links-list">
   
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="User mailing list" aria-label="User mailing list">
-    <a target="_blank" rel="noopener" href="https://example.org/mail" aria-label="User mailing list">
-      <i class="fa fa-envelope"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Twitter" aria-label="Twitter">
-    <a target="_blank" rel="noopener" href="https://example.org/twitter" aria-label="Twitter">
-      <i class="fab fa-twitter"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Stack Overflow" aria-label="Stack Overflow">
-    <a target="_blank" rel="noopener" href="https://example.org/stack" aria-label="Stack Overflow">
-      <i class="fab fa-stack-overflow"></i>
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub Issues" aria-label="GitHub Issues">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest/issues" aria-label="GitHub Issues">
+      <i class="fab fa-github"></i>
     </a>
   </li>
   
@@ -450,20 +662,8 @@ This is the multi-page printable view of this section.
         <ul class="td-footer__links-list">
   
   <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub" aria-label="GitHub">
-    <a target="_blank" rel="noopener" href="https://github.com/google/docsy" aria-label="GitHub">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest" aria-label="GitHub">
       <i class="fab fa-github"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Slack" aria-label="Slack">
-    <a target="_blank" rel="noopener" href="https://example.org/slack" aria-label="Slack">
-      <i class="fab fa-slack"></i>
-    </a>
-  </li>
-  
-  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="Developer mailing list" aria-label="Developer mailing list">
-    <a target="_blank" rel="noopener" href="https://example.org/mail" aria-label="Developer mailing list">
-      <i class="fa fa-envelope"></i>
     </a>
   </li>
   
@@ -471,8 +671,8 @@ This is the multi-page printable view of this section.
 
       </div><div class="td-footer__center col-12 col-sm-4 py-2 order-sm-2">
         <span class="td-footer__copyright">&copy;
-    2018&ndash;2025
-    <span class="td-footer__authors">Docsy Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+    2023&ndash;2025
+    <span class="td-footer__authors">gomcptest Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
       </div>
     </div>
   </div>

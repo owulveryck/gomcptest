@@ -44,16 +44,16 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 		return nil, err
 	}
 	genaimodels := make(map[string]*genai.GenerativeModel, len(gcpConfig.GeminiModels))
-	temperature := float32(0.2) // Lower temperature for more deterministic responses
 	cwd, err := getCWD()
 	for _, model := range gcpConfig.GeminiModels {
 		genaimodels[model] = client.GenerativeModel(model)
-		genaimodels[model].GenerationConfig.Temperature = &temperature
+		genaimodels[model].GenerationConfig.Temperature = &cfg.Temperature
+		genaimodels[model].GenerationConfig.MaxOutputTokens = &cfg.MaxOutputTokens
 		genaimodels[model].SystemInstruction = &genai.Content{
 			Role: "user",
 			Parts: []genai.Part{
-				genai.Text("You are a helpful agent with access to tools" +
-					"Your job is to help the user by performing tasks using these tools. " +
+				genai.Text(cfg.SystemInstruction +
+					" Your job is to help the user by performing tasks using these tools. " +
 					"You should not make up information. " +
 					"If you don't know something, say so and explain what you would need to know to help. " +
 					"If not indication, use the current working directory which is " + cwd),
