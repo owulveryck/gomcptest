@@ -1,14 +1,7 @@
-baseURL: https://owulveryck.github.io/gomcptest
+baseURL: https://gomcptest.dev
 title: gomcptest
 
 # cSpell:ignore goldmark github hugo readingtime docsy subdir lastmod pygments linenos catmullrom norsk gu
-
-# Ensure absolute URLs are used, not relative ones
-relativeURLs: false
-canonifyURLs: true
-uglyURLs: false
-cleanDestinationDir: true
-publishDir: "public"
 
 # Language settings
 contentDir: content/en
@@ -56,14 +49,6 @@ languages:
     title: gomcptest
     params:
       description: Model Context Protocol (MCP) with custom tools to play with agentic systems
-  fr:
-    languageName: Français
-    contentDir: content/fr
-    title: gomcptest
-    params:
-      description: Protocole de Contexte de Modèle (MCP) avec des outils personnalisés pour les systèmes d'agents
-      time_format_default: 02/01/2006
-      time_format_blog: 02/01/2006
   # cSpell:disable
   'no':
     languageName: Norsk
@@ -139,10 +124,12 @@ params:
 
   # Repository configuration (URLs for in-page links to opening issues and suggesting changes)
   github_repo: https://github.com/owulveryck/gomcptest
-  github_subdir: docs
 
   # An optional link to a related project repo. For example, the sibling repository where your product code lives.
   github_project_repo: https://github.com/owulveryck/gomcptest
+
+  # Specify a value here if your content directory is not in your repo's root directory
+  # github_subdir: ""
 
   # Uncomment this if your GitHub repo does not have "main" as the default branch,
   # or specify a new value if you want to reference another branch in your GitHub links
