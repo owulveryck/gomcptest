@@ -1,8 +1,8 @@
 ---
-title: gomcptest
+title: GoMCPTest
 ---
 
-{{< blocks/cover title="gomcptest: Model Context Protocol Implementation" image_anchor="top" height="full" >}}
+{{< blocks/cover title="GoMCPTest: Go playground for Model Context Protocol Experimentations" image_anchor="top" height="full" >}}
 <a class="btn btn-lg btn-primary me-3 mb-4" href="/docs/">
   Learn More <i class="fas fa-arrow-alt-circle-right ms-2"></i>
 </a>
