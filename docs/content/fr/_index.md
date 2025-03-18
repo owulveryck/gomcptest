@@ -2,7 +2,7 @@
 title: gomcptest
 ---
 
-{{< blocks/cover title="gomcptest: Implémentation du Protocole de Contexte de Modèle" image_anchor="top" height="full" >}}
+{{< blocks/cover title="GoMCPTest: Une aire de jeu en Go pour tester et POCer les systèmes MCP" image_anchor="top" height="full" >}}
 <a class="btn btn-lg btn-primary me-3 mb-4" href="/fr/docs/">
   En savoir plus <i class="fas fa-arrow-alt-circle-right ms-2"></i>
 </a>
