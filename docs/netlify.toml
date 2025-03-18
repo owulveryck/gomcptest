@@ -7,17 +7,6 @@ publish = "public"
 
 [build.environment]
 GO_VERSION = "1.22.2"
-HUGO_BASEURL = "https://owulveryck.github.io/gomcptest"
 
 [context.production]
 command = "npm run build:production"
-
-[context.production.environment]
-HUGO_BASEURL = "https://owulveryck.github.io/gomcptest"
-HUGO_ENV = "production"
-
-[context.deploy-preview]
-command = "npm run build:preview"
-
-[context.deploy-preview.environment]
-HUGO_BASEURL = "https://owulveryck.github.io/gomcptest"
