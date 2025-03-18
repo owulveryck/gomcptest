@@ -3,7 +3,7 @@ title: gomcptest
 ---
 
 {{< blocks/cover title="GoMCPTest: Une aire de jeu en Go pour tester et POCer les systèmes MCP" image_anchor="top" height="full" >}}
-<a class="btn btn-lg btn-primary me-3 mb-4" href="fr/docs/">
+<a class="btn btn-lg btn-primary me-3 mb-4" href="docs/">
   En savoir plus <i class="fas fa-arrow-alt-circle-right ms-2"></i>
 </a>
 <a class="btn btn-lg btn-secondary me-3 mb-4" href="https://github.com/owulveryck/gomcptest">
