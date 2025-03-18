@@ -1,15 +1,26 @@
+# Environment and configuration files
+.envrc
 **/envrc
 host/openaiserver/.envrc
-tools/logs/logs
-!tools/logs/
-sandbox/
-tools/duckdbserver/duckdbserver
-tools/wrapper
-host/openaiserver/openaiserver
-host/openaiserver/chatengine/testbin/sampleMCP
-.envrc
-# Added by goreleaser init:
+
+# Build artifacts and binaries
 dist/
+bin/
 tools/bin
 **/cmd/cmd
-bin/
+tools/wrapper
+tools/logs/logs
+!tools/logs
+tools/duckdbserver/duckdbserver
+host/openaiserver/openaiserver
+host/openaiserver/chatengine/testbin/sampleMCP
+
+# Documentation
+docs/node_modules
+docs/public
+
+# Development directories
+sandbox/
+
+# OS specific files
+.DS_Store

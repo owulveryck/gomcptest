@@ -11,8 +11,11 @@ import (
 
 // Config holds the configuration for the dispatch agent
 type Config struct {
-	LogLevel string `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
-	ImageDir string `envconfig:"IMAGE_DIR" default:"./images"`
+	LogLevel          string  `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
+	ImageDir          string  `envconfig:"IMAGE_DIR" default:"./images"`
+	SystemInstruction string  `envconfig:"SYSTEM_INSTRUCTION" default:"You are a helpful agent with access to tools"`
+	Temperature       float32 `envconfig:"MODEL_TEMPERATURE" default:"0.2"`
+	MaxOutputTokens   int32   `envconfig:"MAX_OUTPUT_TOKENS" default:"1024"`
 }
 
 // ToolPaths holds the paths to the tool executables

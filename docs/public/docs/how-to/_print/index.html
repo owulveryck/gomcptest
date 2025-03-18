@@ -1,0 +1,870 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="canonical" type="text/html" href="http://localhost:1313/docs/how-to/">
+<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/docs/how-to/index.xml">
+<meta name="robots" content="noindex, nofollow">
+
+
+<link rel="shortcut icon" href="/favicons/favicon.ico" >
+<link rel="apple-touch-icon" href="/favicons/apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicons/android-36x36.png" sizes="36x36">
+<link rel="icon" type="image/png" href="/favicons/android-48x48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicons/android-72x72.png" sizes="72x72">
+<link rel="icon" type="image/png" href="/favicons/android-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favicons/android-144x144.png" sizes="144x144">
+<link rel="icon" type="image/png" href="/favicons/android-192x192.png" sizes="192x192">
+
+<title>How-To Guides | gomcptest</title>
+<meta name="description" content="Practical guides for solving specific problems with gomcptest">
+<meta property="og:url" content="http://localhost:1313/docs/how-to/">
+  <meta property="og:site_name" content="gomcptest">
+  <meta property="og:title" content="How-To Guides">
+  <meta property="og:description" content="Practical guides for solving specific problems with gomcptest">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="website">
+
+  <meta itemprop="name" content="How-To Guides">
+  <meta itemprop="description" content="Practical guides for solving specific problems with gomcptest">
+  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
+  <meta itemprop="wordCount" content="38">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="How-To Guides">
+  <meta name="twitter:description" content="Practical guides for solving specific problems with gomcptest">
+<link href="/scss/main.css" rel="stylesheet">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-section">
+    <header>
+      <nav class="td-navbar js-navbar-scroll" data-bs-theme="dark">
+<div class="container-fluid flex-column flex-md-row">
+  <a class="navbar-brand" href="/"><span class="navbar-brand__logo navbar-logo"><svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" style="enable-background:new 0 0 500 500"><g><path style="fill:#fff" d="M116.8525 421.9722c-5.7041.0-10.3442-4.3127-10.3442-9.6129V88.183c0-5.3002 4.6401-9.6117 10.3442-9.6117H320.858c3.0347.0 9.3959.5498 11.7506 2.6302l.3545.3442 58.905 63.2912c2.3101 2.491 2.9202 8.4928 2.9202 11.3184v256.2039c0 5.3002-4.6407 9.6129-10.3436 9.6129H116.8525z"/><g><g><g><path style="fill:#767676" d="M384.4445 423.2066H116.852c-6.3839.0-11.5786-4.8658-11.5786-10.8474V88.1831c0-5.9804 5.1947-10.8461 11.5786-10.8461h204.0062c.377.0 9.2786.0329 12.568 2.9389l.3947.3833 58.9508 63.337c3.2135 3.4652 3.2514 11.7924 3.2514 12.1593v256.2036C396.0231 418.3408 390.8284 423.2066 384.4445 423.2066zM116.5079 411.9189c.0848.0278.1999.0531.3441.0531h267.5925c.1442.0.2581-.0253.3441-.0531V156.1556c-.0076-.9033-.3593-3.7347-.7034-5.0037l-57.6527-61.9416c-1.4651-.3176-4.4533-.6389-5.5742-.6389H116.852c-.143.0-.2594.024-.3441.0531V411.9189zm267.4533-261.149zM327.0321 89.371v.0013V89.371z"/></g></g></g><g><g><path style="fill:#5b7fc0" d="M189.0874 210.1754l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4473C177.5953 212.627 183.0601 210.1742 189.0874 210.1754zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 234.1722 197.0804 232.033z"/><path style="opacity:.3;fill:#fff" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/><g><defs><path id="SVGID_1_" d="M194.7376 237.6875c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 234.2399 196.1861 236.239 194.7376 237.6875z"/></defs><clipPath id="SVGID_2_"><use xlink:href="#SVGID_1_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_2_);fill:#fff" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/><path style="opacity:.13;clip-path:url(#SVGID_2_);fill:#020202" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/></g><g><defs><path id="SVGID_3_" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/></defs><clipPath id="SVGID_4_"><use xlink:href="#SVGID_3_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_4_);fill:#5b7fc0" d="M172.6595 215.6045c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8475-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 209.1953 176.6171 211.647 172.6595 215.6045z"/></g></g><rect x="198.8952" y="225.1043" style="fill:#5b7fc0" width="122.6266" height="13.8671"/></g><g><path style="fill:#d95140" d="M189.0874 155.7611l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.0249 2.454-11.4897 6.4116-15.4473C177.5953 158.2128 183.0601 155.7599 189.0874 155.7611zm7.993 21.8577c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.2508 181.7667 197.0816 179.758 197.0804 177.6188z"/><path style="opacity:.3;fill:#fff" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/><g><defs><path id="SVGID_5_" d="M194.7376 183.2733c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 179.8256 196.1861 181.8248 194.7376 183.2733z"/></defs><clipPath id="SVGID_6_"><use xlink:href="#SVGID_5_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_6_);fill:#fff" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/><path style="opacity:.13;clip-path:url(#SVGID_6_);fill:#020202" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/></g><g><defs><path id="SVGID_7_" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/></defs><clipPath id="SVGID_8_"><use xlink:href="#SVGID_7_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_8_);fill:#d95140" d="M172.6595 161.1903c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 154.7811 176.6171 157.2327 172.6595 161.1903z"/></g><rect x="198.8952" y="170.69" style="fill:#d95140" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#56a55c" d="M189.5379 264.6147l.0012-.0012c7.7751.0012 15.0294 4.1862 18.932 10.9235 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032-5.8394.0-11.3281-2.2733-15.458-6.4032-4.13-4.13-6.4032-9.6186-6.4056-15.4628.0012-6.0249 2.454-11.4897 6.4116-15.4472C178.0458 267.0663 183.5105 264.6135 189.5379 264.6147zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6538 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.7013 290.6202 197.5321 288.6115 197.5309 286.4723z"/><path style="opacity:.3;fill:#fff" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/><g><defs><path id="SVGID_9_" d="M195.1881 292.1268c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9941 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.5344 288.6792 196.6366 290.6783 195.1881 292.1268z"/></defs><clipPath id="SVGID_10_"><use xlink:href="#SVGID_9_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_10_);fill:#fff" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/><path style="opacity:.13;clip-path:url(#SVGID_10_);fill:#020202" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/></g><g><defs><path id="SVGID_11_" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/></defs><clipPath id="SVGID_12_"><use xlink:href="#SVGID_11_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_12_);fill:#56a55c" d="M173.11 270.0439c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7325-11.1497-10.9151-18.926-10.9151C182.5311 263.6346 177.0676 266.0863 173.11 270.0439z"/></g></g><rect x="199.3456" y="279.5436" style="fill:#56a55c" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#f1bc42" d="M189.0874 318.7208l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3305-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4472C177.5953 321.1724 183.0601 318.7196 189.0874 318.7208zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 342.7176 197.0804 340.5784z"/><path style="opacity:.3;fill:#fff" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/><g><defs><path id="SVGID_13_" d="M194.7376 346.2329c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 342.7853 196.1861 344.7844 194.7376 346.2329z"/></defs><clipPath id="SVGID_14_"><use xlink:href="#SVGID_13_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_14_);fill:#fff" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/><path style="opacity:.13;clip-path:url(#SVGID_14_);fill:#020202" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/></g><g><defs><path id="SVGID_15_" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/></defs><clipPath id="SVGID_16_"><use xlink:href="#SVGID_15_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_16_);fill:#f1bc42" d="M172.6595 324.15c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8474-1.0151-7.6327-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 317.7407 176.6171 320.1924 172.6595 324.15z"/></g></g><rect x="198.8952" y="333.6497" style="fill:#f1bc42" width="122.6266" height="13.8671"/></g></g></svg></span><span class="navbar-brand__name">gomcptest</span></a>
+  <div class="td-navbar-nav-scroll ms-md-auto" id="main_navbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="/docs/"><span>Docs</span></a>
+      </li>
+      <li class="nav-item dropdown d-none d-lg-block">
+        <div class="dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">English</a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="/fr/docs/how-to/">Français</a></li>
+    </ul>
+</div></li>
+      </ul>
+  </div>
+  <div class="d-none d-lg-block">
+    <div class="td-search">
+  <div class="td-search__icon"></div>
+  <input type="search" class="td-search__input form-control td-search-input" placeholder="Search this site…" aria-label="Search this site…" autocomplete="off">
+</div>
+  </div>
+</div>
+</nav>
+    </header>
+    <div class="container-fluid td-outer">
+      <div class="td-main">
+        <div class="row flex-xl-nowrap">
+          <main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main">
+            
+
+
+
+
+<div class="td-content">
+<div class="pageinfo pageinfo-primary d-print-none">
+<p>
+This is the multi-page printable view of this section.
+<a href="#" onclick="print();return false;">Click here to print</a>.
+</p><p>
+<a href="/docs/how-to/">Return to the regular view of this page</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">How-To Guides</h1>
+<div class="lead">Practical guides for solving specific problems with gomcptest</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+	
+<li>1: <a href="#pg-1b0984aa513cab2c3fab92be432b3edd">How to Create a Custom MCP Tool</a></li>
+
+
+    
+  
+    
+    
+	
+<li>2: <a href="#pg-698eac74d7be52f0ac1350e89ad0e597">How to Configure the OpenAI-Compatible Server</a></li>
+
+
+    
+  
+    
+    
+	
+<li>3: <a href="#pg-0593b1249420a69082646ae587a17e4e">How to Configure the cliGCP Command Line Interface</a></li>
+
+
+    
+  
+    
+    
+	
+<li>4: <a href="#pg-ae5e1f7351270a62eef2bc0be0c0f670">How to Use the OpenAI Server with big-AGI</a></li>
+
+
+    
+  
+
+    </ul>
+
+
+<div class="content">
+      
+
+<div class="pageinfo pageinfo-primary">
+<p>How-to guides are problem-oriented recipes that guide you through the steps involved in addressing key problems and use cases. They are practical and goal-oriented.</p>
+
+</div>
+
+<p>These guides will help you solve specific tasks and customize gomcptest for your needs.</p>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+    
+	<h1 id="pg-1b0984aa513cab2c3fab92be432b3edd">1 - How to Create a Custom MCP Tool</h1>
+    <div class="lead">Build your own Model Context Protocol (MCP) compatible tools</div>
+	<p>This guide shows you how to create a new custom tool that&rsquo;s compatible with the Model Context Protocol (MCP) in gomcptest.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>A working installation of gomcptest</li>
+<li>Go programming knowledge</li>
+<li>Understanding of the MCP protocol basics</li>
+</ul>
+<h2 id="steps-to-create-a-custom-tool">Steps to create a custom tool<a class="td-heading-self-link" href="#steps-to-create-a-custom-tool" aria-label="Heading self-link"></a></h2>
+<h3 id="1-create-the-tool-directory-structure">1. Create the tool directory structure<a class="td-heading-self-link" href="#1-create-the-tool-directory-structure" aria-label="Heading self-link"></a></h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p tools/YourToolName/cmd
+</span></span></code></pre></div><h3 id="2-create-the-readmemd-file">2. Create the README.md file<a class="td-heading-self-link" href="#2-create-the-readmemd-file" aria-label="Heading self-link"></a></h3>
+<p>Create a <code>README.md</code> in the tool directory with documentation:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>touch tools/YourToolName/README.md
+</span></span></code></pre></div><p>Include the following sections:</p>
+<ul>
+<li>Tool description</li>
+<li>Parameters</li>
+<li>Usage notes</li>
+<li>Example</li>
+</ul>
+<h3 id="3-create-the-maingo-file">3. Create the main.go file<a class="td-heading-self-link" href="#3-create-the-maingo-file" aria-label="Heading self-link"></a></h3>
+<p>Create a <code>main.go</code> file in the cmd directory:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>touch tools/YourToolName/cmd/main.go
+</span></span></code></pre></div><h3 id="4-implement-the-tool-functionality">4. Implement the tool functionality<a class="td-heading-self-link" href="#4-implement-the-tool-functionality" aria-label="Heading self-link"></a></h3>
+<p>Here&rsquo;s a template to start with:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;encoding/json&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;log&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;os&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;github.com/mark3labs/mcp-go&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// Define your tool&#39;s parameters structure
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">Params</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Add your parameters here
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#8f5902;font-style:italic">// Example:
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">InputParam</span> <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;input_param&#34;`</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">server</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">mcp</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewServer</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Register your tool function
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">server</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">RegisterFunction</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;YourToolName&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">func</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">RawMessage</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">any</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">error</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">p</span> <span style="color:#000">Params</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Unmarshal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">p</span><span style="color:#000;font-weight:bold">);</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">nil</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">fmt</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Errorf</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;failed to parse parameters: %w&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">err</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8f5902;font-style:italic">// Implement your tool&#39;s logic here
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>		<span style="color:#000">result</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">doSomethingWithParams</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">p</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">result</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">})</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">server</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Run</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdin</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdout</span><span style="color:#000;font-weight:bold">);</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">log</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Fatalf</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Server error: %v&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">err</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">doSomethingWithParams</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">p</span> <span style="color:#000">Params</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">interface</span><span style="color:#000;font-weight:bold">{}</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Your tool&#39;s core functionality
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#8f5902;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Return the result
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">return</span> <span style="color:#204a87;font-weight:bold">map</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">]</span><span style="color:#204a87;font-weight:bold">interface</span><span style="color:#000;font-weight:bold">{}{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#4e9a06">&#34;result&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Your processed result&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="5-add-the-tool-to-the-makefile">5. Add the tool to the Makefile<a class="td-heading-self-link" href="#5-add-the-tool-to-the-makefile" aria-label="Heading self-link"></a></h3>
+<p>Open the Makefile in the root directory and add your tool:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span><span style="color:#000">YourToolName</span><span style="color:#ce5c00;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>	go build -o bin/YourToolName tools/YourToolName/cmd/main.go
+</span></span></code></pre></div><p>Also add it to the <code>all</code> target.</p>
+<h3 id="6-build-your-tool">6. Build your tool<a class="td-heading-self-link" href="#6-build-your-tool" aria-label="Heading self-link"></a></h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make YourToolName
+</span></span></code></pre></div><h3 id="7-test-your-tool">7. Test your tool<a class="td-heading-self-link" href="#7-test-your-tool" aria-label="Heading self-link"></a></h3>
+<p>Test the tool directly:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">echo</span> <span style="color:#4e9a06">&#39;{&#34;name&#34;:&#34;YourToolName&#34;,&#34;params&#34;:{&#34;input_param&#34;:&#34;test&#34;}}&#39;</span> <span style="color:#000;font-weight:bold">|</span> ./bin/YourToolName
+</span></span></code></pre></div><h3 id="8-use-with-the-cli">8. Use with the CLI<a class="td-heading-self-link" href="#8-use-with-the-cli" aria-label="Heading self-link"></a></h3>
+<p>Add your tool to the CLI command:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./bin/cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./LS;./View;./YourToolName;./dispatch_agent;./Bash;./Replace&#34;</span>
+</span></span></code></pre></div><h2 id="tips-for-effective-tool-development">Tips for effective tool development<a class="td-heading-self-link" href="#tips-for-effective-tool-development" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>Focus on a single, well-defined purpose</li>
+<li>Provide clear error messages</li>
+<li>Include meaningful response formatting</li>
+<li>Implement proper parameter validation</li>
+<li>Handle edge cases gracefully</li>
+<li>Consider adding unit tests in a _test.go file</li>
+</ul>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-698eac74d7be52f0ac1350e89ad0e597">2 - How to Configure the OpenAI-Compatible Server</h1>
+    <div class="lead">Customize the OpenAI-compatible server for different use cases</div>
+	<p>This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest for different use cases.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>A working installation of gomcptest</li>
+<li>Basic familiarity with the OpenAI server from the tutorial</li>
+<li>Understanding of environment variables and configuration</li>
+</ul>
+<h2 id="environment-variables-configuration">Environment Variables Configuration<a class="td-heading-self-link" href="#environment-variables-configuration" aria-label="Heading self-link"></a></h2>
+<h3 id="basic-server-configuration">Basic Server Configuration<a class="td-heading-self-link" href="#basic-server-configuration" aria-label="Heading self-link"></a></h3>
+<p>The OpenAI server can be configured using the following environment variables:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Server port (default: 8080)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">PORT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">8080</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Log level: DEBUG, INFO, WARN, ERROR (default: INFO)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">LOG_LEVEL</span><span style="color:#ce5c00;font-weight:bold">=</span>INFO
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Directory to store images (required)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/path/to/image/directory
+</span></span></code></pre></div><h3 id="gcp-configuration">GCP Configuration<a class="td-heading-self-link" href="#gcp-configuration" aria-label="Heading self-link"></a></h3>
+<p>Configure the Google Cloud Platform integration:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Project ID (required)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Region (default: us-central1)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Gemini models (default: gemini-1.5-pro,gemini-2.0-flash)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-1.5-pro,gemini-2.0-flash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Imagen models (optional)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
+</span></span></code></pre></div><h3 id="setting-up-a-production-environment">Setting Up a Production Environment<a class="td-heading-self-link" href="#setting-up-a-production-environment" aria-label="Heading self-link"></a></h3>
+<p>For a production environment, create a proper systemd service file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo nano /etc/systemd/system/gomcptest-openai.service
+</span></span></code></pre></div><p>Add the following content:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">[Unit]</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Description</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">gomcptest OpenAI Server</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">After</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">network.target</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">[Service]</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">User</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">yourusername</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">WorkingDirectory</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">/path/to/gomcptest/host/openaiserver</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">ExecStart</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">/path/to/gomcptest/host/openaiserver/openaiserver -mcpservers &#34;/path/to/gomcptest/bin/GlobTool;/path/to/gomcptest/bin/GrepTool;/path/to/gomcptest/bin/LS;/path/to/gomcptest/bin/View;/path/to/gomcptest/bin/Bash;/path/to/gomcptest/bin/Replace&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">PORT=8080</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">LOG_LEVEL=INFO</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">IMAGE_DIR=/path/to/image/directory</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_PROJECT=your-gcp-project-id</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_REGION=us-central1</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">Restart</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">on-failure</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">[Install]</span>
+</span></span><span style="display:flex;"><span><span style="color:#c4a000">WantedBy</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">multi-user.target</span>
+</span></span></code></pre></div><p>Then enable and start the service:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl <span style="color:#204a87">enable</span> gomcptest-openai
+</span></span><span style="display:flex;"><span>sudo systemctl start gomcptest-openai
+</span></span></code></pre></div><h2 id="configuring-mcp-tools">Configuring MCP Tools<a class="td-heading-self-link" href="#configuring-mcp-tools" aria-label="Heading self-link"></a></h2>
+<h3 id="adding-custom-tools">Adding Custom Tools<a class="td-heading-self-link" href="#adding-custom-tools" aria-label="Heading self-link"></a></h3>
+<p>To add custom MCP tools to the server, include them in the <code>-mcpservers</code> parameter when starting the server:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go run . -mcpservers <span style="color:#4e9a06">&#34;../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../bin/YourCustomTool;../bin/Bash;../bin/Replace&#34;</span>
+</span></span></code></pre></div><h3 id="tool-parameters-and-arguments">Tool Parameters and Arguments<a class="td-heading-self-link" href="#tool-parameters-and-arguments" aria-label="Heading self-link"></a></h3>
+<p>Some tools require additional parameters. You can specify these after the tool path:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go run . -mcpservers <span style="color:#4e9a06">&#34;../bin/GlobTool;../bin/dispatch_agent -glob-path ../bin/GlobTool -grep-path ../bin/GrepTool -ls-path ../bin/LS -view-path ../bin/View&#34;</span>
+</span></span></code></pre></div><h2 id="api-usage-configuration">API Usage Configuration<a class="td-heading-self-link" href="#api-usage-configuration" aria-label="Heading self-link"></a></h2>
+<h3 id="enabling-cors">Enabling CORS<a class="td-heading-self-link" href="#enabling-cors" aria-label="Heading self-link"></a></h3>
+<p>For web applications, you may need to enable CORS. Add a middleware to the main.go file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;net/http&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// other imports
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// CORS middleware
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">corsMiddleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">next</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">HandlerFunc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">func</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ResponseWriter</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Request</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Origin&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;*&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Methods&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;GET, POST, OPTIONS&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Headers&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;Content-Type, Authorization&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Method</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;OPTIONS&#34;</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">WriteHeader</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">StatusOK</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#000">next</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ServeHTTP</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">})</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handle</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;/&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">corsMiddleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">openAIHandler</span><span style="color:#000;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="setting-rate-limits">Setting Rate Limits<a class="td-heading-self-link" href="#setting-rate-limits" aria-label="Heading self-link"></a></h3>
+<p>Add a simple rate limiting middleware:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;net/http&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;sync&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// other imports
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">RateLimiter</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">requests</span>     <span style="color:#204a87;font-weight:bold">map</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">][]</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Time</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">maxRequests</span>  <span style="color:#204a87;font-weight:bold">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">timeWindow</span>   <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Duration</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">mu</span>           <span style="color:#000">sync</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Mutex</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">NewRateLimiter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">maxRequests</span> <span style="color:#204a87;font-weight:bold">int</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">timeWindow</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Duration</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">RateLimiter</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">RateLimiter</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">requests</span><span style="color:#000;font-weight:bold">:</span>    <span style="color:#204a87">make</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">map</span><span style="color:#000;font-weight:bold">[</span><span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">][]</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Time</span><span style="color:#000;font-weight:bold">),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">maxRequests</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">maxRequests</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">timeWindow</span><span style="color:#000;font-weight:bold">:</span>  <span style="color:#000">timeWindow</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">rl</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">RateLimiter</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000">Middleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">next</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">HandlerFunc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">func</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ResponseWriter</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Request</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">ip</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">RemoteAddr</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">mu</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Lock</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic">// Clean up old requests
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">now</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Now</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">reqs</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">exists</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">requests</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">ip</span><span style="color:#000;font-weight:bold">];</span> <span style="color:#000">exists</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">validReqs</span> <span style="color:#000;font-weight:bold">[]</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Time</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">_</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">req</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#204a87;font-weight:bold">range</span> <span style="color:#000">reqs</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">now</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Sub</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">req</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">&lt;=</span> <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">timeWindow</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#000">validReqs</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#204a87">append</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">validReqs</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">req</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">requests</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">ip</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000">validReqs</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic">// Check if rate limit is exceeded
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#204a87">len</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">requests</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">ip</span><span style="color:#000;font-weight:bold">])</span> <span style="color:#ce5c00;font-weight:bold">&gt;=</span> <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">maxRequests</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">mu</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Unlock</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Error</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;Rate limit exceeded&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">StatusTooManyRequests</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic">// Add current request
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">requests</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">ip</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#204a87">append</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">requests</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">ip</span><span style="color:#000;font-weight:bold">],</span> <span style="color:#000">now</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">rl</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">mu</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Unlock</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#000">next</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ServeHTTP</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">})</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">rateLimiter</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">NewRateLimiter</span><span style="color:#000;font-weight:bold">(</span><span style="color:#0000cf;font-weight:bold">10</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Minute</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#8f5902;font-style:italic">// 10 requests per minute
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handle</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;/&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">rateLimiter</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Middleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">corsMiddleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">openAIHandler</span><span style="color:#000;font-weight:bold">)))</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="performance-tuning">Performance Tuning<a class="td-heading-self-link" href="#performance-tuning" aria-label="Heading self-link"></a></h2>
+<h3 id="adjusting-memory-usage">Adjusting Memory Usage<a class="td-heading-self-link" href="#adjusting-memory-usage" aria-label="Heading self-link"></a></h3>
+<p>For high-load scenarios, adjust Go&rsquo;s garbage collector:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GOGC</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">100</span>  <span style="color:#8f5902;font-style:italic"># Default is 100, lower values lead to more frequent GC</span>
+</span></span></code></pre></div><h3 id="increasing-concurrency">Increasing Concurrency<a class="td-heading-self-link" href="#increasing-concurrency" aria-label="Heading self-link"></a></h3>
+<p>If handling many concurrent requests, adjust the server&rsquo;s concurrency limits:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;net/http&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// other imports
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">server</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Server</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">Addr</span><span style="color:#000;font-weight:bold">:</span>         <span style="color:#4e9a06">&#34;:&#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#000">strconv</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Itoa</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">cfg</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Port</span><span style="color:#000;font-weight:bold">),</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">Handler</span><span style="color:#000;font-weight:bold">:</span>      <span style="color:#000">openAIHandler</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">ReadTimeout</span><span style="color:#000;font-weight:bold">:</span>  <span style="color:#0000cf;font-weight:bold">30</span> <span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Second</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">WriteTimeout</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">120</span> <span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Second</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">IdleTimeout</span><span style="color:#000;font-weight:bold">:</span>  <span style="color:#0000cf;font-weight:bold">120</span> <span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#000">time</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Second</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">MaxHeaderBytes</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">1</span> <span style="color:#ce5c00;font-weight:bold">&lt;&lt;</span> <span style="color:#0000cf;font-weight:bold">20</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">err</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#000">server</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ListenAndServe</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// existing code...
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="troubleshooting-common-issues">Troubleshooting Common Issues<a class="td-heading-self-link" href="#troubleshooting-common-issues" aria-label="Heading self-link"></a></h2>
+<h3 id="debugging-connection-problems">Debugging Connection Problems<a class="td-heading-self-link" href="#debugging-connection-problems" aria-label="Heading self-link"></a></h3>
+<p>If you&rsquo;re experiencing connection issues, set the log level to DEBUG:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">LOG_LEVEL</span><span style="color:#ce5c00;font-weight:bold">=</span>DEBUG
+</span></span></code></pre></div><h3 id="common-error-messages">Common Error Messages<a class="td-heading-self-link" href="#common-error-messages" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>Failed to create MCP client</strong>: Ensure the tool path is correct and the tool is executable</li>
+<li><strong>Failed to load GCP config</strong>: Check your GCP environment variables</li>
+<li><strong>Error in LLM request</strong>: Verify your GCP credentials and project access</li>
+</ul>
+<h3 id="checking-tool-registration">Checking Tool Registration<a class="td-heading-self-link" href="#checking-tool-registration" aria-label="Heading self-link"></a></h3>
+<p>To verify tools are registered correctly, look for log messages like:</p>
+<pre tabindex="0"><code>INFO server0 Registering command=../bin/GlobTool
+INFO server1 Registering command=../bin/GrepTool
+</code></pre>
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-0593b1249420a69082646ae587a17e4e">3 - How to Configure the cliGCP Command Line Interface</h1>
+    <div class="lead">Customize the cliGCP tool with environment variables and command-line options</div>
+	<p>This guide shows you how to configure and customize the cliGCP command line interface for various use cases.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>A working installation of gomcptest</li>
+<li>Basic familiarity with the cliGCP tool from the tutorial</li>
+<li>Understanding of environment variables and configuration</li>
+</ul>
+<h2 id="command-line-arguments">Command Line Arguments<a class="td-heading-self-link" href="#command-line-arguments" aria-label="Heading self-link"></a></h2>
+<p>The cliGCP tool accepts the following command line arguments:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Specify the MCP servers to use (required)</span>
+</span></span><span style="display:flex;"><span>-mcpservers <span style="color:#4e9a06">&#34;tool1;tool2;tool3&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Example with tool arguments</span>
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash&#34;</span>
+</span></span></code></pre></div><h2 id="environment-variables-configuration">Environment Variables Configuration<a class="td-heading-self-link" href="#environment-variables-configuration" aria-label="Heading self-link"></a></h2>
+<h3 id="gcp-configuration">GCP Configuration<a class="td-heading-self-link" href="#gcp-configuration" aria-label="Heading self-link"></a></h3>
+<p>Configure the Google Cloud Platform integration with these environment variables:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Project ID (required)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Region (default: us-central1)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Gemini models (required)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-1.5-pro,gemini-2.0-flash
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Directory to store images (required for image generation)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/path/to/image/directory
+</span></span></code></pre></div><h3 id="advanced-configuration">Advanced Configuration<a class="td-heading-self-link" href="#advanced-configuration" aria-label="Heading self-link"></a></h3>
+<p>You can customize the behavior of the cliGCP tool with these additional environment variables:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Set a custom system instruction for the model</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">SYSTEM_INSTRUCTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;You are a helpful assistant specialized in Go programming.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Adjust the model&#39;s temperature (0.0-1.0, default is 0.2)</span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Lower values make output more deterministic, higher values more creative</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">MODEL_TEMPERATURE</span><span style="color:#ce5c00;font-weight:bold">=</span>0.3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Set a maximum token limit for responses</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">MAX_OUTPUT_TOKENS</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">2048</span>
+</span></span></code></pre></div><h2 id="creating-shell-aliases">Creating Shell Aliases<a class="td-heading-self-link" href="#creating-shell-aliases" aria-label="Heading self-link"></a></h2>
+<p>To simplify usage, create shell aliases in your <code>.bashrc</code> or <code>.zshrc</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Add to ~/.bashrc or ~/.zshrc</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">alias</span> <span style="color:#000">gpt</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#39;cd /path/to/gomcptest/bin &amp;&amp; ./cliGCP -mcpservers &#34;./GlobTool;./GrepTool;./LS;./View;./Bash;./Replace&#34;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Create specialized aliases for different tasks</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">alias</span> code-assistant<span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#39;cd /path/to/gomcptest/bin &amp;&amp; GCP_PROJECT=your-project GEMINI_MODELS=gemini-2.0-flash ./cliGCP -mcpservers &#34;./GlobTool;./GrepTool;./LS;./View;./Bash;./Replace&#34;&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">alias</span> security-scanner<span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#39;cd /path/to/gomcptest/bin &amp;&amp; SYSTEM_INSTRUCTION=&#34;You are a security expert focused on finding vulnerabilities in code&#34; ./cliGCP -mcpservers &#34;./GlobTool;./GrepTool;./LS;./View;./Bash&#34;&#39;</span>
+</span></span></code></pre></div><h2 id="customizing-the-system-instruction">Customizing the System Instruction<a class="td-heading-self-link" href="#customizing-the-system-instruction" aria-label="Heading self-link"></a></h2>
+<p>To modify the default system instruction, edit the <code>agent.go</code> file:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// In host/cliGCP/cmd/agent.go
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">genaimodels</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">model</span><span style="color:#000;font-weight:bold">].</span><span style="color:#000">SystemInstruction</span> <span style="color:#000;font-weight:bold">=</span> <span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">genai</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Content</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">Role</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;user&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">Parts</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[]</span><span style="color:#000">genai</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Part</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">genai</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Text</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;You are a helpful agent with access to tools. &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#4e9a06">&#34;Your job is to help the user by performing tasks using these tools. &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#4e9a06">&#34;You should not make up information. &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#4e9a06">&#34;If you don&#39;t know something, say so and explain what you would need to know to help. &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#4e9a06">&#34;If not indication, use the current working directory which is &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#000">cwd</span><span style="color:#000;font-weight:bold">),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">},</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="creating-task-specific-configurations">Creating Task-Specific Configurations<a class="td-heading-self-link" href="#creating-task-specific-configurations" aria-label="Heading self-link"></a></h2>
+<p>For different use cases, you can create specialized configuration scripts:</p>
+<h3 id="code-review-helper">Code Review Helper<a class="td-heading-self-link" href="#code-review-helper" aria-label="Heading self-link"></a></h3>
+<p>Create a file called <code>code-reviewer.sh</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-2.0-flash
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/tmp/images
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">SYSTEM_INSTRUCTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;You are a code review expert. Analyze code for bugs, security issues, and areas for improvement. Focus on providing constructive feedback and detailed explanations.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> /path/to/gomcptest/bin
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./LS;./View;./Bash&#34;</span>
+</span></span></code></pre></div><p>Make it executable:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>chmod +x code-reviewer.sh
+</span></span></code></pre></div><h3 id="documentation-generator">Documentation Generator<a class="td-heading-self-link" href="#documentation-generator" aria-label="Heading self-link"></a></h3>
+<p>Create a file called <code>doc-generator.sh</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-2.0-flash
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/tmp/images
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">SYSTEM_INSTRUCTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;You are a documentation specialist. Your task is to help create clear, comprehensive documentation for code. Analyze code structure and create appropriate documentation following best practices.&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> /path/to/gomcptest/bin
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./LS;./View;./Bash;./Replace&#34;</span>
+</span></span></code></pre></div><h2 id="advanced-tool-configurations">Advanced Tool Configurations<a class="td-heading-self-link" href="#advanced-tool-configurations" aria-label="Heading self-link"></a></h2>
+<h3 id="configuring-dispatch_agent">Configuring dispatch_agent<a class="td-heading-self-link" href="#configuring-dispatch_agent" aria-label="Heading self-link"></a></h3>
+<p>When using the dispatch_agent tool, you can configure its behavior with additional arguments:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View -timeout 30s;./Bash;./Replace&#34;</span>
+</span></span></code></pre></div><h3 id="creating-tool-combinations">Creating Tool Combinations<a class="td-heading-self-link" href="#creating-tool-combinations" aria-label="Heading self-link"></a></h3>
+<p>You can create specialized tool combinations for different tasks:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Web development toolset</span>
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool -include &#39;*.{html,css,js}&#39;;./GrepTool;./LS;./View;./Bash;./Replace&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Go development toolset</span>
+</span></span><span style="display:flex;"><span>./cliGCP -mcpservers <span style="color:#4e9a06">&#34;./GlobTool -include &#39;*.go&#39;;./GrepTool;./LS;./View;./Bash;./Replace&#34;</span>
+</span></span></code></pre></div><h2 id="troubleshooting-common-issues">Troubleshooting Common Issues<a class="td-heading-self-link" href="#troubleshooting-common-issues" aria-label="Heading self-link"></a></h2>
+<h3 id="model-connection-issues">Model Connection Issues<a class="td-heading-self-link" href="#model-connection-issues" aria-label="Heading self-link"></a></h3>
+<p>If you&rsquo;re having trouble connecting to the Gemini model:</p>
+<ol>
+<li>Verify your GCP credentials:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud auth application-default print-access-token
+</span></span></code></pre></div><ol start="2">
+<li>Check that the Vertex AI API is enabled:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcloud services list --enabled <span style="color:#000;font-weight:bold">|</span> grep aiplatform
+</span></span></code></pre></div><ol start="3">
+<li>Verify your project has access to the models you&rsquo;re requesting</li>
+</ol>
+<h3 id="tool-execution-failures">Tool Execution Failures<a class="td-heading-self-link" href="#tool-execution-failures" aria-label="Heading self-link"></a></h3>
+<p>If tools are failing to execute:</p>
+<ol>
+<li>Ensure the tool paths are correct</li>
+<li>Verify the tools are executable</li>
+<li>Check for permission issues in the directories you&rsquo;re accessing</li>
+</ol>
+<h3 id="performance-optimization">Performance Optimization<a class="td-heading-self-link" href="#performance-optimization" aria-label="Heading self-link"></a></h3>
+<p>For better performance:</p>
+<ol>
+<li>Use more specific tool patterns to reduce search scope</li>
+<li>Consider creating specialized agents for different tasks</li>
+<li>Set a lower temperature for more deterministic responses</li>
+</ol>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-ae5e1f7351270a62eef2bc0be0c0f670">4 - How to Use the OpenAI Server with big-AGI</h1>
+    <div class="lead">Configure the gomcptest OpenAI-compatible server as a backend for big-AGI</div>
+	<p>This guide shows you how to set up and configure the gomcptest OpenAI-compatible server to work with <a href="https://github.com/enricoros/big-agi">big-AGI</a>, a popular open-source web client for AI assistants.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>A working installation of gomcptest</li>
+<li>The OpenAI-compatible server running (see the <a href="../../tutorials/openaiserver-tutorial/">OpenAI Server tutorial</a>)</li>
+<li><a href="https://nodejs.org/">Node.js</a> (version 18.17.0 or newer)</li>
+<li>Git</li>
+</ul>
+<h2 id="why-use-big-agi-with-gomcptest">Why Use big-AGI with gomcptest?<a class="td-heading-self-link" href="#why-use-big-agi-with-gomcptest" aria-label="Heading self-link"></a></h2>
+<p>big-AGI provides a polished, feature-rich web interface for interacting with AI models. By connecting it to the gomcptest OpenAI-compatible server, you get:</p>
+<ul>
+<li>A professional web interface for your AI interactions</li>
+<li>Support for tools/function calling</li>
+<li>Conversation history management</li>
+<li>Persona management</li>
+<li>Image generation capabilities</li>
+<li>Multiple user support</li>
+</ul>
+<h2 id="setting-up-big-agi">Setting Up big-AGI<a class="td-heading-self-link" href="#setting-up-big-agi" aria-label="Heading self-link"></a></h2>
+<ol>
+<li>
+<p><strong>Clone the big-AGI repository</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/enricoros/big-agi.git
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> big-agi
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Install dependencies</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>npm install
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Create a <code>.env.local</code> file</strong> for configuration:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cp .env.example .env.local
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Edit the <code>.env.local</code> file</strong> to configure your gomcptest server connection:</p>
+<pre tabindex="0"><code># big-AGI configuration
+
+# Your gomcptest OpenAI-compatible server URL
+OPENAI_API_HOST=http://localhost:8080
+
+# This can be any string since the gomcptest server doesn&#39;t use API keys
+OPENAI_API_KEY=gomcptest-local-server
+
+# Set this to true to enable the custom server
+OPENAI_API_ENABLE_CUSTOM_PROVIDER=true
+</code></pre></li>
+<li>
+<p><strong>Start big-AGI</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>npm run dev
+</span></span></code></pre></div></li>
+<li>
+<p>Open your browser and navigate to <code>http://localhost:3000</code> to access the big-AGI interface.</p>
+</li>
+</ol>
+<h2 id="configuring-big-agi-to-use-your-models">Configuring big-AGI to Use Your Models<a class="td-heading-self-link" href="#configuring-big-agi-to-use-your-models" aria-label="Heading self-link"></a></h2>
+<p>The gomcptest OpenAI-compatible server exposes Google Cloud models through an OpenAI-compatible API. In big-AGI, you&rsquo;ll need to configure the models:</p>
+<ol>
+<li>Open big-AGI in your browser</li>
+<li>Click on the <strong>Settings</strong> icon (gear) in the top right</li>
+<li>Go to the <strong>Models</strong> tab</li>
+<li>Under &ldquo;OpenAI Models&rdquo;:
+<ul>
+<li>Click &ldquo;Add Models&rdquo;</li>
+<li>Add your models by ID (e.g., <code>gemini-1.5-pro</code>, <code>gemini-2.0-flash</code>)</li>
+<li>Set context length appropriately (8K-32K depending on the model)</li>
+<li>Set function calling capability to <code>true</code> for models that support it</li>
+</ul>
+</li>
+</ol>
+<h2 id="enabling-function-calling-with-tools">Enabling Function Calling with Tools<a class="td-heading-self-link" href="#enabling-function-calling-with-tools" aria-label="Heading self-link"></a></h2>
+<p>To use the MCP tools through big-AGI&rsquo;s function calling interface:</p>
+<ol>
+<li>In big-AGI, click on the <strong>Settings</strong> icon</li>
+<li>Go to the <strong>Advanced</strong> tab</li>
+<li>Enable &ldquo;Function Calling&rdquo; under the &ldquo;Experimental Features&rdquo; section</li>
+<li>In a new chat, click on the &ldquo;Functions&rdquo; tab (plugin icon) in the chat interface</li>
+<li>The available tools from your gomcptest server should be listed</li>
+</ol>
+<h2 id="configuring-cors-for-big-agi">Configuring CORS for big-AGI<a class="td-heading-self-link" href="#configuring-cors-for-big-agi" aria-label="Heading self-link"></a></h2>
+<p>If you&rsquo;re running big-AGI on a different domain or port than your gomcptest server, you&rsquo;ll need to enable CORS on the server side. Edit the OpenAI server configuration:</p>
+<ol>
+<li>
+<p>Create or edit a CORS middleware for the OpenAI server:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// CORS middleware with specific origin allowance
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">corsMiddleware</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">next</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Handler</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">HandlerFunc</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">func</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span> <span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ResponseWriter</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Request</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic">// Allow requests from big-AGI origin
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Origin&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;http://localhost:3000&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Methods&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;GET, POST, OPTIONS&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Header</span><span style="color:#000;font-weight:bold">().</span><span style="color:#000">Set</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Access-Control-Allow-Headers&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;Content-Type, Authorization&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Method</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;OPTIONS&#34;</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">WriteHeader</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">http</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">StatusOK</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">next</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ServeHTTP</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">w</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">r</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">})</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div></li>
+<li>
+<p>Apply this middleware to your server routes</p>
+</li>
+</ol>
+<h2 id="troubleshooting-common-issues">Troubleshooting Common Issues<a class="td-heading-self-link" href="#troubleshooting-common-issues" aria-label="Heading self-link"></a></h2>
+<h3 id="model-not-found">Model Not Found<a class="td-heading-self-link" href="#model-not-found" aria-label="Heading self-link"></a></h3>
+<p>If big-AGI reports that models cannot be found:</p>
+<ol>
+<li>Verify your gomcptest server is running and accessible</li>
+<li>Check the server logs to ensure models are properly registered</li>
+<li>Make sure the model IDs in big-AGI match exactly the ones provided by your gomcptest server</li>
+</ol>
+<h3 id="function-calling-not-working">Function Calling Not Working<a class="td-heading-self-link" href="#function-calling-not-working" aria-label="Heading self-link"></a></h3>
+<p>If tools aren&rsquo;t working properly:</p>
+<ol>
+<li>Ensure the tools are properly registered in your gomcptest server</li>
+<li>Check that function calling is enabled in big-AGI settings</li>
+<li>Verify the model you&rsquo;re using supports function calling</li>
+</ol>
+<h3 id="connection-issues">Connection Issues<a class="td-heading-self-link" href="#connection-issues" aria-label="Heading self-link"></a></h3>
+<p>If big-AGI can&rsquo;t connect to your server:</p>
+<ol>
+<li>Verify the <code>OPENAI_API_HOST</code> value in your <code>.env.local</code> file</li>
+<li>Check for CORS issues in your browser&rsquo;s developer console</li>
+<li>Ensure your server is running and accessible from the browser</li>
+</ol>
+<h2 id="production-deployment">Production Deployment<a class="td-heading-self-link" href="#production-deployment" aria-label="Heading self-link"></a></h2>
+<p>For production use, consider:</p>
+<ol>
+<li>
+<p><strong>Securing your API</strong>:</p>
+<ul>
+<li>Add proper authentication to your gomcptest OpenAI server</li>
+<li>Update the <code>OPENAI_API_KEY</code> in big-AGI accordingly</li>
+</ul>
+</li>
+<li>
+<p><strong>Deploying big-AGI</strong>:</p>
+<ul>
+<li>Follow the <a href="https://github.com/enricoros/big-agi/blob/main/docs/deployment.md">big-AGI deployment guide</a></li>
+<li>Configure the environment variables to point to your production gomcptest server</li>
+</ul>
+</li>
+<li>
+<p><strong>Setting up HTTPS</strong>:</p>
+<ul>
+<li>For production, both big-AGI and your gomcptest server should use HTTPS</li>
+<li>Consider using a reverse proxy like Nginx with Let&rsquo;s Encrypt certificates</li>
+</ul>
+</li>
+</ol>
+<h2 id="example-basic-chat-interface">Example: Basic Chat Interface<a class="td-heading-self-link" href="#example-basic-chat-interface" aria-label="Heading self-link"></a></h2>
+<p>Once everything is set up, you can use big-AGI&rsquo;s interface to interact with your AI models:</p>
+<ol>
+<li>Start a new chat</li>
+<li>Select your model from the model dropdown (e.g., <code>gemini-1.5-pro</code>)</li>
+<li>Enable function calling if you want to use tools</li>
+<li>Begin chatting with your AI assistant, powered by gomcptest</li>
+</ol>
+<p>The big-AGI interface provides a much richer experience than a command-line interface, with features like conversation history, markdown rendering, code highlighting, and more.</p>
+
+</div>
+
+
+
+    
+	
+  
+
+
+
+          </main>
+        </div>
+      </div>
+      <footer class="td-footer row d-print-none">
+  <div class="container-fluid">
+    <div class="row mx-md-2">
+      <div class="td-footer__left col-6 col-sm-4 order-sm-1">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub Issues" aria-label="GitHub Issues">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest/issues" aria-label="GitHub Issues">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__right col-6 col-sm-4 order-sm-3">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub" aria-label="GitHub">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest" aria-label="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__center col-12 col-sm-4 py-2 order-sm-2">
+        <span class="td-footer__copyright">&copy;
+    2023&ndash;2025
+    <span class="td-footer__authors">gomcptest Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <script src="/js/main.js"></script>
+<script defer src="/js/click-to-copy.js" crossorigin="anonymous"></script>
+<script src='/js/tabpane-persist.js'></script>
+
+  </body>
+</html>

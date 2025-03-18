@@ -1,0 +1,687 @@
+<!doctype html>
+<html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="canonical" type="text/html" href="http://localhost:1313/docs/explanation/">
+<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/docs/explanation/index.xml">
+<meta name="robots" content="noindex, nofollow">
+
+
+<link rel="shortcut icon" href="/favicons/favicon.ico" >
+<link rel="apple-touch-icon" href="/favicons/apple-touch-icon-180x180.png" sizes="180x180">
+<link rel="icon" type="image/png" href="/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicons/android-36x36.png" sizes="36x36">
+<link rel="icon" type="image/png" href="/favicons/android-48x48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/favicons/android-72x72.png" sizes="72x72">
+<link rel="icon" type="image/png" href="/favicons/android-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="/favicons/android-144x144.png" sizes="144x144">
+<link rel="icon" type="image/png" href="/favicons/android-192x192.png" sizes="192x192">
+
+<title>Explanation | gomcptest</title>
+<meta name="description" content="Understanding-oriented content for gomcptest architecture and concepts">
+<meta property="og:url" content="http://localhost:1313/docs/explanation/">
+  <meta property="og:site_name" content="gomcptest">
+  <meta property="og:title" content="Explanation">
+  <meta property="og:description" content="Understanding-oriented content for gomcptest architecture and concepts">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="website">
+
+  <meta itemprop="name" content="Explanation">
+  <meta itemprop="description" content="Understanding-oriented content for gomcptest architecture and concepts">
+  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
+  <meta itemprop="wordCount" content="35">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Explanation">
+  <meta name="twitter:description" content="Understanding-oriented content for gomcptest architecture and concepts">
+<link href="/scss/main.css" rel="stylesheet">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+  crossorigin="anonymous"></script>
+
+  </head>
+  <body class="td-section">
+    <header>
+      <nav class="td-navbar js-navbar-scroll" data-bs-theme="dark">
+<div class="container-fluid flex-column flex-md-row">
+  <a class="navbar-brand" href="/"><span class="navbar-brand__logo navbar-logo"><svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 500" style="enable-background:new 0 0 500 500"><g><path style="fill:#fff" d="M116.8525 421.9722c-5.7041.0-10.3442-4.3127-10.3442-9.6129V88.183c0-5.3002 4.6401-9.6117 10.3442-9.6117H320.858c3.0347.0 9.3959.5498 11.7506 2.6302l.3545.3442 58.905 63.2912c2.3101 2.491 2.9202 8.4928 2.9202 11.3184v256.2039c0 5.3002-4.6407 9.6129-10.3436 9.6129H116.8525z"/><g><g><g><path style="fill:#767676" d="M384.4445 423.2066H116.852c-6.3839.0-11.5786-4.8658-11.5786-10.8474V88.1831c0-5.9804 5.1947-10.8461 11.5786-10.8461h204.0062c.377.0 9.2786.0329 12.568 2.9389l.3947.3833 58.9508 63.337c3.2135 3.4652 3.2514 11.7924 3.2514 12.1593v256.2036C396.0231 418.3408 390.8284 423.2066 384.4445 423.2066zM116.5079 411.9189c.0848.0278.1999.0531.3441.0531h267.5925c.1442.0.2581-.0253.3441-.0531V156.1556c-.0076-.9033-.3593-3.7347-.7034-5.0037l-57.6527-61.9416c-1.4651-.3176-4.4533-.6389-5.5742-.6389H116.852c-.143.0-.2594.024-.3441.0531V411.9189zm267.4533-261.149zM327.0321 89.371v.0013V89.371z"/></g></g></g><g><g><path style="fill:#5b7fc0" d="M189.0874 210.1754l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4473C177.5953 212.627 183.0601 210.1742 189.0874 210.1754zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 234.1722 197.0804 232.033z"/><path style="opacity:.3;fill:#fff" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/><g><defs><path id="SVGID_1_" d="M194.7376 237.6875c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 234.2399 196.1861 236.239 194.7376 237.6875z"/></defs><clipPath id="SVGID_2_"><use xlink:href="#SVGID_1_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_2_);fill:#fff" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/><path style="opacity:.13;clip-path:url(#SVGID_2_);fill:#020202" d="M190.0704 225.0237c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 225.7247 191.9774 225.0237 190.0704 225.0237z"/></g><g><defs><path id="SVGID_3_" d="M189.0898 210.176c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 212.6276 183.0612 210.176 189.0898 210.176zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 236.239 197.0839 234.2399 197.0839 232.0372z"/></defs><clipPath id="SVGID_4_"><use xlink:href="#SVGID_3_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_4_);fill:#5b7fc0" d="M172.6595 215.6045c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8475-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 209.1953 176.6171 211.647 172.6595 215.6045z"/></g></g><rect x="198.8952" y="225.1043" style="fill:#5b7fc0" width="122.6266" height="13.8671"/></g><g><path style="fill:#d95140" d="M189.0874 155.7611l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.0249 2.454-11.4897 6.4116-15.4473C177.5953 158.2128 183.0601 155.7599 189.0874 155.7611zm7.993 21.8577c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.2508 181.7667 197.0816 179.758 197.0804 177.6188z"/><path style="opacity:.3;fill:#fff" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/><g><defs><path id="SVGID_5_" d="M194.7376 183.2733c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 179.8256 196.1861 181.8248 194.7376 183.2733z"/></defs><clipPath id="SVGID_6_"><use xlink:href="#SVGID_5_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_6_);fill:#fff" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/><path style="opacity:.13;clip-path:url(#SVGID_6_);fill:#020202" d="M190.0704 170.6095c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9546.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.663-2.8588-6.116.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C193.7885 171.3104 191.9774 170.6095 190.0704 170.6095z"/></g><g><defs><path id="SVGID_7_" d="M189.0898 155.7617c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8066-21.8612-21.8613.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 158.2134 183.0612 155.7617 189.0898 155.7617zm7.9941 21.8613c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 181.8248 197.0839 179.8256 197.0839 177.623z"/></defs><clipPath id="SVGID_8_"><use xlink:href="#SVGID_7_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_8_);fill:#d95140" d="M172.6595 161.1903c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 154.7811 176.6171 157.2327 172.6595 161.1903z"/></g><rect x="198.8952" y="170.69" style="fill:#d95140" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#56a55c" d="M189.5379 264.6147l.0012-.0012c7.7751.0012 15.0294 4.1862 18.932 10.9235 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3304-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032-5.8394.0-11.3281-2.2733-15.458-6.4032-4.13-4.13-6.4032-9.6186-6.4056-15.4628.0012-6.0249 2.454-11.4897 6.4116-15.4472C178.0458 267.0663 183.5105 264.6135 189.5379 264.6147zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6538 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403C196.7013 290.6202 197.5321 288.6115 197.5309 286.4723z"/><path style="opacity:.3;fill:#fff" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/><g><defs><path id="SVGID_9_" d="M195.1881 292.1268c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.9989 7.9942-7.9941 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.5344 288.6792 196.6366 290.6783 195.1881 292.1268z"/></defs><clipPath id="SVGID_10_"><use xlink:href="#SVGID_9_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_10_);fill:#fff" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/><path style="opacity:.13;clip-path:url(#SVGID_10_);fill:#020202" d="M190.5209 279.463c-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7446-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9941 2.3802-1e-4 4.616 1.0833 6.1218 2.8788C194.239 280.164 192.4279 279.463 190.5209 279.463z"/></g><g><defs><path id="SVGID_11_" d="M189.5403 264.6153c7.7763.0 15.0283 4.1826 18.926 10.9151 1.9201 3.3135 2.9377 7.0987 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8613-12.0547.0024-21.8636-9.8065-21.8612-21.8613.0-6.0285 2.4516-11.492 6.4116-15.452C178.0482 267.0669 183.5117 264.6153 189.5403 264.6153zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9941.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.6366 290.6783 197.5344 288.6792 197.5344 286.4765z"/></defs><clipPath id="SVGID_12_"><use xlink:href="#SVGID_11_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_12_);fill:#56a55c" d="M173.11 270.0439c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8613 12.0547.0024 21.8636-9.797 21.8613-21.8613.0024-3.8474-1.0151-7.6326-2.9353-10.9462-3.8977-6.7325-11.1497-10.9151-18.926-10.9151C182.5311 263.6346 177.0676 266.0863 173.11 270.0439z"/></g></g><rect x="199.3456" y="279.5436" style="fill:#56a55c" width="122.6266" height="13.8671"/></g><g><g><path style="fill:#f1bc42" d="M189.0874 318.7208l.0012-.0012c7.7751.0012 15.0295 4.1862 18.932 10.9234 1.9177 3.3159 2.9305 7.1011 2.9293 10.9378.0 5.8394-2.2733 11.3305-6.4032 15.4604-4.1288 4.1288-9.6186 6.4032-15.458 6.4032s-11.328-2.2733-15.458-6.4032-6.4032-9.6186-6.4056-15.4628c.0012-6.025 2.454-11.4897 6.4116-15.4472C177.5953 321.1724 183.0601 318.7196 189.0874 318.7208zm7.993 21.8576c.0012-1.4042-.3687-2.7868-1.063-3.9887-1.4293-2.4684-4.0833-3.9995-6.9299-4.0019-4.4077.0024-7.993 3.5877-7.993 7.993.0 2.1356.832 4.1431 2.3427 5.6539 1.5083 1.5083 3.5159 2.3403 5.6503 2.3415 2.1356.0 4.1443-.8308 5.6539-2.3403S197.0816 342.7176 197.0804 340.5784z"/><path style="opacity:.3;fill:#fff" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/><g><defs><path id="SVGID_13_" d="M194.7376 346.2329c-1.4461 1.4461-3.4452 2.3439-5.6479 2.3439-4.4077-.0024-7.9918-3.5865-7.9942-7.9942.0024-4.4125 3.5937-7.999 7.9942-7.9942 2.8443.0 5.497 1.5323 6.924 3.9983.6991 1.2067 1.0702 2.5881 1.0702 3.9959C197.0839 342.7853 196.1861 344.7844 194.7376 346.2329z"/></defs><clipPath id="SVGID_14_"><use xlink:href="#SVGID_13_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_14_);fill:#fff" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/><path style="opacity:.13;clip-path:url(#SVGID_14_);fill:#020202" d="M190.0704 333.5691c-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0011 1.9547.7088 3.7452 1.8782 5.1354-1.7447-1.4674-2.8575-3.6631-2.8588-6.1161.0024-4.4125 3.5936-7.999 7.9942-7.9942 2.3802-1e-4 4.616 1.0834 6.1218 2.8788C193.7885 334.2701 191.9774 333.5691 190.0704 333.5691z"/></g><g><defs><path id="SVGID_15_" d="M189.0898 318.7214c7.7763.0 15.0283 4.1826 18.926 10.915 1.9201 3.3136 2.9377 7.0988 2.9353 10.9462.0024 12.0643-9.8065 21.8636-21.8613 21.8612-12.0547.0024-21.8636-9.8065-21.8612-21.8612.0-6.0285 2.4516-11.4921 6.4116-15.452C177.5977 321.173 183.0612 318.7214 189.0898 318.7214zm7.9941 21.8612c0-1.4078-.3711-2.7892-1.0702-3.9959-1.4269-2.466-4.0797-3.9983-6.924-3.9983-4.4005-.0048-7.9918 3.5817-7.9942 7.9942.0024 4.4077 3.5865 7.9918 7.9942 7.9942 2.2027.0 4.2018-.8978 5.6479-2.3439C196.1861 344.7844 197.0839 342.7853 197.0839 340.5826z"/></defs><clipPath id="SVGID_16_"><use xlink:href="#SVGID_15_" style="overflow:visible"/></clipPath><path style="clip-path:url(#SVGID_16_);fill:#f1bc42" d="M172.6595 324.15c-3.96 3.96-6.4116 9.4235-6.4116 15.452-.0024 12.0547 9.8066 21.8636 21.8613 21.8612 12.0547.0024 21.8636-9.797 21.8613-21.8612.0024-3.8474-1.0151-7.6327-2.9353-10.9462-3.8977-6.7324-11.1497-10.9151-18.926-10.9151C182.0806 317.7407 176.6171 320.1924 172.6595 324.15z"/></g></g><rect x="198.8952" y="333.6497" style="fill:#f1bc42" width="122.6266" height="13.8671"/></g></g></svg></span><span class="navbar-brand__name">gomcptest</span></a>
+  <div class="td-navbar-nav-scroll ms-md-auto" id="main_navbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="/docs/"><span>Docs</span></a>
+      </li>
+      <li class="nav-item dropdown d-none d-lg-block">
+        <div class="dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">English</a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="/fr/docs/explanation/">Français</a></li>
+    </ul>
+</div></li>
+      </ul>
+  </div>
+  <div class="d-none d-lg-block">
+    <div class="td-search">
+  <div class="td-search__icon"></div>
+  <input type="search" class="td-search__input form-control td-search-input" placeholder="Search this site…" aria-label="Search this site…" autocomplete="off">
+</div>
+  </div>
+</div>
+</nav>
+    </header>
+    <div class="container-fluid td-outer">
+      <div class="td-main">
+        <div class="row flex-xl-nowrap">
+          <main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main">
+            
+
+
+
+
+<div class="td-content">
+<div class="pageinfo pageinfo-primary d-print-none">
+<p>
+This is the multi-page printable view of this section.
+<a href="#" onclick="print();return false;">Click here to print</a>.
+</p><p>
+<a href="/docs/explanation/">Return to the regular view of this page</a>.
+</p>
+</div>
+
+
+
+<h1 class="title">Explanation</h1>
+<div class="lead">Understanding-oriented content for gomcptest architecture and concepts</div>
+
+
+
+
+    <ul>
+    
+  
+  
+  
+  
+
+  
+    
+    
+	
+<li>1: <a href="#pg-b0b996368ba948f31e52a0671d2c62fe">gomcptest Architecture</a></li>
+
+
+    
+  
+    
+    
+	
+<li>2: <a href="#pg-090f1260bedc244a0c4b89f7e6660bd9">Understanding the Model Context Protocol (MCP)</a></li>
+
+
+    
+  
+    
+    
+	
+<li>3: <a href="#pg-dfb825df92428ce7ba378cf65f53a5ca">Understanding the MCP Tools</a></li>
+
+
+    
+  
+
+    </ul>
+
+
+<div class="content">
+      
+
+<div class="pageinfo pageinfo-primary">
+<p>Explanation documents discuss and clarify concepts to broaden the reader&rsquo;s understanding of topics. They provide context and illuminate ideas.</p>
+
+</div>
+
+<p>This section provides deeper background on how gomcptest works, its architecture, and the concepts behind it.</p>
+
+</div>
+</div>
+
+
+  
+  
+  
+  
+
+  
+  
+
+  
+    
+    
+	
+    
+
+<div class="td-content" style="">
+    
+	<h1 id="pg-b0b996368ba948f31e52a0671d2c62fe">1 - gomcptest Architecture</h1>
+    <div class="lead">Deep dive into the system architecture and design decisions</div>
+	
+
+<div class="pageinfo pageinfo-primary">
+<p>This document explains the architecture of gomcptest, the design decisions behind it, and how the various components interact to create a custom Model Context Protocol (MCP) host.</p>
+
+</div>
+
+<h2 id="the-big-picture">The Big Picture<a class="td-heading-self-link" href="#the-big-picture" aria-label="Heading self-link"></a></h2>
+<p>The gomcptest project implements a custom host that provides a Model Context Protocol (MCP) implementation. It&rsquo;s designed to enable testing and experimentation with agentic systems without requiring direct integration with commercial LLM platforms.</p>
+<p>The system is built with these key principles in mind:</p>
+<ul>
+<li>Modularity: Components are designed to be interchangeable</li>
+<li>Compatibility: The API mimics the OpenAI API for easy integration</li>
+<li>Extensibility: New tools can be easily added to the system</li>
+<li>Testing: The architecture facilitates testing of agentic applications</li>
+</ul>
+<h2 id="core-components">Core Components<a class="td-heading-self-link" href="#core-components" aria-label="Heading self-link"></a></h2>
+<h3 id="host-openai-server">Host (OpenAI Server)<a class="td-heading-self-link" href="#host-openai-server" aria-label="Heading self-link"></a></h3>
+<p>The host is the central component, located in <code>/host/openaiserver</code>. It presents an OpenAI-compatible API interface and connects to Google&rsquo;s Vertex AI for model inference. This compatibility layer makes it easy to integrate with existing tools and libraries designed for OpenAI.</p>
+<p>The host has several key responsibilities:</p>
+<ol>
+<li><strong>API Compatibility</strong>: Implementing the OpenAI chat completions API</li>
+<li><strong>Session Management</strong>: Maintaining chat history and context</li>
+<li><strong>Model Integration</strong>: Connecting to Vertex AI&rsquo;s Gemini models</li>
+<li><strong>Function Calling</strong>: Orchestrating function/tool calls based on model outputs</li>
+<li><strong>Response Streaming</strong>: Supporting streaming responses to the client</li>
+</ol>
+<p>Unlike commercial implementations, this host is designed for local development and testing, emphasizing flexibility and observability over production-ready features like authentication or rate limiting.</p>
+<h3 id="mcp-tools">MCP Tools<a class="td-heading-self-link" href="#mcp-tools" aria-label="Heading self-link"></a></h3>
+<p>The tools are standalone executables that implement the Model Context Protocol. Each tool is designed to perform a specific function, such as executing shell commands or manipulating files.</p>
+<p>Tools follow a consistent pattern:</p>
+<ul>
+<li>They communicate via standard I/O using the MCP JSON-RPC protocol</li>
+<li>They expose a specific set of parameters</li>
+<li>They handle their own error conditions</li>
+<li>They return results in a standardized format</li>
+</ul>
+<p>This approach allows tools to be:</p>
+<ul>
+<li>Developed independently</li>
+<li>Tested in isolation</li>
+<li>Used in different host environments</li>
+<li>Chained together in complex workflows</li>
+</ul>
+<h3 id="cli">CLI<a class="td-heading-self-link" href="#cli" aria-label="Heading self-link"></a></h3>
+<p>The CLI provides a user interface similar to tools like &ldquo;Claude Code&rdquo; or &ldquo;OpenAI ChatGPT&rdquo;. It connects to the OpenAI-compatible server and provides a way to interact with the LLM and tools through a conversational interface.</p>
+<h2 id="data-flow">Data Flow<a class="td-heading-self-link" href="#data-flow" aria-label="Heading self-link"></a></h2>
+<ol>
+<li>The user sends a request to the CLI</li>
+<li>The CLI forwards this request to the OpenAI-compatible server</li>
+<li>The server sends the request to Vertex AI&rsquo;s Gemini model</li>
+<li>The model may identify function calls in its response</li>
+<li>The server executes these function calls by invoking the appropriate MCP tools</li>
+<li>The results are provided back to the model to continue its response</li>
+<li>The final response is streamed back to the CLI and presented to the user</li>
+</ol>
+<h2 id="design-decisions-explained">Design Decisions Explained<a class="td-heading-self-link" href="#design-decisions-explained" aria-label="Heading self-link"></a></h2>
+<h3 id="why-openai-api-compatibility">Why OpenAI API Compatibility?<a class="td-heading-self-link" href="#why-openai-api-compatibility" aria-label="Heading self-link"></a></h3>
+<p>The OpenAI API has become a de facto standard in the LLM space. By implementing this interface, gomcptest can work with a wide variety of existing tools, libraries, and frontends with minimal adaptation.</p>
+<h3 id="why-google-vertex-ai">Why Google Vertex AI?<a class="td-heading-self-link" href="#why-google-vertex-ai" aria-label="Heading self-link"></a></h3>
+<p>Vertex AI provides access to Google&rsquo;s Gemini models, which have strong function calling capabilities. The implementation could be extended to support other model providers as needed.</p>
+<h3 id="why-standalone-tools">Why Standalone Tools?<a class="td-heading-self-link" href="#why-standalone-tools" aria-label="Heading self-link"></a></h3>
+<p>By implementing tools as standalone executables rather than library functions, we gain several advantages:</p>
+<ul>
+<li>Security through isolation</li>
+<li>Language agnosticism (tools can be written in any language)</li>
+<li>Ability to distribute tools separately from the host</li>
+<li>Easier testing and development</li>
+</ul>
+<h3 id="why-mcp">Why MCP?<a class="td-heading-self-link" href="#why-mcp" aria-label="Heading self-link"></a></h3>
+<p>The Model Context Protocol provides a standardized way for LLMs to interact with external tools. By adopting this protocol, gomcptest ensures compatibility with tools developed for other MCP-compatible hosts.</p>
+<h2 id="limitations-and-future-directions">Limitations and Future Directions<a class="td-heading-self-link" href="#limitations-and-future-directions" aria-label="Heading self-link"></a></h2>
+<p>The current implementation has several limitations:</p>
+<ul>
+<li>Single chat session per instance</li>
+<li>Limited support for authentication and authorization</li>
+<li>No persistence of chat history between restarts</li>
+<li>No built-in support for rate limiting or quotas</li>
+</ul>
+<p>Future enhancements could include:</p>
+<ul>
+<li>Support for multiple chat sessions</li>
+<li>Integration with additional model providers</li>
+<li>Enhanced security features</li>
+<li>Improved error handling and logging</li>
+<li>Performance optimizations for large-scale deployments</li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="td-heading-self-link" href="#conclusion" aria-label="Heading self-link"></a></h2>
+<p>The gomcptest architecture represents a flexible and extensible approach to building custom MCP hosts. It prioritizes simplicity, modularity, and developer experience, making it an excellent platform for experimentation with agentic systems.</p>
+<p>By understanding this architecture, developers can effectively utilize the system, extend it with new tools, and potentially adapt it for their specific needs.</p>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-090f1260bedc244a0c4b89f7e6660bd9">2 - Understanding the Model Context Protocol (MCP)</h1>
+    <div class="lead">Exploration of what MCP is, how it works, and design decisions behind it</div>
+	
+
+<div class="pageinfo pageinfo-primary">
+<p>This document explores the Model Context Protocol (MCP), how it works, the design decisions behind it, and how it compares to alternative approaches for LLM tool integration.</p>
+
+</div>
+
+<h2 id="what-is-the-model-context-protocol">What is the Model Context Protocol?<a class="td-heading-self-link" href="#what-is-the-model-context-protocol" aria-label="Heading self-link"></a></h2>
+<p>The Model Context Protocol (MCP) is a standardized communication protocol that enables Large Language Models (LLMs) to interact with external tools and capabilities. It defines a structured way for models to request information or take actions in the real world, and for tools to provide responses back to the model.</p>
+<p>MCP is designed to solve the problem of extending LLMs beyond their training data by giving them access to:</p>
+<ul>
+<li>Current information (e.g., via web search)</li>
+<li>Computational capabilities (e.g., calculators, code execution)</li>
+<li>External systems (e.g., databases, APIs)</li>
+<li>User environment (e.g., file system, terminal)</li>
+</ul>
+<h2 id="how-mcp-works">How MCP Works<a class="td-heading-self-link" href="#how-mcp-works" aria-label="Heading self-link"></a></h2>
+<p>At its core, MCP is a protocol based on JSON-RPC that enables bidirectional communication between LLMs and tools. The basic workflow is:</p>
+<ol>
+<li>The LLM generates a call to a tool with specific parameters</li>
+<li>The host intercepts this call and routes it to the appropriate tool</li>
+<li>The tool executes the requested action and returns the result</li>
+<li>The result is injected into the model&rsquo;s context</li>
+<li>The model continues generating a response incorporating the new information</li>
+</ol>
+<p>The protocol specifies:</p>
+<ul>
+<li>How tools declare their capabilities and parameters</li>
+<li>How the model requests tool actions</li>
+<li>How tools return results or errors</li>
+<li>How multiple tools can be combined</li>
+</ul>
+<h2 id="mcp-in-gomcptest">MCP in gomcptest<a class="td-heading-self-link" href="#mcp-in-gomcptest" aria-label="Heading self-link"></a></h2>
+<p>In gomcptest, MCP is implemented using a set of independent executables that communicate over standard I/O. This approach has several advantages:</p>
+<ul>
+<li><strong>Language-agnostic</strong>: Tools can be written in any programming language</li>
+<li><strong>Process isolation</strong>: Each tool runs in its own process for security and stability</li>
+<li><strong>Compatibility</strong>: The protocol works with various LLM providers</li>
+<li><strong>Extensibility</strong>: New tools can be easily added to the system</li>
+</ul>
+<p>Each tool in gomcptest follows a consistent pattern:</p>
+<ol>
+<li>It receives a JSON request on stdin</li>
+<li>It parses the parameters and performs its action</li>
+<li>It formats the result as JSON and returns it on stdout</li>
+</ol>
+<h2 id="the-protocol-specification">The Protocol Specification<a class="td-heading-self-link" href="#the-protocol-specification" aria-label="Heading self-link"></a></h2>
+<p>The core MCP protocol in gomcptest follows this format:</p>
+<h3 id="tool-registration">Tool Registration<a class="td-heading-self-link" href="#tool-registration" aria-label="Heading self-link"></a></h3>
+<p>Tools register themselves with a schema that defines their capabilities:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;ToolName&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;description&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Description of what the tool does&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;parameters&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;object&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;properties&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#204a87;font-weight:bold">&#34;param1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">&#34;type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;string&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">&#34;description&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Description of parameter 1&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">},</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#204a87;font-weight:bold">&#34;param2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">&#34;type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;number&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">&#34;description&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Description of parameter 2&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;required&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[</span><span style="color:#4e9a06">&#34;param1&#34;</span><span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="function-call-request">Function Call Request<a class="td-heading-self-link" href="#function-call-request" aria-label="Heading self-link"></a></h3>
+<p>When a model wants to use a tool, it generates a function call like:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;ToolName&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;params&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;param1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value1&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;param2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">42</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="function-call-response">Function Call Response<a class="td-heading-self-link" href="#function-call-response" aria-label="Heading self-link"></a></h3>
+<p>The tool executes the requested action and returns:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;result&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Output of the tool&#39;s execution&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><p>Or, in case of an error:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;error&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;message&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Error message&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;code&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;ERROR_CODE&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="design-decisions-in-mcp">Design Decisions in MCP<a class="td-heading-self-link" href="#design-decisions-in-mcp" aria-label="Heading self-link"></a></h2>
+<p>Several key design decisions shape the MCP implementation in gomcptest:</p>
+<h3 id="standard-io-communication">Standard I/O Communication<a class="td-heading-self-link" href="#standard-io-communication" aria-label="Heading self-link"></a></h3>
+<p>By using stdin/stdout for communication, tools can be written in any language that can read from stdin and write to stdout. This makes it easy to integrate existing utilities and libraries.</p>
+<h3 id="json-schema-for-tool-definition">JSON Schema for Tool Definition<a class="td-heading-self-link" href="#json-schema-for-tool-definition" aria-label="Heading self-link"></a></h3>
+<p>Using JSON Schema for tool definitions provides a clear contract between the model and the tools. It enables:</p>
+<ul>
+<li>Validation of parameters</li>
+<li>Documentation of capabilities</li>
+<li>Potential for automatic code generation</li>
+</ul>
+<h3 id="stateless-design">Stateless Design<a class="td-heading-self-link" href="#stateless-design" aria-label="Heading self-link"></a></h3>
+<p>Tools are designed to be stateless, with each invocation being independent. This simplifies the protocol and makes tools easier to reason about and test.</p>
+<h3 id="pass-through-authentication">Pass-through Authentication<a class="td-heading-self-link" href="#pass-through-authentication" aria-label="Heading self-link"></a></h3>
+<p>The protocol doesn&rsquo;t handle authentication directly; instead, it relies on the host to manage permissions and authentication. This separation of concerns keeps the protocol simple.</p>
+<h2 id="comparison-with-alternatives">Comparison with Alternatives<a class="td-heading-self-link" href="#comparison-with-alternatives" aria-label="Heading self-link"></a></h2>
+<h3 id="vs-openai-function-calling">vs. OpenAI Function Calling<a class="td-heading-self-link" href="#vs-openai-function-calling" aria-label="Heading self-link"></a></h3>
+<p>MCP is similar to OpenAI&rsquo;s function calling feature but with these key differences:</p>
+<ul>
+<li>MCP is designed to be provider-agnostic</li>
+<li>MCP tools run as separate processes</li>
+<li>MCP provides more detailed error handling</li>
+</ul>
+<h3 id="vs-langchain-tools">vs. LangChain Tools<a class="td-heading-self-link" href="#vs-langchain-tools" aria-label="Heading self-link"></a></h3>
+<p>Compared to LangChain:</p>
+<ul>
+<li>MCP is a lower-level protocol rather than a framework</li>
+<li>MCP focuses on interoperability rather than abstraction</li>
+<li>MCP allows for stronger process isolation</li>
+</ul>
+<h3 id="vs-agent-protocols">vs. Agent Protocols<a class="td-heading-self-link" href="#vs-agent-protocols" aria-label="Heading self-link"></a></h3>
+<p>Other agent protocols often focus on higher-level concepts like goals and planning, while MCP focuses specifically on the mechanics of tool invocation.</p>
+<h2 id="future-directions">Future Directions<a class="td-heading-self-link" href="#future-directions" aria-label="Heading self-link"></a></h2>
+<p>The MCP protocol in gomcptest could evolve in several ways:</p>
+<ul>
+<li><strong>Enhanced security</strong>: More granular permissions and sand-boxing</li>
+<li><strong>Streaming responses</strong>: Support for tools that produce incremental results</li>
+<li><strong>Bidirectional communication</strong>: Supporting tools that can request clarification</li>
+<li><strong>Tool composition</strong>: First-class support for chaining tools together</li>
+<li><strong>State management</strong>: Optional session state for tools that need to maintain context</li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="td-heading-self-link" href="#conclusion" aria-label="Heading self-link"></a></h2>
+<p>The Model Context Protocol as implemented in gomcptest represents a pragmatic approach to extending LLM capabilities through external tools. Its simplicity, extensibility, and focus on interoperability make it a solid foundation for building and experimenting with agentic systems.</p>
+<p>By understanding the protocol, developers can create new tools that seamlessly integrate with the system, unlocking new capabilities for LLM applications.</p>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-dfb825df92428ce7ba378cf65f53a5ca">3 - Understanding the MCP Tools</h1>
+    <div class="lead">Detailed explanation of the MCP tools architecture and implementation</div>
+	
+
+<div class="pageinfo pageinfo-primary">
+<p>This document explains the architecture and implementation of the MCP tools in gomcptest, how they work, and the design principles behind them.</p>
+
+</div>
+
+<h2 id="what-are-mcp-tools">What are MCP Tools?<a class="td-heading-self-link" href="#what-are-mcp-tools" aria-label="Heading self-link"></a></h2>
+<p>MCP (Model Context Protocol) tools are standalone executables that provide specific functions that can be invoked by AI models. They allow the AI to interact with its environment - performing tasks like reading and writing files, executing commands, or searching for information.</p>
+<p>In gomcptest, tools are implemented as independent Go executables that follow a standard protocol for receiving requests and returning results through standard input/output streams.</p>
+<h2 id="tool-architecture">Tool Architecture<a class="td-heading-self-link" href="#tool-architecture" aria-label="Heading self-link"></a></h2>
+<p>Each tool in gomcptest follows a consistent architecture:</p>
+<ol>
+<li><strong>Standard I/O Interface</strong>: Tools communicate via stdin/stdout using JSON-formatted requests and responses</li>
+<li><strong>Parameter Validation</strong>: Tools validate their input parameters according to a JSON schema</li>
+<li><strong>Stateless Execution</strong>: Each tool invocation is independent and does not maintain state</li>
+<li><strong>Controlled Access</strong>: Tools implement appropriate security measures and permission checks</li>
+<li><strong>Structured Results</strong>: Results are returned in a standardized JSON format</li>
+</ol>
+<h3 id="common-components">Common Components<a class="td-heading-self-link" href="#common-components" aria-label="Heading self-link"></a></h3>
+<p>Most tools share these common components:</p>
+<ul>
+<li><strong>Main Function</strong>: Parses JSON input, validates parameters, executes the core function, formats and returns the result</li>
+<li><strong>Parameter Structure</strong>: Defines the expected input parameters for the tool</li>
+<li><strong>Result Structure</strong>: Defines the format of the tool&rsquo;s output</li>
+<li><strong>Error Handling</strong>: Standardized error reporting and handling</li>
+<li><strong>Security Checks</strong>: Validation to prevent dangerous operations</li>
+</ul>
+<h2 id="tool-categories">Tool Categories<a class="td-heading-self-link" href="#tool-categories" aria-label="Heading self-link"></a></h2>
+<p>The tools in gomcptest can be categorized into several functional groups:</p>
+<h3 id="filesystem-navigation">Filesystem Navigation<a class="td-heading-self-link" href="#filesystem-navigation" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>LS</strong>: Lists files and directories, providing metadata and structure</li>
+<li><strong>GlobTool</strong>: Finds files matching specific patterns, making it easier to locate relevant files</li>
+<li><strong>GrepTool</strong>: Searches file contents using regular expressions, helping find specific information in codebases</li>
+</ul>
+<h3 id="content-management">Content Management<a class="td-heading-self-link" href="#content-management" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>View</strong>: Reads and displays file contents, allowing the model to analyze existing code or documentation</li>
+<li><strong>Edit</strong>: Makes targeted modifications to files, enabling precise changes without overwriting the entire file</li>
+<li><strong>Replace</strong>: Completely overwrites file contents, useful for generating new files or making major changes</li>
+</ul>
+<h3 id="system-interaction">System Interaction<a class="td-heading-self-link" href="#system-interaction" aria-label="Heading self-link"></a></h3>
+<ul>
+<li><strong>Bash</strong>: Executes shell commands, allowing the model to run commands, scripts, and programs</li>
+<li><strong>dispatch_agent</strong>: A meta-tool that can create specialized sub-agents for specific tasks</li>
+</ul>
+<h2 id="design-principles">Design Principles<a class="td-heading-self-link" href="#design-principles" aria-label="Heading self-link"></a></h2>
+<p>The tools in gomcptest were designed with several key principles in mind:</p>
+<h3 id="1-modularity">1. Modularity<a class="td-heading-self-link" href="#1-modularity" aria-label="Heading self-link"></a></h3>
+<p>Each tool is a standalone executable that can be developed, tested, and deployed independently. This modular approach allows for:</p>
+<ul>
+<li>Independent development cycles</li>
+<li>Targeted testing</li>
+<li>Simpler debugging</li>
+<li>Ability to add or replace tools without affecting the entire system</li>
+</ul>
+<h3 id="2-security">2. Security<a class="td-heading-self-link" href="#2-security" aria-label="Heading self-link"></a></h3>
+<p>Security is a major consideration in the tool design:</p>
+<ul>
+<li>Tools validate inputs to prevent injection attacks</li>
+<li>File operations are limited to appropriate directories</li>
+<li>Bash command execution is restricted with banned commands</li>
+<li>Timeouts prevent infinite operations</li>
+<li>Process isolation prevents one tool from affecting others</li>
+</ul>
+<h3 id="3-simplicity">3. Simplicity<a class="td-heading-self-link" href="#3-simplicity" aria-label="Heading self-link"></a></h3>
+<p>The tools are designed to be simple to understand and use:</p>
+<ul>
+<li>Clear, focused functionality for each tool</li>
+<li>Straightforward parameter structures</li>
+<li>Consistent result formats</li>
+<li>Well-documented behaviors and limitations</li>
+</ul>
+<h3 id="4-extensibility">4. Extensibility<a class="td-heading-self-link" href="#4-extensibility" aria-label="Heading self-link"></a></h3>
+<p>The system is designed to be easily extended:</p>
+<ul>
+<li>New tools can be added by following the standard protocol</li>
+<li>Existing tools can be enhanced with additional parameters</li>
+<li>Alternative implementations can replace existing tools</li>
+</ul>
+<h2 id="tool-protocol-details">Tool Protocol Details<a class="td-heading-self-link" href="#tool-protocol-details" aria-label="Heading self-link"></a></h2>
+<p>The communication protocol for tools follows this pattern:</p>
+<h3 id="input-format">Input Format<a class="td-heading-self-link" href="#input-format" aria-label="Heading self-link"></a></h3>
+<p>Tools receive JSON input on stdin in this format:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value1&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value2&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;param3&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">123</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="output-format">Output Format<a class="td-heading-self-link" href="#output-format" aria-label="Heading self-link"></a></h3>
+<p>Tools return JSON output on stdout in one of these formats:</p>
+<h4 id="success">Success:<a class="td-heading-self-link" href="#success" aria-label="Heading self-link"></a></h4>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;result&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;text result&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><p>or</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;results&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">{</span><span style="color:#204a87;font-weight:bold">&#34;field1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value1&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">&#34;field2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value2&#34;</span><span style="color:#000;font-weight:bold">},</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">{</span><span style="color:#204a87;font-weight:bold">&#34;field1&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value3&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">&#34;field2&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;value4&#34;</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h4 id="error">Error:<a class="td-heading-self-link" href="#error" aria-label="Heading self-link"></a></h4>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;error&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Error message&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;code&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;ERROR_CODE&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="implementation-examples">Implementation Examples<a class="td-heading-self-link" href="#implementation-examples" aria-label="Heading self-link"></a></h2>
+<h3 id="basic-tool-structure">Basic Tool Structure<a class="td-heading-self-link" href="#basic-tool-structure" aria-label="Heading self-link"></a></h3>
+<p>Most tools follow this basic structure:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">package</span> <span style="color:#000">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;encoding/json&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#4e9a06">&#34;os&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// Parameters defines the expected input structure
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">Parameters</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Param1</span> <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;param1&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Param2</span> <span style="color:#204a87;font-weight:bold">int</span>    <span style="color:#4e9a06">`json:&#34;param2,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// Result defines the output structure
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#204a87;font-weight:bold">type</span> <span style="color:#000">Result</span> <span style="color:#204a87;font-weight:bold">struct</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Result</span>  <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;result,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Error</span>   <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;error,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">Code</span>    <span style="color:#204a87;font-weight:bold">string</span> <span style="color:#4e9a06">`json:&#34;code,omitempty&#34;`</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">main</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Parse input
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">var</span> <span style="color:#000">params</span> <span style="color:#000">Parameters</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">decoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewDecoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdin</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">decoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Decode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&amp;</span><span style="color:#000">params</span><span style="color:#000;font-weight:bold">);</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;Failed to parse input&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;INVALID_INPUT&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Validate parameters
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">params</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Param1</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;&#34;</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;param1 is required&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;MISSING_PARAMETER&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Execute core functionality
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">result</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">executeTool</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">err</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#204a87;font-weight:bold">nil</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">err</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Error</span><span style="color:#000;font-weight:bold">(),</span> <span style="color:#4e9a06">&#34;EXECUTION_ERROR&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Return result
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#000">output</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">Result</span><span style="color:#000;font-weight:bold">{</span><span style="color:#000">Result</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">result</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewEncoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdout</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Encode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">output</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">executeTool</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">params</span> <span style="color:#000">Parameters</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">error</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8f5902;font-style:italic">// Tool-specific logic here
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>	<span style="color:#204a87;font-weight:bold">return</span> <span style="color:#4e9a06">&#34;result&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000">outputError</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">message</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">code</span> <span style="color:#204a87;font-weight:bold">string</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">result</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">Result</span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">Error</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">message</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#000">Code</span><span style="color:#000;font-weight:bold">:</span>  <span style="color:#000">code</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">NewEncoder</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">os</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Stdout</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#000">encoder</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Encode</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">result</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h2 id="advanced-concepts">Advanced Concepts<a class="td-heading-self-link" href="#advanced-concepts" aria-label="Heading self-link"></a></h2>
+<h3 id="tool-composition">Tool Composition<a class="td-heading-self-link" href="#tool-composition" aria-label="Heading self-link"></a></h3>
+<p>The dispatch_agent tool demonstrates how tools can be composed to create more powerful capabilities. It:</p>
+<ol>
+<li>Accepts a high-level task description</li>
+<li>Plans a sequence of tool operations to accomplish the task</li>
+<li>Executes these operations using the available tools</li>
+<li>Synthesizes the results into a coherent response</li>
+</ol>
+<h3 id="error-propagation">Error Propagation<a class="td-heading-self-link" href="#error-propagation" aria-label="Heading self-link"></a></h3>
+<p>The tool error mechanism is designed to provide useful information back to the model:</p>
+<ul>
+<li>Error messages are human-readable and descriptive</li>
+<li>Error codes allow programmatic handling of specific error types</li>
+<li>Stacktraces and debugging information are not exposed to maintain security</li>
+</ul>
+<h3 id="performance-considerations">Performance Considerations<a class="td-heading-self-link" href="#performance-considerations" aria-label="Heading self-link"></a></h3>
+<p>Tools are designed with performance in mind:</p>
+<ul>
+<li>File operations use efficient libraries and patterns</li>
+<li>Search operations employ indexing and filtering when appropriate</li>
+<li>Large results can be paginated or truncated to prevent context overflows</li>
+<li>Resource-intensive operations have configurable timeouts</li>
+</ul>
+<h2 id="future-directions">Future Directions<a class="td-heading-self-link" href="#future-directions" aria-label="Heading self-link"></a></h2>
+<p>The tool architecture in gomcptest could evolve in several ways:</p>
+<ol>
+<li><strong>Streaming Results</strong>: Supporting incremental results for long-running operations</li>
+<li><strong>Tool Discovery</strong>: More sophisticated mechanisms for models to discover available tools</li>
+<li><strong>Tool Chaining</strong>: First-class support for composing multiple tools in sequences or pipelines</li>
+<li><strong>Interactive Tools</strong>: Tools that can engage in multi-step interactions with the model</li>
+<li><strong>Persistent State</strong>: Optional state maintenance for tools that benefit from context</li>
+</ol>
+<h2 id="conclusion">Conclusion<a class="td-heading-self-link" href="#conclusion" aria-label="Heading self-link"></a></h2>
+<p>The MCP tools in gomcptest provide a flexible, secure, and extensible foundation for enabling AI agents to interact with their environment. By understanding the architecture and design principles of these tools, developers can effectively utilize the existing tools, extend them with new capabilities, or create entirely new tools that integrate seamlessly with the system.</p>
+
+</div>
+
+
+
+    
+	
+  
+
+
+
+          </main>
+        </div>
+      </div>
+      <footer class="td-footer row d-print-none">
+  <div class="container-fluid">
+    <div class="row mx-md-2">
+      <div class="td-footer__left col-6 col-sm-4 order-sm-1">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub Issues" aria-label="GitHub Issues">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest/issues" aria-label="GitHub Issues">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__right col-6 col-sm-4 order-sm-3">
+        <ul class="td-footer__links-list">
+  
+  <li class="td-footer__links-item" data-bs-toggle="tooltip" title="GitHub" aria-label="GitHub">
+    <a target="_blank" rel="noopener" href="https://github.com/owulveryck/gomcptest" aria-label="GitHub">
+      <i class="fab fa-github"></i>
+    </a>
+  </li>
+  
+</ul>
+
+      </div><div class="td-footer__center col-12 col-sm-4 py-2 order-sm-2">
+        <span class="td-footer__copyright">&copy;
+    2023&ndash;2025
+    <span class="td-footer__authors">gomcptest Authors | <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a> |</span></span><span class="td-footer__all_rights_reserved">All Rights Reserved</span><span class="ms-2"><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a></span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <script src="/js/main.js"></script>
+<script defer src="/js/click-to-copy.js" crossorigin="anonymous"></script>
+<script src='/js/tabpane-persist.js'></script>
+
+  </body>
+</html>
