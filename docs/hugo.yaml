@@ -1,4 +1,4 @@
-baseURL: https://gomcptest.dev
+baseURL: https://owulveryck.github.io/gomcptest
 title: gomcptest
 
 # cSpell:ignore goldmark github hugo readingtime docsy subdir lastmod pygments linenos catmullrom norsk gu
@@ -49,25 +49,14 @@ languages:
     title: gomcptest
     params:
       description: Model Context Protocol (MCP) with custom tools to play with agentic systems
-  # cSpell:disable
-  'no':
-    languageName: Norsk
-    contentDir: content/no
-    title: Gulldoks
+  fr:
+    languageName: Français
+    contentDir: content/fr
+    title: gomcptest
     params:
-      description: Docsy er operativsystem for skyen
+      description: Protocole de Contexte de Modèle (MCP) avec des outils personnalisés pour interagir avec des systèmes d'agents
       time_format_default: 02.01.2006
       time_format_blog: 02.01.2006
-  fa:
-    languageDirection: rtl
-    languageName: "فارسی (Persian)"
-    contentDir: content/fa
-    title: "اسناد گلدی"
-    params:
-      description: "یک نمونه برای پوسته داکسی"
-      time_format_default: 2006.01.02
-      time_format_blog: 2006.01.02
-  # cSpell:enable
 
 markup:
   goldmark:
@@ -120,7 +109,7 @@ params:
 
   # A link to latest version of the docs. Used in the "version-banner" partial to
   # point people to the main doc site.
-  url_latest_version: https://example.com
+  url_latest_version: https://owulveryck.github.io/gomcptest
 
   # Repository configuration (URLs for in-page links to opening issues and suggesting changes)
   github_repo: https://github.com/owulveryck/gomcptest
@@ -145,8 +134,8 @@ params:
   prism_syntax_highlighting: false
 
   copyright:
-    authors: Docsy Authors | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
-    from_year: 2018
+    authors: gomcptest Authors | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
+    from_year: 2023
 
   # User interface configuration
   ui:
@@ -182,32 +171,16 @@ params:
   links:
     # End user relevant links. These will show up on left side of footer and in the community page if you have one.
     user:
-      - name: User mailing list
-        url: https://example.org/mail
-        icon: fa fa-envelope
-        desc: Discussion and help from your fellow users
-      - name: Twitter
-        url: https://example.org/twitter
-        icon: fab fa-twitter
-        desc: Follow us on Twitter to get the latest news!
-      - name: Stack Overflow
-        url: https://example.org/stack
-        icon: fab fa-stack-overflow
-        desc: Practical questions and curated answers
+      - name: GitHub Issues
+        url: https://github.com/owulveryck/gomcptest/issues
+        icon: fab fa-github
+        desc: Report issues or request features
     # Developer relevant links. These will show up on right side of footer and in the community page if you have one.
     developer:
       - name: GitHub
-        url: https://github.com/google/docsy
+        url: https://github.com/owulveryck/gomcptest
         icon: fab fa-github
         desc: Development takes place here!
-      - name: Slack
-        url: https://example.org/slack
-        icon: fab fa-slack
-        desc: Chat with other project developers
-      - name: Developer mailing list
-        url: https://example.org/mail
-        icon: fa fa-envelope
-        desc: Discuss development issues around the project
 
 module:
   # Uncomment the next line to build and serve using local docsy clone declared in the named Hugo workspace:
