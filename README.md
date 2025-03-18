@@ -2,6 +2,8 @@
 
 This project is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host to play with agentic systems. The code is primarily written from scratch to provide a clear understanding of the underlying mechanisms.
 
+[See the experimental website for documentation (auto-generated) at https://owulveryck.github.io/gomcptest/](https://owulveryck.github.io/gomcptest/)
+
 ## Goal
 
 The primary goal of this project is to enable easy testing of agentic systems through the Model Context Protocol. For example:
