@@ -13,3 +13,5 @@ dist/
 tools/bin
 **/cmd/cmd
 bin/
+docs/node_modules
+.DS_Store

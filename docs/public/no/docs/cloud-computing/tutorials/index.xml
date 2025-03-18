@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Steg for steg hjelpeartikler on Gulldoks</title>
+    <link>http://localhost:1313/no/docs/cloud-computing/tutorials/</link>
+    <description>Recent content in Steg for steg hjelpeartikler on Gulldoks</description>
+    <generator>Hugo</generator>
+    <language>no</language>
+    <lastBuildDate>Mon, 09 Jan 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/no/docs/cloud-computing/tutorials/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Matten til mikroservicer: Detaljert spesifikasjon</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-microservices-detailed-spec/</link>
+      <pubDate>Mon, 09 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-microservices-detailed-spec/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Matten til monolitter: Drivverket</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-monoliths-the-inner-workings/</link>
+      <pubDate>Sun, 08 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-monoliths-the-inner-workings/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Matten til Java: Drivverket</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-java-the-inner-workings/</link>
+      <pubDate>Sat, 07 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-java-the-inner-workings/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Matten til monografer: Detaljert spesifikasjon</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-monographs-detailed-spec/</link>
+      <pubDate>Fri, 06 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-math-of-monographs-detailed-spec/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Innsiden av mikroservicer: Detaljert spesifikasjon</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-inside-of-microservices-detailed-spec/</link>
+      <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-inside-of-microservices-detailed-spec/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Innsiden av Go: Drivverket</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/the-inside-of-go-the-inner-workings/</link>
+      <pubDate>Wed, 04 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/the-inside-of-go-the-inner-workings/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Detaljert om monografer: Drivverket</title>
+      <link>http://localhost:1313/no/docs/cloud-computing/tutorials/in-depth-monographs-the-inner-workings/</link>
+      <pubDate>Tue, 03 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/no/docs/cloud-computing/tutorials/in-depth-monographs-the-inner-workings/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://gohugo.io&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. Lorem markdownum tempus auras formasque ore vir crescere est! Malo quod, hunc, est dura; aut haec simillima nec per conantemque iusserat audax moriensque confessasque. Haec vulneret quam libratum homo pede arbore tu manus membrisque iuveni Clymeneia se cepi unda, iustae? Et genitor humanaeve undis &lt;strong&gt;Dicta limina&lt;/strong&gt; vinoque vestigia decorum nulla ars. Pectora sede: quoque magnum Persidaque in suos, adiciunt tenebor.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
