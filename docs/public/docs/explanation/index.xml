@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Explanation on gomcptest</title>
-    <link>http://localhost:1313/docs/explanation/</link>
-    <description>Recent content in Explanation on gomcptest</description>
+    <title>Explanation on GoMCPTest</title>
+    <link>http://localhost:1313/gomcptest/docs/explanation/</link>
+    <description>Recent content in Explanation on GoMCPTest</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <atom:link href="http://localhost:1313/docs/explanation/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/gomcptest/docs/explanation/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>gomcptest Architecture</title>
-      <link>http://localhost:1313/docs/explanation/architecture/</link>
+      <link>http://localhost:1313/gomcptest/docs/explanation/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/docs/explanation/architecture/</guid>
+      <guid>http://localhost:1313/gomcptest/docs/explanation/architecture/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explains the architecture of gomcptest, the design decisions behind it, and how the various components interact to create a custom Model Context Protocol (MCP) host.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;the-big-picture&#34;&gt;The Big Picture&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#the-big-picture&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;The gomcptest project implements a custom host that provides a Model Context Protocol (MCP) implementation. It&amp;rsquo;s designed to enable testing and experimentation with agentic systems without requiring direct integration with commercial LLM platforms.&lt;/p&gt;&#xA;&lt;p&gt;The system is built with these key principles in mind:&lt;/p&gt;</description>
     </item>
     <item>
       <title>Understanding the Model Context Protocol (MCP)</title>
-      <link>http://localhost:1313/docs/explanation/mcp-protocol/</link>
+      <link>http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/docs/explanation/mcp-protocol/</guid>
+      <guid>http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explores the Model Context Protocol (MCP), how it works, the design decisions behind it, and how it compares to alternative approaches for LLM tool integration.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-is-the-model-context-protocol&#34;&gt;What is the Model Context Protocol?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-is-the-model-context-protocol&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;The Model Context Protocol (MCP) is a standardized communication protocol that enables Large Language Models (LLMs) to interact with external tools and capabilities. It defines a structured way for models to request information or take actions in the real world, and for tools to provide responses back to the model.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Understanding the MCP Tools</title>
-      <link>http://localhost:1313/docs/explanation/tools-details/</link>
+      <link>http://localhost:1313/gomcptest/docs/explanation/tools-details/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/docs/explanation/tools-details/</guid>
+      <guid>http://localhost:1313/gomcptest/docs/explanation/tools-details/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explains the architecture and implementation of the MCP tools in gomcptest, how they work, and the design principles behind them.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-are-mcp-tools&#34;&gt;What are MCP Tools?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-are-mcp-tools&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;MCP (Model Context Protocol) tools are standalone executables that provide specific functions that can be invoked by AI models. They allow the AI to interact with its environment - performing tasks like reading and writing files, executing commands, or searching for information.&lt;/p&gt;</description>
     </item>
   </channel>
