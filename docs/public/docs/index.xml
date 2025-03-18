@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Documentation on gomcptest</title>
+    <link>http://localhost:1313/docs/</link>
+    <description>Recent content in Documentation on gomcptest</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 05 Jan 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Overview</title>
+      <link>http://localhost:1313/docs/overview/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/docs/overview/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This is a placeholder page that shows you how to use this template site.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;p&gt;The Overview is where your users find out about your project. Depending on the&#xA;size of your docset, you can have a separate overview page (like this one) or&#xA;put your overview contents in the Documentation landing page (like in the Docsy&#xA;User Guide).&lt;/p&gt;&#xA;&lt;p&gt;Try answering these questions for your user in this page:&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-is-it&#34;&gt;What is it?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-is-it&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;Introduce your project, including what it does or lets you do, why you would use&#xA;it, and its primary goal (and how it achieves it). This should be similar to&#xA;your README description, though you can go into a little more detail here if you&#xA;want.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Examples</title>
+      <link>http://localhost:1313/docs/examples/</link>
+      <pubDate>Thu, 05 Jan 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/docs/examples/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This is a placeholder page that shows you how to use this template site.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;p&gt;Do you have any example &lt;strong&gt;applications&lt;/strong&gt; or &lt;strong&gt;code&lt;/strong&gt; for your users in your repo&#xA;or elsewhere? Link to your examples here.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Concepts</title>
+      <link>http://localhost:1313/docs/concepts/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/docs/concepts/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This is a placeholder page that shows you how to use this template site.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;p&gt;For many projects, users may not need much information beyond the information in the &lt;a href=&#34;http://localhost:1313/docs/overview/&#34;&gt;Overview&lt;/a&gt;, so this section is &lt;strong&gt;optional&lt;/strong&gt;. However if there are areas where your users will need a more detailed understanding of a given term or feature in order to do anything useful with your project (or to not make mistakes when using it) put that information in this section. For example, you may want to add some conceptual pages if you have a large project with many components and a complex architecture.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Contribution Guidelines</title>
+      <link>http://localhost:1313/docs/contribution-guidelines/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/docs/contribution-guidelines/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;These basic sample guidelines assume that your Docsy site is deployed using Netlify and your files are stored in GitHub. You can use the guidelines &amp;ldquo;as is&amp;rdquo; or adapt them with your own instructions: for example, other deployment options, information about your doc project&amp;rsquo;s file structure, project-specific review guidelines, versioning guidelines, or any other information your users might find useful when updating your site. &lt;a href=&#34;https://github.com/kubeflow/website/blob/master/README.md&#34;&gt;Kubeflow&lt;/a&gt; has a great example.&lt;/p&gt;&#xA;&lt;p&gt;Don&amp;rsquo;t forget to link to your own doc repo rather than our example site! Also make sure users can find these guidelines from your doc repo README: either add them there and link to them from this page, add them here and link to them from the README, or include them in both locations.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

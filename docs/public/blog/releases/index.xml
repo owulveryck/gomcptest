@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Releases on gomcptest</title>
+    <link>http://localhost:1313/blog/releases/</link>
+    <description>Recent content in Releases on gomcptest</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 04 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/blog/releases/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Another Great Release</title>
+      <link>http://localhost:1313/blog/2018/01/04/another-great-release/</link>
+      <pubDate>Thu, 04 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/blog/2018/01/04/another-great-release/</guid>
+      <description>&lt;p&gt;Text can be &lt;strong&gt;bold&lt;/strong&gt;, &lt;em&gt;italic&lt;/em&gt;, or &lt;del&gt;strikethrough&lt;/del&gt;. &lt;a href=&#34;https://github.com&#34;&gt;Links&lt;/a&gt; should be blue with no underlines (unless hovered over).&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. There should be whitespace between paragraphs. There should be whitespace between paragraphs. There should be whitespace between paragraphs.&lt;/p&gt;&#xA;&lt;p&gt;There should be whitespace between paragraphs. There should be whitespace between paragraphs. There should be whitespace between paragraphs. There should be whitespace between paragraphs.&lt;/p&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;There should be no margin above this first sentence.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

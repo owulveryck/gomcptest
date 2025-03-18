@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>مستندات on اسناد گلدی</title>
+    <link>http://localhost:1313/fa/docs/</link>
+    <description>Recent content in مستندات on اسناد گلدی</description>
+    <generator>Hugo</generator>
+    <language>fa</language>
+    <atom:link href="http://localhost:1313/fa/docs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>مرور کلی</title>
+      <link>http://localhost:1313/fa/docs/overview/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/fa/docs/overview/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;این یک صفحه جایگزین است که به شما نشان می‌دهد چگونه از این سایت الگو استفاده کنید.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;p&gt;مرور کلی جایی است که کاربران شما درباره پروژه شما اطلاعات کسب می‌کنند. بسته به اندازه مجموعه مستندات شما، می‌توانید یک صفحه مرور جداگانه داشته باشید (مثل این یکی) یا محتوای مرور خود را در صفحه اصلی مستندات قرار دهید (مثل راهنمای کاربر Docsy).&lt;/p&gt;&#xA;&lt;p&gt;سعی کنید به این سوالات برای کاربر خود در این صفحه پاسخ دهید:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
