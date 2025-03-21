@@ -49,6 +49,8 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 	}
 
 	s.stringBuilder.Reset() // Reset the string builder
+	
+	var functionCalls []genai.FunctionCall
 
 	for i, cand := range resp.Candidates {
 		finishReason := ""
@@ -62,8 +64,8 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 				case genai.Text:
 					s.stringBuilder.WriteString(string(v))
 				case genai.FunctionCall:
-					s.fnCallStack.push(v)
-					return nil
+					// Instead of immediately pushing to stack, collect all function calls
+					functionCalls = append(functionCalls, v)
 				default:
 					return fmt.Errorf("unsupported type: %T in candidate %d", part, i)
 				}
@@ -81,12 +83,22 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 		}
 	}
 
-	select {
-	case s.c <- *res:
-		return nil // Explicitly return nil on successful send
-	case <-ctx.Done():
-		return ctx.Err() // Return context error
+	// Send the text content before processing function calls
+	if s.stringBuilder.Len() > 0 {
+		select {
+		case s.c <- *res:
+			// Continue processing
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
+
+	// Push all function calls to the stack for later processing
+	for _, fn := range functionCalls {
+		s.fnCallStack.push(fn)
+	}
+
+	return nil
 }
 
 func (s *streamProcessor) sendChunk(_ context.Context, content string) {
@@ -117,23 +129,35 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 	for {
 		resp, err := iter.Next()
 		if err == iterator.Done {
-			if s.fnCallStack.size() > 0 {
+			// Process all function calls in the stack
+			for s.fnCallStack.size() > 0 {
+				// Process a single function call
 				v := s.fnCallStack.pop()
+				if v == nil {
+					continue
+				}
+				
+				// Show the function call to the user
 				s.sendChunk(ctx, "\n"+formatFunctionCall(*v)+"\n")
 
-				var result genai.Part
-				var err error
-				result, err = s.chatsession.Call(ctx, *v)
+				// Execute the function
+				functionResult, err := s.chatsession.Call(ctx, *v)
 				if err != nil {
 					errMsg := fmt.Sprintf("\n**There has been an error processing the function call**: \n```text\n%s\n```\n", err.Error())
 					s.sendChunk(ctx, errMsg)
-				} else {
-					s.sendChunk(ctx, formatFunctionResponse(result.(*genai.FunctionResponse)))
+					continue // Continue to the next function call if there's an error
 				}
-
-				err = s.processIterator(ctx, s.sendMessageStream(ctx, result))
+				
+				// Show the function result to the user
+				s.sendChunk(ctx, formatFunctionResponse(functionResult))
+				
+				// Send the function result back to the model to get further response
+				newIter := s.sendMessageStream(ctx, functionResult)
+				
+				// Process the model's response to the function result
+				err = s.processIterator(ctx, newIter)
 				if err != nil {
-					return fmt.Errorf("error in sending message %#v, error: %w", result, err)
+					return fmt.Errorf("error in sending message %#v, error: %w", functionResult, err)
 				}
 			}
 

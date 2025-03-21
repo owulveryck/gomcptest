@@ -126,7 +126,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 					err = ctx.Err() // Ensure we return the correct cancellation error
 				}
 
-				fmt.Printf("Error from stream processing: %v\n", err)
+				slog.Error("Error from stream processing", "error", err)
 			}
 		}
 	}()
