@@ -7,7 +7,7 @@ all: tools servers
 BIN_DIR := bin
 
 # Tools to build
-TOOLS := logs LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash
+TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash
 
 # Servers to build
 SERVERS := cliGCP openaiserver
@@ -23,8 +23,6 @@ tools: $(BIN_DIR) $(addprefix $(BIN_DIR)/, $(TOOLS))
 servers: $(BIN_DIR) $(addprefix $(BIN_DIR)/, $(SERVERS)) 
 
 # Special case for tools with main.go in the root directory
-$(BIN_DIR)/logs: tools/logs/main.go
-	go build -o $(BIN_DIR)/logs ./tools/logs
 
 $(BIN_DIR)/duckdbserver: tools/duckdbserver/main.go
 	go build -o $(BIN_DIR)/duckdbserver ./tools/duckdbserver
