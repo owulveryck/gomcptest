@@ -88,6 +88,9 @@ func CreateDispatchTool(agent *DispatchAgent) mcp.Tool {
 			mcp.Required(),
 			mcp.Description("The task for the agent to perform"),
 		),
+		mcp.WithString("path",
+			mcp.Description("The directory path where the agent should work"),
+		),
 	)
 }
 
@@ -99,11 +102,19 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 			return mcp.NewToolResultError("prompt must be a string"), nil
 		}
 
+		// Get the path parameter if provided
+		var path string
+		if pathValue, ok := request.Params.Arguments["path"]; ok {
+			if pathStr, ok := pathValue.(string); ok {
+				path = pathStr
+			}
+		}
+
 		// Process the task using the already initialized agent
 		response, err := agent.ProcessTask(ctx, []*genai.Content{{
 			Role:  "user",
 			Parts: []genai.Part{genai.Text(prompt)},
-		}})
+		}}, path)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Error processing agent task: %v", err)), nil
 		}

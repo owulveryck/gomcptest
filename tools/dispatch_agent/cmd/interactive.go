@@ -15,6 +15,7 @@ import (
 func RunInteractiveMode(agent *DispatchAgent) {
 	fmt.Println("Dispatch Agent Interactive Mode")
 	fmt.Println("Type 'exit' to quit")
+	fmt.Println("You can specify a working directory with '--path=/your/path prompt'")
 	// Initialize liner for command history
 	line := liner.NewLiner()
 	defer line.Close()
@@ -49,12 +50,26 @@ func RunInteractiveMode(agent *DispatchAgent) {
 			break
 		}
 
+		// Check for path flag
+		var workingPath string
+		if strings.HasPrefix(input, "--path=") {
+			parts := strings.SplitN(input, " ", 2)
+			if len(parts) == 2 {
+				pathFlag := parts[0]
+				workingPath = strings.TrimPrefix(pathFlag, "--path=")
+				input = parts[1]
+			} else {
+				fmt.Println("Please provide a prompt after the --path flag")
+				continue
+			}
+		}
+
 		// Process the input
 		history = append(history, &genai.Content{
 			Role:  "user",
 			Parts: []genai.Part{genai.Text(input)},
 		})
-		response, err := agent.ProcessTask(context.Background(), history)
+		response, err := agent.ProcessTask(context.Background(), history, workingPath)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
