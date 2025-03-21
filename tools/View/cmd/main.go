@@ -65,7 +65,7 @@ NOTE: For Jupyter notebooks (.ipynb files), use the ReadNotebook tool instead.`)
 		mcp.WithBoolean("include_metadata",
 			mcp.Description("Whether to include detailed file metadata (size, permissions, modify date)"),
 		),
-		mcp.WithBoolean("include_hex_dump", 
+		mcp.WithBoolean("include_hex_dump",
 			mcp.Description("For binary files, whether to include a hexadecimal dump preview"),
 		),
 		mcp.WithString("find_section",
@@ -130,24 +130,24 @@ func viewHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 	// Handle different file types based on extension and content
 	ext := strings.ToLower(filepath.Ext(filePath))
-	
+
 	// Determine file type category
 	switch {
 	case isImageFile(ext):
 		return handleImageFile(filePath, metadata)
-		
+
 	case isDocumentFile(ext):
 		return handleDocumentFile(filePath, metadata)
-		
+
 	case isProbablyBinaryFile(filePath, ext):
 		return handleBinaryFile(filePath, metadata, includeHexDump)
-		
+
 	case isMarkdownFile(ext):
 		return handleMarkdownFile(filePath, offset, limit, showLineNumbers, metadata, hasFindSection, findSection)
-		
+
 	case isCodeFile(ext):
 		return handleCodeFile(filePath, offset, limit, showLineNumbers, metadata, hasFindSection, findSection)
-		
+
 	default:
 		// Handle as plain text file
 		return handleTextFile(filePath, offset, limit, showLineNumbers, metadata, hasFindSection, findSection)
@@ -181,7 +181,7 @@ func generateFileMetadata(filePath string, fileInfo os.FileInfo) string {
 	mode := fileInfo.Mode()
 	size := fileInfo.Size()
 	modTime := fileInfo.ModTime().Format(time.RFC3339)
-	
+
 	var sizeStr string
 	switch {
 	case size < 1024:
@@ -193,8 +193,8 @@ func generateFileMetadata(filePath string, fileInfo os.FileInfo) string {
 	default:
 		sizeStr = fmt.Sprintf("%.2f GB", float64(size)/(1024*1024*1024))
 	}
-	
-	return fmt.Sprintf("File: %s\nSize: %s\nPermissions: %s\nModified: %s\n\n", 
+
+	return fmt.Sprintf("File: %s\nSize: %s\nPermissions: %s\nModified: %s\n\n",
 		filePath, sizeStr, mode.String(), modTime)
 }
 
@@ -205,21 +205,21 @@ func detectMimeType(filePath string, ext string) string {
 	if mimeType != "application/octet-stream" {
 		return mimeType
 	}
-	
+
 	// If extension doesn't give a specific type, try to detect from content
 	file, err := os.Open(filePath)
 	if err != nil {
 		return mimeType // Return the default type if file can't be opened
 	}
 	defer file.Close()
-	
+
 	// Read first 512 bytes to detect content type
 	buffer := make([]byte, 512)
 	_, err = file.Read(buffer)
 	if err != nil && err != io.EOF {
 		return mimeType // Return default type if can't read
 	}
-	
+
 	// Detect content type from buffer
 	return http.DetectContentType(buffer)
 }
@@ -227,7 +227,7 @@ func detectMimeType(filePath string, ext string) string {
 // Check if the file extension corresponds to an image format
 func isImageFile(ext string) bool {
 	imageExts := map[string]bool{
-		".jpg": true, ".jpeg": true, ".png": true, ".gif": true, 
+		".jpg": true, ".jpeg": true, ".png": true, ".gif": true,
 		".bmp": true, ".tiff": true, ".webp": true, ".svg": true,
 		".ico": true, ".heic": true, ".heif": true, ".avif": true,
 	}
@@ -260,16 +260,16 @@ func isCodeFile(ext string) bool {
 		".rs": true, ".scala": true, ".clj": true, ".ex": true, ".exs": true,
 		".erl": true, ".fs": true, ".fsx": true, ".hs": true, ".lua": true,
 		".pl": true, ".pm": true, ".r": true, ".dart": true, ".groovy": true,
-		
+
 		// Web related
 		".html": true, ".htm": true, ".css": true, ".scss": true, ".sass": true,
 		".less": true, ".xml": true, ".json": true, ".yaml": true, ".yml": true,
 		".graphql": true, ".gql": true, ".vue": true, ".svelte": true,
-		
+
 		// Config files
 		".toml": true, ".ini": true, ".cfg": true, ".conf": true,
 		".properties": true, ".gradle": true, ".lock": true,
-		
+
 		// Shell scripts
 		".zsh": true, ".fish": true, ".bat": true, ".cmd": true, ".ps1": true,
 	}
@@ -285,50 +285,50 @@ func isProbablyBinaryFile(filePath string, ext string) bool {
 		".bin": true, ".pyc": true, ".pyd": true, ".class": true, ".jar": true,
 		".war": true, ".ear": true, ".whl": true, ".apk": true, ".app": true,
 		".deb": true, ".rpm": true,
-		
+
 		// Archives and compressed files
 		".zip": true, ".tar": true, ".gz": true, ".bz2": true, ".xz": true,
 		".7z": true, ".rar": true, ".iso": true, ".dmg": true,
-		
+
 		// Media files (not images - those are handled separately)
 		".mp3": true, ".mp4": true, ".wav": true, ".flac": true, ".ogg": true,
 		".mov": true, ".avi": true, ".mkv": true, ".webm": true, ".aac": true,
 		".wma": true, ".wmv": true, ".m4a": true, ".m4v": true,
-		
+
 		// Database and data files
 		".db": true, ".sqlite": true, ".mdb": true, ".accdb": true,
 		".frm": true, ".myd": true, ".myi": true,
-		
+
 		// Font files
 		".ttf": true, ".otf": true, ".woff": true, ".woff2": true, ".eot": true,
 	}
-	
+
 	// Check by extension first
 	if binExts[ext] || isImageFile(ext) {
 		return true
 	}
-	
+
 	// If extension check is not conclusive, look at content
 	file, err := os.Open(filePath)
 	if err != nil {
 		return false // Can't check, assume text
 	}
 	defer file.Close()
-	
+
 	// Read a sample to check for null bytes (common in binary files)
 	buffer := make([]byte, 8000)
 	bytesRead, err := file.Read(buffer)
 	if err != nil && err != io.EOF {
 		return false
 	}
-	
+
 	// Check for null bytes in the first chunk of data
 	for i := 0; i < bytesRead; i++ {
 		if buffer[i] == 0 {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -349,7 +349,7 @@ func getMIMETypeByExt(ext string) string {
 		".heic": "image/heic",
 		".heif": "image/heif",
 		".avif": "image/avif",
-		
+
 		// Documents
 		".pdf":  "application/pdf",
 		".doc":  "application/msword",
@@ -363,7 +363,7 @@ func getMIMETypeByExt(ext string) string {
 		".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 		".csv":  "text/csv",
 		".tsv":  "text/tab-separated-values",
-		
+
 		// Code/text formats
 		".html": "text/html",
 		".htm":  "text/html",
@@ -381,14 +381,14 @@ func getMIMETypeByExt(ext string) string {
 		".cpp":  "text/x-c++",
 		".go":   "text/x-go",
 		".rs":   "text/x-rust",
-		
+
 		// Archives
-		".zip":  "application/zip",
-		".tar":  "application/x-tar",
-		".gz":   "application/gzip",
-		".rar":  "application/vnd.rar",
-		".7z":   "application/x-7z-compressed",
-		
+		".zip": "application/zip",
+		".tar": "application/x-tar",
+		".gz":  "application/gzip",
+		".rar": "application/vnd.rar",
+		".7z":  "application/x-7z-compressed",
+
 		// Media
 		".mp3":  "audio/mpeg",
 		".wav":  "audio/wav",
@@ -396,7 +396,7 @@ func getMIMETypeByExt(ext string) string {
 		".webm": "video/webm",
 		".mov":  "video/quicktime",
 	}
-	
+
 	if mime, ok := mimeTypes[ext]; ok {
 		return mime
 	}
@@ -410,18 +410,18 @@ func handleImageFile(filePath string, metadata string) (*mcp.CallToolResult, err
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
 	}
-	
+
 	// Encode as base64
 	encoded := base64.StdEncoding.EncodeToString(data)
-	
+
 	// Get MIME type based on extension
 	mimeType := getMIMETypeByExt(filepath.Ext(filePath))
-	
+
 	// Create image result
 	result := metadata
-	result += fmt.Sprintf("MIME type: %s\nImage file: %s\nBase64 encoded content:\n%s", 
+	result += fmt.Sprintf("MIME type: %s\nImage file: %s\nBase64 encoded content:\n%s",
 		mimeType, filePath, encoded)
-		
+
 	return mcp.NewToolResultText(result), nil
 }
 
@@ -432,18 +432,18 @@ func handleBinaryFile(filePath string, metadata string, includeHexDump bool) (*m
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error accessing file: %v", err)), nil
 	}
-	
+
 	// Detect MIME type
 	mimeType := detectMimeType(filePath, filepath.Ext(filePath))
-	
+
 	// Prepare result
 	result := metadata
 	if metadata == "" {
 		result = fmt.Sprintf("File: %s\nSize: %d bytes\n", filePath, fileInfo.Size())
 	}
-	
+
 	result += fmt.Sprintf("Type: Binary file\nMIME type: %s\n", mimeType)
-	
+
 	// Add hex dump if requested
 	if includeHexDump {
 		// Read the first few KB for hex dump preview
@@ -452,42 +452,42 @@ func handleBinaryFile(filePath string, metadata string, includeHexDump bool) (*m
 			return mcp.NewToolResultError(fmt.Sprintf("Error opening file: %v", err)), nil
 		}
 		defer file.Close()
-		
+
 		// Read the first 1024 bytes for hex dump
 		buffer := make([]byte, 1024)
 		bytesRead, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
 			return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
 		}
-		
+
 		// Generate hex dump
 		hexDump := createHexDump(buffer[:bytesRead])
 		result += fmt.Sprintf("\nHex Dump Preview (first 1KB):\n%s\n", hexDump)
 	} else {
 		result += "\nThis is a binary file. Use include_hex_dump=true to see a hexadecimal preview.\n"
 	}
-	
+
 	return mcp.NewToolResultText(result), nil
 }
 
 // Create hex dump from bytes
 func createHexDump(data []byte) string {
 	var hexLines []string
-	
+
 	for i := 0; i < len(data); i += 16 {
 		// Calculate end of this line (max 16 bytes)
 		end := i + 16
 		if end > len(data) {
 			end = len(data)
 		}
-		
+
 		// Convert bytes to hex representation
 		hexBytes := make([]string, end-i)
 		asciiChars := make([]byte, end-i)
-		
+
 		for j := i; j < end; j++ {
 			hexBytes[j-i] = fmt.Sprintf("%02x", data[j])
-			
+
 			// For ASCII representation, only print printable chars
 			if data[j] >= 32 && data[j] <= 126 {
 				asciiChars[j-i] = data[j]
@@ -495,22 +495,22 @@ func createHexDump(data []byte) string {
 				asciiChars[j-i] = '.'
 			}
 		}
-		
+
 		// Pad hex values if less than 16 bytes
 		for len(hexBytes) < 16 {
 			hexBytes = append(hexBytes, "  ")
 		}
-		
+
 		// Format the line
-		hexLine := fmt.Sprintf("%08x  %s  %s  |%s|", 
-			i, 
-			strings.Join(hexBytes[:8], " "), 
+		hexLine := fmt.Sprintf("%08x  %s  %s  |%s|",
+			i,
+			strings.Join(hexBytes[:8], " "),
 			strings.Join(hexBytes[8:], " "),
 			string(asciiChars))
-		
+
 		hexLines = append(hexLines, hexLine)
 	}
-	
+
 	return strings.Join(hexLines, "\n")
 }
 
@@ -518,13 +518,13 @@ func createHexDump(data []byte) string {
 func handleDocumentFile(filePath string, metadata string) (*mcp.CallToolResult, error) {
 	// For now, documents just show metadata and note they can't be fully rendered
 	// In a future version, we could add document parsing libraries
-	
+
 	ext := strings.ToLower(filepath.Ext(filePath))
 	mimeType := getMIMETypeByExt(ext)
-	
+
 	result := metadata
 	result += fmt.Sprintf("Document file: %s\nMIME type: %s\n\n", filePath, mimeType)
-	
+
 	// Add document type specific notes
 	switch ext {
 	case ".pdf":
@@ -541,45 +541,45 @@ func handleDocumentFile(filePath string, metadata string) (*mcp.CallToolResult, 
 	default:
 		result += "This is a document file. The content cannot be fully displayed in text format.\n"
 	}
-	
+
 	// For files we don't parse completely, show a small preview
 	file, err := os.Open(filePath)
 	if err == nil {
 		defer file.Close()
-		
+
 		// For text-based formats, show a preview
 		if ext == ".txt" || ext == ".csv" || ext == ".tsv" {
 			scanner := bufio.NewScanner(file)
 			previewLines := 0
 			preview := ""
-			
+
 			for scanner.Scan() && previewLines < 20 {
 				preview += scanner.Text() + "\n"
 				previewLines++
 			}
-			
+
 			if preview != "" {
 				result += "\nPreview:\n" + preview
 			}
 		}
 	}
-	
+
 	return mcp.NewToolResultText(result), nil
 }
 
 // Handle markdown files with special formatting
 func handleMarkdownFile(filePath string, offset, limit int, showLineNumbers bool, metadata string, hasFindSection bool, findSection string) (*mcp.CallToolResult, error) {
 	// For markdown, we'll read the file but add formatting hints for an LLM
-	
+
 	// Read the file content
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
 	}
-	
+
 	fileContent := string(data)
 	lines := strings.Split(fileContent, "\n")
-	
+
 	// If finding a section is requested, look for it
 	if hasFindSection && findSection != "" {
 		sections, sectionFound := findMarkdownSection(lines, findSection)
@@ -589,24 +589,24 @@ func handleMarkdownFile(filePath string, offset, limit int, showLineNumbers bool
 			if metadata != "" {
 				result += "\n"
 			}
-			
+
 			result += fmt.Sprintf("File: %s\nFound section matching '%s':\n\n", filePath, findSection)
 			result += strings.Join(sections, "\n")
-			
+
 			return mcp.NewToolResultText(result), nil
 		}
 	}
-	
+
 	// Apply offset and limit
 	if offset >= len(lines) {
 		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
 	}
-	
+
 	endLine := offset + limit
 	if endLine > len(lines) {
 		endLine = len(lines)
 	}
-	
+
 	// If requested, add line numbers
 	var outputLines []string
 	for i := offset; i < endLine; i++ {
@@ -617,22 +617,20 @@ func handleMarkdownFile(filePath string, offset, limit int, showLineNumbers bool
 			outputLines = append(outputLines, line)
 		}
 	}
-	
+
 	// Build result
 	result := metadata
-	
+
 	if offset > 0 || endLine < len(lines) {
-		result += fmt.Sprintf("File: %s (Markdown)\nShowing lines %d to %d of %d\n\n", 
+		result += fmt.Sprintf("File: %s (Markdown)\nShowing lines %d to %d of %d\n\n",
 			filePath, offset+1, endLine, len(lines))
 	} else {
 		result += fmt.Sprintf("File: %s (Markdown)\n\n", filePath)
 	}
-	
+
 	// Add markdown rendering hints
-	result += "```markdown\n"
 	result += strings.Join(outputLines, "\n")
-	result += "\n```\n"
-	
+
 	return mcp.NewToolResultText(result), nil
 }
 
@@ -641,9 +639,9 @@ func findMarkdownSection(lines []string, sectionText string) ([]string, bool) {
 	sectionLines := []string{}
 	inSection := false
 	sectionLevel := 0
-	
+
 	lowercaseSearchText := strings.ToLower(sectionText)
-	
+
 	for _, line := range lines {
 		// Check for heading lines (# Header, ## Subheader, etc)
 		if strings.HasPrefix(strings.TrimSpace(line), "#") {
@@ -656,7 +654,7 @@ func findMarkdownSection(lines []string, sectionText string) ([]string, bool) {
 					break
 				}
 			}
-			
+
 			// Check if this heading contains our search text
 			if strings.Contains(strings.ToLower(line), lowercaseSearchText) {
 				// Found a section with our text
@@ -665,20 +663,20 @@ func findMarkdownSection(lines []string, sectionText string) ([]string, bool) {
 				sectionLines = append(sectionLines, line)
 				continue
 			}
-			
+
 			// If we're in a section and we hit a heading of same or higher level,
 			// this is the end of our section
 			if inSection && level <= sectionLevel {
 				break
 			}
 		}
-		
+
 		// If we're in a section, add the line
 		if inSection {
 			sectionLines = append(sectionLines, line)
 		}
 	}
-	
+
 	// If we didn't find anything by heading, try to find content chunks with the term
 	if len(sectionLines) == 0 {
 		// Look for a paragraph or code block containing the search text
@@ -689,19 +687,19 @@ func findMarkdownSection(lines []string, sectionText string) ([]string, bool) {
 				if start < 0 {
 					start = 0
 				}
-				
+
 				// Go forward 10 lines for context (if possible)
 				end := lineIdx + 10
 				if end >= len(lines) {
 					end = len(lines) - 1
 				}
-				
+
 				// Extract the context
-				return lines[start:end+1], true
+				return lines[start : end+1], true
 			}
 		}
 	}
-	
+
 	return sectionLines, len(sectionLines) > 0
 }
 
@@ -710,16 +708,16 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 	// Determine language from extension
 	ext := strings.ToLower(filepath.Ext(filePath))
 	language := getLanguageFromExt(ext)
-	
+
 	// Read the file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
 	}
-	
+
 	fileContent := string(data)
 	lines := strings.Split(fileContent, "\n")
-	
+
 	// If finding a section is requested, look for it
 	if hasFindSection && findSection != "" {
 		sections, sectionFound := findCodeSection(lines, findSection, language)
@@ -729,13 +727,13 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 			if metadata != "" {
 				result += "\n"
 			}
-			
-			result += fmt.Sprintf("File: %s (%s)\nFound section matching '%s':\n\n", 
+
+			result += fmt.Sprintf("File: %s (%s)\nFound section matching '%s':\n\n",
 				filePath, language, findSection)
-				
+
 			// Format with code fence and line numbers if requested
 			result += fmt.Sprintf("```%s\n", language)
-			
+
 			if showLineNumbers {
 				// Find the actual line numbers in the original file
 				lineStart := -1
@@ -745,7 +743,7 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 						break
 					}
 				}
-				
+
 				if lineStart >= 0 {
 					for i, line := range sections {
 						result += fmt.Sprintf("%5d | %s\n", lineStart+i+1, line)
@@ -758,36 +756,36 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 			} else {
 				result += strings.Join(sections, "\n")
 			}
-			
+
 			result += "\n```\n"
-			
+
 			return mcp.NewToolResultText(result), nil
 		}
 	}
-	
+
 	// Apply offset and limit
 	if offset >= len(lines) {
 		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
 	}
-	
+
 	endLine := offset + limit
 	if endLine > len(lines) {
 		endLine = len(lines)
 	}
-	
+
 	// Build result
 	result := metadata
-	
+
 	if offset > 0 || endLine < len(lines) {
-		result += fmt.Sprintf("File: %s (%s)\nShowing lines %d to %d of %d\n\n", 
+		result += fmt.Sprintf("File: %s (%s)\nShowing lines %d to %d of %d\n\n",
 			filePath, language, offset+1, endLine, len(lines))
 	} else {
 		result += fmt.Sprintf("File: %s (%s)\n\n", filePath, language)
 	}
-	
+
 	// Format with code fence and line numbers if requested
 	result += fmt.Sprintf("```%s\n", language)
-	
+
 	if showLineNumbers {
 		for i := offset; i < endLine; i++ {
 			result += fmt.Sprintf("%5d | %s\n", i+1, lines[i])
@@ -795,75 +793,75 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 	} else {
 		result += strings.Join(lines[offset:endLine], "\n")
 	}
-	
+
 	result += "\n```\n"
-	
+
 	return mcp.NewToolResultText(result), nil
 }
 
 // Determine programming language from file extension
 func getLanguageFromExt(ext string) string {
 	languages := map[string]string{
-		".py":     "python",
-		".js":     "javascript",
-		".ts":     "typescript",
-		".jsx":    "jsx",
-		".tsx":    "tsx",
-		".java":   "java",
-		".c":      "c",
-		".cpp":    "cpp",
-		".cc":     "cpp",
-		".h":      "c",
-		".hpp":    "cpp",
-		".cs":     "csharp",
-		".go":     "go",
-		".rb":     "ruby",
-		".php":    "php",
-		".swift":  "swift",
-		".kt":     "kotlin",
-		".kts":    "kotlin",
-		".rs":     "rust",
-		".scala":  "scala",
-		".clj":    "clojure",
-		".ex":     "elixir",
-		".exs":    "elixir",
-		".erl":    "erlang",
-		".fs":     "fsharp",
-		".fsx":    "fsharp",
-		".hs":     "haskell",
-		".lua":    "lua",
-		".pl":     "perl",
-		".pm":     "perl",
-		".r":      "r",
-		".dart":   "dart",
-		".html":   "html",
-		".htm":    "html",
-		".css":    "css",
-		".scss":   "scss",
-		".sass":   "sass",
-		".less":   "less",
-		".xml":    "xml",
-		".json":   "json",
-		".yaml":   "yaml",
-		".yml":    "yaml",
-		".sh":     "bash",
-		".bash":   "bash",
-		".zsh":    "bash",
-		".fish":   "fish",
-		".bat":    "batch",
-		".cmd":    "batch",
-		".ps1":    "powershell",
-		".toml":   "toml",
-		".ini":    "ini",
-		".cfg":    "ini",
-		".conf":   "ini",
-		".sql":    "sql",
+		".py":      "python",
+		".js":      "javascript",
+		".ts":      "typescript",
+		".jsx":     "jsx",
+		".tsx":     "tsx",
+		".java":    "java",
+		".c":       "c",
+		".cpp":     "cpp",
+		".cc":      "cpp",
+		".h":       "c",
+		".hpp":     "cpp",
+		".cs":      "csharp",
+		".go":      "go",
+		".rb":      "ruby",
+		".php":     "php",
+		".swift":   "swift",
+		".kt":      "kotlin",
+		".kts":     "kotlin",
+		".rs":      "rust",
+		".scala":   "scala",
+		".clj":     "clojure",
+		".ex":      "elixir",
+		".exs":     "elixir",
+		".erl":     "erlang",
+		".fs":      "fsharp",
+		".fsx":     "fsharp",
+		".hs":      "haskell",
+		".lua":     "lua",
+		".pl":      "perl",
+		".pm":      "perl",
+		".r":       "r",
+		".dart":    "dart",
+		".html":    "html",
+		".htm":     "html",
+		".css":     "css",
+		".scss":    "scss",
+		".sass":    "sass",
+		".less":    "less",
+		".xml":     "xml",
+		".json":    "json",
+		".yaml":    "yaml",
+		".yml":     "yaml",
+		".sh":      "bash",
+		".bash":    "bash",
+		".zsh":     "bash",
+		".fish":    "fish",
+		".bat":     "batch",
+		".cmd":     "batch",
+		".ps1":     "powershell",
+		".toml":    "toml",
+		".ini":     "ini",
+		".cfg":     "ini",
+		".conf":    "ini",
+		".sql":     "sql",
 		".graphql": "graphql",
-		".gql":    "graphql",
-		".vue":    "vue",
-		".svelte": "svelte",
+		".gql":     "graphql",
+		".vue":     "vue",
+		".svelte":  "svelte",
 	}
-	
+
 	if lang, ok := languages[ext]; ok {
 		return lang
 	}
@@ -873,28 +871,28 @@ func getLanguageFromExt(ext string) string {
 // Find a relevant section of code based on a search text
 func findCodeSection(lines []string, searchText string, language string) ([]string, bool) {
 	lowercaseSearchText := strings.ToLower(searchText)
-	
+
 	// First, try to find class/function definitions that match
 	for lineIdx, line := range lines {
 		lineText := strings.ToLower(line)
-		
+
 		// Look for definitions based on language patterns
 		switch language {
 		case "python", "ruby":
-			if strings.Contains(lineText, "class "+lowercaseSearchText) || 
-			   strings.Contains(lineText, "def "+lowercaseSearchText) ||
-			   strings.Contains(lineText, lowercaseSearchText+"(") {
+			if strings.Contains(lineText, "class "+lowercaseSearchText) ||
+				strings.Contains(lineText, "def "+lowercaseSearchText) ||
+				strings.Contains(lineText, lowercaseSearchText+"(") {
 				return extractDefinitionBlock(lines, lineIdx, 20), true
 			}
 		case "javascript", "typescript", "jsx", "tsx", "java", "c", "cpp", "csharp", "go", "swift", "kotlin", "rust":
-			if strings.Contains(lineText, "class "+lowercaseSearchText) || 
-			   strings.Contains(lineText, "function "+lowercaseSearchText) ||
-			   strings.Contains(lineText, lowercaseSearchText+"(") {
+			if strings.Contains(lineText, "class "+lowercaseSearchText) ||
+				strings.Contains(lineText, "function "+lowercaseSearchText) ||
+				strings.Contains(lineText, lowercaseSearchText+"(") {
 				return extractDefinitionBlock(lines, lineIdx, 20), true
 			}
 		}
 	}
-	
+
 	// If no definition found, try to find any line with the search text and extract context
 	for lineIdx, line := range lines {
 		if strings.Contains(strings.ToLower(line), lowercaseSearchText) {
@@ -903,16 +901,16 @@ func findCodeSection(lines []string, searchText string, language string) ([]stri
 			if start < 0 {
 				start = 0
 			}
-			
+
 			end := lineIdx + 10
 			if end >= len(lines) {
 				end = len(lines) - 1
 			}
-			
-			return lines[start:end+1], true
+
+			return lines[start : end+1], true
 		}
 	}
-	
+
 	return nil, false
 }
 
@@ -920,32 +918,32 @@ func findCodeSection(lines []string, searchText string, language string) ([]stri
 func extractDefinitionBlock(lines []string, startLine int, maxLines int) []string {
 	// Get indentation level of the definition line
 	definitionIndent := getIndentationLevel(lines[startLine])
-	
+
 	var blockLines []string
 	blockLines = append(blockLines, lines[startLine])
-	
+
 	// Add lines with higher indentation until we find a line with the same or lower indentation
 	// or until we reach maxLines
 	linesCount := 1
 	braceCount := strings.Count(lines[startLine], "{") - strings.Count(lines[startLine], "}")
-	
-	for i := startLine+1; i < len(lines) && linesCount < maxLines; i++ {
+
+	for i := startLine + 1; i < len(lines) && linesCount < maxLines; i++ {
 		currentLine := lines[i]
 		currentIndent := getIndentationLevel(currentLine)
-		
+
 		// Update brace count for languages using braces
 		braceCount += strings.Count(currentLine, "{") - strings.Count(currentLine, "}")
-		
+
 		// For languages using indentation (Python), check indentation level
 		// For languages using braces, check brace count
-		if (currentIndent <= definitionIndent && len(strings.TrimSpace(currentLine)) > 0 && braceCount <= 0) {
+		if currentIndent <= definitionIndent && len(strings.TrimSpace(currentLine)) > 0 && braceCount <= 0 {
 			break
 		}
-		
+
 		blockLines = append(blockLines, currentLine)
 		linesCount++
 	}
-	
+
 	return blockLines
 }
 
@@ -956,7 +954,7 @@ func getIndentationLevel(line string) int {
 		if char == ' ' {
 			indent++
 		} else if char == '\t' {
-			indent += 4  // Count a tab as 4 spaces
+			indent += 4 // Count a tab as 4 spaces
 		} else {
 			break
 		}
@@ -971,17 +969,17 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
 	}
-	
+
 	fileContent := string(data)
 	lines := strings.Split(fileContent, "\n")
-	
+
 	// If finding a section is requested, try a simple search
 	if hasFindSection && findSection != "" {
 		var contextLines []string
 		contextFound := false
-		
+
 		lowercaseSearchText := strings.ToLower(findSection)
-		
+
 		// Look for the search text in the content
 		for i, line := range lines {
 			if strings.Contains(strings.ToLower(line), lowercaseSearchText) {
@@ -990,29 +988,29 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 				if start < 0 {
 					start = 0
 				}
-				
+
 				// Go forward 15 lines for context (if possible)
 				end := i + 15
 				if end >= len(lines) {
 					end = len(lines) - 1
 				}
-				
+
 				// Extract the context
-				contextLines = lines[start:end+1]
+				contextLines = lines[start : end+1]
 				contextFound = true
 				break
 			}
 		}
-		
+
 		if contextFound {
 			// Use the context section
 			result := metadata
 			if metadata != "" {
 				result += "\n"
 			}
-			
+
 			result += fmt.Sprintf("File: %s\nFound section matching '%s':\n\n", filePath, findSection)
-			
+
 			// Add line numbers if requested
 			if showLineNumbers {
 				// Find the line number of the first context line
@@ -1023,7 +1021,7 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 						break
 					}
 				}
-				
+
 				for idx, line := range contextLines {
 					if lineStart >= 0 {
 						result += fmt.Sprintf("%5d | %s\n", lineStart+idx+1, line)
@@ -1034,38 +1032,38 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 			} else {
 				result += strings.Join(contextLines, "\n")
 			}
-			
+
 			return mcp.NewToolResultText(result), nil
 		}
 	}
-	
+
 	// Apply offset and limit
 	if offset >= len(lines) {
 		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
 	}
-	
+
 	endLine := offset + limit
 	if endLine > len(lines) {
 		endLine = len(lines)
 	}
-	
+
 	// Truncate long lines (only truncate if over 2000 chars)
 	for i := offset; i < endLine; i++ {
 		if len(lines[i]) > 2000 {
 			lines[i] = lines[i][:2000] + "... [line truncated]"
 		}
 	}
-	
+
 	// Build the result
 	result := metadata
-	
+
 	if offset > 0 || endLine < len(lines) {
-		result += fmt.Sprintf("File: %s\nShowing lines %d to %d of %d\n\n", 
+		result += fmt.Sprintf("File: %s\nShowing lines %d to %d of %d\n\n",
 			filePath, offset+1, endLine, len(lines))
 	} else {
 		result += fmt.Sprintf("File: %s\n\n", filePath)
 	}
-	
+
 	// Add content with line numbers if requested
 	if showLineNumbers {
 		for i := offset; i < endLine; i++ {
@@ -1074,6 +1072,7 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 	} else {
 		result += strings.Join(lines[offset:endLine], "\n")
 	}
-	
+
 	return mcp.NewToolResultText(result), nil
 }
+
