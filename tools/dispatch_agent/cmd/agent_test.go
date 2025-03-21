@@ -64,11 +64,11 @@ func TestAgentCommandHelpers(t *testing.T) {
 	}
 
 	// Get working directory with agent's method
-	_, err = agent.getCurrentDirectory() 
+	_, err = agent.getCurrentDirectory()
 	if err != nil {
 		t.Errorf("getCurrentDirectory failed: %v", err)
 	}
-	
+
 	// Use ls to check that the file we created is visible
 	lsOutput, err := agent.runCommand("ls")
 	if err != nil {

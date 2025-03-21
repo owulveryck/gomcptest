@@ -147,7 +147,7 @@ func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall)
 func formatFunctionResponse(resp *genai.FunctionResponse) string {
 	data := resp.Response
 	var sb strings.Builder
-	
+
 	// Add header with function name
 	parts := strings.SplitN(resp.Name, "_", 2)
 	if len(parts) == 2 {
@@ -155,7 +155,7 @@ func formatFunctionResponse(resp *genai.FunctionResponse) string {
 	} else {
 		sb.WriteString(fmt.Sprintf("Function `%s` returned:\n", resp.Name))
 	}
-	
+
 	// Add response data
 	for key, value := range data {
 		sb.WriteString(fmt.Sprintf("- %s: %v\n", key, value))

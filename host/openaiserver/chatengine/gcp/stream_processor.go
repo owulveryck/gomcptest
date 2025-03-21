@@ -49,7 +49,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 	}
 
 	s.stringBuilder.Reset() // Reset the string builder
-	
+
 	var functionCalls []genai.FunctionCall
 
 	for i, cand := range resp.Candidates {
@@ -136,7 +136,7 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 				if v == nil {
 					continue
 				}
-				
+
 				// Show the function call to the user
 				s.sendChunk(ctx, "\n"+formatFunctionCall(*v)+"\n")
 
@@ -147,13 +147,13 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 					s.sendChunk(ctx, errMsg)
 					continue // Continue to the next function call if there's an error
 				}
-				
+
 				// Show the function result to the user
 				s.sendChunk(ctx, formatFunctionResponse(functionResult))
-				
+
 				// Send the function result back to the model to get further response
 				newIter := s.sendMessageStream(ctx, functionResult)
-				
+
 				// Process the model's response to the function result
 				err = s.processIterator(ctx, newIter)
 				if err != nil {

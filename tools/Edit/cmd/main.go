@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,31 +49,31 @@ func main() {
 func editHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get start time for performance logging
 	startTime := time.Now()
-	
+
 	// Extract parameters
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
-		return mcp.NewToolResultError("file_path must be a string"), nil
+		return nil, errors.New("file_path must be a string")
 	}
 
 	oldString, ok := request.Params.Arguments["old_string"].(string)
 	if !ok {
-		return mcp.NewToolResultError("old_string must be a string"), nil
+		return nil, errors.New("old_string must be a string")
 	}
 
 	newString, ok := request.Params.Arguments["new_string"].(string)
 	if !ok {
-		return mcp.NewToolResultError("new_string must be a string"), nil
+		return nil, errors.New("new_string must be a string")
 	}
 
 	// Validate that the path is absolute
 	if !filepath.IsAbs(filePath) {
-		return mcp.NewToolResultError("file_path must be an absolute path, not a relative path"), nil
+		return nil, errors.New("file_path must be an absolute path, not a relative path")
 	}
-	
+
 	// Basic parameter validation
 	if len(newString) > 10*1024*1024 {
-		return mcp.NewToolResultError("new_string is too large (over 10MB)"), nil
+		return nil, errors.New("new_string is too large (over 10MB)")
 	}
 
 	// Creating a new file
@@ -82,14 +83,14 @@ func editHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 	// Modifying an existing file
 	result, err := modifyFile(filePath, oldString, newString)
-	
+
 	// Log performance metrics
 	elapsed := time.Since(startTime)
 	if elapsed > 100*time.Millisecond {
 		// Only log if operation took more than 100ms
 		fmt.Fprintf(os.Stderr, "Edit operation on %s took %v\n", filePath, elapsed)
 	}
-	
+
 	return result, err
 }
 
@@ -97,37 +98,37 @@ func editHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 func createNewFile(filePath, content string) (*mcp.CallToolResult, error) {
 	// Validate file path
 	if err := validateFilePath(filePath); err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, errors.New(err.Error())
 	}
-	
+
 	// Check if the directory exists
 	dir := filepath.Dir(filePath)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("Directory does not exist: %s", dir)), nil
+		return nil, errors.New(fmt.Sprintf("Directory does not exist: %s", dir))
 	}
 
 	// Check if the file already exists
 	if _, err := os.Stat(filePath); err == nil {
-		return mcp.NewToolResultError(fmt.Sprintf("File already exists: %s. Use a non-empty old_string to modify it.", filePath)), nil
+		return nil, errors.New(fmt.Sprintf("File already exists: %s. Use a non-empty old_string to modify it.", filePath))
 	}
-	
+
 	// Check if content is too large (limit to 10MB to prevent memory issues)
 	if len(content) > 10*1024*1024 {
-		return mcp.NewToolResultError(fmt.Sprintf("Content is too large (%d bytes). Maximum size is 10MB.", len(content))), nil
+		return nil, errors.New(fmt.Sprintf("Content is too large (%d bytes). Maximum size is 10MB.", len(content)))
 	}
-	
+
 	// Check if we have permission to write to the directory
 	if err := checkDirWritePermission(dir); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Permission error: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Permission error: %v", err))
 	}
 
 	// Create the file
 	err := os.WriteFile(filePath, []byte(content), 0644)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error creating file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error creating file: %v", err))
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Created new file: %s", filePath)), nil
+	return nil, errors.New(fmt.Sprintf("Created new file: %s", filePath))
 }
 
 // validateFilePath checks if the file path is valid
@@ -136,18 +137,18 @@ func validateFilePath(filePath string) error {
 	if filePath == "" {
 		return fmt.Errorf("file path cannot be empty")
 	}
-	
+
 	// Check if path is too long
 	if len(filePath) > 4096 {
 		return fmt.Errorf("file path is too long")
 	}
-	
+
 	// Simple check for potential path traversal
 	cleaned := filepath.Clean(filePath)
 	if cleaned != filePath {
 		return fmt.Errorf("invalid file path: %s", filePath)
 	}
-	
+
 	return nil
 }
 
@@ -160,7 +161,7 @@ func checkDirWritePermission(dirPath string) error {
 		return fmt.Errorf("cannot write to directory: %v", err)
 	}
 	f.Close()
-	
+
 	// Clean up the temporary file
 	os.Remove(tempFile)
 	return nil
@@ -170,52 +171,52 @@ func checkDirWritePermission(dirPath string) error {
 func modifyFile(filePath, oldString, newString string) (*mcp.CallToolResult, error) {
 	// Validate file path
 	if err := validateFilePath(filePath); err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
+		return nil, errors.New(err.Error())
 	}
-	
+
 	// Check if file exists
 	fileInfo, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("File does not exist: %s", filePath)), nil
+		return nil, errors.New(fmt.Sprintf("File does not exist: %s", filePath))
 	}
-	
+
 	// Check if it's a directory
 	if fileInfo.IsDir() {
-		return mcp.NewToolResultError(fmt.Sprintf("%s is a directory, not a file", filePath)), nil
+		return nil, errors.New(fmt.Sprintf("%s is a directory, not a file", filePath))
 	}
-	
+
 	// Check if file is too large (limit to 10MB to prevent memory issues)
 	if fileInfo.Size() > 10*1024*1024 {
-		return mcp.NewToolResultError(fmt.Sprintf("File is too large (%d bytes). Maximum size is 10MB.", fileInfo.Size())), nil
+		return nil, errors.New(fmt.Sprintf("File is too large (%d bytes). Maximum size is 10MB.", fileInfo.Size()))
 	}
-	
+
 	// Check if we have permission to read/write the file
 	if err := checkFilePermissions(filePath); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Permission error: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Permission error: %v", err))
 	}
 
 	// Read the file content
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 	}
 
 	contentStr := string(content)
-	
+
 	// Detect if the file appears to be binary
 	if isBinaryFile(content) {
-		return mcp.NewToolResultError("Cannot edit binary files. Use a different tool for binary file manipulation."), nil
+		return nil, errors.New("Cannot edit binary files. Use a different tool for binary file manipulation.")
 	}
 
 	// Count occurrences of oldString
 	count := strings.Count(contentStr, oldString)
 	if count == 0 {
-		return mcp.NewToolResultError("The specified old_string was not found in the file. Please check the string and try again."), nil
+		return nil, errors.New("The specified old_string was not found in the file. Please check the string and try again.")
 	} else if count > 1 {
 		// Find line numbers where matches occur to provide better context
 		lineNumbers := findLineNumbers(contentStr, oldString)
-		return mcp.NewToolResultError(fmt.Sprintf("The specified old_string occurs %d times in the file (around lines %s). Please provide a more specific string with enough context to uniquely identify the instance you want to change.", 
-			count, formatLineNumbers(lineNumbers))), nil
+		return nil, errors.New(fmt.Sprintf("The specified old_string occurs %d times in the file (around lines %s). Please provide a more specific string with enough context to uniquely identify the instance you want to change.",
+			count, formatLineNumbers(lineNumbers)))
 	}
 
 	// Create backup file before making changes
@@ -231,7 +232,7 @@ func modifyFile(filePath, oldString, newString string) (*mcp.CallToolResult, err
 	// Write the modified content back to the file with original permissions
 	err = os.WriteFile(filePath, []byte(newContent), fileInfo.Mode())
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error writing to file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error writing to file: %v", err))
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Successfully edited file: %s\nReplaced 1 occurrence of the specified text.\nBackup created at %s", filePath, backupPath)), nil
@@ -245,14 +246,14 @@ func checkFilePermissions(filePath string) error {
 		return fmt.Errorf("cannot read file: %v", err)
 	}
 	f.Close()
-	
+
 	// Check write permission by opening for append
 	f, err = os.OpenFile(filePath, os.O_WRONLY, 0666)
 	if err != nil {
 		return fmt.Errorf("cannot write to file: %v", err)
 	}
 	f.Close()
-	
+
 	return nil
 }
 
@@ -271,7 +272,7 @@ func isBinaryFile(content []byte) bool {
 func findLineNumbers(content, searchStr string) []int {
 	lines := strings.Split(content, "\n")
 	var lineNumbers []int
-	
+
 	// Limit to first 5 occurrences to avoid huge error messages
 	for i, line := range lines {
 		if strings.Contains(line, searchStr) {
@@ -281,7 +282,7 @@ func findLineNumbers(content, searchStr string) []int {
 			}
 		}
 	}
-	
+
 	return lineNumbers
 }
 
@@ -290,12 +291,12 @@ func formatLineNumbers(numbers []int) string {
 	if len(numbers) == 0 {
 		return "unknown"
 	}
-	
+
 	strNumbers := make([]string, len(numbers))
 	for i, num := range numbers {
 		strNumbers[i] = fmt.Sprintf("%d", num)
 	}
-	
+
 	return strings.Join(strNumbers, ", ")
 }
 

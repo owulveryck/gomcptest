@@ -109,7 +109,7 @@ func TestGlobToolHandlerIntegration(t *testing.T) {
 				if !strings.Contains(resultString, "isError") || !strings.Contains(resultString, "true") {
 					t.Errorf("Expected error result but got success: %s", resultString)
 				} else if !strings.Contains(resultString, tc.checkContains) {
-					t.Errorf("Error message doesn't contain expected content. Got: %s, Expected to contain: %s", 
+					t.Errorf("Error message doesn't contain expected content. Got: %s, Expected to contain: %s",
 						resultString, tc.checkContains)
 				}
 				return
@@ -123,7 +123,7 @@ func TestGlobToolHandlerIntegration(t *testing.T) {
 
 			// Check for expected content
 			if tc.checkContains != "" && !strings.Contains(resultString, tc.checkContains) {
-				t.Errorf("Result doesn't contain expected content. Got: %s, Expected to contain: %s", 
+				t.Errorf("Result doesn't contain expected content. Got: %s, Expected to contain: %s",
 					resultString, tc.checkContains)
 			}
 
@@ -135,13 +135,13 @@ func TestGlobToolHandlerIntegration(t *testing.T) {
 				// Convert to JSON and count new lines
 				textJSON, _ := json.Marshal(textResult)
 				textString := string(textJSON)
-				
+
 				// Just check that there is content
 				if !strings.Contains(textString, "content") {
 					t.Errorf("Expected content in result: %s", textString)
 					return
 				}
-				
+
 				// Use fmt.Println for inspection in case of errors
 				if testing.Verbose() {
 					fmt.Println("Result JSON:", textString)
@@ -156,20 +156,20 @@ func TestMCPStructure(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping MCP structure test in short mode")
 	}
-	
+
 	// Create a basic request
 	request := mcp.CallToolRequest{}
 	request.Params.Arguments = map[string]interface{}{
 		"pattern": "**/*.go",
 	}
 	request.Params.Name = "GlobTool"
-	
+
 	// Call the handler with a known pattern that will succeed
 	result, err := globToolHandler(context.Background(), request)
 	if err != nil {
 		t.Fatalf("Error calling handler: %v", err)
 	}
-	
+
 	// Print the structure
 	resultJSON, _ := json.MarshalIndent(result, "", "  ")
 	fmt.Printf("CallToolResult structure:\n%s\n", resultJSON)
@@ -207,7 +207,7 @@ func TestGlobToolHandlerMissingParams(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
 			}
-			
+
 			// Convert to JSON to inspect structure
 			resultJSON, _ := json.Marshal(result)
 			resultString := string(resultJSON)
@@ -220,7 +220,7 @@ func TestGlobToolHandlerMissingParams(t *testing.T) {
 
 			// Check error message prefix
 			if !strings.Contains(resultString, tc.errorPrefix) {
-				t.Errorf("Expected error message to contain '%s', got '%s'", 
+				t.Errorf("Expected error message to contain '%s', got '%s'",
 					tc.errorPrefix, resultString)
 			}
 		})

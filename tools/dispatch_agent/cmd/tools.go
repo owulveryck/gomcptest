@@ -99,7 +99,7 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		prompt, ok := request.Params.Arguments["prompt"].(string)
 		if !ok {
-			return mcp.NewToolResultError("prompt must be a string"), nil
+			return nil, errors.New("prompt must be a string")
 		}
 
 		// Get the path parameter if provided
@@ -116,7 +116,7 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 			Parts: []genai.Part{genai.Text(prompt)},
 		}}, path)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Error processing agent task: %v", err)), nil
+			return nil, errors.New(fmt.Sprintf("Error processing agent task: %v", err))
 		}
 		if response == "" {
 			response = "success"

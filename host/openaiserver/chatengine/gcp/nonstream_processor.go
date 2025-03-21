@@ -20,13 +20,13 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 	res.Choices = make([]chatengine.Choice, len(resp.Candidates))
 
 	out, functionCalls := processResponse(resp)
-	
+
 	for i, cand := range resp.Candidates {
 		finishReason := ""
 		if cand.FinishReason > 0 {
 			finishReason = "stop"
 		}
-		
+
 		res.Choices[i] = chatengine.Choice{
 			Index: int(cand.Index),
 			Message: chatengine.ChatMessage{
@@ -51,15 +51,15 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 			}
 			functionResponses[i] = functionResult
 		}
-		
+
 		resp, err := genaiCS.SendMessage(ctx, functionResponses...)
 		if err != nil {
 			return nil, fmt.Errorf("error sending function results: %w", err)
 		}
-		
+
 		// Process new response
 		out, functionCalls = processResponse(resp)
-		
+
 		// Update the response with the new content
 		for i := range res.Choices {
 			if i < len(res.Choices) {

@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 package main
@@ -19,10 +20,10 @@ func main() {
 	// Create a minimal request
 	var req mcp.CallToolRequest
 	req.Params.Arguments = args
-	
+
 	// Call the handler
 	result, _ := replaceHandler(context.Background(), req)
-	
+
 	// Print the result
 	fmt.Printf("Result type: %T\n", result)
 	fmt.Printf("Result: %#v\n", result)

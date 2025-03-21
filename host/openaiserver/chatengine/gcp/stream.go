@@ -18,7 +18,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	if generativemodel, modelIsPresent = chatsession.generativemodels[req.Model]; !modelIsPresent {
 		return nil, errors.New("cannot find model")
 	}
-	
+
 	// Set temperature from request
 	generativemodel.SetTemperature(req.Temperature)
 
