@@ -1,4 +1,4 @@
-.PHONY: all clean tools servers 
+.PHONY: all clean tools servers install
 
 # Build everything
 all: tools servers
@@ -7,10 +7,13 @@ all: tools servers
 BIN_DIR := bin
 
 # Tools to build
-TOOLS := logs LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash
+TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash
 
 # Servers to build
 SERVERS := cliGCP openaiserver
+
+# Default install directory (can be overridden via command line or environment)
+INSTALL_DIR ?= ~/openaiserver
 
 # Ensure the bin directory exists
 $(BIN_DIR):
@@ -22,9 +25,14 @@ tools: $(BIN_DIR) $(addprefix $(BIN_DIR)/, $(TOOLS))
 # Build all servers
 servers: $(BIN_DIR) $(addprefix $(BIN_DIR)/, $(SERVERS)) 
 
+# Install binaries to target directory
+# Usage: make install INSTALL_DIR=/path/to/install
+install: all
+	mkdir -p $(INSTALL_DIR)/bin
+	cp $(BIN_DIR)/cliGCP $(BIN_DIR)/openaiserver $(INSTALL_DIR)
+	cp $(addprefix $(BIN_DIR)/, $(TOOLS)) $(INSTALL_DIR)/bin
+
 # Special case for tools with main.go in the root directory
-$(BIN_DIR)/logs: tools/logs/main.go
-	go build -o $(BIN_DIR)/logs ./tools/logs
 
 $(BIN_DIR)/duckdbserver: tools/duckdbserver/main.go
 	go build -o $(BIN_DIR)/duckdbserver ./tools/duckdbserver

@@ -14,15 +14,15 @@ func TestBashHandler(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name:          "Simple echo command",
-			command:       "echo 'Hello, World!'",
-			expectError:   false,
+			name:        "Simple echo command",
+			command:     "echo 'Hello, World!'",
+			expectError: false,
 		},
 		{
-			name:          "Command with timeout",
-			command:       "sleep 0.1 && echo 'Done'",
-			timeout:       100.0, // 100ms
-			expectError:   false,
+			name:        "Command with timeout",
+			command:     "sleep 0.1 && echo 'Done'",
+			timeout:     100.0, // 100ms
+			expectError: false,
 		},
 		{
 			name:          "Timeout exceeded",

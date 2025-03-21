@@ -43,16 +43,16 @@ func TestLsHandler(t *testing.T) {
 		if result == nil {
 			t.Fatal("Expected non-nil result")
 		}
-		
+
 		// Convert to JSON to inspect result
 		resultJSON, _ := json.Marshal(result)
 		resultString := string(resultJSON)
-		
+
 		if strings.Contains(resultString, "isError") && strings.Contains(resultString, "true") {
 			t.Errorf("Expected success but got error: %s", resultString)
 			return
 		}
-		
+
 		if !strings.Contains(resultString, "testdir") {
 			t.Errorf("Result should contain 'testdir', got: %s", resultString)
 		}
@@ -70,7 +70,7 @@ func TestLsHandler(t *testing.T) {
 	t.Run("WithIgnorePattern", func(t *testing.T) {
 		request := mcp.CallToolRequest{}
 		request.Params.Arguments = map[string]interface{}{
-			"path":          tempDir,
+			"path":           tempDir,
 			"ignore_pattern": "*.tmp",
 		}
 		request.Params.Name = "LS"
@@ -83,16 +83,16 @@ func TestLsHandler(t *testing.T) {
 		if result == nil {
 			t.Fatal("Expected non-nil result")
 		}
-		
+
 		// Convert to JSON to inspect result
 		resultJSON, _ := json.Marshal(result)
 		resultString := string(resultJSON)
-		
+
 		if strings.Contains(resultString, "isError") && strings.Contains(resultString, "true") {
 			t.Errorf("Expected success but got error: %s", resultString)
 			return
 		}
-		
+
 		if !strings.Contains(resultString, "testdir") {
 			t.Errorf("Result should contain 'testdir', got: %s", resultString)
 		}
@@ -116,24 +116,16 @@ func TestLsHandler(t *testing.T) {
 
 		result, err := lsHandler(ctx, request)
 
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
+		if err == nil {
+			t.Fatal("Expected an error for relative path but got none")
 		}
-		if result == nil {
-			t.Fatal("Expected non-nil result")
+		if result != nil {
+			t.Fatal("Expected nil result but got a result")
 		}
-		
-		// Convert to JSON to inspect result
-		resultJSON, _ := json.Marshal(result)
-		resultString := string(resultJSON)
-		
-		if !strings.Contains(resultString, "isError") || !strings.Contains(resultString, "true") {
-			t.Errorf("Expected error result but got success: %s", resultString)
-			return
-		}
-		
-		if !strings.Contains(resultString, "path must be an absolute path") {
-			t.Errorf("Result should contain 'path must be an absolute path', got: %s", resultString)
+
+		// Check error message
+		if !strings.Contains(err.Error(), "path must be an absolute path") {
+			t.Errorf("Error should contain 'path must be an absolute path', got: %v", err)
 		}
 	})
 
@@ -146,24 +138,16 @@ func TestLsHandler(t *testing.T) {
 
 		result, err := lsHandler(ctx, request)
 
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
+		if err == nil {
+			t.Fatal("Expected an error for non-existent path but got none")
 		}
-		if result == nil {
-			t.Fatal("Expected non-nil result")
+		if result != nil {
+			t.Fatal("Expected nil result but got a result")
 		}
-		
-		// Convert to JSON to inspect result
-		resultJSON, _ := json.Marshal(result)
-		resultString := string(resultJSON)
-		
-		if !strings.Contains(resultString, "isError") || !strings.Contains(resultString, "true") {
-			t.Errorf("Expected error result but got success: %s", resultString)
-			return
-		}
-		
-		if !strings.Contains(resultString, "Path does not exist") {
-			t.Errorf("Result should contain 'Path does not exist', got: %s", resultString)
+
+		// Check error message
+		if !strings.Contains(err.Error(), "Path does not exist") {
+			t.Errorf("Error should contain 'Path does not exist', got: %v", err)
 		}
 	})
 
@@ -185,16 +169,16 @@ func TestLsHandler(t *testing.T) {
 		if result == nil {
 			t.Fatal("Expected non-nil result")
 		}
-		
+
 		// Convert to JSON to inspect result
 		resultJSON, _ := json.Marshal(result)
 		resultString := string(resultJSON)
-		
+
 		if strings.Contains(resultString, "isError") && strings.Contains(resultString, "true") {
 			t.Errorf("Expected success but got error: %s", resultString)
 			return
 		}
-		
+
 		if !strings.Contains(resultString, "Directory is empty") {
 			t.Errorf("Result should contain 'Directory is empty', got: %s", resultString)
 		}
@@ -218,18 +202,18 @@ func TestListDirectory(t *testing.T) {
 
 	t.Run("ListAll", func(t *testing.T) {
 		entries, err := listDirectory(tempDir, nil)
-		
+
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		
+
 		if len(entries.Dirs) != 2 {
 			t.Errorf("Expected 2 directories, got %d", len(entries.Dirs))
 		}
 		if len(entries.Files) != 2 {
 			t.Errorf("Expected 2 files, got %d", len(entries.Files))
 		}
-		
+
 		// Check if directory entries contain expected values
 		foundDir1 := false
 		foundDir2 := false
@@ -247,7 +231,7 @@ func TestListDirectory(t *testing.T) {
 		if !foundDir2 {
 			t.Errorf("Expected to find 'dir2' in directory listing")
 		}
-		
+
 		// Check if file entries contain expected values
 		foundFile1 := false
 		foundFile2 := false
@@ -269,18 +253,18 @@ func TestListDirectory(t *testing.T) {
 
 	t.Run("WithIgnore", func(t *testing.T) {
 		entries, err := listDirectory(tempDir, []string{"*.log"})
-		
+
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		
+
 		if len(entries.Dirs) != 2 {
 			t.Errorf("Expected 2 directories, got %d", len(entries.Dirs))
 		}
 		if len(entries.Files) != 1 {
 			t.Errorf("Expected 1 file, got %d", len(entries.Files))
 		}
-		
+
 		// Check if file entries contain expected values
 		foundFile1 := false
 		foundFile2 := false
@@ -306,20 +290,20 @@ func TestListDirectory(t *testing.T) {
 		os.WriteFile(filepath.Join(tempDir, "zfile.txt"), []byte("z"), 0644)
 		os.Mkdir(filepath.Join(tempDir, "adir"), 0755)
 		os.Mkdir(filepath.Join(tempDir, "zdir"), 0755)
-		
+
 		entries, err := listDirectory(tempDir, nil)
-		
+
 		if err != nil {
 			t.Fatalf("Unexpected error: %v", err)
 		}
-		
+
 		if len(entries.Dirs) != 4 {
 			t.Errorf("Expected 4 directories, got %d", len(entries.Dirs))
 		}
 		if len(entries.Files) != 4 {
 			t.Errorf("Expected 4 files, got %d", len(entries.Files))
 		}
-		
+
 		// Check that arrays are sorted alphabetically
 		if len(entries.Dirs) > 0 && entries.Dirs[0] != "adir" {
 			t.Errorf("Expected first directory to be 'adir', got '%s'", entries.Dirs[0])

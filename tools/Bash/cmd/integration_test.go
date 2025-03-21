@@ -63,10 +63,10 @@ func TestToolRegistration(t *testing.T) {
 		mcp.WithString("command", mcp.Required(), mcp.Description("The command")),
 		mcp.WithNumber("timeout", mcp.Description("Timeout")),
 	)
-	
+
 	// Ensure we can register the tool without panic
 	s.AddTool(tool, bashHandler)
-	
+
 	// Verify that registration worked (no way to query yet)
 	t.Log("Tool registration successful")
 }

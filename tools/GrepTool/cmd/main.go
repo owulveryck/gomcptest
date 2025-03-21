@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -62,7 +63,7 @@ func main() {
 func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	pattern, ok := request.Params.Arguments["pattern"].(string)
 	if !ok {
-		return mcp.NewToolResultError("pattern must be a string"), nil
+		return nil, errors.New("pattern must be a string")
 	}
 
 	// Process ignore_case flag
@@ -80,7 +81,7 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		regex, err = regexp.Compile(pattern)
 	}
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid regex pattern: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Invalid regex pattern: %v", err))
 	}
 
 	// Get search path (default to current directory)
@@ -91,7 +92,7 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Make sure searchPath exists
 	if _, err := os.Stat(searchPath); os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("Path does not exist: %s", searchPath)), nil
+		return nil, errors.New(fmt.Sprintf("Path does not exist: %s", searchPath))
 	}
 
 	// Get include pattern (default to all files)
@@ -114,17 +115,17 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Create search configuration
 	config := searchConfig{
-		Path:          searchPath,
+		Path:           searchPath,
 		IncludePattern: includePattern,
-		Regex:         regex,
-		ContextLines:  contextLines,
-		IgnoreVCS:     ignoreVCS,
+		Regex:          regex,
+		ContextLines:   contextLines,
+		IgnoreVCS:      ignoreVCS,
 	}
 
 	// Find matching files and search for the pattern
 	matches, err := searchFiles(config)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error searching files: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error searching files: %v", err))
 	}
 
 	// Sort matches by modification time
@@ -138,7 +139,7 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	result := fmt.Sprintf("Found matches in %d files for pattern: %s\n\n", len(matches), pattern)
 	for _, match := range matches {
 		result += fmt.Sprintf("📄 %s\n", match.FilePath)
-		
+
 		var prevLineNum int
 		for _, block := range match.MatchingBlocks {
 			// Add separator between non-consecutive blocks
@@ -146,18 +147,18 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 				result += "    --\n"
 			}
 			prevLineNum = block.EndLine
-			
+
 			for i, line := range block.Lines {
 				lineNum := block.StartLine + i
 				prefix := "  "
-				
+
 				// If this is a match line (not context), highlight it
 				if line.IsMatch {
 					prefix = "▶ "
 					// Highlight the matching part - simple implementation just wraps in **
 					line.Content = highlightMatches(line.Content, regex)
 				}
-				
+
 				result += fmt.Sprintf("%s%d: %s\n", prefix, lineNum, line.Content)
 			}
 		}
@@ -249,7 +250,7 @@ func searchFiles(config searchConfig) ([]FileMatch, error) {
 				if err != nil {
 					continue
 				}
-				
+
 				// Search file content
 				fileMatches, err := searchFileContent(filePath, config.Regex, config.ContextLines)
 				if err != nil {
@@ -283,7 +284,7 @@ func searchFiles(config searchConfig) ([]FileMatch, error) {
 		// Handle directories
 		if info.IsDir() {
 			basename := filepath.Base(path)
-			
+
 			// Skip hidden directories, but check for VCS exception
 			if strings.HasPrefix(basename, ".") {
 				// If we're not ignoring VCS dirs and this is a VCS dir, don't skip
@@ -292,7 +293,7 @@ func searchFiles(config searchConfig) ([]FileMatch, error) {
 				}
 				return filepath.SkipDir
 			}
-			
+
 			// Skip version control directories if configured
 			if config.IgnoreVCS && (basename == ".git" || basename == ".svn" || basename == ".hg") {
 				return filepath.SkipDir
@@ -322,7 +323,7 @@ func searchFiles(config searchConfig) ([]FileMatch, error) {
 		if !matched {
 			return nil
 		}
-		
+
 		// Send file to worker
 		filesChan <- path
 		return nil
@@ -378,7 +379,7 @@ func searchFileContent(filePath string, regex *regexp.Regexp, contextLines int) 
 				// Extend current block
 				oldEnd := currentBlock.EndLine
 				currentBlock.EndLine = endLine
-				
+
 				// Add new lines to the block
 				for i := oldEnd + 1; i <= endLine; i++ {
 					idx := i - 1 // Convert to 0-based
@@ -393,13 +394,13 @@ func searchFileContent(filePath string, regex *regexp.Regexp, contextLines int) 
 				if currentBlock != nil {
 					blocks = append(blocks, *currentBlock)
 				}
-				
+
 				newBlock := MatchBlock{
 					StartLine: startLine,
 					EndLine:   endLine,
 					Lines:     make([]LineContent, 0, endLine-startLine+1),
 				}
-				
+
 				// Add all lines in the block
 				for i := startLine; i <= endLine; i++ {
 					idx := i - 1 // Convert to 0-based
@@ -409,7 +410,7 @@ func searchFileContent(filePath string, regex *regexp.Regexp, contextLines int) 
 						IsMatch: isCurrentLineMatch,
 					})
 				}
-				
+
 				currentBlock = &newBlock
 			}
 		}

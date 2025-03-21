@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -64,7 +65,7 @@ type FileInfo struct {
 func globToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	pattern, ok := request.Params.Arguments["pattern"].(string)
 	if !ok {
-		return mcp.NewToolResultError("pattern must be a string"), nil
+		return nil, errors.New("pattern must be a string")
 	}
 
 	// Get search path (default to current directory)
@@ -93,13 +94,13 @@ func globToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Make sure searchPath exists
 	if _, err := os.Stat(searchPath); os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("Path does not exist: %s", searchPath)), nil
+		return nil, errors.New(fmt.Sprintf("Path does not exist: %s", searchPath))
 	}
 
 	// Find matching files
 	files, err := findMatchingFiles(searchPath, pattern, excludePattern, useAbsolute)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error finding files: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error finding files: %v", err))
 	}
 
 	// Sort files by modification time
@@ -119,13 +120,13 @@ func globToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	for _, file := range files {
 		// Format file size
 		sizeStr := formatFileSize(file.Size)
-		
+
 		// Format timestamps
 		modTimeStr := file.ModTime.Format("2006-01-02 15:04:05")
-		
+
 		// Format permissions
 		permStr := file.Mode.String()
-		
+
 		result += fmt.Sprintf("%s (%s, modified %s, %s)\n", file.Path, sizeStr, modTimeStr, permStr)
 	}
 
@@ -151,15 +152,15 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 	var mutex sync.Mutex
 	var files []FileInfo
 	var wg sync.WaitGroup
-	
+
 	// Maximum number of concurrent goroutines
 	const maxWorkers = 10
 	sem := make(chan struct{}, maxWorkers)
-	
+
 	// For error handling across goroutines
 	errChan := make(chan error, 1)
 	var firstErr error
-	
+
 	// Handle special case where pattern is a direct path
 	if !strings.Contains(pattern, "*") && !strings.Contains(pattern, "?") && !strings.Contains(pattern, "[") {
 		if info, err := os.Stat(pattern); err == nil && !info.IsDir() {
@@ -170,25 +171,25 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 
 	// Normalize patterns to use forward slashes
 	pattern = strings.ReplaceAll(pattern, "\\", "/")
-	
+
 	// Process a file - check if it matches and add to results
 	processFile := func(path string, info os.FileInfo) {
 		defer wg.Done()
 		defer func() { <-sem }() // Release semaphore slot
-		
+
 		// Skip directories
 		if info.IsDir() {
 			return
 		}
-		
+
 		// Skip hidden files (starting with .)
 		if strings.HasPrefix(filepath.Base(path), ".") {
 			return
 		}
-		
+
 		// Normalize path for matching
 		normPath := strings.ReplaceAll(path, "\\", "/")
-		
+
 		// Check if file matches pattern using doublestar
 		matched, err := doublestar.Match(pattern, normPath)
 		if err != nil {
@@ -200,7 +201,7 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 			}
 			return
 		}
-		
+
 		// Check if file should be excluded
 		excluded := false
 		if excludePattern != "" && matched {
@@ -215,29 +216,29 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 				return
 			}
 		}
-		
+
 		if matched && !excluded {
 			// Get file metadata
 			fileInfo := getFileInfo(path, useAbsolute)
-			
+
 			// Add to results with mutex lock
 			mutex.Lock()
 			files = append(files, fileInfo)
 			mutex.Unlock()
 		}
 	}
-	
+
 	// Use filepath.Walk to traverse the directory tree
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip hidden directories
 		if info.IsDir() && strings.HasPrefix(filepath.Base(path), ".") {
 			return filepath.SkipDir
 		}
-		
+
 		// Check if we already have an error
 		select {
 		case err := <-errChan:
@@ -246,20 +247,20 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 		default:
 			// No error yet, continue
 		}
-		
+
 		// Process files concurrently
 		if !info.IsDir() {
 			wg.Add(1)
 			sem <- struct{}{} // Acquire semaphore slot
 			go processFile(path, info)
 		}
-		
+
 		return nil
 	})
-	
+
 	// Wait for all goroutines to finish
 	wg.Wait()
-	
+
 	// Check if we had any errors from the goroutines
 	select {
 	case err := <-errChan:
@@ -269,14 +270,14 @@ func findMatchingFiles(root, pattern string, excludePattern string, useAbsolute 
 	default:
 		// No error
 	}
-	
+
 	if err != nil {
 		return nil, err
 	}
 	if firstErr != nil {
 		return nil, firstErr
 	}
-	
+
 	return files, nil
 }
 
@@ -287,7 +288,7 @@ func getFileInfo(path string, useAbsolute bool) FileInfo {
 		// Return empty struct if error
 		return FileInfo{Path: path}
 	}
-	
+
 	// Get absolute path if requested
 	displayPath := path
 	if useAbsolute {
@@ -296,10 +297,10 @@ func getFileInfo(path string, useAbsolute bool) FileInfo {
 			displayPath = absPath
 		}
 	}
-	
+
 	// Get creation time (best effort, defaults to mod time if not available)
 	createTime := info.ModTime()
-	
+
 	return FileInfo{
 		Path:       displayPath,
 		Size:       info.Size(),
