@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -44,17 +45,17 @@ func main() {
 func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	path, ok := request.Params.Arguments["path"].(string)
 	if !ok {
-		return mcp.NewToolResultError("path must be a string"), nil
+		return nil, errors.New("path must be a string")
 	}
 
 	// Validate that the path is absolute
 	if !filepath.IsAbs(path) {
-		return mcp.NewToolResultError("path must be an absolute path, not a relative path"), nil
+		return nil, errors.New("path must be an absolute path, not a relative path")
 	}
 
 	// Check if path exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("Path does not exist: %s", path)), nil
+		return nil, errors.New(fmt.Sprintf("Path does not exist: %s", path))
 	}
 
 	// Get ignore pattern
@@ -66,12 +67,12 @@ func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 	// List directory contents
 	entries, err := listDirectory(path, ignorePatterns)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error listing directory: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error listing directory: %v", err))
 	}
 
 	// Format the result
 	result := fmt.Sprintf("Contents of %s:\n\n", path)
-	
+
 	// Add directories first
 	if len(entries.Dirs) > 0 {
 		result += "Directories:\n"
@@ -80,7 +81,7 @@ func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 		}
 		result += "\n"
 	}
-	
+
 	// Then add files
 	if len(entries.Files) > 0 {
 		result += "Files:\n"
@@ -88,7 +89,7 @@ func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 			result += fmt.Sprintf("  📄 %s\n", file)
 		}
 	}
-	
+
 	if len(entries.Dirs) == 0 && len(entries.Files) == 0 {
 		result += "Directory is empty."
 	}
@@ -113,12 +114,12 @@ func listDirectory(path string, ignorePatterns []string) (DirectoryEntries, erro
 
 	for _, entry := range dirEntries {
 		name := entry.Name()
-		
+
 		// Skip hidden files/dirs
 		if strings.HasPrefix(name, ".") {
 			continue
 		}
-		
+
 		// Check if the entry should be ignored
 		ignored := false
 		for _, pattern := range ignorePatterns {
@@ -131,11 +132,11 @@ func listDirectory(path string, ignorePatterns []string) (DirectoryEntries, erro
 				break
 			}
 		}
-		
+
 		if ignored {
 			continue
 		}
-		
+
 		// Add to appropriate list
 		if entry.IsDir() {
 			entries.Dirs = append(entries.Dirs, name)
@@ -143,10 +144,10 @@ func listDirectory(path string, ignorePatterns []string) (DirectoryEntries, erro
 			entries.Files = append(entries.Files, name)
 		}
 	}
-	
+
 	// Sort entries alphabetically
 	sort.Strings(entries.Dirs)
 	sort.Strings(entries.Files)
-	
+
 	return entries, nil
 }

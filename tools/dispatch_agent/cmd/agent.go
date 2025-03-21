@@ -76,14 +76,14 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	cs := agent.generativemodels[defaultModel].StartChat()
 	cs.History = history[:len(history)-1]
 	lastMessage := history[len(history)-1]
-	
+
 	// Add working directory information if provided
 	workingDirInstruction := ""
 	if workingPath != "" {
 		workingDirInstruction = fmt.Sprintf("\nYou will be working in the directory: %s. All tools should use this as the base path for their operations.", workingPath)
 	}
-	
-	parts := append(lastMessage.Parts, genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them" + workingDirInstruction))
+
+	parts := append(lastMessage.Parts, genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"+workingDirInstruction))
 	res, err := cs.SendMessage(ctx, parts...)
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
@@ -91,7 +91,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	out, functionCalls := processResponse(res)
 	output.WriteString(out)
 	fmt.Println(out)
-	
+
 	// Store original working directory if we need to change it
 	var originalDir string
 	if workingPath != "" {
@@ -100,13 +100,13 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 		if err != nil {
 			return "", fmt.Errorf("error getting current directory: %w", err)
 		}
-		
+
 		// Change to the specified working directory
 		if err := agent.changeDirectory(workingPath); err != nil {
 			return "", fmt.Errorf("error changing to directory %s: %w", workingPath, err)
 		}
 	}
-	
+
 	for functionCalls != nil {
 		for _, fn := range functionCalls {
 			fmt.Printf("will call %v\n", fn)
@@ -124,7 +124,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			fmt.Println(out)
 		}
 	}
-	
+
 	// Restore original directory if we changed it
 	if workingPath != "" && originalDir != "" {
 		_ = agent.changeDirectory(originalDir) // Best effort

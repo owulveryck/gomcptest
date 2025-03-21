@@ -49,17 +49,17 @@ func TestReplaceExistingFile(t *testing.T) {
 	t.Run("ReplaceExistingFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "existing.txt")
 		newContent := "This is the new content."
-		
+
 		// First verify the original file content
 		origContent, err := os.ReadFile(filePath)
 		if err != nil {
 			t.Fatalf("failed to read file before replace: %v", err)
 		}
-		
+
 		if string(origContent) != "This is an existing file.\n" {
 			t.Fatalf("test file doesn't contain the expected text")
 		}
-		
+
 		// Create arguments map
 		args := map[string]interface{}{
 			"file_path": filePath,
@@ -69,13 +69,13 @@ func TestReplaceExistingFile(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Check result - it should contain success message
 		fmt.Printf("Result: %#v\n", result)
 		resultStr := fmt.Sprintf("%v", result)
@@ -103,7 +103,7 @@ func TestCreateNewFile(t *testing.T) {
 	t.Run("CreateNewFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "newfile.txt")
 		content := "This is a new file content"
-		
+
 		// Verify file doesn't exist yet
 		if _, err := os.Stat(filePath); err == nil {
 			t.Fatalf("test file already exists before creation")
@@ -118,13 +118,13 @@ func TestCreateNewFile(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Check result - it should contain success message
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "Successfully created new file") {
@@ -155,13 +155,13 @@ func TestRelativePath(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should be an error
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "absolute path") {
@@ -177,7 +177,7 @@ func TestNonExistentDirectory(t *testing.T) {
 
 	t.Run("NonExistentDirectory", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "nonexistent", "file.txt")
-		
+
 		// Create arguments map
 		args := map[string]interface{}{
 			"file_path": filePath,
@@ -187,19 +187,19 @@ func TestNonExistentDirectory(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should be an error
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "Directory does not exist") {
 			t.Errorf("expected error about directory not existing, got: %+v", result)
 		}
-		
+
 		// Verify file wasn't created
 		if _, err := os.Stat(filePath); err == nil {
 			t.Errorf("file was created in non-existent directory")
@@ -218,9 +218,9 @@ func TestInvalidArguments(t *testing.T) {
 
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		result, _ := replaceHandler(context.Background(), req)
-		
+
 		// Should have error about file_path type
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "file_path must be a string") {
@@ -237,9 +237,9 @@ func TestInvalidArguments(t *testing.T) {
 
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		result, _ := replaceHandler(context.Background(), req)
-		
+
 		// Should have error about content type
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "content must be a string") {
@@ -255,7 +255,7 @@ func TestWriteError(t *testing.T) {
 
 	t.Run("NoPermissionDir", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "noperm", "file.txt")
-		
+
 		// Create arguments map
 		args := map[string]interface{}{
 			"file_path": filePath,
@@ -265,19 +265,19 @@ func TestWriteError(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should be an error
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "Error writing file") {
 			t.Errorf("expected error about writing file, got: %v", result)
 		}
-		
+
 		// Verify file wasn't created
 		if _, err := os.Stat(filePath); err == nil {
 			t.Errorf("file was created in no permission directory")
@@ -297,13 +297,13 @@ func TestEmptyPath(t *testing.T) {
 		// Create a minimal request
 		var req mcp.CallToolRequest
 		req.Params.Arguments = args
-		
+
 		// Call the handler
 		result, err := replaceHandler(context.Background(), req)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		
+
 		// Should be an error
 		resultStr := fmt.Sprintf("%v", result)
 		if !strings.Contains(resultStr, "absolute path") {

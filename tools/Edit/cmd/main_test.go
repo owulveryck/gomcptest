@@ -23,9 +23,9 @@ func setupTestFiles(t *testing.T) (string, func()) {
 
 	// Create test files
 	files := map[string]string{
-		"simple.txt":   "Hello, World!\nThis is a test file.\nIt has multiple lines.\n",
+		"simple.txt":    "Hello, World!\nThis is a test file.\nIt has multiple lines.\n",
 		"duplicate.txt": "This line appears once.\nThis line appears twice.\nSome other content.\nThis line appears twice.\n",
-		"binary.bin":   string([]byte{0, 1, 2, 3, 4, 5}),
+		"binary.bin":    string([]byte{0, 1, 2, 3, 4, 5}),
 	}
 
 	for name, content := range files {
@@ -61,10 +61,10 @@ func testEdit(t *testing.T, filePathArg, oldStringArg, newStringArg string) {
 
 	// Create a minimal request with just what we need
 	var req mcp.CallToolRequest
-	
+
 	// Set the Arguments map directly (this assumes the struct layout matches)
 	req.Params.Arguments = args
-	
+
 	// Call the handler
 	_, err := editHandler(context.Background(), req)
 	if err != nil {
@@ -93,17 +93,17 @@ func TestModifyFile(t *testing.T) {
 	// Test case: simple replacement
 	t.Run("SimpleReplacement", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "simple.txt")
-		
+
 		// First verify the original file content
 		origContent, err := os.ReadFile(filePath)
 		if err != nil {
 			t.Fatalf("failed to read file before edit: %v", err)
 		}
-		
+
 		if !strings.Contains(string(origContent), "World") {
 			t.Fatalf("test file doesn't contain the expected text to replace")
 		}
-		
+
 		// Perform the edit
 		testEdit(t, filePath, "World", "Universe")
 
@@ -134,7 +134,7 @@ func TestCreateFile(t *testing.T) {
 	t.Run("CreateNewFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "newfile.txt")
 		content := "This is a new file content"
-		
+
 		// Verify file doesn't exist yet
 		if _, err := os.Stat(filePath); err == nil {
 			t.Fatalf("test file already exists before creation")
@@ -156,26 +156,26 @@ func TestCreateFile(t *testing.T) {
 
 	t.Run("CreateFileInNonExistentDir", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "nonexistent", "file.txt")
-		
+
 		// Verify the directory doesn't exist
 		dirPath := filepath.Dir(filePath)
 		if _, err := os.Stat(dirPath); err == nil {
 			t.Fatalf("test directory exists when it shouldn't")
 		}
-		
+
 		// The attempt to create a file in a non-existent directory will fail,
 		// but we'll just ignore the result and check that the file wasn't created
-		
+
 		var req mcp.CallToolRequest
 		req.Params.Arguments = map[string]interface{}{
 			"file_path":  filePath,
 			"old_string": "",
 			"new_string": "content",
 		}
-		
+
 		// Call handler directly and ignore the result
 		editHandler(context.Background(), req)
-		
+
 		// Verify the file wasn't created
 		if _, err := os.Stat(filePath); err == nil {
 			t.Errorf("file was created in non-existent directory")
@@ -190,7 +190,7 @@ func TestDuplicateMatches(t *testing.T) {
 
 	t.Run("DuplicateMatches", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "duplicate.txt")
-		
+
 		// Should fail because the line appears twice
 		testError(t, filePath, "This line appears twice.", "REPLACED")
 	})
@@ -205,8 +205,8 @@ func TestUniqueContext(t *testing.T) {
 		filePath := filepath.Join(tempDir, "duplicate.txt")
 		// Use more context to uniquely identify the line
 		request := createRequest(
-			filePath, 
-			"This line appears twice.\nSome other content.", 
+			filePath,
+			"This line appears twice.\nSome other content.",
 			"REPLACED\nSome other content.",
 		)
 
@@ -240,7 +240,7 @@ func TestBinaryFile(t *testing.T) {
 
 	t.Run("BinaryFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "binary.bin")
-		
+
 		// Should fail for binary file
 		testError(t, filePath, string([]byte{1, 2, 3}), "new content")
 	})
@@ -253,7 +253,7 @@ func TestNonExistentFile(t *testing.T) {
 
 	t.Run("NonExistentFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "nonexistent.txt")
-		
+
 		// Should fail because file doesn't exist
 		testError(t, filePath, "some text", "new text")
 	})
@@ -274,7 +274,7 @@ func TestInvalidPath(t *testing.T) {
 	t.Run("TooLongPath", func(t *testing.T) {
 		// Create a path that's longer than 4096 characters
 		longPath := filepath.Join("/", strings.Repeat("verylongdirectoryname", 200), "file.txt")
-		
+
 		// Should fail for too long path
 		testError(t, longPath, "text", "new")
 	})
@@ -287,7 +287,7 @@ func TestContentNotFound(t *testing.T) {
 
 	t.Run("ContentNotFound", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "simple.txt")
-		
+
 		// Should fail because the text doesn't exist in the file
 		testError(t, filePath, "text that doesn't exist", "new text")
 	})
@@ -314,7 +314,7 @@ func TestFileSizeLimit(t *testing.T) {
 	t.Run("LargeNewString", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "simple.txt")
 		largeContent := strings.Repeat("X", 10*1024*1024+100) // 10MB + 100 bytes
-		
+
 		// Should fail because new content is too large
 		testError(t, filePath, "Hello", largeContent)
 	})
@@ -354,7 +354,7 @@ func TestPermissionIssues(t *testing.T) {
 	t.Run("NoPermissionDirectory", func(t *testing.T) {
 		dirPath := filepath.Join(tempDir, "noperm")
 		filePath := filepath.Join(dirPath, "file.txt")
-		
+
 		// Should fail because directory has no write permission
 		testError(t, filePath, "", "new content")
 	})
@@ -374,10 +374,10 @@ func TestDirectoryHandling(t *testing.T) {
 			"old_string": "text",
 			"new_string": "new text",
 		}
-		
+
 		// Call handler directly and ignore the result
 		editHandler(context.Background(), req)
-		
+
 		// No need to check anything - if the directory was somehow modified it would be a major issue,
 		// but that would be caught by other tests failing
 	})
@@ -390,7 +390,7 @@ func TestOverwriteExistingFile(t *testing.T) {
 
 	t.Run("OverwriteExistingFile", func(t *testing.T) {
 		filePath := filepath.Join(tempDir, "simple.txt")
-		
+
 		// Should fail because trying to create a file that already exists
 		testError(t, filePath, "", "This should fail")
 	})
@@ -404,9 +404,9 @@ func containsLineNumbers(s string) bool {
 
 // Helper function to check if a string contains a specific substring
 func containsSubstring(s, substr string) bool {
-	return strings.HasPrefix(s, substr) || 
-	       strings.HasSuffix(s, substr) || 
-	       strings.Contains(s, substr)
+	return strings.HasPrefix(s, substr) ||
+		strings.HasSuffix(s, substr) ||
+		strings.Contains(s, substr)
 }
 
 // Helper function to check if a string contains a digit
@@ -429,7 +429,7 @@ func testError(t *testing.T, filePath, oldString, newString string) {
 	fileExistedBefore := false
 	var origContent []byte
 	var err error
-	
+
 	if _, err = os.Stat(filePath); err == nil {
 		fileExistedBefore = true
 		origContent, err = os.ReadFile(filePath)
@@ -437,7 +437,7 @@ func testError(t *testing.T, filePath, oldString, newString string) {
 			t.Fatalf("failed to read file before test: %v", err)
 		}
 	}
-	
+
 	// Try to make the edit which should fail
 	var req mcp.CallToolRequest
 	req.Params.Arguments = map[string]interface{}{
@@ -445,10 +445,10 @@ func testError(t *testing.T, filePath, oldString, newString string) {
 		"old_string": oldString,
 		"new_string": newString,
 	}
-	
+
 	// Call the handler, ignoring the result
 	editHandler(context.Background(), req)
-	
+
 	// Verify file wasn't modified or created
 	if fileExistedBefore {
 		// File should still exist and have the same content
@@ -456,7 +456,7 @@ func testError(t *testing.T, filePath, oldString, newString string) {
 		if err != nil {
 			t.Fatalf("failed to read file after test: %v", err)
 		}
-		
+
 		if !bytes.Equal(origContent, currentContent) {
 			t.Errorf("file was modified when it shouldn't have been")
 		}
@@ -510,11 +510,11 @@ func TestUtilityFunctions(t *testing.T) {
 	t.Run("FindLineNumbers", func(t *testing.T) {
 		content := "Line 1\nLine 2\nLine with pattern\nLine 4\nAnother line with pattern\n"
 		lineNumbers := findLineNumbers(content, "pattern")
-		
+
 		if len(lineNumbers) != 2 {
 			t.Errorf("Expected 2 line numbers, got %d", len(lineNumbers))
 		}
-		
+
 		if lineNumbers[0] != 3 || lineNumbers[1] != 5 {
 			t.Errorf("Expected line numbers 3 and 5, got %v", lineNumbers)
 		}
@@ -526,7 +526,7 @@ func TestUtilityFunctions(t *testing.T) {
 		if formatted != "1, 2, 3" {
 			t.Errorf("Expected '1, 2, 3', got '%s'", formatted)
 		}
-		
+
 		// Test with empty slice
 		formatted = formatLineNumbers([]int{})
 		if formatted != "unknown" {

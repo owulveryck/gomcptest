@@ -86,36 +86,36 @@ NOTE: For Jupyter notebooks (.ipynb files), use the ReadNotebook tool instead.`)
 func viewHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
-		return mcp.NewToolResultError("file_path must be a string"), nil
+		return nil, errors.New("file_path must be a string")
 	}
 
 	// Validate that the path is absolute
 	if !filepath.IsAbs(filePath) {
-		return mcp.NewToolResultError("file_path must be an absolute path, not a relative path"), nil
+		return nil, errors.New("file_path must be an absolute path, not a relative path")
 	}
 
 	// Check if file exists
 	fileInfo, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("File does not exist: %s", filePath)), nil
+		return nil, errors.New(fmt.Sprintf("File does not exist: %s", filePath))
 	} else if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error accessing file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error accessing file: %v", err))
 	}
 
 	// Check if it's a directory
 	if fileInfo.IsDir() {
-		return mcp.NewToolResultError(fmt.Sprintf("%s is a directory, not a file", filePath)), nil
+		return nil, errors.New(fmt.Sprintf("%s is a directory, not a file", filePath))
 	}
 
 	// Extract all parameters
 	offset := getNumberParam(request, "offset", 0)
 	if offset < 0 {
-		return mcp.NewToolResultError("offset must be a non-negative number"), nil
+		return nil, errors.New("offset must be a non-negative number")
 	}
 
 	limit := getNumberParam(request, "limit", 2000)
 	if limit <= 0 {
-		return mcp.NewToolResultError("limit must be a positive number"), nil
+		return nil, errors.New("limit must be a positive number")
 	}
 
 	showLineNumbers := getBoolParam(request, "show_line_numbers", false)
@@ -409,7 +409,7 @@ func handleImageFile(filePath string, metadata string) (*mcp.CallToolResult, err
 	// Read file content
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 	}
 
 	// Encode as base64
@@ -431,7 +431,7 @@ func handleBinaryFile(filePath string, metadata string, includeHexDump bool) (*m
 	// Get file info for basic stats
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error accessing file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error accessing file: %v", err))
 	}
 
 	// Detect MIME type
@@ -450,7 +450,7 @@ func handleBinaryFile(filePath string, metadata string, includeHexDump bool) (*m
 		// Read the first few KB for hex dump preview
 		file, err := os.Open(filePath)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Error opening file: %v", err)), nil
+			return nil, errors.New(fmt.Sprintf("Error opening file: %v", err))
 		}
 		defer file.Close()
 
@@ -458,7 +458,7 @@ func handleBinaryFile(filePath string, metadata string, includeHexDump bool) (*m
 		buffer := make([]byte, 1024)
 		bytesRead, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
-			return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+			return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 		}
 
 		// Generate hex dump
@@ -575,7 +575,7 @@ func handleMarkdownFile(filePath string, offset, limit int, showLineNumbers bool
 	// Read the file content
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 	}
 
 	fileContent := string(data)
@@ -600,7 +600,7 @@ func handleMarkdownFile(filePath string, offset, limit int, showLineNumbers bool
 
 	// Apply offset and limit
 	if offset >= len(lines) {
-		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
+		return nil, errors.New(fmt.Sprintf("Offset %d exceeds file length", offset))
 	}
 
 	endLine := offset + limit
@@ -713,7 +713,7 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 	// Read the file
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 	}
 
 	fileContent := string(data)
@@ -766,7 +766,7 @@ func handleCodeFile(filePath string, offset, limit int, showLineNumbers bool, me
 
 	// Apply offset and limit
 	if offset >= len(lines) {
-		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
+		return nil, errors.New(fmt.Sprintf("Offset %d exceeds file length", offset))
 	}
 
 	endLine := offset + limit
@@ -968,7 +968,7 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 	// Read file content
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error reading file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error reading file: %v", err))
 	}
 
 	fileContent := string(data)
@@ -1040,7 +1040,7 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 
 	// Apply offset and limit
 	if offset >= len(lines) {
-		return mcp.NewToolResultError(fmt.Sprintf("Offset %d exceeds file length", offset)), nil
+		return nil, errors.New(fmt.Sprintf("Offset %d exceeds file length", offset))
 	}
 
 	endLine := offset + limit
@@ -1076,4 +1076,3 @@ func handleTextFile(filePath string, offset, limit int, showLineNumbers bool, me
 
 	return mcp.NewToolResultText(result), nil
 }
-

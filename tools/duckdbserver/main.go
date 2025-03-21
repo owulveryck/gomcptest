@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 
@@ -81,11 +82,11 @@ For more details on DuckDB's SQL syntax and functions, visit: https://duckdb.org
 func duckDBHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	queryStr, ok := request.Params.Arguments["query"].(string)
 	if !ok {
-		return mcp.NewToolResultError("query must be a string"), nil
+		return nil, errors.New("query must be a string")
 	}
 	res, err := executeDuckDBQuery(queryStr)
 	if err != nil {
-		return mcp.NewToolResultError("duckdb encountered an error: " + err.Error()), nil
+		return nil, errors.New("duckdb encountered an error: " + err.Error())
 	}
 
 	return mcp.NewToolResultText(res), nil

@@ -32,4 +32,3 @@ func main() {
 	// If interactive mode is requested, run the agent in interactive mode
 	RunInteractiveMode(agent)
 }
-

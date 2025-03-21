@@ -58,7 +58,7 @@ func main() {
 
 	// Create dispatch_agent tool
 	tool := CreateDispatchTool(agent)
-	
+
 	// Create handler and add tool to server
 	dispatchHandler := CreateDispatchHandler(agent)
 	s.AddTool(tool, dispatchHandler)

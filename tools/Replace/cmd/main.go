@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -42,23 +43,23 @@ func main() {
 func replaceHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
-		return mcp.NewToolResultError("file_path must be a string"), nil
+		return nil, errors.New("file_path must be a string")
 	}
 
 	content, ok := request.Params.Arguments["content"].(string)
 	if !ok {
-		return mcp.NewToolResultError("content must be a string"), nil
+		return nil, errors.New("content must be a string")
 	}
 
 	// Validate that the path is absolute
 	if !filepath.IsAbs(filePath) {
-		return mcp.NewToolResultError("file_path must be an absolute path, not a relative path"), nil
+		return nil, errors.New("file_path must be an absolute path, not a relative path")
 	}
 
 	// Check if the directory exists
 	dir := filepath.Dir(filePath)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return mcp.NewToolResultError(fmt.Sprintf("Directory does not exist: %s", dir)), nil
+		return nil, errors.New(fmt.Sprintf("Directory does not exist: %s", dir))
 	}
 
 	// Check if file exists before writing
@@ -69,7 +70,7 @@ func replaceHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 
 	// Write the file
 	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Error writing file: %v", err)), nil
+		return nil, errors.New(fmt.Sprintf("Error writing file: %v", err))
 	}
 
 	if fileExisted {
