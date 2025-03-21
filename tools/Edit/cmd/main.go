@@ -128,7 +128,7 @@ func createNewFile(filePath, content string) (*mcp.CallToolResult, error) {
 		return nil, errors.New(fmt.Sprintf("Error creating file: %v", err))
 	}
 
-	return nil, errors.New(fmt.Sprintf("Created new file: %s", filePath))
+	return mcp.NewToolResultText(fmt.Sprintf("Created new file: %s", filePath)), nil
 }
 
 // validateFilePath checks if the file path is valid

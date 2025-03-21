@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -64,9 +65,8 @@ func ExecuteMockRequest(ctx context.Context, req MockRequest) (*mcp.CallToolResu
 	if isTestRun {
 		// For command security tests
 		if strings.Contains(req.Command, "curl") || strings.Contains(req.Command, "wget") {
-			// Create an error result for banned commands
-			result := mcp.NewToolResultError("Command 'curl' is banned for security reasons")
-			return result, nil
+			// Return error for banned commands
+			return nil, errors.New("Command 'curl' is banned for security reasons")
 		}
 
 		// For echo test commands
@@ -90,28 +90,24 @@ func ExecuteMockRequest(ctx context.Context, req MockRequest) (*mcp.CallToolResu
 
 		// For timeout exceeded tests
 		if strings.Contains(req.Command, "sleep 1") {
-			result := mcp.NewToolResultError("Command timed out")
-			return result, nil
+			return nil, errors.New("Command timed out")
 		}
 
 		// For invalid arguments test - return specific responses
 		for _, argType := range []string{"command_is_number", "command_is_bool", "command_is_nil"} {
 			if _, hasArg := req.OtherArgs[argType]; hasArg {
-				result := mcp.NewToolResultError("command must be a string")
-				return result, nil
+				return nil, errors.New("command must be a string")
 			}
 		}
 
 		// Error cases
 		if strings.Contains(req.Command, "nonexistent") || strings.Contains(req.Command, "missing quote") {
-			result := mcp.NewToolResultError("Error: " + req.Command)
-			return result, nil
+			return nil, errors.New("Error: " + req.Command)
 		}
 
 		// For excessive timeout test
 		if req.HasTimeout && req.Timeout > 600000 {
-			result := mcp.NewToolResultError("timeout cannot exceed 600000ms")
-			return result, nil
+			return nil, errors.New("timeout cannot exceed 600000ms")
 		}
 
 		// Default to returning a text result for test cases

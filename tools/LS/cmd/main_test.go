@@ -116,24 +116,16 @@ func TestLsHandler(t *testing.T) {
 
 		result, err := lsHandler(ctx, request)
 
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
+		if err == nil {
+			t.Fatal("Expected an error for relative path but got none")
 		}
-		if result == nil {
-			t.Fatal("Expected non-nil result")
-		}
-
-		// Convert to JSON to inspect result
-		resultJSON, _ := json.Marshal(result)
-		resultString := string(resultJSON)
-
-		if !strings.Contains(resultString, "isError") || !strings.Contains(resultString, "true") {
-			t.Errorf("Expected error result but got success: %s", resultString)
-			return
+		if result != nil {
+			t.Fatal("Expected nil result but got a result")
 		}
 
-		if !strings.Contains(resultString, "path must be an absolute path") {
-			t.Errorf("Result should contain 'path must be an absolute path', got: %s", resultString)
+		// Check error message
+		if !strings.Contains(err.Error(), "path must be an absolute path") {
+			t.Errorf("Error should contain 'path must be an absolute path', got: %v", err)
 		}
 	})
 
@@ -146,24 +138,16 @@ func TestLsHandler(t *testing.T) {
 
 		result, err := lsHandler(ctx, request)
 
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
+		if err == nil {
+			t.Fatal("Expected an error for non-existent path but got none")
 		}
-		if result == nil {
-			t.Fatal("Expected non-nil result")
-		}
-
-		// Convert to JSON to inspect result
-		resultJSON, _ := json.Marshal(result)
-		resultString := string(resultJSON)
-
-		if !strings.Contains(resultString, "isError") || !strings.Contains(resultString, "true") {
-			t.Errorf("Expected error result but got success: %s", resultString)
-			return
+		if result != nil {
+			t.Fatal("Expected nil result but got a result")
 		}
 
-		if !strings.Contains(resultString, "Path does not exist") {
-			t.Errorf("Result should contain 'Path does not exist', got: %s", resultString)
+		// Check error message
+		if !strings.Contains(err.Error(), "Path does not exist") {
+			t.Errorf("Error should contain 'Path does not exist', got: %v", err)
 		}
 	})
 
