@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -87,35 +88,35 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	if isTestRun {
 		// Handle TestInvalidArguments test cases specially
 		if _, ok := request.Params.Arguments["command"].(float64); ok {
-			return mcp.NewToolResultError("command must be a string"), nil
+			return nil, errors.New("command must be a string")
 		}
 
 		if _, ok := request.Params.Arguments["command"].(bool); ok {
-			return mcp.NewToolResultError("command must be a string"), nil
+			return nil, errors.New("command must be a string")
 		}
 
 		// Handle nil command argument
 		if request.Params.Arguments["command"] == nil {
-			return mcp.NewToolResultError("command must be a string"), nil
+			return nil, errors.New("command must be a string")
 		}
 	}
 
 	// Check if command exists and is a string
 	commandArg, exists := request.Params.Arguments["command"]
 	if !exists || commandArg == nil {
-		return mcp.NewToolResultError("command must be a string"), nil
+		return nil, errors.New("command must be a string")
 	}
 
 	command, ok := commandArg.(string)
 	if !ok {
-		return mcp.NewToolResultError("command must be a string"), nil
+		return nil, errors.New("command must be a string")
 	}
 
 	// Check for timeout parameter
 	var timeout time.Duration = 30 * time.Minute // Default timeout
 	if timeoutMs, ok := request.Params.Arguments["timeout"].(float64); ok {
 		if timeoutMs > 600000 {
-			return mcp.NewToolResultError("timeout cannot exceed 600000ms (10 minutes)"), nil
+			return nil, errors.New("timeout cannot exceed 600000ms (10 minutes)")
 		}
 		timeout = time.Duration(timeoutMs) * time.Millisecond
 	}
@@ -139,7 +140,7 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 		// If this exact command is in our test cases, block it
 		if bannedCmd, found := testCases[command]; found {
-			return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+			return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 		}
 
 		return nil, nil // Skip further checks in test mode
@@ -155,7 +156,7 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 				strings.HasPrefix(command, bannedCmd+" ") || // at start with args
 				strings.Contains(command, " "+bannedCmd+" ") || // in middle with spaces
 				strings.HasSuffix(command, " "+bannedCmd) { // at end after space
-				return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+				return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 			}
 
 			// Check for path-based variations
@@ -166,7 +167,7 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 			}
 			for _, pattern := range pathPatterns {
 				if strings.Contains(command, pattern) {
-					return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+					return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 				}
 			}
 
@@ -183,21 +184,21 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 			}
 			for _, pattern := range chainPatterns {
 				if strings.Contains(command, pattern) {
-					return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+					return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 				}
 			}
 
 			// Check for command substitution
 			if strings.Contains(command, "$("+bannedCmd) || // subshell
 				strings.Contains(command, "`"+bannedCmd) { // backtick
-				return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+				return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 			}
 
 			// Check for variable usage
 			if strings.Contains(command, "$"+bannedCmd) ||
 				strings.Contains(command, "${"+bannedCmd) ||
 				strings.Contains(command, bannedCmd+"=") {
-				return mcp.NewToolResultError(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd)), nil
+				return nil, errors.New(fmt.Sprintf("Command '%s' is banned for security reasons", bannedCmd))
 			}
 		}
 	}
@@ -211,7 +212,7 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if execCtx.Err() == context.DeadlineExceeded {
-			return mcp.NewToolResultError(fmt.Sprintf("Command timed out after %v", timeout)), nil
+			return nil, errors.New(fmt.Sprintf("Command timed out after %v", timeout))
 		}
 		// Return both the error and any output that was generated
 		return mcp.NewToolResultText(fmt.Sprintf("Error: %v\n\nOutput:\n%s", err, truncateOutput(string(output)))), nil

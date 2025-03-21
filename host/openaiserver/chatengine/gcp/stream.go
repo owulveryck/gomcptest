@@ -18,7 +18,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	if generativemodel, modelIsPresent = chatsession.generativemodels[req.Model]; !modelIsPresent {
 		return nil, errors.New("cannot find model")
 	}
-	
+
 	// Set temperature from request
 	generativemodel.SetTemperature(req.Temperature)
 
@@ -126,7 +126,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 					err = ctx.Err() // Ensure we return the correct cancellation error
 				}
 
-				fmt.Printf("Error from stream processing: %v\n", err)
+				slog.Error("Error from stream processing", "error", err)
 			}
 		}
 	}()

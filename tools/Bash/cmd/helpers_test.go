@@ -255,4 +255,3 @@ func isToolResultError(result *mcp.CallToolResult) bool {
 	}
 	return false
 }
-

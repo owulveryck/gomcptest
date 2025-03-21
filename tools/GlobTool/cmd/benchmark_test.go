@@ -86,13 +86,13 @@ func setupBenchmarkFiles(t *testing.T) (string, func()) {
 		if fileExists(filePath) {
 			continue // Skip if file already exists
 		}
-		
+
 		// Create file with unique content and size
 		content := make([]byte, (i+1)*100) // Different sizes
 		for j := range content {
 			content[j] = byte(i + j%256)
 		}
-		
+
 		if err := createFileWithContent(filePath, content); err != nil {
 			if t != nil {
 				t.Fatalf("Failed to create file %s: %v", filePath, err)

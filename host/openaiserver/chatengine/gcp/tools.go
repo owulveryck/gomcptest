@@ -143,10 +143,20 @@ func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall)
 	return chatsession.servers[srvNumber].Run(ctx, fn)
 }
 
-// on a new line, indented with a hyphen and a space.
+// Format the function response in a structured way
 func formatFunctionResponse(resp *genai.FunctionResponse) string {
 	data := resp.Response
 	var sb strings.Builder
+
+	// Add header with function name
+	parts := strings.SplitN(resp.Name, "_", 2)
+	if len(parts) == 2 {
+		sb.WriteString(fmt.Sprintf("Function `%s` from `%s` returned:\n", parts[1], parts[0]))
+	} else {
+		sb.WriteString(fmt.Sprintf("Function `%s` returned:\n", resp.Name))
+	}
+
+	// Add response data
 	for key, value := range data {
 		sb.WriteString(fmt.Sprintf("- %s: %v\n", key, value))
 	}

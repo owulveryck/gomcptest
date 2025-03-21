@@ -132,13 +132,13 @@ func TestExpandPatterns(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := expandPatterns(tt.pattern)
-			
+
 			// Check if lengths match
 			if len(result) != len(tt.expected) {
 				t.Errorf("expandPatterns() returned %d patterns, want %d", len(result), len(tt.expected))
 				return
 			}
-			
+
 			// Check each pattern
 			for i, pattern := range result {
 				if pattern != tt.expected[i] {
@@ -210,12 +210,12 @@ Line 8: The end`
 		t.Run(tt.name, func(t *testing.T) {
 			regex := regexp.MustCompile(tt.pattern)
 			blocks, err := searchFileContent(testFilePath, regex, tt.contextLines)
-			
+
 			if err != nil {
 				t.Errorf("searchFileContent() error = %v", err)
 				return
 			}
-			
+
 			if len(blocks) != tt.expectedLen {
 				t.Errorf("searchFileContent() returned %d blocks, want %d", len(blocks), tt.expectedLen)
 			}
@@ -233,17 +233,17 @@ func TestIntegration(t *testing.T) {
 
 	// Create some test files
 	files := map[string]string{
-		"file1.txt":           "This is a test file with some text in it.\nIt has multiple lines.\nTesting 123.",
-		"file2.js":            "function test() { return 'hello world'; }",
-		"file3.ts":            "class Test { constructor() { console.log('testing'); } }",
-		"ignored.bin":         string([]byte{0x00, 0x01, 0x02, 0x03}), // Binary file
-		".hidden/hidden.txt":  "This is a hidden file that should be ignored.",
+		"file1.txt":          "This is a test file with some text in it.\nIt has multiple lines.\nTesting 123.",
+		"file2.js":           "function test() { return 'hello world'; }",
+		"file3.ts":           "class Test { constructor() { console.log('testing'); } }",
+		"ignored.bin":        string([]byte{0x00, 0x01, 0x02, 0x03}), // Binary file
+		".hidden/hidden.txt": "This is a hidden file that should be ignored.",
 	}
 
 	// Create the files
 	for filePath, content := range files {
 		fullPath := filepath.Join(tempDir, filePath)
-		
+
 		// Create directories if needed
 		dir := filepath.Dir(fullPath)
 		if dir != tempDir {
@@ -251,7 +251,7 @@ func TestIntegration(t *testing.T) {
 				t.Fatalf("Failed to create directory %s: %v", dir, err)
 			}
 		}
-		
+
 		// Write the file
 		if err := ioutil.WriteFile(fullPath, []byte(content), 0644); err != nil {
 			t.Fatalf("Failed to create file %s: %v", fullPath, err)
@@ -335,12 +335,12 @@ func TestIntegration(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			matches, err := searchFiles(tt.config)
-			
+
 			if err != nil {
 				t.Errorf("searchFiles() error = %v", err)
 				return
 			}
-			
+
 			if len(matches) != tt.expectedFiles {
 				t.Errorf("searchFiles() returned %d files, want %d", len(matches), tt.expectedFiles)
 			}

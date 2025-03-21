@@ -9,6 +9,7 @@ Launches a new agent that has access to the following tools: View, GlobTool, Gre
 ## Parameters
 
 - `prompt` (string, required): The task for the agent to perform
+- `path` (string, optional): The directory path where the agent should work. This will be set as the current working directory for all tools.
 
 ## Usage Notes
 
@@ -44,13 +45,25 @@ cd cmd
 go run main.go
 ```
 
-## Example
+## Examples
 
+Without specifying a path:
 ```json
 {
   "name": "dispatch_agent",
   "params": {
     "prompt": "Find all config files in the project"
+  }
+}
+```
+
+With a specific working directory:
+```json
+{
+  "name": "dispatch_agent",
+  "params": {
+    "prompt": "Find all config files in the project",
+    "path": "/path/to/project"
   }
 }
 ```
