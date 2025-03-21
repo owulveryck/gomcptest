@@ -32,6 +32,9 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 			Usage: chatengine.CompletionUsage{},
 		}, nil
 	}
+	// Set temperature from request
+	generativemodel.SetTemperature(req.Temperature)
+	
 	cs := generativemodel.StartChat()
 	if len(req.Messages) > 1 {
 		cs.History = make([]*genai.Content, len(req.Messages)-1)
