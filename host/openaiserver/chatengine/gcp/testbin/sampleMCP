@@ -1,6 +1,0 @@
-#!/bin/bash
-# This is a dummy MCP implementation for testing
-echo '{"jsonrpc":"2.0","result":{"apiVersion":"1.0.0","implementation":{"name":"test-mcp","version":"1.0.0"}},"id":"1"}'
-read -r input
-# Return a fixed response for anything sent to us
-echo '{"jsonrpc":"2.0","result":{"content":[{"type":"text","text":"Hello, Olivier! Here is the number 42."}]},"id":"2"}'
