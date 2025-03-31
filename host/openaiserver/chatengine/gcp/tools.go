@@ -28,15 +28,83 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 	serverName := serverPrefix + strconv.Itoa(len(chatsession.servers))
 	for i, tool := range tools.Tools {
 		schema := &genai.Schema{
-			Type:       genai.TypeObject,
-			Properties: make(map[string]*genai.Schema),
+			Title:       tool.Name,
+			Description: tool.Description,
+			Type:        genai.TypeObject,
+			Properties:  make(map[string]*genai.Schema),
+			Required:    tool.InputSchema.Required,
 		}
 		for k, v := range tool.InputSchema.Properties {
 			v := v.(map[string]interface{})
-			schema.Properties[k] = &genai.Schema{
-				Type:        genai.TypeString,
-				Description: v["description"].(string),
+			var desc string
+			var ok bool
+			if desc, ok = v["description"].(string); !ok {
+				desc = ""
 			}
+			currentType := v["type"].(string)
+			switch currentType {
+			case "string":
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeString,
+					Description: desc,
+				}
+				continue
+			case "number":
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeNumber,
+					Description: desc,
+				}
+				continue
+			case "boolean":
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeBoolean,
+					Description: desc,
+				}
+				continue
+			case "integer":
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeInteger,
+					Description: desc,
+				}
+				continue
+			case "object":
+				slog.Info("Object", "value", v)
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeObject,
+					Description: desc,
+					Items:       &genai.Schema{},
+				}
+				continue
+			case "array":
+				slog.Info("Array", "value", v)
+				items, ok := v["items"]
+				slog.Info("ITEMS", "items", items)
+				if !ok {
+					return errors.New("expected items in the array")
+				}
+				items = items.(map[string]interface{})
+				schema.Properties[k] = &genai.Schema{
+					Type:        genai.TypeArray,
+					Description: desc,
+					Items: &genai.Schema{
+						Type: genai.TypeString,
+					},
+				}
+				continue
+			default:
+				return fmt.Errorf("unhandled type")
+			}
+			/*
+				for k2, v := range v {
+					slog.Info("PROPERTIES: ", "k", k, "k2", k2, "v", v)
+					switch v := v.(type) {
+					case string:
+						slog.Info("STRING", "v", v)
+					default:
+						slog.Info("DEFAULT", "v", v)
+					}
+				}
+			*/
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
@@ -89,7 +157,7 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	}
 	request.Params.Arguments = make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = fmt.Sprint(v)
+		request.Params.Arguments[k] = v // fmt.Sprint(v)
 	}
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
