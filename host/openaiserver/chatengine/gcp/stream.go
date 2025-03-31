@@ -63,7 +63,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	// Create the channel for streaming responses
 	c := make(chan chatengine.ChatCompletionStreamResponse)
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, cs, chatsession, newFunctionCallStack())
+	sp := newStreamProcessor(c, cs, chatsession)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {

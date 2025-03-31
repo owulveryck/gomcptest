@@ -21,17 +21,15 @@ type streamProcessor struct {
 	c             chan<- chatengine.ChatCompletionStreamResponse
 	cs            *genai.ChatSession
 	chatsession   *ChatSession
-	fnCallStack   *functionCallStack
 	stringBuilder strings.Builder // Reuse the string builder
 	completionID  string          // Unique ID for this completion
 }
 
-func newStreamProcessor(c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession, chatsession *ChatSession, fnCallStack *functionCallStack) *streamProcessor {
+func newStreamProcessor(c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession, chatsession *ChatSession) *streamProcessor {
 	return &streamProcessor{
 		c:            c,
 		cs:           cs,
 		chatsession:  chatsession,
-		fnCallStack:  fnCallStack,
 		completionID: uuid.New().String(), // generate one ID here
 	}
 }
