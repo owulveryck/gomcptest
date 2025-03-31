@@ -94,7 +94,13 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("Error in Calling MCP Tool: %w", err)
+		// In case of error, do not return the error, inform the LLM so the agentic system can act accordingly
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+			},
+		}, nil
 	}
 	var content string
 	response := make(map[string]any, len(result.Content))

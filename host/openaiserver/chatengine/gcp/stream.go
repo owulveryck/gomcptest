@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"time"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
@@ -21,6 +20,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 
 	// Set temperature from request
 	generativemodel.SetTemperature(req.Temperature)
+	generativemodel.SetCandidateCount(1)
 
 	cs := generativemodel.StartChat()
 
@@ -63,7 +63,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	// Create the channel for streaming responses
 	c := make(chan chatengine.ChatCompletionStreamResponse)
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, cs, chatsession, newFunctionCallStack())
+	sp := newStreamProcessor(c, cs, chatsession)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {
@@ -89,25 +89,11 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			if imagenmodel != nil {
 				image, err := imagenmodel.generateImage(ctx, content, chatsession.imageBaseDir)
 				if err != nil {
-					sp.sendChunk(ctx, err.Error())
-				} else {
-					c <- chatengine.ChatCompletionStreamResponse{
-						ID:      sp.completionID,
-						Created: time.Now().Unix(),
-						//		Model:   config.GeminiModel,
-						Object: "chat.completion.chunk",
-						Choices: []chatengine.ChatCompletionStreamChoice{
-							{
-								Index: 0,
-								Delta: chatengine.ChatMessage{
-									Role: "assistant",
-									// TODO change this
-									Content: "![](http://localhost:" + chatsession.port + image + ")",
-								},
-							},
-						},
-					}
+					sp.sendChunk(ctx, err.Error(), "error")
+					close(done)
+					return
 				}
+				sp.sendChunk(ctx, "![](http://localhost:"+chatsession.port+image+")", "done")
 				close(done)
 				return
 			}

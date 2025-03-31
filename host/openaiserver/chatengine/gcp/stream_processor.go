@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -20,17 +21,15 @@ type streamProcessor struct {
 	c             chan<- chatengine.ChatCompletionStreamResponse
 	cs            *genai.ChatSession
 	chatsession   *ChatSession
-	fnCallStack   *functionCallStack
 	stringBuilder strings.Builder // Reuse the string builder
 	completionID  string          // Unique ID for this completion
 }
 
-func newStreamProcessor(c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession, chatsession *ChatSession, fnCallStack *functionCallStack) *streamProcessor {
+func newStreamProcessor(c chan<- chatengine.ChatCompletionStreamResponse, cs *genai.ChatSession, chatsession *ChatSession) *streamProcessor {
 	return &streamProcessor{
 		c:            c,
 		cs:           cs,
 		chatsession:  chatsession,
-		fnCallStack:  fnCallStack,
 		completionID: uuid.New().String(), // generate one ID here
 	}
 }
@@ -39,138 +38,90 @@ func (s *streamProcessor) sendMessageStream(ctx context.Context, parts ...genai.
 	return s.cs.SendMessageStream(ctx, parts...)
 }
 
-func (s *streamProcessor) processContentResponse(ctx context.Context, resp *genai.GenerateContentResponse) error {
-	res := &chatengine.ChatCompletionStreamResponse{
-		ID:      s.completionID, // Use the pre-generated ID
-		Created: time.Now().Unix(),
-		//		Model:   config.GeminiModel,
-		Object:  "chat.completion.chunk",
-		Choices: make([]chatengine.ChatCompletionStreamChoice, len(resp.Candidates)),
+func (s *streamProcessor) processContentResponse(ctx context.Context, resp *genai.GenerateContentResponse) (error, []genai.Part) {
+	cand := resp.Candidates[0]
+	finishReason := ""
+	if cand.FinishReason == genai.FinishReasonStop { // Use constant
+		finishReason = finishReasonStop
 	}
 
-	s.stringBuilder.Reset() // Reset the string builder
-
-	var functionCalls []genai.FunctionCall
-
-	for i, cand := range resp.Candidates {
-		finishReason := ""
-		if cand.FinishReason == genai.FinishReasonStop { // Use constant
-			finishReason = finishReasonStop
-		}
-
-		if cand.Content != nil {
-			for _, part := range cand.Content.Parts {
-				switch v := part.(type) {
-				case genai.Text:
-					s.stringBuilder.WriteString(string(v))
-				case genai.FunctionCall:
-					// Instead of immediately pushing to stack, collect all function calls
-					functionCalls = append(functionCalls, v)
-				default:
-					return fmt.Errorf("unsupported type: %T in candidate %d", part, i)
+	fnResps := make([]genai.Part, 0)
+	if cand.Content != nil {
+		for _, part := range cand.Content.Parts {
+			switch v := part.(type) {
+			case genai.Text:
+				err := s.sendChunk(ctx, string(v), finishReason)
+				if err != nil {
+					return err, nil
 				}
+			case genai.FunctionCall:
+				log.Println("should call function", v)
+				var fnResp *genai.FunctionResponse
+				var err error
+				fnResp, err = s.chatsession.Call(ctx, v)
+				if err != nil {
+					fnResp = &genai.FunctionResponse{}
+					err := s.sendChunk(ctx, err.Error(), "error")
+					if err != nil {
+						return err, nil
+					}
+				}
+				fnResps = append(fnResps, fnResp)
+			default:
+				return fmt.Errorf("unsupported type: %T", part), nil
 			}
 		}
-
-		res.Choices[i] = chatengine.ChatCompletionStreamChoice{
-			Index: int(cand.Index),
-			Delta: chatengine.ChatMessage{
-				Role:    "assistant",
-				Content: s.stringBuilder.String(),
-			},
-			Logprobs:     nil,
-			FinishReason: finishReason,
-		}
 	}
-
-	// Send the text content before processing function calls
-	if s.stringBuilder.Len() > 0 {
-		select {
-		case s.c <- *res:
-			// Continue processing
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
-
-	// Push all function calls to the stack for later processing
-	for _, fn := range functionCalls {
-		s.fnCallStack.push(fn)
-	}
-
-	return nil
+	return nil, fnResps
 }
 
-func (s *streamProcessor) sendChunk(_ context.Context, content string) {
-	s.c <- chatengine.ChatCompletionStreamResponse{
+func (s *streamProcessor) sendChunk(ctx context.Context, content string, finishReason string) error {
+	select {
+	case s.c <- chatengine.ChatCompletionStreamResponse{
 		ID:      s.completionID,
 		Created: time.Now().Unix(),
+		//
 		//		Model:   config.GeminiModel,
 		Object: "chat.completion.chunk",
 		Choices: []chatengine.ChatCompletionStreamChoice{
 			{
-				Index: 0,
+				Index:        0,
+				FinishReason: finishReason,
 				Delta: chatengine.ChatMessage{
 					Role:    "assistant",
 					Content: content,
 				},
 			},
 		},
+	}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 
 func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.GenerateContentResponseIterator) error {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered from panic:", r)
-		}
-	}()
-
-	for {
-		resp, err := iter.Next()
-		if err == iterator.Done {
-			// Process all function calls in the stack
-			for s.fnCallStack.size() > 0 {
-				// Process a single function call
-				v := s.fnCallStack.pop()
-				if v == nil {
-					continue
-				}
-
-				// Show the function call to the user
-				s.sendChunk(ctx, "\n"+formatFunctionCall(*v)+"\n")
-
-				// Execute the function
-				functionResult, err := s.chatsession.Call(ctx, *v)
-				if err != nil {
-					errMsg := fmt.Sprintf("\n**There has been an error processing the function call**: \n```text\n%s\n```\n", err.Error())
-					s.sendChunk(ctx, errMsg)
-					continue // Continue to the next function call if there's an error
-				}
-
-				// Show the function result to the user
-				s.sendChunk(ctx, formatFunctionResponse(functionResult))
-
-				// Send the function result back to the model to get further response
-				newIter := s.sendMessageStream(ctx, functionResult)
-
-				// Process the model's response to the function result
-				err = s.processIterator(ctx, newIter)
-				if err != nil {
-					return fmt.Errorf("error in sending message %#v, error: %w", functionResult, err)
-				}
-			}
-
-			return nil
-		}
+	var fnResps []genai.Part
+	var err error
+	for err == nil {
+		var resp *genai.GenerateContentResponse
+		resp, err = iter.Next()
 		if err != nil {
-			return fmt.Errorf("error in processing %w", err)
+			continue
 		}
-		err = s.processContentResponse(ctx, resp)
+		err, fnResps = s.processContentResponse(ctx, resp)
 		if err != nil {
 			return fmt.Errorf("error in processing content response: %w", err)
 		}
 	}
+	if err != nil && err != iterator.Done {
+		return fmt.Errorf("error in processing %w", err)
+	}
+	if fnResps != nil && len(fnResps) > 0 {
+		iter := s.sendMessageStream(ctx, fnResps...)
+		return s.processIterator(ctx, iter)
+	}
+	return nil
 }
 
 func formatFunctionCall(fn genai.FunctionCall) string {
