@@ -3,6 +3,7 @@ package gcp
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
@@ -56,4 +57,85 @@ func checkImagegen(s string, m map[string]*imagenAPI) *imagenAPI {
 		}
 	}
 	return nil
+}
+
+func extractGenaiSchemaFromMCPProperty(p interface{}) (*genai.Schema, error) {
+	switch p := p.(type) {
+	case map[string]interface{}:
+		return extractGenaiSchemaFromMCPPRopertyMap(p)
+	default:
+		return nil, fmt.Errorf("unhandled type for property %T (%v)", p, p)
+	}
+}
+
+func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Schema, error) {
+	var propertyType, propertyDescription string
+	var ok bool
+	// first check if we have type and description
+	if propertyType, ok = p["type"].(string); !ok {
+		return nil, fmt.Errorf("expected type in the property details (%v)", p)
+	}
+	if propertyDescription, ok = p["description"].(string); !ok {
+		slog.Debug("properties", "no description found", p)
+	}
+	switch propertyType {
+	case "string":
+		return &genai.Schema{
+			Type:        genai.TypeString,
+			Description: propertyDescription,
+		}, nil
+	case "number":
+		return &genai.Schema{
+			Type:        genai.TypeNumber,
+			Description: propertyDescription,
+		}, nil
+	case "boolean":
+		return &genai.Schema{
+			Type:        genai.TypeBoolean,
+			Description: propertyDescription,
+		}, nil
+	case "integer":
+		return &genai.Schema{
+			Type:        genai.TypeInteger,
+			Description: propertyDescription,
+		}, nil
+	case "object":
+		var properties map[string]interface{}
+		var ok bool
+		if properties, ok = p["properties"].(map[string]interface{}); !ok {
+			return nil, fmt.Errorf("expected items in the property details for a type array (%v)", p)
+		}
+		genaiProperties := make(map[string]*genai.Schema, len(properties))
+		for p, prop := range properties {
+			var err error
+			genaiProperties[p], err = extractGenaiSchemaFromMCPProperty(prop)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return &genai.Schema{
+			Type:        genai.TypeObject,
+			Description: propertyDescription,
+			Properties:  genaiProperties,
+		}, nil
+	case "array":
+		var items interface{}
+		var ok bool
+		if items, ok = p["items"]; !ok {
+			return nil, fmt.Errorf("expected items in the property details for a type array (%v)", p)
+		}
+		schema, err := extractGenaiSchemaFromMCPProperty(items)
+		if err != nil {
+			return nil, err
+		}
+		return &genai.Schema{
+			Type:        genai.TypeArray,
+			Description: propertyDescription,
+			Items:       schema,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unhandled type")
+	}
+
+	return nil, nil
 }

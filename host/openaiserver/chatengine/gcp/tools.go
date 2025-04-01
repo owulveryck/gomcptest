@@ -28,15 +28,18 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 	serverName := serverPrefix + strconv.Itoa(len(chatsession.servers))
 	for i, tool := range tools.Tools {
 		schema := &genai.Schema{
-			Type:       genai.TypeObject,
-			Properties: make(map[string]*genai.Schema),
+			Title:       tool.Name,
+			Description: tool.Description,
+			Type:        genai.TypeObject,
+			Properties:  make(map[string]*genai.Schema),
+			Required:    tool.InputSchema.Required,
 		}
-		for k, v := range tool.InputSchema.Properties {
-			v := v.(map[string]interface{})
-			schema.Properties[k] = &genai.Schema{
-				Type:        genai.TypeString,
-				Description: v["description"].(string),
+		for propertyName, propertyValue := range tool.InputSchema.Properties {
+			propertyGenaiSchema, err := extractGenaiSchemaFromMCPProperty(propertyValue)
+			if err != nil {
+				return err
 			}
+			schema.Properties[propertyName] = propertyGenaiSchema
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
@@ -54,18 +57,6 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 					Parameters:  schema,
 				})
 			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
-			/*
-				// Creating schema
-				chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
-					FunctionDeclarations: []*genai.FunctionDeclaration{
-						{
-							Name:        serverName + "_" + tool.Name,
-							Description: tool.Description,
-							Parameters:  schema,
-						},
-					},
-				})
-			*/
 		}
 	}
 	chatsession.servers = append(chatsession.servers, &MCPServerTool{
@@ -89,7 +80,7 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	}
 	request.Params.Arguments = make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = fmt.Sprint(v)
+		request.Params.Arguments[k] = v // fmt.Sprint(v)
 	}
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
