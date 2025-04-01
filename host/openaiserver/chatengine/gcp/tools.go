@@ -78,13 +78,20 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	} else {
 		return nil, fmt.Errorf("cannot extract function name")
 	}
-	request.Params.Arguments = make(map[string]interface{})
-	for k, v := range f.Args {
-		request.Params.Arguments[k] = v // fmt.Sprint(v)
+	request.Params.Arguments = map[string]interface{}{
+		"null": nil,
 	}
+	if len(f.Args) > 0 {
+		request.Params.Arguments = make(map[string]interface{})
+		for k, v := range f.Args {
+			request.Params.Arguments[k] = v // fmt.Sprint(v)
+		}
+	}
+	slog.Info("Run", "Server", parts[0], "Function", parts[1], "Request", request)
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
+		slog.Error("Run", "Server", parts[0], "Function", parts[1], "Error", err, "Request", request)
 		// In case of error, do not return the error, inform the LLM so the agentic system can act accordingly
 		return &genai.FunctionResponse{
 			Name: f.Name,
