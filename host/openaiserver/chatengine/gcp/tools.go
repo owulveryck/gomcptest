@@ -94,6 +94,14 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		}, nil
 	}
 	var content string
+	if len(result.Content) == 0 {
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"result": "",
+			},
+		}, nil
+	}
 	response := make(map[string]any, len(result.Content))
 	for i := range result.Content {
 		var res mcp.TextContent

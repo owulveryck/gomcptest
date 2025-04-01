@@ -105,6 +105,12 @@ func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Sche
 		if properties, ok = p["properties"].(map[string]interface{}); !ok {
 			return nil, fmt.Errorf("expected items in the property details for a type array (%v)", p)
 		}
+		var required []string
+		if r, ok := p["required"].([]interface{}); ok {
+			for _, r := range r {
+				required = append(required, r.(string))
+			}
+		}
 		genaiProperties := make(map[string]*genai.Schema, len(properties))
 		for p, prop := range properties {
 			var err error
@@ -117,6 +123,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Sche
 			Type:        genai.TypeObject,
 			Description: propertyDescription,
 			Properties:  genaiProperties,
+			Required:    required,
 		}, nil
 	case "array":
 		var items interface{}
