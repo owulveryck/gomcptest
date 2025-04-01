@@ -42,18 +42,23 @@ func loadGCPConfig() (gcp.Configuration, error) {
 }
 
 // createMCPClient creates an MCP client based on the provided server command and arguments.
-func createMCPClient(server []string) (client.MCPClient, error) {
+func createMCPClient(server string) (client.MCPClient, error) {
 	if len(server) == 0 {
 		return nil, fmt.Errorf("server command cannot be empty")
 	}
 	var mcpClient client.MCPClient
 	var err error
-	if len(server) > 1 {
-		slog.Info("Registering", "command", server[0], "args", server[1:])
-		mcpClient, err = client.NewStdioMCPClient(server[0], nil, server[1:]...)
+	cmd, env, args := parseCommandString(server)
+	if len(env) == 0 {
+		env = nil
+	}
+	if len(args) > 1 {
+		// TODO: process environment variables
+		slog.Info("Registering", "command", cmd, "args", args, "env", env)
+		mcpClient, err = client.NewStdioMCPClient(cmd, env, args...)
 	} else {
-		slog.Info("Registering", "command", server[0])
-		mcpClient, err = client.NewStdioMCPClient(server[0], nil)
+		slog.Info("Registering", "command", cmd, "env", env)
+		mcpClient, err = client.NewStdioMCPClient(cmd, env)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MCP client: %w", err)
