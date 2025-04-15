@@ -14,7 +14,13 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-const serverPrefix = "server"
+const (
+	serverPrefix           = "server"
+	resourcePrefix         = "rs"
+	resourceTemplatePrefix = "rst"
+	toolPrefix             = "tool"
+	promptPrefix           = "prompt"
+)
 
 // AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
 // functionality as a tool during chat completions.
@@ -24,8 +30,45 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 	if err != nil {
 		return err
 	}
+	resourceTemplates, err := mcpClient.ListResourceTemplates(context.Background(), mcp.ListResourceTemplatesRequest{})
+	if err != nil {
+		return err
+	}
+	_ = resourceTemplates
 	// define servername
 	serverName := serverPrefix + strconv.Itoa(len(chatsession.servers))
+
+	for i, resourceTemplate := range resourceTemplates.ResourceTemplates {
+		schema := &genai.Schema{
+			Title:       resourceTemplate.Name,
+			Description: resourceTemplate.Description,
+			Type:        genai.TypeObject,
+			Properties: map[string]*genai.Schema{
+				"uri": {
+					Description: "The uri in format " + resourceTemplate.URITemplate.Raw(),
+					Type:        genai.TypeString,
+					Format:      resourceTemplate.URITemplate.Raw(),
+				},
+			},
+		}
+		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
+		for _, generativemodel := range chatsession.generativemodels {
+			functionName := serverName + "_" + resourceTemplatePrefix + "_" + resourceTemplate.Name
+			if generativemodel.Tools == nil {
+				generativemodel.Tools = make([]*genai.Tool, 1)
+				generativemodel.Tools[0] = &genai.Tool{
+					FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+				}
+			}
+			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
+				&genai.FunctionDeclaration{
+					Name:        functionName,
+					Description: resourceTemplate.Description,
+					Parameters:  schema,
+				})
+			slog.Debug("registered resource template", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
+		}
+	}
 	for i, tool := range tools.Tools {
 		schema := &genai.Schema{
 			Title:       tool.Name,
@@ -44,6 +87,7 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		for _, generativemodel := range chatsession.generativemodels {
+			functionName := serverName + "_" + toolPrefix + "_" + tool.Name
 			if generativemodel.Tools == nil {
 				generativemodel.Tools = make([]*genai.Tool, 1)
 				generativemodel.Tools[0] = &genai.Tool{
@@ -52,11 +96,11 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 			}
 			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
 				&genai.FunctionDeclaration{
-					Name:        serverName + "_" + tool.Name,
+					Name:        functionName,
 					Description: tool.Description,
 					Parameters:  schema,
 				})
-			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
+			slog.Debug("registered function", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
 		}
 	}
 	chatsession.servers = append(chatsession.servers, &MCPServerTool{
@@ -71,47 +115,62 @@ type MCPServerTool struct {
 }
 
 func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCall) (*genai.FunctionResponse, error) {
-	request := mcp.CallToolRequest{}
 	parts := strings.SplitN(f.Name, "_", 2) // Split into two parts: ["a", "b/c/d"]
-	if len(parts) > 1 {
-		request.Params.Name = parts[1]
-	} else {
-		return nil, fmt.Errorf("cannot extract function name")
-	}
-	request.Params.Arguments = make(map[string]interface{})
-	for k, v := range f.Args {
-		request.Params.Arguments[k] = v // fmt.Sprint(v)
+	if len(parts) != 2 {
+		return nil, errors.New("expected function call in form of serverNumber_functionname")
 	}
 
-	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
-	if err != nil {
-		// In case of error, do not return the error, inform the LLM so the agentic system can act accordingly
+	switch parts[0] {
+	case toolPrefix:
+		request := mcp.CallToolRequest{}
+		parts := strings.SplitN(f.Name, "_", 2) // Split into two parts: ["a", "b/c/d"]
+		if len(parts) > 1 {
+			request.Params.Name = parts[1]
+		} else {
+			return nil, fmt.Errorf("cannot extract function name")
+		}
+		request.Params.Arguments = make(map[string]interface{})
+		for k, v := range f.Args {
+			request.Params.Arguments[k] = v // fmt.Sprint(v)
+		}
+
+		result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
+		if err != nil {
+			// In case of error, do not return the error, inform the LLM so the agentic system can act accordingly
+			return &genai.FunctionResponse{
+				Name: f.Name,
+				Response: map[string]any{
+					"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+				},
+			}, nil
+		}
+		var content string
+		response := make(map[string]any, len(result.Content))
+		for i := range result.Content {
+			var res mcp.TextContent
+			var ok bool
+			if res, ok = result.Content[i].(mcp.TextContent); !ok {
+				return nil, errors.New("Not implemented: type is not a text")
+			}
+			content = res.Text
+			response["result"+strconv.Itoa(i)] = content
+		}
+		if result.IsError {
+			// in case of error, we process the result anyway
+			// return nil, fmt.Errorf("Error in result: %v", content)
+		}
+		return &genai.FunctionResponse{
+			Name:     f.Name,
+			Response: response,
+		}, nil
+	default:
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+				"error": fmt.Sprintf("Not yet implemented"),
 			},
 		}, nil
 	}
-	var content string
-	response := make(map[string]any, len(result.Content))
-	for i := range result.Content {
-		var res mcp.TextContent
-		var ok bool
-		if res, ok = result.Content[i].(mcp.TextContent); !ok {
-			return nil, errors.New("Not implemented: type is not a text")
-		}
-		content = res.Text
-		response["result"+strconv.Itoa(i)] = content
-	}
-	if result.IsError {
-		// in case of error, we process the result anyway
-		// return nil, fmt.Errorf("Error in result: %v", content)
-	}
-	return &genai.FunctionResponse{
-		Name:     f.Name,
-		Response: response,
-	}, nil
 }
 
 func (chatsession *ChatSession) Call(ctx context.Context, fn genai.FunctionCall) (*genai.FunctionResponse, error) {
