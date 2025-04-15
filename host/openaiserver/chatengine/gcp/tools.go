@@ -163,6 +163,26 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 			Name:     f.Name,
 			Response: response,
 		}, nil
+	case resourceTemplatePrefix:
+		request := mcp.ReadResourceRequest{}
+		request.Params.URI = f.Args["uri"].(string)
+
+		result, err := mcpServerTool.mcpClient.ReadResource(ctx, request)
+		if err != nil {
+			return &genai.FunctionResponse{
+				Name: f.Name,
+				Response: map[string]any{
+					"error": fmt.Sprintf("Error in Getting Resources Tool: %w", err),
+				},
+			}, nil
+		}
+
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"output": result.Contents,
+			},
+		}, nil
 	default:
 		return &genai.FunctionResponse{
 			Name: f.Name,
