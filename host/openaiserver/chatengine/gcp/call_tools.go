@@ -63,6 +63,7 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 
 		result, err := mcpServerTool.mcpClient.ReadResource(ctx, request)
 		if err != nil {
+			slog.Error("error in calling resource", "client error", err.Error())
 			return &genai.FunctionResponse{
 				Name: f.Name,
 				Response: map[string]any{
