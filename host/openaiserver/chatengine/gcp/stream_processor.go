@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -55,7 +54,6 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 					return err, nil
 				}
 			case genai.FunctionCall:
-				log.Println("should call function", v)
 				var fnResp *genai.FunctionResponse
 				var err error
 				fnResp, err = s.chatsession.Call(ctx, v)
