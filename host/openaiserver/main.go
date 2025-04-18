@@ -111,6 +111,9 @@ func main() {
 
 	servers := extractServers(*mcpServers)
 	for i := range servers {
+		if servers[i] == "" {
+			continue
+		}
 		logger := logger.WithGroup("server" + strconv.Itoa(i))
 		slog.SetDefault(logger)
 
