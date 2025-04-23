@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,10 +16,13 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	_, prefix, _, _ := extractParts(f.Name, serverPrefix)
 	switch prefix {
 	case toolPrefix:
+		slog.Info("MCP Call", "tool", f.Name, "args", f.Args)
 		return mcpServerTool.runTool(ctx, f)
 	case resourceTemplatePrefix:
+		slog.Info("MCP Call", "resource", f.Name, "args", f.Args)
 		return mcpServerTool.getResourceTemplate(ctx, f)
 	case promptPrefix:
+		slog.Info("MCP Call", "prompt", f.Name, "args", f.Args)
 		return mcpServerTool.getPrompt(ctx, f)
 	default:
 		return &genai.FunctionResponse{

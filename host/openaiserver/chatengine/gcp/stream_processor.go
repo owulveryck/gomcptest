@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/google/uuid"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"google.golang.org/api/iterator"
 )
@@ -116,6 +117,19 @@ func (s *streamProcessor) processIterator(ctx context.Context, iter *genai.Gener
 		return fmt.Errorf("error in processing %w", err)
 	}
 	if fnResps != nil && len(fnResps) > 0 {
+		promptReply := make([]genai.Part, 0)
+		for i, functionResult := range fnResps {
+			if functionResult, ok := functionResult.(*genai.FunctionResponse); ok {
+				if content, ok := functionResult.Response[promptresult]; ok {
+					for _, message := range content.([]mcp.PromptMessage) {
+						promptReply = append(promptReply, genai.Text(message.Content.(mcp.TextContent).Text))
+					}
+					functionResult.Response[promptresult] = "success"
+				}
+				fnResps[i] = functionResult
+				fnResps = append(fnResps, promptReply...)
+			}
+		}
 		iter := s.sendMessageStream(ctx, fnResps...)
 		return s.processIterator(ctx, iter)
 	}

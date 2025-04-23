@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/google/uuid"
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
@@ -37,6 +38,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		}
 	}
 
+	promptReply := make([]genai.Part, 0)
 	// Handle function calls iteratively
 	for functionCalls != nil && len(functionCalls) > 0 {
 		functionResponses := make([]genai.Part, len(functionCalls))
@@ -48,6 +50,13 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 			functionResult, err := chatsession.Call(ctx, fn)
 			if err != nil {
 				return nil, fmt.Errorf("error executing function %v: %w", fn.Name, err)
+			}
+			// TODO check if functionResult is a prompt answer...
+			if content, ok := functionResult.Response[promptresult]; ok {
+				for _, message := range content.([]mcp.PromptMessage) {
+					promptReply = append(promptReply, genai.Text(message.Content.(mcp.TextContent).Text))
+				}
+				functionResult.Response[promptresult] = "success"
 			}
 			functionResponses[i] = functionResult
 		}
@@ -67,6 +76,14 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 				res.Choices[i].Message.Content = currentContent + out
 			}
 		}
+	}
+	if len(promptReply) > 0 {
+		slog.Debug("Sending back prompt to history", "prompt", promptReply)
+		resp, err := genaiCS.SendMessage(ctx, promptReply...)
+		if err != nil {
+			return nil, fmt.Errorf("error sending function results: %w", err)
+		}
+		return chatsession.processChatResponse(ctx, resp, genaiCS)
 	}
 
 	return &res, nil

@@ -2,13 +2,14 @@ package gcp
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"cloud.google.com/go/vertexai/genai"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
+
+const promptresult = "PROMPTRESULT"
 
 func (mcpServerTool *MCPServerTool) getPrompt(ctx context.Context, f genai.FunctionCall) (*genai.FunctionResponse, error) {
 	_, _, fnName, _ := extractParts(f.Name, serverPrefix)
@@ -29,11 +30,10 @@ func (mcpServerTool *MCPServerTool) getPrompt(ctx context.Context, f genai.Funct
 			},
 		}, nil
 	}
-	b, _ := json.Marshal(result.Messages)
 	return &genai.FunctionResponse{
 		Name: f.Name,
 		Response: map[string]any{
-			"prompt": string(b),
+			promptresult: result.Messages,
 		},
 	}, nil
 }
