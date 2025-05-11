@@ -54,7 +54,17 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	}
 	// GetLastMessage
 	message := req.Messages[len(req.Messages)-1]
-	resp, err := cs.SendMessage(ctx, genai.Text(message.Content.(string)))
+	var err error
+	var resp *genai.GenerateContentResponse
+	switch v := message.Content.(type) {
+	case string:
+		resp, err = cs.SendMessage(ctx, genai.Text(v))
+	case []interface{}:
+		content := v[0].(map[string]interface{})["text"].(string)
+		resp, err = cs.SendMessage(ctx, genai.Text(content))
+	default:
+		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
+	}
 	if err != nil {
 		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
 	}
