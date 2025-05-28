@@ -32,6 +32,10 @@ func (chatsession *ChatSession) AddMCPTool(mcpClient client.MCPClient) error {
 	if err != nil {
 		slog.Info("cannot register resources template for server", "message from MCP Server", err.Error())
 	}
+	err = chatsession.addMCPResource(mcpClient, mcpServerName)
+	if err != nil {
+		slog.Info("cannot register resources for server", "message from MCP Server", err.Error())
+	}
 	err = chatsession.addMCPPromptTemplate(mcpClient, mcpServerName)
 	if err != nil {
 		slog.Info("cannot register resources template for server", "message from MCP Server", err.Error())
