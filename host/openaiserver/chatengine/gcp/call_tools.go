@@ -19,8 +19,11 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 		slog.Info("MCP Call", "tool", f.Name, "args", f.Args)
 		return mcpServerTool.runTool(ctx, f)
 	case resourceTemplatePrefix:
-		slog.Info("MCP Call", "resource", f.Name, "args", f.Args)
+		slog.Info("MCP Call", "resource template", f.Name, "args", f.Args)
 		return mcpServerTool.getResourceTemplate(ctx, f)
+	case resourcePrefix:
+		slog.Info("MCP Call", "resource", f.Name, "args", f.Args)
+		return mcpServerTool.getResource(ctx, f)
 	case promptPrefix:
 		slog.Info("MCP Call", "prompt", f.Name, "args", f.Args)
 		return mcpServerTool.getPrompt(ctx, f)
