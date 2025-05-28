@@ -72,7 +72,7 @@ func (chatsession *ChatSession) addMCPResource(mcpClient client.MCPClient, mcpSe
 		}
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		for _, generativemodel := range chatsession.generativemodels {
-			functionName := mcpServerName + resourceTemplatePrefix + "_" + resource.Name
+			functionName := mcpServerName + resourcePrefix + "_" + resource.Name
 			if generativemodel.Tools == nil {
 				generativemodel.Tools = make([]*genai.Tool, 1)
 				generativemodel.Tools[0] = &genai.Tool{
