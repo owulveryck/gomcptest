@@ -2,9 +2,9 @@ package gcp
 
 import (
 	"context"
-	"log"
 
 	"cloud.google.com/go/vertexai/genai"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
 type ChatSession struct {
@@ -18,7 +18,8 @@ type ChatSession struct {
 func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
 	client, err := genai.NewClient(ctx, config.GCPProject, config.GCPRegion)
 	if err != nil {
-		log.Fatalf("Failed to create the client: %v", err)
+		logging.Error(ctx, "Failed to create the client", "error", err)
+		panic(err)
 	}
 	genaimodels := make(map[string]*genai.GenerativeModel, len(config.GeminiModels))
 	for _, model := range config.GeminiModels {
@@ -30,7 +31,8 @@ func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
 		for _, model := range config.ImagenModels {
 			imagenapi, err := newImagenAPI(ctx, config, model)
 			if err != nil {
-				log.Fatal(err)
+				logging.Error(ctx, "Failed to create imagen API", "model", model, "error", err)
+				panic(err)
 			}
 			imagemodels[model] = imagenapi
 		}

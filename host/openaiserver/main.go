@@ -16,6 +16,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
 // Config holds the configuration parameters.
@@ -107,6 +108,7 @@ func main() {
 	}
 
 	ctx := context.Background()
+	ctx = logging.WithLogger(ctx, logger)
 	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig), cfg.ImageDir)
 
 	servers := extractServers(*mcpServers)
@@ -114,29 +116,26 @@ func main() {
 		if servers[i] == "" {
 			continue
 		}
-		logger := logger.WithGroup("server" + strconv.Itoa(i))
-		slog.SetDefault(logger)
+		serverCtx := logging.WithGroup(ctx, "server"+strconv.Itoa(i))
 
 		mcpClient, err := createMCPClient(servers[i])
 		if err != nil {
-			slog.Error("Failed to create MCP client", "error", err)
+			logging.Error(serverCtx, "Failed to create MCP client", "error", err)
 			os.Exit(1)
 		}
 
-		err = openAIHandler.AddTools(ctx, mcpClient)
+		err = openAIHandler.AddTools(serverCtx, mcpClient)
 		if err != nil {
-			slog.Error("Failed to add tools", "error", err)
+			logging.Error(serverCtx, "Failed to add tools", "error", err)
 			os.Exit(1)
 		}
 	}
-	slog.SetDefault(logger)
-
-	slog.Info("Starting web server", "port", cfg.Port)
+	logging.Info(ctx, "Starting web server", "port", cfg.Port)
 	http.Handle("/", openAIHandler)
 
 	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil)
 	if err != nil {
-		slog.Error("Failed to start web server", "error", err)
+		logging.Error(ctx, "Failed to start web server", "error", err)
 		os.Exit(1)
 	}
 }

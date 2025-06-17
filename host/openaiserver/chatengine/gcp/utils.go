@@ -1,13 +1,14 @@
 package gcp
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
 func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]genai.Part, error) {
@@ -59,16 +60,16 @@ func checkImagegen(s string, m map[string]*imagenAPI) *imagenAPI {
 	return nil
 }
 
-func extractGenaiSchemaFromMCPProperty(p interface{}) (*genai.Schema, error) {
+func extractGenaiSchemaFromMCPProperty(ctx context.Context, p interface{}) (*genai.Schema, error) {
 	switch p := p.(type) {
 	case map[string]interface{}:
-		return extractGenaiSchemaFromMCPPRopertyMap(p)
+		return extractGenaiSchemaFromMCPPRopertyMap(ctx, p)
 	default:
 		return nil, fmt.Errorf("unhandled type for property %T (%v)", p, p)
 	}
 }
 
-func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Schema, error) {
+func extractGenaiSchemaFromMCPPRopertyMap(ctx context.Context, p map[string]interface{}) (*genai.Schema, error) {
 	var propertyType, propertyDescription string
 	var ok bool
 	// first check if we have type and description
@@ -76,7 +77,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Sche
 		return nil, fmt.Errorf("expected type in the property details (%v)", p)
 	}
 	if propertyDescription, ok = p["description"].(string); !ok {
-		slog.Debug("properties", "no description found", p)
+		logging.Debug(ctx, "properties", "no description found", p)
 	}
 	switch propertyType {
 	case "string":
@@ -114,7 +115,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Sche
 		genaiProperties := make(map[string]*genai.Schema, len(properties))
 		for p, prop := range properties {
 			var err error
-			genaiProperties[p], err = extractGenaiSchemaFromMCPProperty(prop)
+			genaiProperties[p], err = extractGenaiSchemaFromMCPProperty(ctx, prop)
 			if err != nil {
 				return nil, err
 			}
@@ -131,7 +132,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Sche
 		if items, ok = p["items"]; !ok {
 			return nil, fmt.Errorf("expected items in the property details for a type array (%v)", p)
 		}
-		schema, err := extractGenaiSchemaFromMCPProperty(items)
+		schema, err := extractGenaiSchemaFromMCPProperty(ctx, items)
 		if err != nil {
 			return nil, err
 		}

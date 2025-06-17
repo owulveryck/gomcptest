@@ -2,18 +2,18 @@ package gcp
 
 import (
 	"context"
-	"log/slog"
 	"strconv"
 
 	"cloud.google.com/go/vertexai/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
-func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServerName string) error {
+func (chatsession *ChatSession) addMCPTool(ctx context.Context, mcpClient client.MCPClient, mcpServerName string) error {
 	toolsRequest := mcp.ListToolsRequest{}
-	tools, err := mcpClient.ListTools(context.Background(), toolsRequest)
+	tools, err := mcpClient.ListTools(ctx, toolsRequest)
 	if err != nil {
 		return err
 	}
@@ -26,14 +26,14 @@ func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServer
 			Required:    tool.InputSchema.Required,
 		}
 		for propertyName, propertyValue := range tool.InputSchema.Properties {
-			propertyGenaiSchema, err := extractGenaiSchemaFromMCPProperty(propertyValue)
+			propertyGenaiSchema, err := extractGenaiSchemaFromMCPProperty(ctx, propertyValue)
 			if err != nil {
 				return err
 			}
 			schema.Properties[propertyName] = propertyGenaiSchema
 		}
 		schema.Required = tool.InputSchema.Required
-		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
+		logging.Debug(ctx, "So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		for _, generativemodel := range chatsession.generativemodels {
 			functionName := mcpServerName + toolPrefix + "_" + tool.Name
 			if generativemodel.Tools == nil {
@@ -48,7 +48,7 @@ func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServer
 					Description: tool.Description,
 					Parameters:  schema,
 				})
-			slog.Debug("registered function", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
+			logging.Debug(ctx, "registered function", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
 		}
 	}
 	return nil

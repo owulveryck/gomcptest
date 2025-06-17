@@ -3,7 +3,6 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
 func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *genai.GenerateContentResponse, genaiCS *genai.ChatSession) (*chatengine.ChatCompletionResponse, error) {
@@ -20,7 +20,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 	res.Object = "chat.completion"
 	res.Choices = make([]chatengine.Choice, len(resp.Candidates))
 
-	out, functionCalls := processResponse(resp)
+	out, functionCalls := processResponse(ctx, resp)
 
 	for i, cand := range resp.Candidates {
 		finishReason := ""
@@ -44,7 +44,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		functionResponses := make([]genai.Part, len(functionCalls))
 		for i, fn := range functionCalls {
 			// Log function call
-			slog.Debug("Calling function", "name", fn.Name)
+			logging.Debug(ctx, "Calling function", "name", fn.Name)
 
 			var err error
 			functionResult, err := chatsession.Call(ctx, fn)
@@ -67,7 +67,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		}
 
 		// Process new response
-		out, functionCalls = processResponse(resp)
+		out, functionCalls = processResponse(ctx, resp)
 
 		// Update the response with the new content
 		for i := range res.Choices {
@@ -78,7 +78,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		}
 	}
 	if len(promptReply) > 0 {
-		slog.Debug("Sending back prompt to history", "prompt", promptReply)
+		logging.Debug(ctx, "Sending back prompt to history", "prompt", promptReply)
 		resp, err := genaiCS.SendMessage(ctx, promptReply...)
 		if err != nil {
 			return nil, fmt.Errorf("error sending function results: %w", err)
@@ -89,7 +89,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 	return &res, nil
 }
 
-func processResponse(resp *genai.GenerateContentResponse) (string, []genai.FunctionCall) {
+func processResponse(ctx context.Context, resp *genai.GenerateContentResponse) (string, []genai.FunctionCall) {
 	var functionCalls []genai.FunctionCall
 	var output strings.Builder
 	for _, cand := range resp.Candidates {
@@ -104,7 +104,7 @@ func processResponse(resp *genai.GenerateContentResponse) (string, []genai.Funct
 					functionCalls = append(functionCalls, part.(genai.FunctionCall))
 				}
 			default:
-				slog.Error("unhandled return type", "type", fmt.Sprintf("%T", part))
+				logging.Error(ctx, "unhandled return type", "type", fmt.Sprintf("%T", part))
 			}
 		}
 	}
