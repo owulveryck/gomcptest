@@ -2,10 +2,10 @@ package chatengine
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
 func (o *OpenAIV1WithToolHandler) AddTools(ctx context.Context, client client.MCPClient) error {
@@ -20,11 +20,11 @@ func (o *OpenAIV1WithToolHandler) AddTools(ctx context.Context, client client.MC
 	if err != nil {
 		return err
 	}
-	slog.Info(
+	logging.Info(ctx,
 		"Initialized",
-		slog.String("name", initResult.ServerInfo.Name),
-		slog.String("version", initResult.ServerInfo.Version),
+		"name", initResult.ServerInfo.Name,
+		"version", initResult.ServerInfo.Version,
 	)
 
-	return o.c.AddMCPTool(client)
+	return o.c.AddMCPTool(ctx, client)
 }

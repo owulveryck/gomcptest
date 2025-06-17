@@ -2,17 +2,17 @@ package gcp
 
 import (
 	"context"
-	"log/slog"
 	"strconv"
 
 	"cloud.google.com/go/vertexai/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
-func (chatsession *ChatSession) addMCPPromptTemplate(mcpClient client.MCPClient, mcpServerName string) error {
-	promptsTemplates, err := mcpClient.ListPrompts(context.Background(), mcp.ListPromptsRequest{})
+func (chatsession *ChatSession) addMCPPromptTemplate(ctx context.Context, mcpClient client.MCPClient, mcpServerName string) error {
+	promptsTemplates, err := mcpClient.ListPrompts(ctx, mcp.ListPromptsRequest{})
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func (chatsession *ChatSession) addMCPPromptTemplate(mcpClient client.MCPClient,
 			}
 		}
 
-		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
+		logging.Debug(ctx, "So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		for _, generativemodel := range chatsession.generativemodels {
 			functionName := mcpServerName + promptPrefix + "_" + promptsTemplate.Name
 			if generativemodel.Tools == nil {
@@ -47,7 +47,7 @@ func (chatsession *ChatSession) addMCPPromptTemplate(mcpClient client.MCPClient,
 					Description: promptsTemplate.Description,
 					Parameters:  schema,
 				})
-			slog.Debug("registered prompt template", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
+			logging.Debug(ctx, "registered prompt template", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
 		}
 	}
 	return nil

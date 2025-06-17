@@ -26,7 +26,7 @@ func (mcpServerTool *MCPServerTool) getPrompt(ctx context.Context, f genai.Funct
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+				"error": fmt.Sprintf("Error in Calling MCP Tool: %v", err),
 			},
 		}, nil
 	}

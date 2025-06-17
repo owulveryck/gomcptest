@@ -2,17 +2,17 @@ package gcp
 
 import (
 	"context"
-	"log/slog"
 	"strconv"
 
 	"cloud.google.com/go/vertexai/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
-func (chatsession *ChatSession) addMCPResourceTemplate(mcpClient client.MCPClient, mcpServerName string) error {
-	resourceTemplates, err := mcpClient.ListResourceTemplates(context.Background(), mcp.ListResourceTemplatesRequest{})
+func (chatsession *ChatSession) addMCPResourceTemplate(ctx context.Context, mcpClient client.MCPClient, mcpServerName string) error {
+	resourceTemplates, err := mcpClient.ListResourceTemplates(ctx, mcp.ListResourceTemplatesRequest{})
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (chatsession *ChatSession) addMCPResourceTemplate(mcpClient client.MCPClien
 				},
 			},
 		}
-		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
+		logging.Debug(ctx, "So far, only one tool is supported, we cheat by adding appending functions to the tool")
 		for _, generativemodel := range chatsession.generativemodels {
 			functionName := mcpServerName + resourceTemplatePrefix + "_" + resourceTemplate.Name
 			if generativemodel.Tools == nil {
@@ -45,7 +45,7 @@ func (chatsession *ChatSession) addMCPResourceTemplate(mcpClient client.MCPClien
 					Description: resourceTemplate.Description,
 					Parameters:  schema,
 				})
-			slog.Debug("registered resource template", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
+			logging.Debug(ctx, "registered resource template", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
 		}
 	}
 	return nil
