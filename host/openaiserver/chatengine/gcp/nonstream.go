@@ -63,10 +63,10 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 		content := v[0].(map[string]interface{})["text"].(string)
 		resp, err = cs.SendMessage(ctx, genai.Text(content))
 	default:
-		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
+		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content, err)
 	}
 	if err != nil {
-		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content.(string), err)
+		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot send message `%v` : %w", message.Content, err)
 	}
 	res, err := chatsession.processChatResponse(ctx, resp, cs)
 	return *res, err
