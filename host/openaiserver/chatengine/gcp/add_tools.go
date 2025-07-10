@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"log/slog"
 	"strconv"
 
 	"github.com/mark3labs/mcp-go/client"
@@ -33,9 +34,13 @@ func (chatsession *ChatSession) AddMCPTool(ctx context.Context, mcpClient client
 	if err != nil {
 		logging.Info(ctx, "cannot register resources template for server", "message from MCP Server", err.Error())
 	}
-	err = chatsession.addMCPPromptTemplate(ctx, mcpClient, mcpServerName)
+	err = chatsession.addMCPResource(mcpClient, mcpServerName)
 	if err != nil {
-		logging.Info(ctx, "cannot register resources template for server", "message from MCP Server", err.Error())
+		slog.Info("cannot register resources for server", "message from MCP Server", err.Error())
+	}
+	err = chatsession.addMCPPromptTemplate(mcpClient, mcpServerName)
+	if err != nil {
+		logging.Info(ctx, "cannot register prompt for server", "message from MCP Server", err.Error())
 	}
 	chatsession.servers = append(chatsession.servers, &MCPServerTool{
 		mcpClient: mcpClient,

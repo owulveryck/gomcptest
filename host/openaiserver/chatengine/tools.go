@@ -16,8 +16,10 @@ func (o *OpenAIV1WithToolHandler) AddTools(ctx context.Context, client client.MC
 		Version: "1.0.0",
 	}
 
+	logging.Debug(ctx, "initialization")
 	initResult, err := client.Initialize(ctx, initRequest)
 	if err != nil {
+		logging.Error(ctx, "cannot initialize", "error", err)
 		return err
 	}
 	logging.Info(ctx,

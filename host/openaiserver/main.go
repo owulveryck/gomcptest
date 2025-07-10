@@ -124,6 +124,7 @@ func main() {
 			os.Exit(1)
 		}
 
+		logging.Debug(serverCtx, "Adding tools to server")
 		err = openAIHandler.AddTools(serverCtx, mcpClient)
 		if err != nil {
 			logging.Error(serverCtx, "Failed to add tools", "error", err)
