@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -97,14 +97,20 @@ func CreateDispatchTool(agent *DispatchAgent) mcp.Tool {
 // CreateDispatchHandler creates a handler function for the dispatch_agent tool
 func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		prompt, ok := request.Params.Arguments["prompt"].(string)
+		// First convert Arguments to map[string]interface{}
+		args, ok := request.Params.Arguments.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("arguments must be a map")
+		}
+
+		prompt, ok := args["prompt"].(string)
 		if !ok {
 			return nil, errors.New("prompt must be a string")
 		}
 
 		// Get the path parameter if provided
 		var path string
-		if pathValue, ok := request.Params.Arguments["path"]; ok {
+		if pathValue, ok := args["path"]; ok {
 			if pathStr, ok := pathValue.(string); ok {
 				path = pathStr
 			}
@@ -113,7 +119,7 @@ func CreateDispatchHandler(agent *DispatchAgent) func(ctx context.Context, reque
 		// Process the task using the already initialized agent
 		response, err := agent.ProcessTask(ctx, []*genai.Content{{
 			Role:  "user",
-			Parts: []genai.Part{genai.Text(prompt)},
+			Parts: []*genai.Part{genai.NewPartFromText(prompt)},
 		}}, path)
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("Error processing agent task: %v", err))
@@ -150,33 +156,21 @@ func (agent *DispatchAgent) AddMCPTool(mcpClient client.MCPClient) error {
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
-		for _, generativemodel := range agent.generativemodels {
-			if generativemodel.Tools == nil {
-				generativemodel.Tools = make([]*genai.Tool, 1)
-				generativemodel.Tools[0] = &genai.Tool{
-					FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
-				}
+		
+		// Add tool to agent's tools
+		if len(agent.tools) == 0 {
+			agent.tools = make([]*genai.Tool, 1)
+			agent.tools[0] = &genai.Tool{
+				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}
-			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
-				&genai.FunctionDeclaration{
-					Name:        serverName + "_" + tool.Name,
-					Description: tool.Description,
-					Parameters:  schema,
-				})
-			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
-			/*
-				// Creating schema
-				chatsession.model.Tools = append(chatsession.model.Tools, &genai.Tool{
-					FunctionDeclarations: []*genai.FunctionDeclaration{
-						{
-							Name:        serverName + "_" + tool.Name,
-							Description: tool.Description,
-							Parameters:  schema,
-						},
-					},
-				})
-			*/
 		}
+		agent.tools[0].FunctionDeclarations = append(agent.tools[0].FunctionDeclarations,
+			&genai.FunctionDeclaration{
+				Name:        serverName + "_" + tool.Name,
+				Description: tool.Description,
+				Parameters:  schema,
+			})
+		slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
 	}
 	agent.servers = append(agent.servers, &MCPServerTool{
 		mcpClient: mcpClient,
@@ -197,10 +191,11 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	} else {
 		return nil, fmt.Errorf("cannot extract function name")
 	}
-	request.Params.Arguments = make(map[string]interface{})
+	args := make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = v.(string)
+		args[k] = fmt.Sprint(v)
 	}
+	request.Params.Arguments = args
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
