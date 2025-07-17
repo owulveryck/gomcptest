@@ -36,6 +36,7 @@ The tools use the default GCP login credentials configured by `gcloud auth login
     - **LS**: List directory contents
     - **Replace**: Replace entire file contents
     - **View**: View file contents
+    - **dispatch_agent**: Specialized agent dispatcher for various automated tasks
 
 ## Components
 
@@ -45,8 +46,9 @@ The tools use the default GCP login credentials configured by `gcloud auth login
 -   **Google Gemini Integration:** It utilizes the VertexAI API to interact with Google Gemini models.
 -   **Streaming Support:** The server supports streaming responses.
 -   **Function Calling:** Allows Gemini to call external functions and incorporate their results into chat responses.
--   **MCP Server Interaction:** Demonstrates interaction with a hypothetical MCP (Model Control Plane) server for tool execution.
+-   **MCP Server Interaction:** Demonstrates interaction with MCP (Model Context Protocol) servers for tool execution.
 -   **Single Chat Session:** The application uses single chat session, and new conversation will not trigger a new session.
+-   **CLI Interface:** Interactive command-line interface for testing agentic systems with natural language.
 
 ## Building the Tools
 
@@ -83,8 +85,10 @@ export IMAGE_DIR=/tmp/images
 You can test the CLI (a tool similar to _Claude Code_) from the `bin` directory with:
 
 ```bash
-./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path .GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace"
+./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace"
 ```
+
+The CLI provides an interactive interface for testing MCP tools with natural language commands, similar to Claude Code.
 
 ## Caution
 
