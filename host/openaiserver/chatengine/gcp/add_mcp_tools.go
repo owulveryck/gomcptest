@@ -2,18 +2,18 @@ package gcp
 
 import (
 	"context"
+	"log/slog"
 	"strconv"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
-func (chatsession *ChatSession) addMCPTool(ctx context.Context, mcpClient client.MCPClient, mcpServerName string) error {
+func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServerName string) error {
 	toolsRequest := mcp.ListToolsRequest{}
-	tools, err := mcpClient.ListTools(ctx, toolsRequest)
+	tools, err := mcpClient.ListTools(context.Background(), toolsRequest)
 	if err != nil {
 		return err
 	}
@@ -26,30 +26,31 @@ func (chatsession *ChatSession) addMCPTool(ctx context.Context, mcpClient client
 			Required:    tool.InputSchema.Required,
 		}
 		for propertyName, propertyValue := range tool.InputSchema.Properties {
-			propertyGenaiSchema, err := extractGenaiSchemaFromMCPProperty(ctx, propertyValue)
+			propertyGenaiSchema, err := extractGenaiSchemaFromMCPProperty(propertyValue)
 			if err != nil {
 				return err
 			}
 			schema.Properties[propertyName] = propertyGenaiSchema
 		}
 		schema.Required = tool.InputSchema.Required
-		logging.Debug(ctx, "So far, only one tool is supported, we cheat by adding appending functions to the tool")
-		for _, generativemodel := range chatsession.generativemodels {
-			functionName := mcpServerName + toolPrefix + "_" + tool.Name
-			if generativemodel.Tools == nil {
-				generativemodel.Tools = make([]*genai.Tool, 1)
-				generativemodel.Tools[0] = &genai.Tool{
-					FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
-				}
-			}
-			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
-				&genai.FunctionDeclaration{
-					Name:        functionName,
-					Description: tool.Description,
-					Parameters:  schema,
-				})
-			logging.Debug(ctx, "registered function", "model", generativemodel.Name(), "function "+strconv.Itoa(i), functionName)
+		slog.Debug("Adding MCP tool as a function")
+		functionName := mcpServerName + toolPrefix + "_" + tool.Name
+		
+		// Ensure we have a tool to add functions to
+		if len(chatsession.tools) == 0 {
+			chatsession.tools = []*genai.Tool{{
+				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+			}}
 		}
+		
+		// Add the function declaration to the first tool
+		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
+			&genai.FunctionDeclaration{
+				Name:        functionName,
+				Description: tool.Description,
+				Parameters:  schema,
+			})
+		slog.Debug("registered function", "function "+strconv.Itoa(i), functionName)
 	}
 	return nil
 }

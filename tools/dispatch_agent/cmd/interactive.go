@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 	"github.com/peterh/liner"
 )
 
@@ -67,7 +67,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		// Process the input
 		history = append(history, &genai.Content{
 			Role:  "user",
-			Parts: []genai.Part{genai.Text(input)},
+			Parts: []*genai.Part{genai.NewPartFromText(input)},
 		})
 		response, err := agent.ProcessTask(context.Background(), history, workingPath)
 		if err != nil {
@@ -76,7 +76,7 @@ func RunInteractiveMode(agent *DispatchAgent) {
 		}
 		history = append(history, &genai.Content{
 			Role:  "model",
-			Parts: []genai.Part{genai.Text(response)},
+			Parts: []*genai.Part{genai.NewPartFromText(response)},
 		})
 
 		// Print the response

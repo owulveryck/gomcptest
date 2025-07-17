@@ -84,25 +84,31 @@ Usage notes:
 
 // bashHandler processes and executes bash commands with security checks
 func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
 	// Special handling for tests
 	if isTestRun {
 		// Handle TestInvalidArguments test cases specially
-		if _, ok := request.Params.Arguments["command"].(float64); ok {
+		if _, ok := args["command"].(float64); ok {
 			return nil, errors.New("command must be a string")
 		}
 
-		if _, ok := request.Params.Arguments["command"].(bool); ok {
+		if _, ok := args["command"].(bool); ok {
 			return nil, errors.New("command must be a string")
 		}
 
 		// Handle nil command argument
-		if request.Params.Arguments["command"] == nil {
+		if args["command"] == nil {
 			return nil, errors.New("command must be a string")
 		}
 	}
 
 	// Check if command exists and is a string
-	commandArg, exists := request.Params.Arguments["command"]
+	commandArg, exists := args["command"]
 	if !exists || commandArg == nil {
 		return nil, errors.New("command must be a string")
 	}
@@ -114,7 +120,7 @@ func bashHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 	// Check for timeout parameter
 	var timeout time.Duration = 30 * time.Minute // Default timeout
-	if timeoutMs, ok := request.Params.Arguments["timeout"].(float64); ok {
+	if timeoutMs, ok := args["timeout"].(float64); ok {
 		if timeoutMs > 600000 {
 			return nil, errors.New("timeout cannot exceed 600000ms (10 minutes)")
 		}

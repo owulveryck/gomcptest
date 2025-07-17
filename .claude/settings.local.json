@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(go mod:*)",
+      "WebFetch(domain:cloud.google.com)",
+      "WebFetch(domain:pkg.go.dev)",
+      "Bash(find:*)",
+      "Bash(go build:*)",
+      "Bash(go doc:*)"
+    ],
+    "deny": []
+  }
+}

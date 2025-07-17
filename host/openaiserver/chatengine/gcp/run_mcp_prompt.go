@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -26,7 +26,7 @@ func (mcpServerTool *MCPServerTool) getPrompt(ctx context.Context, f genai.Funct
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %v", err),
+				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
 			},
 		}, nil
 	}

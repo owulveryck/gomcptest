@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -15,10 +15,11 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 	_, _, fnName, _ := extractParts(f.Name, serverPrefix)
 	request := mcp.CallToolRequest{}
 	request.Params.Name = fnName
-	request.Params.Arguments = make(map[string]interface{})
+	args := make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = v // fmt.Sprint(v)
+		args[k] = v // fmt.Sprint(v)
 	}
+	request.Params.Arguments = args
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
@@ -26,7 +27,7 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %v", err),
+				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
 			},
 		}, nil
 	}

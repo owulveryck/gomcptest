@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 	"github.com/fatih/color"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
@@ -15,10 +15,10 @@ const serverPrefix = "server"
 
 // DispatchAgent handles tasks by directing them to appropriate tools
 type DispatchAgent struct {
-	genaiClient      *genai.Client
-	generativemodels map[string]*genai.GenerativeModel
-	gcpConfig        gcp.Configuration
-	servers          []*MCPServerTool
+	genaiClient *genai.Client
+	gcpConfig   gcp.Configuration
+	servers     []*MCPServerTool
+	tools       []*genai.Tool
 }
 
 // NewDispatchAgent creates a new dispatch agent with initialized configuration
@@ -39,33 +39,16 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 
 	// Initialize chat session
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, gcpConfig.GCPProject, gcpConfig.GCPRegion)
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{Project: gcpConfig.GCPProject, Location: gcpConfig.GCPRegion, Backend: genai.BackendVertexAI})
 	if err != nil {
 		return nil, err
 	}
-	genaimodels := make(map[string]*genai.GenerativeModel, len(gcpConfig.GeminiModels))
-	cwd, err := getCWD()
-	for _, model := range gcpConfig.GeminiModels {
-		genaimodels[model] = client.GenerativeModel(model)
-		genaimodels[model].GenerationConfig.Temperature = &cfg.Temperature
-		genaimodels[model].GenerationConfig.MaxOutputTokens = &cfg.MaxOutputTokens
-		genaimodels[model].SystemInstruction = &genai.Content{
-			Role: "user",
-			Parts: []genai.Part{
-				genai.Text(cfg.SystemInstruction +
-					" Your job is to help the user by performing tasks using these tools. " +
-					"You should not make up information. " +
-					"If you don't know something, say so and explain what you would need to know to help. " +
-					"If not indication, use the current working directory which is " + cwd),
-			},
-		}
-	}
 
 	return &DispatchAgent{
-		genaiClient:      client,
-		generativemodels: genaimodels,
-		gcpConfig:        gcpConfig,
-		servers:          make([]*MCPServerTool, 0),
+		genaiClient: client,
+		gcpConfig:   gcpConfig,
+		servers:     make([]*MCPServerTool, 0),
+		tools:       make([]*genai.Tool, 0),
 	}, nil
 }
 
@@ -74,32 +57,85 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	// Set up the conversation with the LLM
 	var output strings.Builder
 	defaultModel := agent.gcpConfig.GeminiModels[0]
-	cs := agent.generativemodels[defaultModel].StartChat()
-	cs.History = history[:len(history)-1]
-	lastMessage := history[len(history)-1]
-	parts := append(lastMessage.Parts, genai.Text("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
-	res, err := cs.SendMessage(ctx, parts...)
+	
+	// Load configuration for system instruction
+	cfg, err := LoadConfig()
+	if err != nil {
+		return "", err
+	}
+	cwd, err := getCWD()
+	if err != nil {
+		return "", err
+	}
+	
+	// Prepare system instruction
+	systemInstruction := &genai.Content{
+		Role: "user",
+		Parts: []*genai.Part{genai.NewPartFromText(cfg.SystemInstruction +
+			" Your job is to help the user by performing tasks using these tools. " +
+			"You should not make up information. " +
+			"If you don't know something, say so and explain what you would need to know to help. " +
+			"If not indication, use the current working directory which is " + cwd)},
+	}
+	
+	// Add system instruction to history
+	contents := append([]*genai.Content{systemInstruction}, history...)
+	
+	// Add workflow instruction to the last message
+	lastMessage := contents[len(contents)-1]
+	lastMessage.Parts = append(lastMessage.Parts, genai.NewPartFromText("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
+	
+	// Configure generation settings
+	config := &genai.GenerateContentConfig{
+		Temperature:      &cfg.Temperature,
+		MaxOutputTokens:  &cfg.MaxOutputTokens,
+	}
+	
+	// Add tools if available
+	if len(agent.tools) > 0 {
+		config.Tools = agent.tools
+	}
+	
+	// Generate content using the new API
+	res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
 	}
+	
 	out, functionCalls := processResponse(res)
 	output.WriteString(out)
 	// Print response with colorization
 	printResponse(out)
 
 	for functionCalls != nil {
-		functionResponses := make([]genai.Part, len(functionCalls))
+		functionResponses := make([]*genai.Part, len(functionCalls))
 		for i, fn := range functionCalls {
 			// Print function call with color
 			functionCallColor := color.New(color.FgYellow, color.Bold)
 			functionCallColor.Printf("Calling function: %v\n", fn.Name)
 
-			functionResponses[i], err = agent.Call(ctx, fn)
+			functionResp, err := agent.Call(ctx, fn)
 			if err != nil {
 				return "", fmt.Errorf("error in LLM request (function Call): %w", err)
 			}
+			functionResponses[i] = genai.NewPartFromFunctionResponse(functionResp.Name, functionResp.Response)
 		}
-		res, err := cs.SendMessage(ctx, functionResponses...)
+		
+		// Add function responses to conversation
+		modelParts := make([]*genai.Part, len(functionCalls))
+		for i, fc := range functionCalls {
+			modelParts[i] = genai.NewPartFromFunctionCall(fc.Name, fc.Args)
+		}
+		contents = append(contents, &genai.Content{
+			Role:  "model",
+			Parts: modelParts,
+		})
+		contents = append(contents, &genai.Content{
+			Role:  "user",
+			Parts: functionResponses,
+		})
+		
+		res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 		if err != nil {
 			return "", err
 		}
@@ -233,14 +269,14 @@ func processResponse(resp *genai.GenerateContentResponse) (string, []genai.Funct
 	var output strings.Builder
 	for _, cand := range resp.Candidates {
 		for _, part := range cand.Content.Parts {
-			switch part.(type) {
-			case genai.Text:
-				fmt.Fprintln(&output, part)
-			case genai.FunctionCall:
+			switch {
+			case part.Text != "":
+				fmt.Fprintln(&output, part.Text)
+			case part.FunctionCall != nil:
 				if functionCalls == nil {
-					functionCalls = []genai.FunctionCall{part.(genai.FunctionCall)}
+					functionCalls = []genai.FunctionCall{*part.FunctionCall}
 				} else {
-					functionCalls = append(functionCalls, part.(genai.FunctionCall))
+					functionCalls = append(functionCalls, *part.FunctionCall)
 				}
 			default:
 				log.Fatalf("unhandled return %T", part)

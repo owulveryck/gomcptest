@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -22,7 +22,7 @@ func (mcpServerTool *MCPServerTool) getResourceTemplate(ctx context.Context, f g
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("error in getting resources, URI is not a proper URI: %v", err),
+				"error": fmt.Sprintf("error in getting resources, URI is not a proper URI: %w", err),
 			},
 		}, nil
 

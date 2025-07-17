@@ -84,7 +84,13 @@ NOTE: For Jupyter notebooks (.ipynb files), use the ReadNotebook tool instead.`)
 }
 
 func viewHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filePath, ok := request.Params.Arguments["file_path"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
+	filePath, ok := args["file_path"].(string)
 	if !ok {
 		return nil, errors.New("file_path must be a string")
 	}
@@ -108,20 +114,20 @@ func viewHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	}
 
 	// Extract all parameters
-	offset := getNumberParam(request, "offset", 0)
+	offset := getNumberParam(args, "offset", 0)
 	if offset < 0 {
 		return nil, errors.New("offset must be a non-negative number")
 	}
 
-	limit := getNumberParam(request, "limit", 2000)
+	limit := getNumberParam(args, "limit", 2000)
 	if limit <= 0 {
 		return nil, errors.New("limit must be a positive number")
 	}
 
-	showLineNumbers := getBoolParam(request, "show_line_numbers", false)
-	includeMetadata := getBoolParam(request, "include_metadata", false)
-	includeHexDump := getBoolParam(request, "include_hex_dump", false)
-	findSection, hasFindSection := request.Params.Arguments["find_section"].(string)
+	showLineNumbers := getBoolParam(args, "show_line_numbers", false)
+	includeMetadata := getBoolParam(args, "include_metadata", false)
+	includeHexDump := getBoolParam(args, "include_hex_dump", false)
+	findSection, hasFindSection := args["find_section"].(string)
 
 	// Get file metadata if requested
 	metadata := ""
@@ -156,22 +162,22 @@ func viewHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 }
 
 // Parameter extraction helper functions
-func getNumberParam(request mcp.CallToolRequest, name string, defaultValue int) int {
-	if value, ok := request.Params.Arguments[name].(float64); ok {
+func getNumberParam(args map[string]interface{}, name string, defaultValue int) int {
+	if value, ok := args[name].(float64); ok {
 		return int(value)
 	}
 	return defaultValue
 }
 
-func getBoolParam(request mcp.CallToolRequest, name string, defaultValue bool) bool {
-	if value, ok := request.Params.Arguments[name].(bool); ok {
+func getBoolParam(args map[string]interface{}, name string, defaultValue bool) bool {
+	if value, ok := args[name].(bool); ok {
 		return value
 	}
 	return defaultValue
 }
 
-func getStringParam(request mcp.CallToolRequest, name string, defaultValue string) string {
-	if value, ok := request.Params.Arguments[name].(string); ok {
+func getStringParam(args map[string]interface{}, name string, defaultValue string) string {
+	if value, ok := args[name].(string); ok {
 		return value
 	}
 	return defaultValue
