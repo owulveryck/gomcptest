@@ -88,7 +88,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	// Configure generation settings
 	config := &genai.GenerateContentConfig{
 		Temperature:      &cfg.Temperature,
-		MaxOutputTokens:  &cfg.MaxOutputTokens,
+		MaxOutputTokens:  cfg.MaxOutputTokens,
 	}
 	
 	// Add tools if available
