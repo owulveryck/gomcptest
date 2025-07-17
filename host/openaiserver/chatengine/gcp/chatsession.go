@@ -2,28 +2,29 @@ package gcp
 
 import (
 	"context"
+	"log"
 
-	"cloud.google.com/go/vertexai/genai"
-	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
+	"google.golang.org/genai"
 )
 
 type ChatSession struct {
-	generativemodels map[string]*genai.GenerativeModel
+	client           *genai.Client
+	modelNames       []string
 	imagemodels      map[string]*imagenAPI
 	servers          []*MCPServerTool
 	imageBaseDir     string
 	port             string
+	tools            []*genai.Tool
 }
 
 func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
-	client, err := genai.NewClient(ctx, config.GCPProject, config.GCPRegion)
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		Project:  config.GCPProject,
+		Location: config.GCPRegion,
+		Backend:  genai.BackendVertexAI,
+	})
 	if err != nil {
-		logging.Error(ctx, "Failed to create the client", "error", err)
-		panic(err)
-	}
-	genaimodels := make(map[string]*genai.GenerativeModel, len(config.GeminiModels))
-	for _, model := range config.GeminiModels {
-		genaimodels[model] = client.GenerativeModel(model)
+		log.Fatalf("Failed to create the client: %v", err)
 	}
 	var imagemodels map[string]*imagenAPI
 	if len(config.ImagenModels) != 0 {
@@ -31,17 +32,18 @@ func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
 		for _, model := range config.ImagenModels {
 			imagenapi, err := newImagenAPI(ctx, config, model)
 			if err != nil {
-				logging.Error(ctx, "Failed to create imagen API", "model", model, "error", err)
-				panic(err)
+				log.Fatal(err)
 			}
 			imagemodels[model] = imagenapi
 		}
 	}
 	return &ChatSession{
-		generativemodels: genaimodels,
-		servers:          make([]*MCPServerTool, 0),
-		imagemodels:      imagemodels,
-		imageBaseDir:     config.ImageDir,
-		port:             config.Port,
+		client:       client,
+		modelNames:   config.GeminiModels,
+		servers:      make([]*MCPServerTool, 0),
+		imagemodels:  imagemodels,
+		imageBaseDir: config.ImageDir,
+		port:         config.Port,
+		tools:        make([]*genai.Tool, 0),
 	}
 }

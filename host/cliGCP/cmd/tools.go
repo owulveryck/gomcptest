@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -111,21 +111,21 @@ func (agent *DispatchAgent) AddMCPTool(mcpClient client.MCPClient) error {
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
-		for _, generativemodel := range agent.generativemodels {
-			if generativemodel.Tools == nil {
-				generativemodel.Tools = make([]*genai.Tool, 1)
-				generativemodel.Tools[0] = &genai.Tool{
-					FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
-				}
+		
+		// Add tool to agent's tools
+		if len(agent.tools) == 0 {
+			agent.tools = make([]*genai.Tool, 1)
+			agent.tools[0] = &genai.Tool{
+				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}
-			generativemodel.Tools[0].FunctionDeclarations = append(generativemodel.Tools[0].FunctionDeclarations,
-				&genai.FunctionDeclaration{
-					Name:        serverName + "_" + tool.Name,
-					Description: tool.Description,
-					Parameters:  schema,
-				})
-			slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
 		}
+		agent.tools[0].FunctionDeclarations = append(agent.tools[0].FunctionDeclarations,
+			&genai.FunctionDeclaration{
+				Name:        serverName + "_" + tool.Name,
+				Description: tool.Description,
+				Parameters:  schema,
+			})
+		slog.Debug("registered function", "function "+strconv.Itoa(i), serverName+"_"+tool.Name, "description", tool.Description)
 	}
 	agent.servers = append(agent.servers, &MCPServerTool{
 		mcpClient: mcpClient,
@@ -146,10 +146,11 @@ func (mcpServerTool *MCPServerTool) Run(ctx context.Context, f genai.FunctionCal
 	} else {
 		return nil, fmt.Errorf("cannot extract function name")
 	}
-	request.Params.Arguments = make(map[string]interface{})
+	args := make(map[string]interface{})
 	for k, v := range f.Args {
-		request.Params.Arguments[k] = fmt.Sprint(v)
+		args[k] = fmt.Sprint(v)
 	}
+	request.Params.Arguments = args
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {

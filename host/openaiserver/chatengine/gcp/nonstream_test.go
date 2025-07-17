@@ -127,7 +127,7 @@ func TestHandleCompletionRequest_server(t *testing.T) {
 		GeminiModels: []string{"gemini-2.0-flash"},
 		GCPRegion:    os.Getenv("GCP_REGION"),
 	})
-	err = cs.AddMCPTool(context.Background(), c)
+	err = cs.AddMCPTool(c)
 	if err != nil {
 		t.Fatal(err)
 	}

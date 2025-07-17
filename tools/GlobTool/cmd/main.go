@@ -63,32 +63,38 @@ type FileInfo struct {
 }
 
 func globToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	pattern, ok := request.Params.Arguments["pattern"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
+	pattern, ok := args["pattern"].(string)
 	if !ok {
 		return nil, errors.New("pattern must be a string")
 	}
 
 	// Get search path (default to current directory)
 	searchPath := "."
-	if path, ok := request.Params.Arguments["path"].(string); ok && path != "" {
+	if path, ok := args["path"].(string); ok && path != "" {
 		searchPath = path
 	}
 
 	// Get exclude pattern (if any)
 	var excludePattern string
-	if exclude, ok := request.Params.Arguments["exclude"].(string); ok && exclude != "" {
+	if exclude, ok := args["exclude"].(string); ok && exclude != "" {
 		excludePattern = exclude
 	}
 
 	// Get result limit (if any)
 	var limit int
-	if limitVal, ok := request.Params.Arguments["limit"].(float64); ok && limitVal > 0 {
+	if limitVal, ok := args["limit"].(float64); ok && limitVal > 0 {
 		limit = int(limitVal)
 	}
 
 	// Get absolute path setting
 	useAbsolute := false
-	if absVal, ok := request.Params.Arguments["absolute"].(bool); ok {
+	if absVal, ok := args["absolute"].(bool); ok {
 		useAbsolute = absVal
 	}
 

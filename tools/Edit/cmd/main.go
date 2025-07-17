@@ -50,18 +50,24 @@ func editHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	// Get start time for performance logging
 	startTime := time.Now()
 
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
 	// Extract parameters
-	filePath, ok := request.Params.Arguments["file_path"].(string)
+	filePath, ok := args["file_path"].(string)
 	if !ok {
 		return nil, errors.New("file_path must be a string")
 	}
 
-	oldString, ok := request.Params.Arguments["old_string"].(string)
+	oldString, ok := args["old_string"].(string)
 	if !ok {
 		return nil, errors.New("old_string must be a string")
 	}
 
-	newString, ok := request.Params.Arguments["new_string"].(string)
+	newString, ok := args["new_string"].(string)
 	if !ok {
 		return nil, errors.New("new_string must be a string")
 	}

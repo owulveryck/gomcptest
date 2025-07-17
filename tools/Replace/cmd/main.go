@@ -41,12 +41,18 @@ func main() {
 }
 
 func replaceHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filePath, ok := request.Params.Arguments["file_path"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
+	filePath, ok := args["file_path"].(string)
 	if !ok {
 		return nil, errors.New("file_path must be a string")
 	}
 
-	content, ok := request.Params.Arguments["content"].(string)
+	content, ok := args["content"].(string)
 	if !ok {
 		return nil, errors.New("content must be a string")
 	}

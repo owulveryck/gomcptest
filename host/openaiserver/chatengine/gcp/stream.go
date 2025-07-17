@@ -7,63 +7,48 @@ import (
 	"io"
 	"log/slog"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
-	var generativemodel *genai.GenerativeModel
 	var modelIsPresent bool
-	if generativemodel, modelIsPresent = chatsession.generativemodels[req.Model]; !modelIsPresent {
+	for _, model := range chatsession.modelNames {
+		if model == req.Model {
+			modelIsPresent = true
+			break
+		}
+	}
+	if !modelIsPresent {
 		return nil, errors.New("cannot find model")
 	}
 
-	// Set temperature from request
-	generativemodel.SetTemperature(req.Temperature)
-	generativemodel.SetCandidateCount(1)
-
-	cs := generativemodel.StartChat()
-
-	// Populate chat history if available
-	if len(req.Messages) > 1 {
-		historyLength := len(req.Messages) - 1
-		cs.History = make([]*genai.Content, historyLength)
-
-		for i := 0; i < historyLength; i++ {
-			msg := req.Messages[i]
-			role := "user"
-			if msg.Role != "user" {
-				role = "model"
-			}
-
-			parts, err := toGenaiPart(&msg)
-			if err != nil || parts == nil {
-				return nil, fmt.Errorf("cannot process message: %w ", err)
-			}
-			if len(parts) == 0 {
-				return nil, fmt.Errorf("message %d has no content", i)
-			}
-			cs.History[i] = &genai.Content{
-				Role:  role,
-				Parts: parts,
-			}
+	// Prepare content for the new API
+	contents := make([]*genai.Content, 0, len(req.Messages))
+	for _, msg := range req.Messages {
+		role := "user"
+		if msg.Role != "user" {
+			role = "model"
 		}
-	}
 
-	// Extract the last message for the current turn
-	message := req.Messages[len(req.Messages)-1]
-	genaiMessageParts, err := toGenaiPart(&message)
-	if err != nil || genaiMessageParts == nil {
-		return nil, fmt.Errorf("cannot process message: %w ", err)
-	}
-	if len(genaiMessageParts) == 0 {
-		return nil, fmt.Errorf("last message has no content")
+		parts, err := toGenaiPart(&msg)
+		if err != nil || parts == nil {
+			return nil, fmt.Errorf("cannot process message: %w ", err)
+		}
+		if len(parts) == 0 {
+			return nil, fmt.Errorf("message has no content")
+		}
+		
+		contents = append(contents, &genai.Content{
+			Role:  role,
+			Parts: parts,
+		})
 	}
 
 	// Create the channel for streaming responses
 	c := make(chan chatengine.ChatCompletionStreamResponse)
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, cs, chatsession)
+	sp := newStreamProcessor(c, chatsession, req.Model)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {
@@ -83,8 +68,9 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		}()
 		// Check if it is an image generation, if so, do it and return
 		if chatsession.imagemodels != nil {
+			lastMessage := req.Messages[len(req.Messages)-1]
 			slog.Debug("activating image experimental feature")
-			content := message.GetContent()
+			content := lastMessage.GetContent()
 			imagenmodel := checkImagegen(content, chatsession.imagemodels)
 			if imagenmodel != nil {
 				image, err := imagenmodel.generateImage(ctx, content, chatsession.imageBaseDir)
@@ -97,23 +83,33 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 				close(done)
 				return
 			}
+		}
+		
+		// Configure generation settings
+		config := &genai.GenerateContentConfig{
+			Temperature: &req.Temperature,
+		}
+		
+		// Add tools if available
+		if len(chatsession.tools) > 0 {
+			config.Tools = chatsession.tools
+		}
 
-			// Process the stream
-			stream := sp.sendMessageStream(streamCtx, genaiMessageParts...)
-			err := sp.processIterator(streamCtx, stream)
+		// Process the stream using the new API
+		stream := sp.generateContentStream(streamCtx, req.Model, contents, config)
+		err := sp.processIterator(streamCtx, stream, contents)
 
-			// Signal normal completion
-			close(done)
+		// Signal normal completion
+		close(done)
 
-			// Handle errors, but ignore io.EOF as it's expected
-			if err != nil && err != io.EOF {
-				// Check if the error is due to context cancellation
-				if ctx.Err() != nil {
-					err = ctx.Err() // Ensure we return the correct cancellation error
-				}
-
-				slog.Error("Error from stream processing", "error", err)
+		// Handle errors, but ignore io.EOF as it's expected
+		if err != nil && err != io.EOF {
+			// Check if the error is due to context cancellation
+			if ctx.Err() != nil {
+				err = ctx.Err() // Ensure we return the correct cancellation error
 			}
+
+			slog.Error("Error from stream processing", "error", err)
 		}
 	}()
 

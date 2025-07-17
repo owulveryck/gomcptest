@@ -1,26 +1,25 @@
 package gcp
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
-	"cloud.google.com/go/vertexai/genai"
+	"google.golang.org/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
-	"github.com/owulveryck/gomcptest/host/openaiserver/logging"
 )
 
-func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]genai.Part, error) {
+func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
 	if c.Content == nil {
 		return nil, errors.New("no content")
 	}
 
 	switch v := c.Content.(type) {
 	case string:
-		return []genai.Part{genai.Text(v)}, nil
+		return []*genai.Part{genai.NewPartFromText(v)}, nil
 	case []interface{}:
-		returnedParts := make([]genai.Part, 0)
+		returnedParts := make([]*genai.Part, 0)
 		for _, item := range v {
 			if m, ok := item.(map[string]interface{}); ok {
 				if imgurl, ok := m["image_url"].(map[string]interface{}); ok {
@@ -29,25 +28,22 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]genai.Part, error) {
 						if err != nil {
 							return nil, fmt.Errorf("failed to extract image  %w", err)
 						}
-						returnedParts = append(returnedParts, genai.Blob{
-							Data:     data,
-							MIMEType: mime,
-						})
+						returnedParts = append(returnedParts, genai.NewPartFromBytes(data, mime))
 					}
 				}
 				if textMap, ok := m["text"].(map[string]interface{}); ok {
 					if value, ok := textMap["value"].(string); ok {
-						returnedParts = append(returnedParts, genai.Text(value))
+						returnedParts = append(returnedParts, genai.NewPartFromText(value))
 					}
 				}
 				if text, ok := m["text"].(string); ok {
-					returnedParts = append(returnedParts, genai.Text(text))
+					returnedParts = append(returnedParts, genai.NewPartFromText(text))
 				}
 			}
 		}
 		return returnedParts, nil
 	default:
-		return []genai.Part{}, nil
+		return []*genai.Part{}, nil
 	}
 }
 
@@ -60,16 +56,16 @@ func checkImagegen(s string, m map[string]*imagenAPI) *imagenAPI {
 	return nil
 }
 
-func extractGenaiSchemaFromMCPProperty(ctx context.Context, p interface{}) (*genai.Schema, error) {
+func extractGenaiSchemaFromMCPProperty(p interface{}) (*genai.Schema, error) {
 	switch p := p.(type) {
 	case map[string]interface{}:
-		return extractGenaiSchemaFromMCPPRopertyMap(ctx, p)
+		return extractGenaiSchemaFromMCPPRopertyMap(p)
 	default:
 		return nil, fmt.Errorf("unhandled type for property %T (%v)", p, p)
 	}
 }
 
-func extractGenaiSchemaFromMCPPRopertyMap(ctx context.Context, p map[string]interface{}) (*genai.Schema, error) {
+func extractGenaiSchemaFromMCPPRopertyMap(p map[string]interface{}) (*genai.Schema, error) {
 	var propertyType, propertyDescription string
 	var ok bool
 	// first check if we have type and description
@@ -77,7 +73,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(ctx context.Context, p map[string]inte
 		return nil, fmt.Errorf("expected type in the property details (%v)", p)
 	}
 	if propertyDescription, ok = p["description"].(string); !ok {
-		logging.Debug(ctx, "properties", "no description found", p)
+		slog.Debug("properties", "no description found", p)
 	}
 	switch propertyType {
 	case "string":
@@ -115,7 +111,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(ctx context.Context, p map[string]inte
 		genaiProperties := make(map[string]*genai.Schema, len(properties))
 		for p, prop := range properties {
 			var err error
-			genaiProperties[p], err = extractGenaiSchemaFromMCPProperty(ctx, prop)
+			genaiProperties[p], err = extractGenaiSchemaFromMCPProperty(prop)
 			if err != nil {
 				return nil, err
 			}
@@ -132,7 +128,7 @@ func extractGenaiSchemaFromMCPPRopertyMap(ctx context.Context, p map[string]inte
 		if items, ok = p["items"]; !ok {
 			return nil, fmt.Errorf("expected items in the property details for a type array (%v)", p)
 		}
-		schema, err := extractGenaiSchemaFromMCPProperty(ctx, items)
+		schema, err := extractGenaiSchemaFromMCPProperty(items)
 		if err != nil {
 			return nil, err
 		}
