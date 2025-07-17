@@ -80,7 +80,13 @@ For more details on DuckDB's SQL syntax and functions, visit: https://duckdb.org
 }
 
 func duckDBHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	queryStr, ok := request.Params.Arguments["query"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
+	queryStr, ok := args["query"].(string)
 	if !ok {
 		return nil, errors.New("query must be a string")
 	}

@@ -61,14 +61,20 @@ func main() {
 }
 
 func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	pattern, ok := request.Params.Arguments["pattern"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+
+	pattern, ok := args["pattern"].(string)
 	if !ok {
 		return nil, errors.New("pattern must be a string")
 	}
 
 	// Process ignore_case flag
 	ignoreCase := false
-	if val, ok := request.Params.Arguments["ignore_case"].(bool); ok {
+	if val, ok := args["ignore_case"].(bool); ok {
 		ignoreCase = val
 	}
 
@@ -86,7 +92,7 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Get search path (default to current directory)
 	searchPath := "."
-	if path, ok := request.Params.Arguments["path"].(string); ok && path != "" {
+	if path, ok := args["path"].(string); ok && path != "" {
 		searchPath = path
 	}
 
@@ -97,19 +103,19 @@ func grepToolHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Get include pattern (default to all files)
 	includePattern := "*"
-	if include, ok := request.Params.Arguments["include"].(string); ok && include != "" {
+	if include, ok := args["include"].(string); ok && include != "" {
 		includePattern = include
 	}
 
 	// Get context lines
 	contextLines := 0
-	if val, ok := request.Params.Arguments["context"].(float64); ok {
+	if val, ok := args["context"].(float64); ok {
 		contextLines = int(val)
 	}
 
 	// Process no_ignore_vcs flag
 	ignoreVCS := true
-	if val, ok := request.Params.Arguments["no_ignore_vcs"].(bool); ok {
+	if val, ok := args["no_ignore_vcs"].(bool); ok {
 		ignoreVCS = !val
 	}
 

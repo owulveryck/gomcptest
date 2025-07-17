@@ -43,7 +43,13 @@ func main() {
 }
 
 func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	path, ok := request.Params.Arguments["path"].(string)
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("arguments must be a map")
+	}
+	
+	path, ok := args["path"].(string)
 	if !ok {
 		return nil, errors.New("path must be a string")
 	}
@@ -60,7 +66,7 @@ func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 
 	// Get ignore pattern
 	var ignorePatterns []string
-	if ignorePattern, ok := request.Params.Arguments["ignore_pattern"].(string); ok && ignorePattern != "" {
+	if ignorePattern, ok := args["ignore_pattern"].(string); ok && ignorePattern != "" {
 		ignorePatterns = append(ignorePatterns, ignorePattern)
 	}
 
