@@ -29,7 +29,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		}
 
 		res.Choices[i] = chatengine.Choice{
-			Index: int(*cand.Index),
+			Index: int(cand.Index),
 			Message: chatengine.ChatMessage{
 				Role:    cand.Content.Role,
 				Content: out,
