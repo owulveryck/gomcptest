@@ -26,6 +26,8 @@ The project consists of three main parts:
    - **GlobTool/GrepTool**: Find files and search content
    - **LS/View**: Navigate and read the filesystem
    - **dispatch_agent**: Create sub-agents with specific tasks
+   - **imagen**: Generate and manipulate images using Google Imagen
+   - **duckdbserver**: Process data using DuckDB
 
 3. **MCP Protocol**: The standardized communication layer that allows models to discover, invoke, and receive results from tools
 
@@ -95,9 +97,16 @@ These credentials will be used by gomcptest when interacting with Google Cloud s
    cd gomcptest
    ```
 
-2. **Build Tools**: Compile all MCP-compatible tools
+2. **Build All Components**: Compile tools and servers using the root Makefile
    ```bash
+   # Build all tools and servers
+   make all
+   
+   # Or build only tools
    make tools
+   
+   # Or build only servers
+   make servers
    ```
 
 3. **Choose Interface**: 
