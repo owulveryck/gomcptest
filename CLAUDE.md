@@ -21,12 +21,27 @@ This document provides context about the gomcptest project for AI assistants lik
 - **Replace**: Replace entire file contents
 - **View**: View file contents
 - **dispatch_agent**: Specialized agent dispatcher for various tasks
+- **imagen**: Image generation and manipulation using Google Imagen
+- **duckdbserver**: DuckDB server for data processing
 
 ## Build System
 
-Use the Makefile in the `tools/` directory to build all tools:
+Use the root Makefile to build all tools and servers:
 ```bash
+# Build all tools and servers
 make all
+
+# Build only tools
+make tools
+
+# Build only servers  
+make servers
+
+# Run a specific tool for testing
+make run TOOL=Bash
+
+# Install binaries to a directory
+make install INSTALL_DIR=/path/to/install
 ```
 
 ## Configuration
@@ -35,8 +50,10 @@ Environment variables are used for configuration:
 - `GCP_PROJECT`: Google Cloud Project ID
 - `GCP_REGION`: Google Cloud Region (default: us-central1)
 - `GEMINI_MODELS`: Comma-separated list of Gemini models
+- `IMAGEN_MODELS`: Comma-separated list of Imagen models
 - `IMAGE_DIR`: Directory to store images
 - `LOG_LEVEL`: Logging level (DEBUG, INFO, WARN, ERROR)
+- `PORT`: Server port (default: 8080)
 
 ## Testing
 
@@ -62,6 +79,8 @@ The documentation is auto-generated using Hugo and includes:
 ## Current State
 
 The project is actively maintained with recent commits focusing on:
+- Comprehensive Imagen tool suite with HTTP server
+- Rationalized build system with single root Makefile
 - Better logging mechanisms
 - Package updates
 - Resource management improvements
