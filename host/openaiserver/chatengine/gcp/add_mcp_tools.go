@@ -35,14 +35,14 @@ func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServer
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("Adding MCP tool as a function")
 		functionName := mcpServerName + toolPrefix + "_" + tool.Name
-		
+
 		// Ensure we have a tool to add functions to
 		if len(chatsession.tools) == 0 {
 			chatsession.tools = []*genai.Tool{{
 				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}}
 		}
-		
+
 		// Add the function declaration to the first tool
 		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
 			&genai.FunctionDeclaration{

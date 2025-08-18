@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/genai"
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"google.golang.org/genai"
 )
 
 func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *genai.GenerateContentResponse, originalContents []*genai.Content, modelName string) (*chatengine.ChatCompletionResponse, error) {
@@ -64,7 +64,7 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		// Create a new conversation that includes the function call and responses
 		newContents := make([]*genai.Content, len(originalContents))
 		copy(newContents, originalContents)
-		
+
 		// Add the assistant's response with function calls
 		assistantParts := make([]*genai.Part, 0)
 		for _, cand := range resp.Candidates {
@@ -76,64 +76,64 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 				}
 			}
 		}
-		
+
 		if len(assistantParts) > 0 {
 			newContents = append(newContents, &genai.Content{
 				Role:  "model",
 				Parts: assistantParts,
 			})
 		}
-		
+
 		// Add function responses
 		newContents = append(newContents, &genai.Content{
 			Role:  "user",
 			Parts: functionResponses,
 		})
-		
+
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
-		
+
 		// Add tools if available
 		if len(chatsession.tools) > 0 {
 			config.Tools = chatsession.tools
 		}
-		
+
 		// Generate follow-up content
 		followUpResp, err := chatsession.client.Models.GenerateContent(ctx, modelName, newContents, config)
 		if err != nil {
 			return nil, fmt.Errorf("error in function call follow-up: %w", err)
 		}
-		
+
 		// Process the follow-up response recursively
 		return chatsession.processChatResponse(ctx, followUpResp, newContents, modelName)
 	}
 	if len(promptReply) > 0 {
 		slog.Debug("Sending back prompt to history", "prompt", promptReply)
-		
+
 		// Create a new conversation that includes the prompt replies
 		newContents := make([]*genai.Content, len(originalContents))
 		copy(newContents, originalContents)
-		
+
 		// Add the prompt replies as user content
 		newContents = append(newContents, &genai.Content{
 			Role:  "user",
 			Parts: promptReply,
 		})
-		
+
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
-		
+
 		// Add tools if available
 		if len(chatsession.tools) > 0 {
 			config.Tools = chatsession.tools
 		}
-		
+
 		// Generate follow-up content for prompt replies
 		followUpResp, err := chatsession.client.Models.GenerateContent(ctx, modelName, newContents, config)
 		if err != nil {
 			return nil, fmt.Errorf("error in prompt follow-up: %w", err)
 		}
-		
+
 		return chatsession.processChatResponse(ctx, followUpResp, newContents, modelName)
 	}
 

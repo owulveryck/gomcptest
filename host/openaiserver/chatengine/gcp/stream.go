@@ -7,8 +7,8 @@ import (
 	"io"
 	"log/slog"
 
-	"google.golang.org/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"google.golang.org/genai"
 )
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
@@ -38,7 +38,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		if len(parts) == 0 {
 			return nil, fmt.Errorf("message has no content")
 		}
-		
+
 		contents = append(contents, &genai.Content{
 			Role:  role,
 			Parts: parts,
@@ -67,29 +67,12 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			}
 		}()
 		// Check if it is an image generation, if so, do it and return
-		if chatsession.imagemodels != nil {
-			lastMessage := req.Messages[len(req.Messages)-1]
-			slog.Debug("activating image experimental feature")
-			content := lastMessage.GetContent()
-			imagenmodel := checkImagegen(content, chatsession.imagemodels)
-			if imagenmodel != nil {
-				image, err := imagenmodel.generateImage(ctx, content, chatsession.imageBaseDir)
-				if err != nil {
-					sp.sendChunk(ctx, err.Error(), "error")
-					close(done)
-					return
-				}
-				sp.sendChunk(ctx, "![](http://localhost:"+chatsession.port+image+")", "done")
-				close(done)
-				return
-			}
-		}
-		
+
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{
 			Temperature: &req.Temperature,
 		}
-		
+
 		// Add tools if available
 		if len(chatsession.tools) > 0 {
 			config.Tools = chatsession.tools

@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"strings"
 
-	"google.golang.org/genai"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"google.golang.org/genai"
 )
 
 func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
@@ -45,15 +44,6 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
 	default:
 		return []*genai.Part{}, nil
 	}
-}
-
-func checkImagegen(s string, m map[string]*imagenAPI) *imagenAPI {
-	for k, v := range m {
-		if strings.Contains(s, k) {
-			return v
-		}
-	}
-	return nil
 }
 
 func extractGenaiSchemaFromMCPProperty(p interface{}) (*genai.Schema, error) {

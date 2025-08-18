@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"google.golang.org/genai"
 	"github.com/google/uuid"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"google.golang.org/genai"
 )
 
 func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (chatengine.ChatCompletionResponse, error) {
@@ -45,7 +45,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 		if msg.Role != "user" {
 			role = "model"
 		}
-		
+
 		parts, err := toGenaiPart(&msg)
 		if err != nil || parts == nil {
 			return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot process message: %w ", err)
@@ -53,7 +53,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 		if len(parts) == 0 {
 			return chatengine.ChatCompletionResponse{}, fmt.Errorf("message has no content")
 		}
-		
+
 		contents = append(contents, &genai.Content{
 			Role:  role,
 			Parts: parts,
@@ -64,7 +64,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	config := &genai.GenerateContentConfig{
 		Temperature: &req.Temperature,
 	}
-	
+
 	// Add tools if available
 	if len(chatsession.tools) > 0 {
 		config.Tools = chatsession.tools
@@ -75,7 +75,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	if err != nil {
 		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot generate content: %w", err)
 	}
-	
+
 	res, err := chatsession.processChatResponse(ctx, resp, contents, req.Model)
 	return *res, err
 }

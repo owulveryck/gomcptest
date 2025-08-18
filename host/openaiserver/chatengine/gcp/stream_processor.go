@@ -3,15 +3,15 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"strings"
-	"time"
 	"iter"
 	"log/slog"
+	"strings"
+	"time"
 
-	"google.golang.org/genai"
 	"github.com/google/uuid"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
+	"google.golang.org/genai"
 )
 
 const (
@@ -48,7 +48,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 
 	fnResps := make([]*genai.Part, 0)
 	promptReply := make([]*genai.Part, 0)
-	
+
 	if cand.Content != nil {
 		for _, part := range cand.Content.Parts {
 			if part.Text != "" {
@@ -67,7 +67,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 						return err, nil, nil
 					}
 				}
-				
+
 				// Check if this is a prompt response
 				if content, ok := fnResp.Response[promptresult]; ok {
 					for _, message := range content.([]mcp.PromptMessage) {
@@ -75,7 +75,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 					}
 					fnResp.Response[promptresult] = "success"
 				}
-				
+
 				fnResps = append(fnResps, genai.NewPartFromFunctionResponse(fnResp.Name, fnResp.Response))
 			} else {
 				return fmt.Errorf("unsupported part type: %T", part), nil, nil
@@ -114,7 +114,7 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 	var fnResps []*genai.Part
 	var promptReplies []*genai.Part
 	var lastResponse *genai.GenerateContentResponse
-	
+
 	for resp, err := range responseSeq {
 		if err != nil {
 			return fmt.Errorf("error in response sequence: %w", err)
@@ -131,13 +131,13 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 			promptReplies = append(promptReplies, promptReplyParts...)
 		}
 	}
-	
+
 	// Handle function call follow-ups
 	if fnResps != nil && len(fnResps) > 0 && lastResponse != nil {
 		// Create a new conversation that includes the function call and responses
 		newContents := make([]*genai.Content, len(originalContents))
 		copy(newContents, originalContents)
-		
+
 		// Add the assistant's response with function calls
 		assistantParts := make([]*genai.Part, 0)
 		for _, cand := range lastResponse.Candidates {
@@ -149,60 +149,60 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 				}
 			}
 		}
-		
+
 		if len(assistantParts) > 0 {
 			newContents = append(newContents, &genai.Content{
 				Role:  "model",
 				Parts: assistantParts,
 			})
 		}
-		
+
 		// Add function responses
 		newContents = append(newContents, &genai.Content{
 			Role:  "user",
 			Parts: fnResps,
 		})
-		
+
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
-		
+
 		// Add tools if available
 		if len(s.chatsession.tools) > 0 {
 			config.Tools = s.chatsession.tools
 		}
-		
+
 		// Continue streaming with function responses
 		followUpSeq := s.generateContentStream(ctx, s.modelName, newContents, config)
 		return s.processIterator(ctx, followUpSeq, newContents)
 	}
-	
+
 	// Handle prompt reply follow-ups
 	if promptReplies != nil && len(promptReplies) > 0 {
 		slog.Debug("Sending back prompt replies to history", "prompt", promptReplies)
-		
+
 		// Create a new conversation that includes the prompt replies
 		newContents := make([]*genai.Content, len(originalContents))
 		copy(newContents, originalContents)
-		
+
 		// Add the prompt replies as user content
 		newContents = append(newContents, &genai.Content{
 			Role:  "user",
 			Parts: promptReplies,
 		})
-		
+
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
-		
+
 		// Add tools if available
 		if len(s.chatsession.tools) > 0 {
 			config.Tools = s.chatsession.tools
 		}
-		
+
 		// Continue streaming with prompt replies
 		followUpSeq := s.generateContentStream(ctx, s.modelName, newContents, config)
 		return s.processIterator(ctx, followUpSeq, newContents)
 	}
-	
+
 	return nil
 }
 

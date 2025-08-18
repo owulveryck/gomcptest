@@ -32,14 +32,14 @@ func (chatsession *ChatSession) addMCPResourceTemplate(mcpClient client.MCPClien
 		}
 		slog.Debug("Adding MCP resource template as a tool")
 		functionName := mcpServerName + resourceTemplatePrefix + "_" + resourceTemplate.Name
-		
+
 		// Ensure we have a tool to add functions to
 		if len(chatsession.tools) == 0 {
 			chatsession.tools = []*genai.Tool{{
 				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}}
 		}
-		
+
 		// Add the function declaration to the first tool
 		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
 			&genai.FunctionDeclaration{
@@ -73,14 +73,14 @@ func (chatsession *ChatSession) addMCPResource(mcpClient client.MCPClient, mcpSe
 		}
 		slog.Debug("Adding MCP resource as a tool")
 		functionName := mcpServerName + resourcePrefix + "_" + resource.Name
-		
+
 		// Ensure we have a tool to add functions to
 		if len(chatsession.tools) == 0 {
 			chatsession.tools = []*genai.Tool{{
 				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}}
 		}
-		
+
 		// Add the function declaration to the first tool
 		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
 			&genai.FunctionDeclaration{

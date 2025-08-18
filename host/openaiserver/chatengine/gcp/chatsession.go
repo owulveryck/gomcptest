@@ -8,13 +8,11 @@ import (
 )
 
 type ChatSession struct {
-	client           *genai.Client
-	modelNames       []string
-	imagemodels      map[string]*imagenAPI
-	servers          []*MCPServerTool
-	imageBaseDir     string
-	port             string
-	tools            []*genai.Tool
+	client     *genai.Client
+	modelNames []string
+	servers    []*MCPServerTool
+	port       string
+	tools      []*genai.Tool
 }
 
 func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
@@ -26,24 +24,11 @@ func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
 	if err != nil {
 		log.Fatalf("Failed to create the client: %v", err)
 	}
-	var imagemodels map[string]*imagenAPI
-	if len(config.ImagenModels) != 0 {
-		imagemodels = make(map[string]*imagenAPI, len(config.ImagenModels))
-		for _, model := range config.ImagenModels {
-			imagenapi, err := newImagenAPI(ctx, config, model)
-			if err != nil {
-				log.Fatal(err)
-			}
-			imagemodels[model] = imagenapi
-		}
-	}
 	return &ChatSession{
-		client:       client,
-		modelNames:   config.GeminiModels,
-		servers:      make([]*MCPServerTool, 0),
-		imagemodels:  imagemodels,
-		imageBaseDir: config.ImageDir,
-		port:         config.Port,
-		tools:        make([]*genai.Tool, 0),
+		client:     client,
+		modelNames: config.GeminiModels,
+		servers:    make([]*MCPServerTool, 0),
+		port:       config.Port,
+		tools:      make([]*genai.Tool, 0),
 	}
 }

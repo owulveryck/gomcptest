@@ -34,14 +34,14 @@ func (chatsession *ChatSession) addMCPPromptTemplate(mcpClient client.MCPClient,
 
 		slog.Debug("Adding MCP prompt template as a tool")
 		functionName := mcpServerName + promptPrefix + "_" + promptsTemplate.Name
-		
+
 		// Ensure we have a tool to add functions to
 		if len(chatsession.tools) == 0 {
 			chatsession.tools = []*genai.Tool{{
 				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
 			}}
 		}
-		
+
 		// Add the function declaration to the first tool
 		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
 			&genai.FunctionDeclaration{
