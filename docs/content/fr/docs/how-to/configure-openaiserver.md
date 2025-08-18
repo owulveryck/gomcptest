@@ -27,8 +27,6 @@ export PORT=8080
 # Log level: DEBUG, INFO, WARN, ERROR (default: INFO)
 export LOG_LEVEL=INFO
 
-# Directory to store images (required)
-export IMAGE_DIR=/path/to/image/directory
 ```
 
 ### GCP Configuration

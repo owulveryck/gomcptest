@@ -50,9 +50,9 @@ Add the following content to the .envrc file:
 export GCP_PROJECT=your-gcp-project-id
 export GCP_REGION=us-central1
 export GEMINI_MODELS=gemini-2.0-flash
-export IMAGEN_MODELS=imagen-3.0-generate-002
-export IMAGE_DIR=/tmp/images
 ```
+
+**Note**: `IMAGEN_MODELS` and `IMAGE_DIR` are no longer needed for the cliGCP host. Image generation is available through the independent `tools/imagen` MCP server.
 
 Load the environment variables:
 

@@ -78,15 +78,15 @@ make clean
 
 ## Configuration
 
-Read the `.envrc` file in the `bin` directory to set up the required environment variables:
+Set up the required environment variables for the host applications:
 
 ```bash
 export GCP_PROJECT=your-project-id
 export GCP_REGION=your-region
 export GEMINI_MODELS=gemini-2.0-flash
-export IMAGEN_MODELS=imagen-3.0-generate-002
-export IMAGE_DIR=/tmp/images
 ```
+
+Note: `IMAGEN_MODELS` and `IMAGE_DIR` are no longer needed for the hosts as imagen functionality is now provided by the independent MCP tool in `tools/imagen`.
 
 ## Testing the CLI
 
@@ -122,9 +122,8 @@ This guide will help you quickly run the `openaiserver` located in the `host/ope
 2.  Set the required environment variables.  Refer to the Configuration section for details on the environment variables.  A minimal example:
 
     ```bash
-    export IMAGE_DIR=/path/to/your/image/directory
     export GCP_PROJECT=your-gcp-project-id
-    export IMAGE_DIR=/tmp/images # Directory must exist
+    export GCP_REGION=us-central1
     ```
 
 3.  Run the server:
@@ -151,7 +150,6 @@ The `openaiserver` application is configured using environment variables. The fo
 | --------- | --------------------------------- | ------- | -------- |
 | `PORT`      | The port the server listens on    | `8080`  | No       |
 | `LOG_LEVEL` | Log level (DEBUG, INFO, WARN, ERROR) | `INFO`  | No       |
-| `IMAGE_DIR` | Directory to store images         |         | Yes      |
 
 ### GCP Configuration
 
@@ -160,9 +158,8 @@ The `openaiserver` application is configured using environment variables. The fo
 | `GCP_PROJECT`  | Google Cloud Project ID                      |                           | Yes      |
 | `GEMINI_MODELS` | Comma-separated list of Gemini models      | `gemini-1.5-pro,gemini-2.0-flash` | No       |
 | `GCP_REGION`   | Google Cloud Region                          | `us-central1`             | No       |
-| `IMAGEN_MODELS` | Comma-separated list of Imagen models      |                           | No       |
-| `IMAGE_DIR`     | Directory to store images                    |                           | Yes      |
-| `PORT`         | The port the server listens on                | `8080`                    | No       |
+
+**Note**: `IMAGEN_MODELS` and `IMAGE_DIR` environment variables are no longer needed for the hosts. Image generation is now handled by the independent `tools/imagen` MCP server.
 
 ## Notes
 

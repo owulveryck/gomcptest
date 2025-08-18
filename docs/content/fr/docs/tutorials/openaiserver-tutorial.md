@@ -31,20 +31,14 @@ Add the following content to the .envrc file, adjusting the values according to 
 # Server configuration
 PORT=8080
 LOG_LEVEL=INFO
-IMAGE_DIR=/tmp/images
 
 # GCP configuration
 GCP_PROJECT=your-gcp-project-id
 GCP_REGION=us-central1
 GEMINI_MODELS=gemini-2.0-flash
-IMAGEN_MODELS=imagen-3.0-generate-002
 ```
 
-Ensure the image directory exists:
-
-```bash
-mkdir -p /tmp/images
-```
+**Note**: Les variables d'environnement `IMAGE_DIR` et `IMAGEN_MODELS` ne sont plus nécessaires pour l'hôte openaiserver. La génération d'images est maintenant gérée par le serveur MCP indépendant `tools/imagen`.
 
 Load the environment variables:
 

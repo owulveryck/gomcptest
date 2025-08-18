@@ -50,10 +50,10 @@ Environment variables are used for configuration:
 - `GCP_PROJECT`: Google Cloud Project ID
 - `GCP_REGION`: Google Cloud Region (default: us-central1)
 - `GEMINI_MODELS`: Comma-separated list of Gemini models
-- `IMAGEN_MODELS`: Comma-separated list of Imagen models
-- `IMAGE_DIR`: Directory to store images
 - `LOG_LEVEL`: Logging level (DEBUG, INFO, WARN, ERROR)
 - `PORT`: Server port (default: 8080)
+
+**Note**: `IMAGEN_MODELS` and `IMAGE_DIR` are no longer needed for the hosts as imagen functionality is now provided by the independent MCP tool.
 
 ## Testing
 
