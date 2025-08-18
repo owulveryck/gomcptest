@@ -1,4 +1,4 @@
-.PHONY: all clean tools servers install
+.PHONY: all clean tools servers install run
 
 # Build everything
 all: tools servers
@@ -7,7 +7,7 @@ all: tools servers
 BIN_DIR := bin
 
 # Tools to build
-TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash
+TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash imagen
 
 # Servers to build
 SERVERS := cliGCP openaiserver
@@ -61,6 +61,25 @@ $(BIN_DIR)/dispatch_agent: tools/dispatch_agent/cmd/main.go
 
 $(BIN_DIR)/Bash: tools/Bash/cmd/main.go
 	go build -o $(BIN_DIR)/Bash ./tools/Bash/cmd
+
+$(BIN_DIR)/imagen: tools/imagen/cmd/main.go
+	go build -o $(BIN_DIR)/imagen ./tools/imagen/cmd
+
+# Build and run a specific tool
+# Usage: make run TOOL=Bash
+run:
+	@if [ -z "$(TOOL)" ]; then \
+		echo "Please specify a tool with TOOL=<tool_name>"; \
+		echo "Available tools: $(TOOLS)"; \
+		exit 1; \
+	fi
+	@if [ ! -d "tools/$(TOOL)" ]; then \
+		echo "Tool $(TOOL) not found"; \
+		echo "Available tools: $(TOOLS)"; \
+		exit 1; \
+	fi
+	@echo "Running $(TOOL)..."
+	@cd tools/$(TOOL)/cmd && go run main.go
 
 # Server binaries
 $(BIN_DIR)/cliGCP: host/cliGCP/cmd/main.go
