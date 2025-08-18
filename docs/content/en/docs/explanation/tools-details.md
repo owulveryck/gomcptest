@@ -57,6 +57,14 @@ The tools in gomcptest can be categorized into several functional groups:
 - **Bash**: Executes shell commands, allowing the model to run commands, scripts, and programs
 - **dispatch_agent**: A meta-tool that can create specialized sub-agents for specific tasks
 
+### AI/ML Services
+
+- **imagen**: Generates and manipulates images using Google's Imagen API, enabling visual content creation
+
+### Data Processing
+
+- **duckdbserver**: Provides SQL-based data processing capabilities using DuckDB, enabling complex data analysis and transformations
+
 ## Design Principles
 
 The tools in gomcptest were designed with several key principles in mind:

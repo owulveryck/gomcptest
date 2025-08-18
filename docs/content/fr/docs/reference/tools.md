@@ -140,6 +140,38 @@ Launches a new agent with access to specific tools.
 
 The result of the agent's task execution.
 
+## imagen
+
+Génère et manipule des images en utilisant l'API Google Imagen.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prompt` | string | Yes | Description de l'image à générer |
+| `aspectRatio` | string | No | Ratio d'aspect pour l'image (par défaut: "1:1") |
+| `safetyFilterLevel` | string | No | Niveau de filtre de sécurité (par défaut: "block_some") |
+| `personGeneration` | string | No | Politique de génération de personnes (par défaut: "dont_allow") |
+
+### Response
+
+Retourne un objet JSON avec le chemin de l'image générée et les métadonnées.
+
+## duckdbserver
+
+Fournit des capacités de traitement de données en utilisant DuckDB.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | Requête SQL à exécuter |
+| `database` | string | No | Chemin du fichier de base de données (par défaut: en mémoire) |
+
+### Response
+
+Résultats de la requête au format JSON.
+
 ## Tool Response Format
 
 Most tools return JSON responses with the following structure:
