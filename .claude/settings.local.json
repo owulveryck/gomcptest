@@ -8,7 +8,14 @@
       "Bash(find:*)",
       "Bash(go build:*)",
       "Bash(go doc:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(rm:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:github-production-user-asset-6210df.s3.amazonaws.com)",
+      "Bash(dot:*)",
+      "Bash(/opt/homebrew/bin/dot -Tsvg diagram.gv -o diagram.svg)",
+      "Bash(goimports:*)"
     ],
     "deny": []
   }
