@@ -25,7 +25,7 @@ The tools use the default GCP login credentials configured by `gcloud auth login
 
 ## Project Structure
 
-![diagram](https://github.com/user-attachments/assets/8a4aa410-cbf5-4a33-be04-7cc39a736953)
+![Architecture Diagram](doc/diagram.svg)
 
 -   **`host/openaiserver`**: Implements a custom host that mimics the OpenAI API, using Google Gemini and function calling. This is the core of the POC.
 -   **`tools`**: Contains various MCP-compatible tools that can be used with the host:

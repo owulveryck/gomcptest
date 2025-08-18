@@ -45,12 +45,36 @@ digraph chat_architecture {
     subgraph cluster_environment {
         label = "ENVIRONMENT";
         style = "dashed";
-        mcp_server [label="MCP\nSERVER\n(servers/logs/main.go)", shape=hexagon, fillcolor=lightyellow, tooltip="Executes actions and reads resources"];
-         subgraph cluster_samplehttpserver {
-            label = "samplehttpserver";
+        mcp_server [label="MCP\nSERVER", shape=hexagon, fillcolor=lightyellow, tooltip="Executes actions and reads resources"];
+        
+        subgraph cluster_filesystem_tools {
+            label = "Filesystem Tools";
             style = "dashed";
-            samplehttpserver [label="HTTP Server\n(examples/samplehttpserver/main.go)", shape=component, fillcolor=lightgrey, tooltip="Generates sample HTTP logs"];
-            access_log [label="access.log\n(examples/samplehttpserver/access.log)", shape=cylinder, fillcolor=lightgrey, tooltip="Example log file"];
+            ls_tool [label="LS\n(tools/LS)", shape=component, fillcolor=lightcoral, tooltip="List directories"];
+            view_tool [label="View\n(tools/View)", shape=component, fillcolor=lightcoral, tooltip="Read files"];
+            edit_tool [label="Edit\n(tools/Edit)", shape=component, fillcolor=lightcoral, tooltip="Edit files"];
+            replace_tool [label="Replace\n(tools/Replace)", shape=component, fillcolor=lightcoral, tooltip="Replace file contents"];
+            glob_tool [label="GlobTool\n(tools/GlobTool)", shape=component, fillcolor=lightcoral, tooltip="Find files by pattern"];
+            grep_tool [label="GrepTool\n(tools/GrepTool)", shape=component, fillcolor=lightcoral, tooltip="Search file contents"];
+        }
+        
+        subgraph cluster_system_tools {
+            label = "System Tools";
+            style = "dashed";
+            bash_tool [label="Bash\n(tools/Bash)", shape=component, fillcolor=orange, tooltip="Execute shell commands"];
+            dispatch_agent [label="dispatch_agent\n(tools/dispatch_agent)", shape=component, fillcolor=orange, tooltip="Create sub-agents"];
+        }
+        
+        subgraph cluster_ai_tools {
+            label = "AI/ML Tools";
+            style = "dashed";
+            imagen_tool [label="imagen\n(tools/imagen)", shape=component, fillcolor=pink, tooltip="Generate images with Google Imagen"];
+        }
+        
+        subgraph cluster_data_tools {
+            label = "Data Tools";
+            style = "dashed";
+            duckdb_tool [label="duckdbserver\n(tools/duckdbserver)", shape=component, fillcolor=lightseagreen, tooltip="SQL data processing"];
         }
     }
 
@@ -71,8 +95,16 @@ digraph chat_architecture {
     chat_handler -> monitoring [label="Collect Metrics", style=dashed];
     chat_handler -> logging [label="Collect Logs", style=dashed];
     
-    mcp_server -> access_log [label="read"];
-    samplehttpserver -> access_log [label="write"];
+    mcp_server -> ls_tool [label="invoke"];
+    mcp_server -> view_tool [label="invoke"];
+    mcp_server -> edit_tool [label="invoke"];
+    mcp_server -> replace_tool [label="invoke"];
+    mcp_server -> glob_tool [label="invoke"];
+    mcp_server -> grep_tool [label="invoke"];
+    mcp_server -> bash_tool [label="invoke"];
+    mcp_server -> dispatch_agent [label="invoke"];
+    mcp_server -> imagen_tool [label="invoke"];
+    mcp_server -> duckdb_tool [label="invoke"];
     
     note [label="Generative\nmodel can\ngenerate\ntext", shape=note, style="filled", fillcolor=white];
     note -> llm [style=invis];
