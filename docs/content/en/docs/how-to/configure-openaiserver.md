@@ -26,9 +26,6 @@ export PORT=8080
 
 # Log level: DEBUG, INFO, WARN, ERROR (default: INFO)
 export LOG_LEVEL=INFO
-
-# Directory to store images (required)
-export IMAGE_DIR=/path/to/image/directory
 ```
 
 ### GCP Configuration
@@ -44,10 +41,9 @@ export GCP_REGION=us-central1
 
 # Comma-separated list of Gemini models (default: gemini-1.5-pro,gemini-2.0-flash)
 export GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash
-
-# Comma-separated list of Imagen models (optional)
-export IMAGEN_MODELS=imagen-3.0-generate-002
 ```
+
+**Note**: `IMAGEN_MODELS` and `IMAGE_DIR` environment variables are no longer needed for the openaiserver. Image generation is now handled by the independent `tools/imagen` MCP server.
 
 ### Setting Up a Production Environment
 
@@ -70,7 +66,6 @@ WorkingDirectory=/path/to/gomcptest/host/openaiserver
 ExecStart=/path/to/gomcptest/host/openaiserver/openaiserver -mcpservers "/path/to/gomcptest/bin/GlobTool;/path/to/gomcptest/bin/GrepTool;/path/to/gomcptest/bin/LS;/path/to/gomcptest/bin/View;/path/to/gomcptest/bin/Bash;/path/to/gomcptest/bin/Replace"
 Environment=PORT=8080
 Environment=LOG_LEVEL=INFO
-Environment=IMAGE_DIR=/path/to/image/directory
 Environment=GCP_PROJECT=your-gcp-project-id
 Environment=GCP_REGION=us-central1
 Environment=GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash
