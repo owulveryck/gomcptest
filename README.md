@@ -37,6 +37,8 @@ The tools use the default GCP login credentials configured by `gcloud auth login
     - **Replace**: Replace entire file contents
     - **View**: View file contents
     - **dispatch_agent**: Specialized agent dispatcher for various automated tasks
+    - **imagen**: Image generation and manipulation using Google Imagen
+    - **duckdbserver**: DuckDB server for data processing
 
 ## Components
 
@@ -52,20 +54,26 @@ The tools use the default GCP login credentials configured by `gcloud auth login
 
 ## Building the Tools
 
-You can build all the tools using the included Makefile:
+You can build all tools and servers using the root Makefile:
 
 ```bash
-# Build all tools
+# Build all tools and servers
 make all
 
-# Or build individual tools
-make Bash
-make Edit
-make GlobTool
-make GrepTool
-make LS
-make Replace
-make View
+# Build only tools
+make tools
+
+# Build only servers
+make servers
+
+# Run a specific tool for testing
+make run TOOL=Bash
+
+# Install binaries to a directory
+make install INSTALL_DIR=/path/to/install
+
+# Clean build artifacts
+make clean
 ```
 
 ## Configuration
@@ -85,7 +93,7 @@ export IMAGE_DIR=/tmp/images
 You can test the CLI (a tool similar to _Claude Code_) from the `bin` directory with:
 
 ```bash
-./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace"
+./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace;./imagen"
 ```
 
 The CLI provides an interactive interface for testing MCP tools with natural language commands, similar to Claude Code.
