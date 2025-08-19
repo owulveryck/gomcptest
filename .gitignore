@@ -6,7 +6,7 @@ host/openaiserver/.envrc
 # Build artifacts and binaries
 dist/
 bin/
-tools/bin
+tools/bin/
 **/cmd/cmd
 tools/wrapper
 tools/logs/logs
@@ -14,6 +14,27 @@ tools/logs/logs
 tools/duckdbserver/duckdbserver
 host/openaiserver/openaiserver
 host/openaiserver/chatengine/testbin/sampleMCP
+host/cliGCP/cmd/cmd
+
+# Root level binaries
+cmd
+openaiserver
+
+# Any executable files without extension in the root
+/*
+!*/
+!.*
+!*.go
+!*.md
+!*.json
+!*.yaml
+!*.yml
+!*.txt
+!*.mod
+!*.sum
+!LICENSE
+!Makefile
+!Dockerfile
 
 # Documentation
 docs/node_modules
