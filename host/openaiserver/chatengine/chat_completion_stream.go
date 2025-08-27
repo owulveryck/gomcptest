@@ -21,7 +21,28 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 	ctx := r.Context()
 	stream, err := o.c.SendStreamingChatRequest(ctx, req)
 	if err != nil {
-		http.Error(w, "Error: cannot stream response "+err.Error(), http.StatusInternalServerError)
+		// Send error as a streaming response chunk
+		errorChunk := ChatCompletionStreamResponse{
+			ID:      "error-" + r.Header.Get("X-Request-ID"),
+			Object:  "chat.completion.chunk",
+			Created: 0,
+			Model:   req.Model,
+			Choices: []ChatCompletionStreamChoice{
+				{
+					Index: 0,
+					Delta: ChatMessage{
+						Role:    "assistant",
+						Content: "I encountered an error while processing your request. Please check the MCP server configuration and try again.\n\nError details: " + err.Error(),
+					},
+					FinishReason: "error",
+				},
+			},
+		}
+
+		jsonBytes, _ := json.Marshal(errorChunk)
+		w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+		w.Write([]byte("data: [DONE]\n\n"))
+		flusher.Flush()
 		return
 	}
 

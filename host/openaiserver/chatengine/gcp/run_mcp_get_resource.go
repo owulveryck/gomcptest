@@ -22,7 +22,7 @@ func (mcpServerTool *MCPServerTool) getResourceTemplate(ctx context.Context, f g
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("error in getting resources, URI is not a proper URI: %w", err),
+				"error": fmt.Sprintf("error in getting resources, URI is not a proper URI: %v", err),
 			},
 		}, nil
 

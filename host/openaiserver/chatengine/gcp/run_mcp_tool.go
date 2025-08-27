@@ -12,7 +12,8 @@ import (
 )
 
 func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.FunctionCall) (*genai.FunctionResponse, error) {
-	_, _, fnName, _ := extractParts(f.Name, serverPrefix)
+	serverNumber, _, fnName, _ := extractParts(f.Name, serverPrefix)
+	serverName := fmt.Sprintf("%s%d", serverPrefix, serverNumber)
 	request := mcp.CallToolRequest{}
 	request.Params.Name = fnName
 	args := make(map[string]interface{})
@@ -27,7 +28,12 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+				"error":         true,
+				"error_type":    "mcp_call_failed",
+				"error_message": fmt.Sprintf("Failed to call MCP tool '%s': %v", fnName, err),
+				"tool_name":     fnName,
+				"server_name":   serverName,
+				"suggestion":    "Please check if the MCP server is running and configured correctly, then try again.",
 			},
 		}, nil
 	}
@@ -43,8 +49,13 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 		response["result"+strconv.Itoa(i)] = content
 	}
 	if result.IsError {
-		// in case of error, we process the result anyway
-		// return nil, fmt.Errorf("Error in result: %v", content)
+		// in case of error, we include error information in the response
+		response["error"] = true
+		response["error_type"] = "mcp_tool_error"
+		response["error_message"] = fmt.Sprintf("MCP tool '%s' returned an error: %s", fnName, content)
+		response["tool_name"] = fnName
+		response["server_name"] = serverName
+		response["suggestion"] = "The tool executed but encountered an error. Check the tool parameters and try again."
 	}
 	return &genai.FunctionResponse{
 		Name:     f.Name,
