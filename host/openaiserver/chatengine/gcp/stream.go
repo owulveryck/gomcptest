@@ -97,6 +97,11 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		// Add tools if available
 		if len(chatsession.tools) > 0 {
 			config.Tools = chatsession.tools
+			config.ToolConfig = &genai.ToolConfig{
+				FunctionCallingConfig: &genai.FunctionCallingConfig{
+					Mode: genai.FunctionCallingConfigModeValidated,
+				},
+			}
 		}
 
 		// Process the stream using the new API

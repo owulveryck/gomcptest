@@ -51,6 +51,9 @@ func (chatsession *ChatSession) processChatResponse(ctx context.Context, resp *g
 		finishReason := ""
 		if cand.FinishReason == genai.FinishReasonStop {
 			finishReason = "stop"
+		} else if cand.FinishReason == genai.FinishReasonUnexpectedToolCall {
+			finishReason = "error"
+			out = "The model attempted to call a tool but encountered an error. This may be due to tool configuration issues or malformed tool calls. Please check your request and try again."
 		}
 
 		res.Choices[i] = chatengine.Choice{

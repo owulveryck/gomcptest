@@ -158,6 +158,18 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 	finishReason := ""
 	if cand.FinishReason == genai.FinishReasonStop { // Use constant
 		finishReason = finishReasonStop
+	} else if cand.FinishReason == genai.FinishReasonUnexpectedToolCall {
+		// Handle unexpected tool call error specifically
+		slog.Error("Model returned UNEXPECTED_TOOL_CALL finish reason",
+			"model", s.modelName,
+			"response_id", resp.ResponseID,
+			"model_version", resp.ModelVersion,
+			"candidate_index", cand.Index,
+			"full_response", fmt.Sprintf("%#v", resp))
+
+		errorMsg := s.buildUnexpectedToolCallErrorMessage(resp)
+		err := s.sendChunk(ctx, errorMsg, "error")
+		return err, nil, nil
 	}
 
 	fnResps := make([]*genai.Part, 0)
@@ -260,6 +272,78 @@ func (s *streamProcessor) buildEmptyResponseErrorMessage(resp *genai.GenerateCon
 
 	if len(details) > 0 {
 		return fmt.Sprintf("%s Details: %s", baseMsg, strings.Join(details, ", "))
+	}
+
+	return baseMsg
+}
+
+// buildUnexpectedToolCallErrorMessage creates a detailed error message for UNEXPECTED_TOOL_CALL errors
+func (s *streamProcessor) buildUnexpectedToolCallErrorMessage(resp *genai.GenerateContentResponse) string {
+	baseMsg := "The model attempted to call a tool but encountered an error. This may be due to tool configuration issues or malformed tool calls."
+
+	if resp == nil {
+		return baseMsg + " (Response was nil)"
+	}
+
+	var details []string
+
+	// Add model and response info
+	if s.modelName != "" {
+		details = append(details, fmt.Sprintf("Model: %s", s.modelName))
+	}
+	if resp.ModelVersion != "" {
+		details = append(details, fmt.Sprintf("Model Version: %s", resp.ModelVersion))
+	}
+	if resp.ResponseID != "" {
+		details = append(details, fmt.Sprintf("ResponseID: %s", resp.ResponseID))
+	}
+
+	// Check for prompt feedback (content filtering, safety issues)
+	if resp.PromptFeedback != nil {
+		if resp.PromptFeedback.BlockReasonMessage != "" {
+			details = append(details, fmt.Sprintf("Block reason: %s", resp.PromptFeedback.BlockReasonMessage))
+		} else if resp.PromptFeedback.BlockReason != "" {
+			details = append(details, fmt.Sprintf("Content was blocked (reason code: %s)", resp.PromptFeedback.BlockReason))
+		}
+		if len(resp.PromptFeedback.SafetyRatings) > 0 {
+			details = append(details, "Safety ratings flagged the content")
+		}
+	}
+
+	// Check for candidates and their content
+	if len(resp.Candidates) > 0 {
+		cand := resp.Candidates[0]
+		if cand.Content != nil && len(cand.Content.Parts) > 0 {
+			var toolCallInfo []string
+			for _, part := range cand.Content.Parts {
+				if part.FunctionCall != nil {
+					toolCallInfo = append(toolCallInfo, fmt.Sprintf("Tool: %s", part.FunctionCall.Name))
+				}
+			}
+			if len(toolCallInfo) > 0 {
+				details = append(details, fmt.Sprintf("Attempted tool calls: [%s]", strings.Join(toolCallInfo, ", ")))
+			}
+		}
+	}
+
+	// Add usage metadata if available
+	if resp.UsageMetadata != nil {
+		details = append(details, fmt.Sprintf("Tokens - Prompt: %d, Candidates: %d, Total: %d",
+			resp.UsageMetadata.PromptTokenCount,
+			resp.UsageMetadata.CandidatesTokenCount,
+			resp.UsageMetadata.TotalTokenCount))
+	}
+
+	// Add troubleshooting suggestions
+	suggestions := []string{
+		"Check that all required tool parameters are properly defined",
+		"Verify tool schema compatibility with the model",
+		"Consider simplifying the request or using fewer tools",
+	}
+	details = append(details, fmt.Sprintf("Suggestions: %s", strings.Join(suggestions, "; ")))
+
+	if len(details) > 0 {
+		return fmt.Sprintf("%s\n\nDetails: %s", baseMsg, strings.Join(details, ", "))
 	}
 
 	return baseMsg
@@ -378,6 +462,11 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 		// Add tools if available
 		if len(s.chatsession.tools) > 0 {
 			config.Tools = s.chatsession.tools
+			config.ToolConfig = &genai.ToolConfig{
+				FunctionCallingConfig: &genai.FunctionCallingConfig{
+					Mode: genai.FunctionCallingConfigModeValidated,
+				},
+			}
 		}
 
 		// Continue streaming with function responses
@@ -405,6 +494,11 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 		// Add tools if available
 		if len(s.chatsession.tools) > 0 {
 			config.Tools = s.chatsession.tools
+			config.ToolConfig = &genai.ToolConfig{
+				FunctionCallingConfig: &genai.FunctionCallingConfig{
+					Mode: genai.FunctionCallingConfigModeValidated,
+				},
+			}
 		}
 
 		// Continue streaming with prompt replies

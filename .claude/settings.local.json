@@ -34,7 +34,12 @@
       "Bash(go test:*)",
       "Bash(git log:*)",
       "Bash(go vet:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(go list:*)",
+      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
+      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
+      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
+      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)"
     ],
     "deny": []
   }

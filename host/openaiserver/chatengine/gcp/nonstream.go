@@ -90,6 +90,11 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 	// Add tools if available
 	if len(chatsession.tools) > 0 {
 		config.Tools = chatsession.tools
+		config.ToolConfig = &genai.ToolConfig{
+			FunctionCallingConfig: &genai.FunctionCallingConfig{
+				Mode: genai.FunctionCallingConfigModeValidated,
+			},
+		}
 	}
 
 	// Log the model call details for debugging
