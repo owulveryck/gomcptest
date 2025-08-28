@@ -31,7 +31,8 @@
       "Bash(go test:*)",
       "Bash(git log:*)",
       "Bash(git commit:*)",
-      "Bash(go vet:*)"
+      "Bash(go vet:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
