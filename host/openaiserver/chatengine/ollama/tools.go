@@ -34,11 +34,14 @@ func (engine *Engine) AddMCPTool(mcpClient client.MCPClient) error {
 				Description: tool.Description,
 				Parameters: struct {
 					Type       string   `json:"type"`
+					Defs       any      `json:"$defs,omitempty"`
+					Items      any      `json:"items,omitempty"`
 					Required   []string `json:"required"`
 					Properties map[string]struct {
-						Type        string   `json:"type"`
-						Description string   `json:"description"`
-						Enum        []string `json:"enum,omitempty"`
+						Type        api.PropertyType `json:"type"`
+						Items       any              `json:"items,omitempty"`
+						Description string           `json:"description"`
+						Enum        []any            `json:"enum,omitempty"`
 					} `json:"properties"`
 				}{
 					Type:       tool.InputSchema.Type,
@@ -57,34 +60,33 @@ func (engine *Engine) AddMCPTool(mcpClient client.MCPClient) error {
 // Helper function to convert properties to Ollama's format
 // Thank you https://k33g.hashnode.dev/building-a-generative-ai-mcp-client-application-in-go-using-ollama
 func convertProperties(props map[string]interface{}) map[string]struct {
-	Type        string   `json:"type"`
-	Description string   `json:"description"`
-	Enum        []string `json:"enum,omitempty"`
+	Type        api.PropertyType `json:"type"`
+	Items       any              `json:"items,omitempty"`
+	Description string           `json:"description"`
+	Enum        []any            `json:"enum,omitempty"`
 } {
 	result := make(map[string]struct {
-		Type        string   `json:"type"`
-		Description string   `json:"description"`
-		Enum        []string `json:"enum,omitempty"`
+		Type        api.PropertyType `json:"type"`
+		Items       any              `json:"items,omitempty"`
+		Description string           `json:"description"`
+		Enum        []any            `json:"enum,omitempty"`
 	})
 
 	for name, prop := range props {
 		if propMap, ok := prop.(map[string]interface{}); ok {
 			prop := struct {
-				Type        string   `json:"type"`
-				Description string   `json:"description"`
-				Enum        []string `json:"enum,omitempty"`
+				Type        api.PropertyType `json:"type"`
+				Items       any              `json:"items,omitempty"`
+				Description string           `json:"description"`
+				Enum        []any            `json:"enum,omitempty"`
 			}{
-				Type:        getString(propMap, "type"),
+				Type:        api.PropertyType{getString(propMap, "type")},
 				Description: getString(propMap, "description"),
 			}
 
 			// Handle enum if present
 			if enumRaw, ok := propMap["enum"].([]interface{}); ok {
-				for _, e := range enumRaw {
-					if str, ok := e.(string); ok {
-						prop.Enum = append(prop.Enum, str)
-					}
-				}
+				prop.Enum = enumRaw
 			}
 			result[name] = prop
 		}

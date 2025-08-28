@@ -23,12 +23,28 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		return nil, errors.New("cannot find model")
 	}
 
-	// Prepare content for the new API
+	// Prepare content for the new API and extract system instructions
 	contents := make([]*genai.Content, 0, len(req.Messages))
+	var systemInstruction *genai.Content
+
 	for _, msg := range req.Messages {
+		// Handle system messages separately
+		if msg.Role == "system" {
+			parts, err := toGenaiPart(&msg)
+			if err != nil || parts == nil {
+				return nil, fmt.Errorf("cannot process system message: %w ", err)
+			}
+			if len(parts) > 0 {
+				systemInstruction = &genai.Content{
+					Parts: parts,
+				}
+			}
+			continue
+		}
+
 		role := "user"
 		if msg.Role != "user" {
-			role = "model"
+			role = "assistant"
 		}
 
 		parts, err := toGenaiPart(&msg)
@@ -71,6 +87,11 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{
 			Temperature: &req.Temperature,
+		}
+
+		// Set system instruction if available
+		if systemInstruction != nil {
+			config.SystemInstruction = systemInstruction
 		}
 
 		// Add tools if available

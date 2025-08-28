@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"google.golang.org/genai"
@@ -12,7 +13,17 @@ import (
 )
 
 func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.FunctionCall) (*genai.FunctionResponse, error) {
-	_, _, fnName, _ := extractParts(f.Name, serverPrefix)
+	serverNumber, _, fnName, err := extractParts(f.Name, serverPrefix)
+	if err != nil {
+		slog.Error("error extracting parts from function name", "function_name", f.Name, "error", err.Error())
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"error": fmt.Sprintf("Error parsing function name: %v", err),
+			},
+		}, nil
+	}
+	serverName := fmt.Sprintf("%s%d", serverPrefix, serverNumber)
 	request := mcp.CallToolRequest{}
 	request.Params.Name = fnName
 	args := make(map[string]interface{})
@@ -23,11 +34,18 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 
 	result, err := mcpServerTool.mcpClient.CallTool(ctx, request)
 	if err != nil {
+		slog.Debug("MCP tool execution failed", "tool", fnName, "server", serverName, "error", err)
+		slog.Error("error in calling tool", "tool", fnName, "server", serverName, "error", err.Error())
 		// In case of error, do not return the error, inform the LLM so the agentic system can act accordingly
 		return &genai.FunctionResponse{
 			Name: f.Name,
 			Response: map[string]any{
-				"error": fmt.Sprintf("Error in Calling MCP Tool: %w", err),
+				"error":         true,
+				"error_type":    "mcp_call_failed",
+				"error_message": fmt.Sprintf("Failed to call MCP tool '%s': %v", fnName, err),
+				"tool_name":     fnName,
+				"server_name":   serverName,
+				"suggestion":    "Please check if the MCP server is running and configured correctly, then try again.",
 			},
 		}, nil
 	}
@@ -43,8 +61,16 @@ func (mcpServerTool *MCPServerTool) runTool(ctx context.Context, f genai.Functio
 		response["result"+strconv.Itoa(i)] = content
 	}
 	if result.IsError {
-		// in case of error, we process the result anyway
-		// return nil, fmt.Errorf("Error in result: %v", content)
+		slog.Debug("MCP tool execution completed with error", "tool", fnName, "server", serverName, "error_content", content)
+		// in case of error, we include error information in the response
+		response["error"] = true
+		response["error_type"] = "mcp_tool_error"
+		response["error_message"] = fmt.Sprintf("MCP tool '%s' returned an error: %s", fnName, content)
+		response["tool_name"] = fnName
+		response["server_name"] = serverName
+		response["suggestion"] = "The tool executed but encountered an error. Check the tool parameters and try again."
+	} else {
+		slog.Debug("MCP tool execution completed successfully", "tool", fnName, "server", serverName, "response", response)
 	}
 	return &genai.FunctionResponse{
 		Name:     f.Name,

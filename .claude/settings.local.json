@@ -18,7 +18,23 @@
       "Bash(goimports:*)",
       "Bash(git stash:*)",
       "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(mkdir:*)",
+      "Bash(./bin/imagen_edit:*)",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(kill:*)",
+      "Bash(cp:*)",
+      "Bash(bash:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(GCP_PROJECT=test timeout 10 bash -c 'echo \"\"{\\\"\"jsonrpc\\\"\":\\\"\"2.0\\\"\",\\\"\"id\\\"\":1,\\\"\"method\\\"\":\\\"\"initialize\\\"\",\\\"\"params\\\"\":{\\\"\"protocolVersion\\\"\":\\\"\"2024-11-05\\\"\",\\\"\"clientInfo\\\"\":{\\\"\"name\\\"\":\\\"\"test\\\"\",\\\"\"version\\\"\":\\\"\"1.0\\\"\"},\\\"\"capabilities\\\"\":{}}}\"\" | ./bin/imagen_edit_test > debug.log 2>&1 & sleep 5; curl -s http://localhost:8081/health 2>&1 || echo \"\"Connection failed\"\"; pkill -f imagen_edit_test')",
+      "Bash(GCP_PROJECT=test timeout 30 bash -c 'echo \"\"{\\\"\"jsonrpc\\\"\":\\\"\"2.0\\\"\",\\\"\"id\\\"\":1,\\\"\"method\\\"\":\\\"\"initialize\\\"\",\\\"\"params\\\"\":{\\\"\"protocolVersion\\\"\":\\\"\"2024-11-05\\\"\",\\\"\"clientInfo\\\"\":{\\\"\"name\\\"\":\\\"\"test\\\"\",\\\"\"version\\\"\":\\\"\"1.0\\\"\"},\\\"\"capabilities\\\"\":{}}}\"\" | ./bin/imagen_edit_test > config_test.log 2>&1 & sleep 5; curl -s http://localhost:8081/health 2>&1; sleep 1; curl -s http://localhost:8081/ | head -5; pkill -f imagen_edit_test')",
+      "Bash(go test:*)",
+      "Bash(git log:*)",
+      "Bash(go vet:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

@@ -19,6 +19,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/owulveryck/gomcptest/tools/imagen/prompt"
 	"google.golang.org/genai"
 )
 
@@ -47,6 +48,7 @@ type ImagenClient struct {
 // Global configuration for the web server
 var globalConfig Configuration
 var serverStartOnce sync.Once
+var promptService *prompt.PromptService
 
 func main() {
 	// Load configuration early to start web server
@@ -56,6 +58,9 @@ func main() {
 		return
 	}
 	globalConfig = config
+
+	// Initialize prompt service
+	promptService = prompt.NewPromptService()
 
 	// Start web server in background
 	startWebServer()
@@ -70,6 +75,13 @@ func main() {
 	addImagenGenerateStandardTool(s)
 	addImagenGenerateUltraTool(s)
 	addImagenGenerateFastTool(s)
+
+	// Add prompt service tools
+	addPromptAnalyzeTool(s)
+	addPromptEnhanceTool(s)
+	addPromptOptimizeTool(s)
+	addPromptValidateTool(s)
+	addPromptStyleTemplatesTool(s)
 
 	// Start the stdio server
 	if err := server.ServeStdio(s); err != nil {
@@ -375,6 +387,10 @@ func generateImages(ctx context.Context, request mcp.CallToolRequest, model stri
 		return nil, errors.New("prompt is too long (max ~480 tokens/1920 characters)")
 	}
 
+	// Optimize prompt for the specific model
+	optimizedPrompt := promptService.OptimizeForModel(prompt, model)
+	slog.Info("Prompt optimization", "original", prompt, "optimized", optimizedPrompt, "model", model)
+
 	// Load configuration
 	config, err := loadConfiguration()
 	if err != nil {
@@ -412,14 +428,14 @@ func generateImages(ctx context.Context, request mcp.CallToolRequest, model stri
 		return nil, fmt.Errorf("failed to create Imagen client: %v", err)
 	}
 
-	// Generate images
-	response, err := client.generateImages(ctx, model, prompt, numberOfImages, aspectRatio, sampleImageSize, personGeneration)
+	// Generate images using optimized prompt
+	response, err := client.generateImages(ctx, model, optimizedPrompt, numberOfImages, aspectRatio, sampleImageSize, personGeneration)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate images: %v", err)
 	}
 
-	// Save images and prepare result with URLs
-	result, err := processImageResponse(response, config, prompt, model)
+	// Save images and prepare result with URLs (show both original and optimized prompts)
+	result, err := processImageResponse(response, config, optimizedPrompt, model)
 	if err != nil {
 		return nil, fmt.Errorf("failed to process images: %v", err)
 	}
@@ -581,4 +597,421 @@ func getModelShortName(model string) string {
 	default:
 		return "unknown"
 	}
+}
+
+// addPromptAnalyzeTool adds the prompt analysis tool
+func addPromptAnalyzeTool(s *server.MCPServer) {
+	tool := mcp.NewTool("prompt_analyze",
+		mcp.WithDescription(`Analyze an image generation prompt and provide optimization suggestions.
+
+CAPABILITIES:
+- Analyzes prompt structure and components
+- Checks for subject, context, style, and quality modifiers
+- Estimates token count (max 480 tokens recommended)
+- Provides improvement suggestions
+- Assigns quality score (0-100)
+
+PARAMETERS:
+- prompt: The text prompt to analyze
+
+ANALYSIS INCLUDES:
+- Token count estimation
+- Component detection (subject, context, style, quality)
+- Optimization suggestions
+- Overall quality score
+
+EXAMPLE:
+{"prompt": "A cat sitting on a chair"}
+
+OUTPUT: Detailed analysis with suggestions for improvement`),
+		mcp.WithString("prompt",
+			mcp.Required(),
+			mcp.Description("Text prompt to analyze"),
+		),
+	)
+
+	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args, ok := request.Params.Arguments.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("arguments must be a map")
+		}
+
+		promptText, ok := args["prompt"].(string)
+		if !ok || promptText == "" {
+			return nil, errors.New("prompt must be a non-empty string")
+		}
+
+		analysis := promptService.AnalyzePrompt(promptText)
+
+		result := fmt.Sprintf(`PROMPT ANALYSIS RESULTS
+
+Prompt: "%s"
+
+METRICS:
+- Token Count: %d/480 (%.1f%%)
+- Quality Score: %d/100
+
+COMPONENTS DETECTED:
+- Subject: %v
+- Context: %v  
+- Style: %v
+- Quality Modifiers: %v
+
+SUGGESTIONS:
+%s
+
+RECOMMENDATION: %s`,
+			promptText,
+			analysis.TokenCount,
+			float64(analysis.TokenCount)/480*100,
+			analysis.Score,
+			analysis.HasSubject,
+			analysis.HasContext,
+			analysis.HasStyle,
+			analysis.HasQualityMods,
+			strings.Join(analysis.Suggestions, "\n- "),
+			getRecommendation(analysis.Score))
+
+		return mcp.NewToolResultText(result), nil
+	})
+}
+
+// addPromptEnhanceTool adds the prompt enhancement tool
+func addPromptEnhanceTool(s *server.MCPServer) {
+	tool := mcp.NewTool("prompt_enhance",
+		mcp.WithDescription(`Enhance a basic prompt with quality modifiers, style templates, and structure improvements.
+
+CAPABILITIES:
+- Applies predefined style templates
+- Adds quality modifiers and keywords
+- Optimizes for specific aspect ratios
+- Structures prompts for better results
+- Maintains original intent while improving quality
+
+PARAMETERS:
+- prompt: Base prompt to enhance (required)
+- style: Style template to apply (optional: photographic, artistic, cinematic, portrait, landscape, abstract)
+- add_quality: Add quality modifiers (default: true)
+- aspect_ratio: Target aspect ratio for optimization (optional: 1:1, 3:4, 4:3, 9:16, 16:9)
+- structure: Apply prompt structuring (default: false)
+
+EXAMPLES:
+- Basic: {"prompt": "A cat", "style": "photographic"}
+- Advanced: {"prompt": "Mountain view", "style": "landscape", "aspect_ratio": "16:9", "add_quality": true}
+
+OUTPUT: Enhanced prompt optimized for image generation`),
+		mcp.WithString("prompt",
+			mcp.Required(),
+			mcp.Description("Base prompt to enhance"),
+		),
+		mcp.WithString("style",
+			mcp.Description("Style template: photographic, artistic, cinematic, portrait, landscape, abstract"),
+		),
+		mcp.WithBoolean("add_quality",
+			mcp.Description("Add quality modifiers (default: true)"),
+		),
+		mcp.WithString("aspect_ratio",
+			mcp.Description("Target aspect ratio: 1:1, 3:4, 4:3, 9:16, 16:9"),
+		),
+		mcp.WithBoolean("structure",
+			mcp.Description("Apply prompt structuring (default: false)"),
+		),
+	)
+
+	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args, ok := request.Params.Arguments.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("arguments must be a map")
+		}
+
+		promptText, ok := args["prompt"].(string)
+		if !ok || promptText == "" {
+			return nil, errors.New("prompt must be a non-empty string")
+		}
+
+		options := prompt.EnhancementOptions{
+			AddQualityModifiers: getBoolParam(args, "add_quality", true),
+			StructurePrompt:     getBoolParam(args, "structure", false),
+			TargetStyle:         getStringParam(args, "style", ""),
+			TargetAspectRatio:   getStringParam(args, "aspect_ratio", ""),
+		}
+
+		enhanced := promptService.EnhancePrompt(promptText, options)
+
+		result := fmt.Sprintf(`PROMPT ENHANCEMENT RESULTS
+
+Original: "%s"
+
+Enhanced: "%s"
+
+ENHANCEMENTS APPLIED:
+- Style Template: %s
+- Quality Modifiers: %v
+- Aspect Ratio Optimization: %s
+- Structured: %v
+
+IMPROVEMENT: Enhanced prompt follows best practices for image generation.`,
+			promptText,
+			enhanced,
+			options.TargetStyle,
+			options.AddQualityModifiers,
+			options.TargetAspectRatio,
+			options.StructurePrompt)
+
+		return mcp.NewToolResultText(result), nil
+	})
+}
+
+// addPromptOptimizeTool adds the model-specific optimization tool
+func addPromptOptimizeTool(s *server.MCPServer) {
+	tool := mcp.NewTool("prompt_optimize_for_model",
+		mcp.WithDescription(`Optimize a prompt for specific Imagen model characteristics.
+
+CAPABILITIES:
+- Model-specific optimizations
+- Adjusts detail level for model capabilities
+- Optimizes prompt length and complexity
+- Tailors keywords for best results
+
+SUPPORTED MODELS:
+- imagen-4.0-generate-001 (standard): Balanced optimization
+- imagen-4.0-ultra-generate-001 (ultra): Enhanced detail and quality keywords
+- imagen-4.0-fast-generate-001 (fast): Simplified, concise prompts
+
+PARAMETERS:
+- prompt: Text prompt to optimize (required)
+- model: Target Imagen model (required)
+
+EXAMPLE:
+{"prompt": "Portrait of a person", "model": "imagen-4.0-ultra-generate-001"}
+
+OUTPUT: Model-optimized prompt for best generation results`),
+		mcp.WithString("prompt",
+			mcp.Required(),
+			mcp.Description("Text prompt to optimize"),
+		),
+		mcp.WithString("model",
+			mcp.Required(),
+			mcp.Description("Target model: imagen-4.0-generate-001, imagen-4.0-ultra-generate-001, imagen-4.0-fast-generate-001"),
+		),
+	)
+
+	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args, ok := request.Params.Arguments.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("arguments must be a map")
+		}
+
+		promptText, ok := args["prompt"].(string)
+		if !ok || promptText == "" {
+			return nil, errors.New("prompt must be a non-empty string")
+		}
+
+		modelName, ok := args["model"].(string)
+		if !ok || modelName == "" {
+			return nil, errors.New("model must be specified")
+		}
+
+		// Validate model
+		validModels := []string{ModelStandard, ModelUltra, ModelFast}
+		isValid := false
+		for _, valid := range validModels {
+			if modelName == valid {
+				isValid = true
+				break
+			}
+		}
+		if !isValid {
+			return nil, errors.New("model must be one of: " + strings.Join(validModels, ", "))
+		}
+
+		optimized := promptService.OptimizeForModel(promptText, modelName)
+
+		result := fmt.Sprintf(`MODEL OPTIMIZATION RESULTS
+
+Original: "%s"
+
+Optimized: "%s"
+
+TARGET MODEL: %s
+OPTIMIZATION STRATEGY: %s
+
+CHANGES: The prompt has been optimized for the specific characteristics and capabilities of the %s model.`,
+			promptText,
+			optimized,
+			modelName,
+			getModelStrategy(modelName),
+			getModelShortName(modelName))
+
+		return mcp.NewToolResultText(result), nil
+	})
+}
+
+// addPromptValidateTool adds the prompt validation tool
+func addPromptValidateTool(s *server.MCPServer) {
+	tool := mcp.NewTool("prompt_validate",
+		mcp.WithDescription(`Validate a prompt against best practices and identify potential issues.
+
+CAPABILITIES:
+- Checks prompt length and token count
+- Identifies vague or problematic terms
+- Detects conflicting style instructions
+- Validates against Imagen guidelines
+- Provides specific fix recommendations
+
+VALIDATION CHECKS:
+- Token count limit (480 tokens max)
+- Minimum descriptive length
+- Vague terminology detection
+- Style conflict detection
+- Content policy compliance
+
+PARAMETERS:
+- prompt: Text prompt to validate (required)
+
+EXAMPLE:
+{"prompt": "Nice beautiful picture of something good"}
+
+OUTPUT: List of validation issues and specific recommendations for fixes`),
+		mcp.WithString("prompt",
+			mcp.Required(),
+			mcp.Description("Text prompt to validate"),
+		),
+	)
+
+	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		args, ok := request.Params.Arguments.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("arguments must be a map")
+		}
+
+		promptText, ok := args["prompt"].(string)
+		if !ok || promptText == "" {
+			return nil, errors.New("prompt must be a non-empty string")
+		}
+
+		issues := promptService.ValidatePrompt(promptText)
+
+		result := fmt.Sprintf(`PROMPT VALIDATION RESULTS
+
+Prompt: "%s"
+
+VALIDATION STATUS: %s
+
+ISSUES FOUND:
+%s
+
+RECOMMENDATION: %s`,
+			promptText,
+			getValidationStatus(len(issues)),
+			formatIssues(issues),
+			getValidationRecommendation(len(issues)))
+
+		return mcp.NewToolResultText(result), nil
+	})
+}
+
+// addPromptStyleTemplatesTool adds the style templates listing tool
+func addPromptStyleTemplatesTool(s *server.MCPServer) {
+	tool := mcp.NewTool("prompt_style_templates",
+		mcp.WithDescription(`List available style templates for prompt enhancement.
+
+CAPABILITIES:
+- Shows all predefined style templates
+- Provides template descriptions and keywords
+- Shows example usage for each style
+- Helps choose appropriate style for desired output
+
+AVAILABLE STYLES:
+- photographic: Realistic photographic style
+- artistic: Digital art and concept art style  
+- cinematic: Movie-like cinematic style
+- portrait: Professional portrait photography
+- landscape: Scenic landscape photography
+- abstract: Abstract and geometric art
+
+PARAMETERS: None
+
+OUTPUT: Complete list of style templates with descriptions and usage examples`),
+	)
+
+	s.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		templates := promptService.GetStyleTemplates()
+
+		var result strings.Builder
+		result.WriteString("AVAILABLE STYLE TEMPLATES\n\n")
+
+		for name, template := range templates {
+			result.WriteString(fmt.Sprintf("STYLE: %s\n", strings.ToUpper(name)))
+			result.WriteString(fmt.Sprintf("Description: %s\n", template.Description))
+			result.WriteString(fmt.Sprintf("Template: %s [YOUR_PROMPT] %s\n", template.Prefix, template.Suffix))
+			result.WriteString(fmt.Sprintf("Keywords: %s\n", strings.Join(template.Keywords, ", ")))
+			result.WriteString(fmt.Sprintf("Example: %s a mountain landscape %s\n\n", template.Prefix, template.Suffix))
+		}
+
+		result.WriteString("USAGE: Use the 'prompt_enhance' tool with the 'style' parameter to apply these templates.")
+
+		return mcp.NewToolResultText(result.String()), nil
+	})
+}
+
+// Helper functions for prompt tools
+
+func getBoolParam(args map[string]interface{}, name string, defaultValue bool) bool {
+	if value, ok := args[name].(bool); ok {
+		return value
+	}
+	return defaultValue
+}
+
+func getRecommendation(score int) string {
+	switch {
+	case score >= 80:
+		return "Excellent prompt! Ready for high-quality image generation."
+	case score >= 60:
+		return "Good prompt with room for minor improvements."
+	case score >= 40:
+		return "Decent prompt but could benefit from enhancement."
+	default:
+		return "Prompt needs significant improvement before use."
+	}
+}
+
+func getModelStrategy(model string) string {
+	switch model {
+	case ModelUltra:
+		return "Enhanced detail keywords and quality modifiers for ultra-high quality output"
+	case ModelFast:
+		return "Simplified and concise structure optimized for speed"
+	case ModelStandard:
+		return "Balanced optimization with quality modifiers and clear structure"
+	default:
+		return "Standard optimization approach"
+	}
+}
+
+func getValidationStatus(issueCount int) string {
+	if issueCount == 0 {
+		return "PASSED - No issues found"
+	}
+	return fmt.Sprintf("FAILED - %d issue(s) found", issueCount)
+}
+
+func formatIssues(issues []string) string {
+	if len(issues) == 0 {
+		return "- No issues detected"
+	}
+
+	var formatted strings.Builder
+	for _, issue := range issues {
+		formatted.WriteString(fmt.Sprintf("- %s\n", issue))
+	}
+	return strings.TrimSuffix(formatted.String(), "\n")
+}
+
+func getValidationRecommendation(issueCount int) string {
+	if issueCount == 0 {
+		return "Prompt follows best practices and is ready for image generation."
+	}
+	return "Please address the issues above before generating images for best results."
 }
