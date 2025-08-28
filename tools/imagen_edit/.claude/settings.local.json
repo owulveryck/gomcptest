@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(python3:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(cat:*)",
+      "Bash(./test.sh)",
+      "Bash(echo \"GCP_PROJECT: $GCP_PROJECT\")",
+      "Bash(echo:*)",
+      "Bash(gcloud auth:*)",
+      "Bash(gcloud services list:*)",
+      "Bash(make:*)",
+      "Bash(goimports:*)",
+      "Bash(./test_direct.sh:*)",
+      "Bash(go run:*)",
+      "Bash(mv:*)",
+      "WebFetch(domain:pkg.go.dev)",
+      "WebFetch(domain:cloud.google.com)",
+      "WebFetch(domain:ai.google.dev)"
+    ],
+    "additionalDirectories": [
+      "/Users/olivier.wulveryck/github.com/owulveryck/gomcptest"
+    ]
+  }
+}

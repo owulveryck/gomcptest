@@ -1,0 +1,10 @@
+@startuml
+actor User
+participant "Web Server" as WS
+database "Database" as DB
+
+User -> WS: Request data
+WS -> DB: Query
+DB -> WS: Result
+WS -> User: Response
+// Missing @enduml deliberately to test error detection
