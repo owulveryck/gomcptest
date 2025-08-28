@@ -17,7 +17,8 @@
       "Bash(/opt/homebrew/bin/dot -Tsvg diagram.gv -o diagram.svg)",
       "Bash(goimports:*)",
       "Bash(git stash:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
