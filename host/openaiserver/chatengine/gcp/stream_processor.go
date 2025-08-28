@@ -45,9 +45,9 @@ func formatContentForLogging(contents []*genai.Content) string {
 	for i, content := range contents {
 		var parts []string
 		for _, part := range content.Parts {
-			if part.Text != nil {
+			if part.Text != "" {
 				// Truncate long text for readability
-				text := *part.Text
+				text := part.Text
 				if len(text) > 100 {
 					text = text[:100] + "..."
 				}
@@ -56,12 +56,10 @@ func formatContentForLogging(contents []*genai.Content) string {
 				parts = append(parts, fmt.Sprintf("FunctionCall: %s", part.FunctionCall.Name))
 			} else if part.FunctionResponse != nil {
 				parts = append(parts, fmt.Sprintf("FunctionResponse: %s", part.FunctionResponse.Name))
-			} else if part.Blob != nil {
-				parts = append(parts, fmt.Sprintf("Blob: %s (%d bytes)", part.Blob.MIMEType, len(part.Blob.Data)))
-			} else if part.FileData != nil {
-				parts = append(parts, fmt.Sprintf("FileData: %s", part.FileData.FileURI))
 			} else if part.InlineData != nil {
 				parts = append(parts, fmt.Sprintf("InlineData: %s (%d bytes)", part.InlineData.MIMEType, len(part.InlineData.Data)))
+			} else if part.FileData != nil {
+				parts = append(parts, fmt.Sprintf("FileData: %s", part.FileData.FileURI))
 			} else {
 				parts = append(parts, "Unknown part type")
 			}
@@ -110,8 +108,8 @@ func formatConfigForLogging(config *genai.GenerateContentConfig) string {
 	}
 	if config.SystemInstruction != nil {
 		// Get a brief representation of system instruction
-		if len(config.SystemInstruction.Parts) > 0 && config.SystemInstruction.Parts[0].Text != nil {
-			text := *config.SystemInstruction.Parts[0].Text
+		if len(config.SystemInstruction.Parts) > 0 && config.SystemInstruction.Parts[0].Text != "" {
+			text := config.SystemInstruction.Parts[0].Text
 			if len(text) > 50 {
 				text = text[:50] + "..."
 			}

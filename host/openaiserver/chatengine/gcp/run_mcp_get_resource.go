@@ -31,6 +31,7 @@ func (mcpServerTool *MCPServerTool) getResourceTemplate(ctx context.Context, f g
 
 	result, err := mcpServerTool.mcpClient.ReadResource(ctx, request)
 	if err != nil {
+		slog.Debug("MCP resource template execution failed", "uri", sanitizedURI, "error", err)
 		slog.Error("error in calling resource", "client error", err.Error())
 		return &genai.FunctionResponse{
 			Name: f.Name,
@@ -39,13 +40,24 @@ func (mcpServerTool *MCPServerTool) getResourceTemplate(ctx context.Context, f g
 			},
 		}, nil
 	}
-	b, _ := json.Marshal(result.Contents)
+	b, err := json.Marshal(result.Contents)
+	if err != nil {
+		slog.Error("error marshaling resource contents", "error", err.Error())
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"error": fmt.Sprintf("Error marshaling resource contents: %v", err),
+			},
+		}, nil
+	}
+	response := map[string]any{
+		"output": string(b),
+	}
+	slog.Debug("MCP resource template execution completed successfully", "uri", sanitizedURI, "response_size", len(b))
 
 	return &genai.FunctionResponse{
-		Name: f.Name,
-		Response: map[string]any{
-			"output": string(b),
-		},
+		Name:     f.Name,
+		Response: response,
 	}, nil
 }
 
@@ -69,6 +81,7 @@ func (mcpServerTool *MCPServerTool) getResource(ctx context.Context, f genai.Fun
 
 	result, err := mcpServerTool.mcpClient.ReadResource(ctx, request)
 	if err != nil {
+		slog.Debug("MCP resource execution failed", "uri", sanitizedURI, "error", err)
 		slog.Error("error in calling resource", "client error", err.Error())
 		return &genai.FunctionResponse{
 			Name: f.Name,
@@ -77,12 +90,23 @@ func (mcpServerTool *MCPServerTool) getResource(ctx context.Context, f genai.Fun
 			},
 		}, nil
 	}
-	b, _ := json.Marshal(result.Contents)
+	b, err := json.Marshal(result.Contents)
+	if err != nil {
+		slog.Error("error marshaling resource contents", "error", err.Error())
+		return &genai.FunctionResponse{
+			Name: f.Name,
+			Response: map[string]any{
+				"error": fmt.Sprintf("Error marshaling resource contents: %v", err),
+			},
+		}, nil
+	}
+	response := map[string]any{
+		"output": string(b),
+	}
+	slog.Debug("MCP resource execution completed successfully", "uri", sanitizedURI, "response_size", len(b))
 
 	return &genai.FunctionResponse{
-		Name: f.Name,
-		Response: map[string]any{
-			"output": string(b),
-		},
+		Name:     f.Name,
+		Response: response,
 	}, nil
 }

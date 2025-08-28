@@ -50,17 +50,61 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 		select {
 		case res, ok := <-stream:
 			if !ok {
-				return // Stream closed, exit loop
+				// Stream closed, send [DONE] before exiting
+				w.Write([]byte("data: [DONE]\n\n"))
+				flusher.Flush()
+				return
 			}
 
-			// Ensure response is valid
+			// Ensure response is valid - if invalid, send error response
 			if res.ID == "" {
+				errorChunk := ChatCompletionStreamResponse{
+					ID:      "error-" + r.Header.Get("X-Request-ID"),
+					Object:  "chat.completion.chunk",
+					Created: 0,
+					Model:   req.Model,
+					Choices: []ChatCompletionStreamChoice{
+						{
+							Index: 0,
+							Delta: ChatMessage{
+								Role:    "assistant",
+								Content: "I encountered an error: invalid response received from the model.",
+							},
+							FinishReason: "error",
+						},
+					},
+				}
+				jsonBytes, _ := json.Marshal(errorChunk)
+				w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+				w.Write([]byte("data: [DONE]\n\n"))
+				flusher.Flush()
 				return
 			}
 
 			jsonBytes, err := json.Marshal(res)
 			if err != nil {
 				log.Println("Error encoding JSON:", err)
+				// Send error response instead of returning silently
+				errorChunk := ChatCompletionStreamResponse{
+					ID:      "error-" + r.Header.Get("X-Request-ID"),
+					Object:  "chat.completion.chunk",
+					Created: 0,
+					Model:   req.Model,
+					Choices: []ChatCompletionStreamChoice{
+						{
+							Index: 0,
+							Delta: ChatMessage{
+								Role:    "assistant",
+								Content: "I encountered an error encoding the response. Please try again.",
+							},
+							FinishReason: "error",
+						},
+					},
+				}
+				jsonBytes, _ := json.Marshal(errorChunk)
+				w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+				w.Write([]byte("data: [DONE]\n\n"))
+				flusher.Flush()
 				return
 			}
 
@@ -69,6 +113,9 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 
 		case <-ctx.Done(): // Stop if client disconnects
 			log.Println("Client disconnected, stopping stream")
+			// Send [DONE] even when client disconnects
+			w.Write([]byte("data: [DONE]\n\n"))
+			flusher.Flush()
 			return
 		}
 	}
