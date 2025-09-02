@@ -732,11 +732,13 @@
             background: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            padding: 16px;
+            padding: 20px;
             animation: slideIn 0.3s ease-out;
             border-left: 4px solid #007AFF;
             position: relative;
-            max-height: 200px;
+            min-width: 450px;
+            max-width: 600px;
+            max-height: 400px;
             overflow-y: auto;
         }
         
@@ -761,16 +763,16 @@
         
         .tool-popup-title {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             color: #333;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .tool-popup-icon {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -782,19 +784,27 @@
             color: #999;
             cursor: pointer;
             padding: 4px;
-            font-size: 18px;
+            font-size: 20px;
             line-height: 1;
             transition: color 0.2s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
         }
         
         .tool-popup-close:hover {
             color: #333;
+            background: #f3f4f6;
         }
         
         .tool-popup-content {
-            font-size: 13px;
+            font-size: 14px;
             color: #666;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-top: 8px;
         }
         
         .tool-popup-name {
@@ -805,14 +815,17 @@
         
         .tool-popup-args {
             background: #f8f9fa;
-            border-radius: 6px;
-            padding: 8px;
-            margin-top: 8px;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            font-size: 12px;
+            font-size: 13px;
             color: #444;
             white-space: pre-wrap;
             word-break: break-word;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
         }
         
         .tool-popup-response {
@@ -837,8 +850,8 @@
         }
         
         .tool-popup-spinner {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             border: 2px solid #e0e0e0;
             border-top-color: #007AFF;
             border-radius: 50%;
@@ -1527,7 +1540,7 @@
                     <div class="tool-popup-header">
                         <div class="tool-popup-title">
                             <div class="tool-popup-icon">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <path d="M12 6v6l4 2"></path>
                                 </svg>
@@ -1538,9 +1551,9 @@
                     </div>
                     <div class="tool-popup-content">
                         <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
-                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
                             <div class="tool-popup-spinner"></div>
-                            <span style="font-size: 12px; color: #666;">Executing...</span>
+                            <span style="font-size: 14px; color: #666;">Executing...</span>
                         </div>
                     </div>
                 `;
@@ -1561,12 +1574,12 @@
                         if (content) {
                             content.innerHTML = `
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <line x1="12" y1="8" x2="12" y2="12"></line>
                                         <line x1="12" y1="16" x2="12" y2="16"></line>
                                     </svg>
-                                    <span style="font-size: 13px; color: #FFA500; font-weight: 500;">
+                                    <span style="font-size: 14px; color: #FFA500; font-weight: 500;">
                                         Tool execution timeout
                                     </span>
                                 </div>
