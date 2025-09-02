@@ -1387,7 +1387,19 @@
                     
                     const messageContent = document.createElement('div');
                     messageContent.className = 'message-content';
-                    messageContent.innerHTML = this.renderMarkdown(msg.content);
+                    
+                    // Show typing indicator if message is being typed
+                    if (msg.isTyping && !msg.content) {
+                        messageContent.innerHTML = `
+                            <div class="typing-dots" style="display: flex; gap: 4px; padding: 10px 0;">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        `;
+                    } else {
+                        messageContent.innerHTML = this.renderMarkdown(msg.content);
+                    }
                     
                     const actions = document.createElement('div');
                     actions.className = 'message-actions';
@@ -1819,11 +1831,10 @@
                 let assistantMessage = '';
                 let messageIndex = null;
                 
-                // Add empty assistant message that we'll update
-                this.messages.push({ role: 'assistant', content: '' });
+                // Add empty assistant message with typing indicator
+                this.messages.push({ role: 'assistant', content: '', isTyping: true });
                 messageIndex = this.messages.length - 1;
                 this.renderMessages();
-                this.typingIndicator.classList.remove('active');
                 
                 try {
                     let isStreaming = true;
@@ -1834,6 +1845,7 @@
                             this.isStreaming = false;
                             this.currentReader = null;
                             this.updateSendButton();
+                            this.messages[messageIndex].isTyping = false;
                             this.updateMessageContent(messageIndex, assistantMessage, false);
                             break;
                         }
@@ -1849,6 +1861,7 @@
                                     this.isStreaming = false;
                                     this.currentReader = null;
                                     this.updateSendButton();
+                                    this.messages[messageIndex].isTyping = false;
                                     this.updateMessageContent(messageIndex, assistantMessage, false);
                                     return;
                                 }
@@ -1869,6 +1882,10 @@
                                         // Handle regular chat completion chunks
                                         const delta = parsed.choices[0].delta;
                                         if (delta && delta.content) {
+                                            // Remove typing indicator on first content
+                                            if (this.messages[messageIndex].isTyping) {
+                                                this.messages[messageIndex].isTyping = false;
+                                            }
                                             assistantMessage += delta.content;
                                             // Update the message in real-time with streaming indicator
                                             this.messages[messageIndex].content = assistantMessage;
