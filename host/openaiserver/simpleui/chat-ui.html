@@ -567,6 +567,18 @@
             display: block;
             margin: 10px 0;
         }
+        
+        /* Object tag styles for SVG display */
+        .message-content object[type="image/svg+xml"] {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
 
         .error-message {
             background: #fef2f2;
@@ -1263,19 +1275,20 @@
                 
                 let html = marked.parse(text || '');
                 
-                // Custom handling for SVG images and inline SVG
-                // Replace markdown image syntax that might contain SVG URLs
-                html = html.replace(/<img([^>]*?)>/g, (match, attrs) => {
-                    // Check if it's an SVG URL
-                    if (attrs.includes('.svg') || attrs.includes('image/svg+xml')) {
-                        // Keep the img tag but ensure it can display SVG
-                        return `<img${attrs} style="max-width: 100%; height: auto;">`;
-                    }
-                    return match;
+                // Handle SVG URLs - convert them to object tags for better compatibility
+                html = html.replace(/<img([^>]*?)src=["']([^"']+\.svg[^"']*)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
+                    // Use object tag for SVG files to ensure they display properly
+                    return `<object type="image/svg+xml" data="${src}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
+                        <img src="${src}" alt="SVG Image" style="max-width: 100%; height: auto;">
+                    </object>`;
                 });
                 
-                // Allow inline SVG by not escaping it
-                // marked already handles this with sanitize: false
+                // Also handle SVG URLs that might be in markdown link format
+                html = html.replace(/!\[([^\]]*)\]\(([^)]+\.svg[^)]*)\)/g, (match, alt, src) => {
+                    return `<object type="image/svg+xml" data="${src}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
+                        <img src="${src}" alt="${alt}" style="max-width: 100%; height: auto;">
+                    </object>`;
+                });
                 
                 return html;
             }
@@ -1290,13 +1303,21 @@
                     const altText = String(text || '');
                     const titleText = String(title || '');
                     
-                    // Check if it's an SVG or image generation URL
-                    if (url && (url.includes('.svg') || 
-                                url.includes('wardley_map') || 
+                    // Check if it's an SVG URL
+                    if (url && (url.includes('.svg') || url.endsWith('.svg'))) {
+                        // Use object tag for better SVG compatibility
+                        return `<object type="image/svg+xml" data="${url}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
+                            <img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto;">
+                        </object>`;
+                    }
+                    
+                    // Check if it's another type of image generation URL
+                    if (url && (url.includes('wardley_map') || 
                                 url.includes('localhost:8585') ||
                                 url.includes('image/svg'))) {
                         return `<img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">`;
                     }
+                    
                     // Default image rendering
                     return `<img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto;">`;
                 };
@@ -1501,12 +1522,11 @@
                                     <path d="M12 6v6l4 2"></path>
                                 </svg>
                             </div>
-                            Tool Call
+                            Tool Call: ${event.tool_call.name}
                         </div>
                         <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
                     </div>
                     <div class="tool-popup-content">
-                        <div class="tool-popup-name">${event.tool_call.name}</div>
                         <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
                         <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
                             <div class="tool-popup-spinner"></div>
@@ -1522,11 +1542,8 @@
                 // Store reference
                 this.toolPopups.set(popupId, popup);
                 
-                // Auto-close after 30 seconds if no response
-                const timer = setTimeout(() => {
-                    this.closeToolPopup(popupId);
-                }, 30000);
-                this.popupAutoCloseTimers.set(popupId, timer);
+                // Don't auto-close tool call popups - wait for response
+                // We'll close them when we get the response or after a timeout
             }
             
             updateToolResponsePopup(event) {
@@ -1534,84 +1551,31 @@
                 const popup = this.toolPopups.get(popupId);
                 
                 if (!popup) {
-                    // If no existing popup, create a new one for the response
-                    this.showToolResponseOnlyPopup(event);
+                    // If no existing popup, don't create a new one
+                    // Tool responses should appear in the chat, not as separate popups
                     return;
                 }
                 
-                // Clear auto-close timer
+                // Clear any existing auto-close timer
                 const timer = this.popupAutoCloseTimers.get(popupId);
                 if (timer) {
                     clearTimeout(timer);
                     this.popupAutoCloseTimers.delete(popupId);
                 }
                 
-                // Update popup class and content
-                const hasError = event.tool_response.error;
-                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
-                
-                // Update content
-                const content = popup.querySelector('.tool-popup-content');
-                let responseHtml = `
-                    <div class="tool-popup-name">${event.tool_response.name}</div>
-                `;
-                
-                if (hasError) {
-                    responseHtml += `<div class="tool-popup-error">Error: ${event.tool_response.error}</div>`;
-                } else {
-                    const responseStr = typeof event.tool_response.response === 'string' 
-                        ? event.tool_response.response 
-                        : JSON.stringify(event.tool_response.response, null, 2);
-                    responseHtml += `<div class="tool-popup-response">${responseStr}</div>`;
-                }
-                
-                content.innerHTML = responseHtml;
-                
-                // Update icon
-                const icon = popup.querySelector('.tool-popup-icon');
-                if (icon) {
-                    if (hasError) {
-                        icon.innerHTML = `
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="15" y1="9" x2="9" y2="15"></line>
-                                <line x1="9" y1="9" x2="15" y2="15"></line>
-                            </svg>
-                        `;
-                    } else {
-                        icon.innerHTML = `
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M9 12l2 2 4-4"></path>
-                            </svg>
-                        `;
-                    }
-                }
-                
-                // Update title
-                const title = popup.querySelector('.tool-popup-title');
-                if (title) {
-                    const titleText = hasError ? 'Tool Error' : 'Tool Response';
-                    title.innerHTML = icon.outerHTML + titleText;
-                }
-                
-                // Auto-close after 10 seconds
-                const newTimer = setTimeout(() => {
+                // Simply close the tool call popup after a brief delay
+                // The response will appear in the chat stream
+                setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 10000);
-                this.popupAutoCloseTimers.set(popupId, newTimer);
-            }
-            
-            showToolResponseOnlyPopup(event) {
-                const popupId = event.tool_response.id || 'response-' + Date.now();
+                }, 1500);  // Close after 1.5 seconds to show completion
+                
+                // Update the popup briefly to show completion
                 const hasError = event.tool_response.error;
-                
-                // Create popup element
-                const popup = document.createElement('div');
                 popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
-                popup.id = `popup-${popupId}`;
                 
-                const iconHtml = hasError ? `
+                // Update content to show completion status
+                const content = popup.querySelector('.tool-popup-content');
+                const icon = hasError ? `
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="15" y1="9" x2="9" y2="15"></line>
@@ -1624,39 +1588,17 @@
                     </svg>
                 `;
                 
-                // Create popup HTML
-                popup.innerHTML = `
-                    <div class="tool-popup-header">
-                        <div class="tool-popup-title">
-                            <div class="tool-popup-icon">${iconHtml}</div>
-                            ${hasError ? 'Tool Error' : 'Tool Response'}
-                        </div>
-                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
-                    </div>
-                    <div class="tool-popup-content">
-                        <div class="tool-popup-name">${event.tool_response.name}</div>
-                        ${hasError 
-                            ? `<div class="tool-popup-error">Error: ${event.tool_response.error}</div>`
-                            : `<div class="tool-popup-response">${typeof event.tool_response.response === 'string' 
-                                ? event.tool_response.response 
-                                : JSON.stringify(event.tool_response.response, null, 2)}</div>`
-                        }
+                content.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="tool-popup-icon">${icon}</div>
+                        <span style="font-size: 13px; color: ${hasError ? '#dc2626' : '#059669'}; font-weight: 500;">
+                            ${hasError ? 'Tool execution failed' : 'Tool executed successfully'}
+                        </span>
                     </div>
                 `;
-                
-                // Add to container
-                const container = document.getElementById('toolPopupContainer');
-                container.appendChild(popup);
-                
-                // Store reference
-                this.toolPopups.set(popupId, popup);
-                
-                // Auto-close after 10 seconds
-                const timer = setTimeout(() => {
-                    this.closeToolPopup(popupId);
-                }, 10000);
-                this.popupAutoCloseTimers.set(popupId, timer);
             }
+            
+            // Removed showToolResponseOnlyPopup - tool responses now appear in chat stream only
             
             closeToolPopup(popupId) {
                 const popup = this.toolPopups.get(popupId);
