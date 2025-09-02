@@ -134,9 +134,14 @@ func main() {
 	slog.SetDefault(logger)
 
 	slog.Info("Starting web server", "port", cfg.Port)
-	http.Handle("/", openAIHandler)
 
-	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil)
+	// Set up routing
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ui", ServeUI)
+	mux.HandleFunc("/ui/", ServeUI)
+	mux.Handle("/", openAIHandler)
+
+	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux)
 	if err != nil {
 		slog.Error("Failed to start web server", "error", err)
 		os.Exit(1)
