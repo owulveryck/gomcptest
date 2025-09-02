@@ -631,32 +631,53 @@
             font-weight: 600;
         }
         
-        /* SVG styles */
+        /* SVG styles - responsive sizing */
         .message-content svg {
-            max-width: 100%;
+            width: 100%;
             height: auto;
+            max-height: 70vh;  /* Limit height to 70% of viewport */
+            object-fit: contain;  /* Maintain aspect ratio */
             display: block;
             margin: 10px 0;
         }
         
         .message-content img[src*=".svg"],
         .message-content img[src*="image/svg"] {
-            max-width: 100%;
+            width: 100%;
             height: auto;
+            max-height: 70vh;  /* Limit height to 70% of viewport */
+            object-fit: contain;  /* Maintain aspect ratio */
             display: block;
             margin: 10px 0;
         }
         
-        /* Object tag styles for SVG display */
+        /* Object tag styles for SVG display - responsive sizing */
         .message-content object[type="image/svg+xml"] {
-            max-width: 100%;
+            width: 100%;
             height: auto;
+            min-height: 400px;  /* Minimum height for visibility */
+            max-height: 70vh;  /* Maximum 70% of viewport height */
             display: block;
             margin: 10px 0;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 10px;
             background: white;
+            overflow: auto;  /* Allow scrolling if needed */
+        }
+        
+        /* For larger screens, allow SVGs to be bigger */
+        @media (min-width: 1200px) {
+            .message-content svg,
+            .message-content img[src*=".svg"],
+            .message-content img[src*="image/svg"],
+            .message-content object[type="image/svg+xml"] {
+                max-height: 80vh;  /* Allow up to 80% viewport height on larger screens */
+            }
+            
+            .message-content object[type="image/svg+xml"] {
+                min-height: 500px;  /* Larger minimum on bigger screens */
+            }
         }
 
         .error-message {
@@ -1418,15 +1439,15 @@
                 // Handle SVG URLs - convert them to object tags for better compatibility
                 html = html.replace(/<img([^>]*?)src=["']([^"']+\.svg[^"']*)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
                     // Use object tag for SVG files to ensure they display properly
-                    return `<object type="image/svg+xml" data="${src}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
-                        <img src="${src}" alt="SVG Image" style="max-width: 100%; height: auto;">
+                    return `<object type="image/svg+xml" data="${src}">
+                        <img src="${src}" alt="SVG Image">
                     </object>`;
                 });
                 
                 // Also handle SVG URLs that might be in markdown link format
                 html = html.replace(/!\[([^\]]*)\]\(([^)]+\.svg[^)]*)\)/g, (match, alt, src) => {
-                    return `<object type="image/svg+xml" data="${src}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
-                        <img src="${src}" alt="${alt}" style="max-width: 100%; height: auto;">
+                    return `<object type="image/svg+xml" data="${src}">
+                        <img src="${src}" alt="${alt}">
                     </object>`;
                 });
                 
@@ -1453,21 +1474,21 @@
                     
                     // Check if it's an SVG URL
                     if (url && (url.includes('.svg') || url.endsWith('.svg'))) {
-                        // Use object tag for better SVG compatibility
-                        return `<object type="image/svg+xml" data="${url}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background: white;">
-                            <img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto;">
+                        // Use object tag for better SVG compatibility - CSS handles styling
+                        return `<object type="image/svg+xml" data="${url}" title="${titleText}">
+                            <img src="${url}" alt="${altText}" title="${titleText}">
                         </object>`;
                     }
                     
-                    // Check if it's another type of image generation URL
+                    // Check if it's another type of image generation URL (also likely SVG)
                     if (url && (url.includes('wardley_map') || 
                                 url.includes('localhost:8585') ||
                                 url.includes('image/svg'))) {
-                        return `<img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">`;
+                        return `<img src="${url}" alt="${altText}" title="${titleText}">`;
                     }
                     
                     // Default image rendering
-                    return `<img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto;">`;
+                    return `<img src="${url}" alt="${altText}" title="${titleText}">`;
                 };
                 
                 return renderer;
