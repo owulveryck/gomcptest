@@ -732,13 +732,13 @@
             background: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            padding: 20px;
+            padding: 24px;
             animation: slideIn 0.3s ease-out;
             border-left: 4px solid #007AFF;
             position: relative;
-            min-width: 450px;
-            max-width: 600px;
-            max-height: 400px;
+            min-width: 600px;
+            max-width: 800px;
+            max-height: 600px;
             overflow-y: auto;
         }
         
@@ -816,14 +816,14 @@
         .tool-popup-args {
             background: #f8f9fa;
             border-radius: 8px;
-            padding: 12px;
+            padding: 14px;
             margin-top: 12px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
             font-size: 13px;
             color: #444;
             white-space: pre-wrap;
             word-break: break-word;
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             border: 1px solid #e5e7eb;
         }
@@ -831,14 +831,14 @@
         .tool-popup-response {
             background: #f0f9ff;
             border-radius: 8px;
-            padding: 12px;
+            padding: 14px;
             margin-top: 12px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
             font-size: 13px;
             color: #444;
             white-space: pre-wrap;
             word-break: break-word;
-            max-height: 250px;
+            max-height: 350px;
             overflow-y: auto;
             border: 1px solid #bfdbfe;
         }
@@ -1579,7 +1579,8 @@
                 // Store reference
                 this.toolPopups.set(popupId, popup);
                 
-                // Auto-close after 5 seconds if no response received
+                // Set a longer timeout (30 seconds) for tools that take a while
+                // This will only trigger if no response is received
                 const timer = setTimeout(() => {
                     // Update popup to show timeout before closing
                     const popup = this.toolPopups.get(popupId);
@@ -1594,7 +1595,7 @@
                                         <line x1="12" y1="16" x2="12" y2="16"></line>
                                     </svg>
                                     <span style="font-size: 14px; color: #FFA500; font-weight: 500;">
-                                        Tool execution timeout
+                                        Tool execution timeout - no response received
                                     </span>
                                 </div>
                             `;
@@ -1602,9 +1603,9 @@
                         // Close after showing timeout message
                         setTimeout(() => {
                             this.closeToolPopup(popupId);
-                        }, 1500);
+                        }, 2000);
                     }
-                }, 5000);
+                }, 30000);
                 this.popupAutoCloseTimers.set(popupId, timer)
             }
             
@@ -1705,10 +1706,10 @@
                 // Update content with both arguments and response
                 content.innerHTML = argsHTML + responseHTML;
                 
-                // Auto-close after 5 seconds to give user time to see the result
+                // Auto-close after 10 seconds to give user time to see the result
                 setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 5000);
+                }, 10000);
             }
             
             // Removed showToolResponseOnlyPopup - tool responses now appear in chat stream only
