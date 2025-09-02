@@ -185,7 +185,7 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 			} else if part.FunctionCall != nil {
 				// Send tool call event to stream
 				toolCallID := generateToolCallID()
-				toolCallEvent := NewToolCallEvent(s.completionID, part.FunctionCall.Name, part.FunctionCall.Args)
+				toolCallEvent := NewToolCallEvent(s.completionID, toolCallID, part.FunctionCall.Name, part.FunctionCall.Args)
 				if err := s.sendToolCallEvent(ctx, toolCallEvent); err != nil {
 					slog.Error("Failed to send tool call event", "error", err)
 				}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 )
 
@@ -39,14 +40,14 @@ type ToolResponseDetails struct {
 }
 
 // NewToolCallEvent creates a new tool call event
-func NewToolCallEvent(completionID string, toolName string, args map[string]interface{}) ToolCallEvent {
+func NewToolCallEvent(completionID string, toolCallID string, toolName string, args map[string]interface{}) ToolCallEvent {
 	return ToolCallEvent{
 		ID:        completionID,
 		Object:    "tool.call",
 		Created:   time.Now().Unix(),
 		EventType: "tool_call",
 		ToolCall: ToolCallDetails{
-			ID:        generateToolCallID(),
+			ID:        toolCallID,
 			Name:      toolName,
 			Arguments: args,
 		},
@@ -74,19 +75,9 @@ func NewToolResponseEvent(completionID string, toolCallID string, toolName strin
 	return event
 }
 
-// generateToolCallID generates a unique ID for a tool call
+// generateToolCallID generates a unique ID for a tool call using UUID
 func generateToolCallID() string {
-	return "call_" + time.Now().Format("20060102150405") + "_" + generateRandomString(8)
-}
-
-// generateRandomString generates a random string of given length
-func generateRandomString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[time.Now().UnixNano()%int64(len(charset))]
-	}
-	return string(b)
+	return "call_" + uuid.New().String()
 }
 
 // ToJSON converts the event to JSON bytes
