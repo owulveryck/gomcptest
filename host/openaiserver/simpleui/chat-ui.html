@@ -1556,15 +1556,18 @@
                                     <path d="M12 6v6l4 2"></path>
                                 </svg>
                             </div>
-                            Tool Call: ${event.tool_call.name}
+                            Tool Executing: ${event.tool_call.name}
                         </div>
                         <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
                     </div>
                     <div class="tool-popup-content">
-                        <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
+                        <div>
+                            <strong style="color: #333; font-size: 13px;">Arguments:</strong>
+                            <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
+                        </div>
                         <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
                             <div class="tool-popup-spinner"></div>
-                            <span style="font-size: 14px; color: #666;">Executing...</span>
+                            <span style="font-size: 14px; color: #666;">Waiting for response...</span>
                         </div>
                     </div>
                 `;
@@ -1647,41 +1650,65 @@
                     }
                 }
                 
-                // Update title text
+                // Update title to show status
                 const titleElement = popup.querySelector('.tool-popup-title');
                 if (titleElement) {
-                    const titleText = titleElement.childNodes[1]; // Text node after icon
-                    if (titleText) {
-                        titleText.textContent = hasError ? ` Tool Failed: ${event.tool_response.name}` : ` Tool Completed: ${event.tool_response.name}`;
-                    }
+                    // Keep the icon and update the text
+                    const iconHTML = iconElement ? iconElement.outerHTML : '';
+                    titleElement.innerHTML = iconHTML + (hasError ? ` Tool Failed: ${event.tool_response.name}` : ` Tool Completed: ${event.tool_response.name}`);
                 }
                 
-                // Update content to show the response
+                // Get existing content div
                 const content = popup.querySelector('.tool-popup-content');
+                
+                // Keep the arguments that were already displayed and add the response
+                const existingArgs = popup.querySelector('.tool-popup-args');
+                let argsHTML = '';
+                if (existingArgs) {
+                    argsHTML = existingArgs.outerHTML;
+                }
+                
+                // Build the complete content with both arguments and response
+                let responseHTML = '';
                 if (hasError) {
-                    content.innerHTML = `
+                    responseHTML = `
                         <div class="tool-popup-error">
                             <strong>Error:</strong> ${event.tool_response.error}
                         </div>
                     `;
                 } else {
                     // Format the response
-                    let responseHTML = '';
                     if (typeof event.tool_response.response === 'string') {
-                        responseHTML = `<div class="tool-popup-response">${event.tool_response.response}</div>`;
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">${event.tool_response.response}</div>
+                            </div>
+                        `;
                     } else if (typeof event.tool_response.response === 'object' && event.tool_response.response !== null) {
-                        responseHTML = `<div class="tool-popup-response"><pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre></div>`;
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response"><pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre></div>
+                            </div>
+                        `;
                     } else {
-                        responseHTML = `<div class="tool-popup-response">Tool executed successfully</div>`;
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">Tool executed successfully</div>
+                            </div>
+                        `;
                     }
-                    
-                    content.innerHTML = responseHTML;
                 }
                 
-                // Auto-close after 3 seconds to give user time to see the result
+                // Update content with both arguments and response
+                content.innerHTML = argsHTML + responseHTML;
+                
+                // Auto-close after 5 seconds to give user time to see the result
                 setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 3000);
+                }, 5000);
             }
             
             // Removed showToolResponseOnlyPopup - tool responses now appear in chat stream only
