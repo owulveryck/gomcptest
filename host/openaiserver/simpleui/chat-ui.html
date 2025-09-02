@@ -1298,15 +1298,23 @@
                 
                 // Custom image renderer to handle SVG URLs properly
                 renderer.image = function(href, title, text) {
-                    // Ensure href is a string
-                    const url = String(href || '');
+                    // The href parameter might be an object, extract the actual href
+                    let url = '';
+                    if (typeof href === 'object' && href !== null && href.href) {
+                        url = String(href.href);
+                    } else if (typeof href === 'string') {
+                        url = href;
+                    } else {
+                        url = String(href || '');
+                    }
+                    
                     const altText = String(text || '');
                     const titleText = String(title || '');
                     
                     // Check if it's an SVG URL
                     if (url && (url.includes('.svg') || url.endsWith('.svg'))) {
                         // Use object tag for better SVG compatibility
-                        return `<object type="image/svg+xml" data="${url}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;">
+                        return `<object type="image/svg+xml" data="${url}" title="${titleText}" style="max-width: 100%; height: auto; display: block; margin: 10px 0; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; background: white;">
                             <img src="${url}" alt="${altText}" title="${titleText}" style="max-width: 100%; height: auto;">
                         </object>`;
                     }
