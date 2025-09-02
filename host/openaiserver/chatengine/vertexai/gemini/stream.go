@@ -11,7 +11,7 @@ import (
 	"google.golang.org/genai"
 )
 
-func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
+func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.StreamEvent, error) {
 	var modelIsPresent bool
 	for _, model := range chatsession.modelNames {
 		if model == req.Model {
@@ -62,7 +62,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	}
 
 	// Create the channel for streaming responses
-	c := make(chan chatengine.ChatCompletionStreamResponse)
+	c := make(chan chatengine.StreamEvent)
 	// Initialize the stream processor
 	sp := newStreamProcessor(c, chatsession, req.Model)
 

@@ -48,7 +48,7 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 
 	for {
 		select {
-		case res, ok := <-stream:
+		case event, ok := <-stream:
 			if !ok {
 				// Stream closed, send [DONE] before exiting
 				w.Write([]byte("data: [DONE]\n\n"))
@@ -56,60 +56,78 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 				return
 			}
 
-			// Ensure response is valid - if invalid, send error response
-			if res.ID == "" {
-				errorChunk := ChatCompletionStreamResponse{
-					ID:      "error-" + r.Header.Get("X-Request-ID"),
-					Object:  "chat.completion.chunk",
-					Created: 0,
-					Model:   req.Model,
-					Choices: []ChatCompletionStreamChoice{
-						{
-							Index: 0,
-							Delta: ChatMessage{
-								Role:    "assistant",
-								Content: "I encountered an error: invalid response received from the model.",
+			// Handle different event types
+			switch res := event.(type) {
+			case ChatCompletionStreamResponse:
+				// Original chat completion chunk handling
+				if res.ID == "" {
+					errorChunk := ChatCompletionStreamResponse{
+						ID:      "error-" + r.Header.Get("X-Request-ID"),
+						Object:  "chat.completion.chunk",
+						Created: 0,
+						Model:   req.Model,
+						Choices: []ChatCompletionStreamChoice{
+							{
+								Index: 0,
+								Delta: ChatMessage{
+									Role:    "assistant",
+									Content: "I encountered an error: invalid response received from the model.",
+								},
+								FinishReason: "error",
 							},
-							FinishReason: "error",
 						},
-					},
+					}
+					jsonBytes, _ := json.Marshal(errorChunk)
+					w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+					w.Write([]byte("data: [DONE]\n\n"))
+					flusher.Flush()
+					return
 				}
-				jsonBytes, _ := json.Marshal(errorChunk)
-				w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
-				w.Write([]byte("data: [DONE]\n\n"))
-				flusher.Flush()
-				return
-			}
 
-			jsonBytes, err := json.Marshal(res)
-			if err != nil {
-				log.Println("Error encoding JSON:", err)
-				// Send error response instead of returning silently
-				errorChunk := ChatCompletionStreamResponse{
-					ID:      "error-" + r.Header.Get("X-Request-ID"),
-					Object:  "chat.completion.chunk",
-					Created: 0,
-					Model:   req.Model,
-					Choices: []ChatCompletionStreamChoice{
-						{
-							Index: 0,
-							Delta: ChatMessage{
-								Role:    "assistant",
-								Content: "I encountered an error encoding the response. Please try again.",
+				jsonBytes, err := json.Marshal(res)
+				if err != nil {
+					log.Println("Error encoding JSON:", err)
+					// Send error response instead of returning silently
+					errorChunk := ChatCompletionStreamResponse{
+						ID:      "error-" + r.Header.Get("X-Request-ID"),
+						Object:  "chat.completion.chunk",
+						Created: 0,
+						Model:   req.Model,
+						Choices: []ChatCompletionStreamChoice{
+							{
+								Index: 0,
+								Delta: ChatMessage{
+									Role:    "assistant",
+									Content: "I encountered an error encoding the response. Please try again.",
+								},
+								FinishReason: "error",
 							},
-							FinishReason: "error",
 						},
-					},
+					}
+					jsonBytes, _ := json.Marshal(errorChunk)
+					w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+					w.Write([]byte("data: [DONE]\n\n"))
+					flusher.Flush()
+					return
 				}
-				jsonBytes, _ := json.Marshal(errorChunk)
-				w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
-				w.Write([]byte("data: [DONE]\n\n"))
-				flusher.Flush()
-				return
-			}
 
-			_, _ = w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
-			flusher.Flush()
+				_, _ = w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+				flusher.Flush()
+
+			default:
+				// For any other event type (tool calls, tool responses, etc.),
+				// only send if withAllEvents flag is true
+				if o.withAllEvents {
+					jsonBytes, err := json.Marshal(event)
+					if err != nil {
+						log.Println("Error encoding event:", err)
+						continue
+					}
+					_, _ = w.Write([]byte("data: " + string(jsonBytes) + "\n\n"))
+					flusher.Flush()
+				}
+				// Otherwise, silently skip non-ChatCompletionStreamResponse events
+			}
 
 		case <-ctx.Done(): // Stop if client disconnects
 			log.Println("Client disconnected, stopping stream")

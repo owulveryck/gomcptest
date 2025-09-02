@@ -31,7 +31,7 @@ func (chatsession *ChatSession) HandleCompletionRequest(_ context.Context, _ cha
 	panic("not implemented") // TODO: Implement
 }
 
-func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
+func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.StreamEvent, error) {
 	var modelIsPresent bool
 	var model string
 	for _, model = range chatsession.modelNames {
@@ -79,7 +79,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	})
 
 	// Create the channel for streaming responses
-	c := make(chan chatengine.ChatCompletionStreamResponse)
+	c := make(chan chatengine.StreamEvent)
 	// Initialize the stream processor
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation

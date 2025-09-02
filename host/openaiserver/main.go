@@ -16,7 +16,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/claude"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini"
 )
 
 // Config holds the configuration parameters.
@@ -98,6 +98,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
+	withAllEvents := flag.Bool("withAllEvents", false, "Include all events (tool calls, tool responses) in stream output, not just content chunks")
 	flag.Parse()
 
 	gcpconfig, err := loadGCPConfig()
@@ -107,8 +108,8 @@ func main() {
 	}
 
 	ctx := context.Background()
-	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gemini.NewChatSession(ctx, gcpconfig))
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(claude.NewChatSession(ctx, gcpconfig))
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandlerWithOptions(gemini.NewChatSession(ctx, gcpconfig), *withAllEvents)
+	// openAIHandler := chatengine.NewOpenAIV1WithToolHandlerWithOptions(claude.NewChatSession(ctx, gcpconfig), *withAllEvents)
 
 	servers := extractServers(*mcpServers)
 	for i := range servers {

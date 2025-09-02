@@ -703,10 +703,174 @@
         .message-content.streaming {
             position: relative;
         }
+        
+        /* Tool Event Popup Styles */
+        .tool-popup-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .tool-popup {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #007AFF;
+            position: relative;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .tool-popup.tool-call {
+            border-left-color: #007AFF;
+        }
+        
+        .tool-popup.tool-response {
+            border-left-color: #34C759;
+        }
+        
+        .tool-popup.tool-error {
+            border-left-color: #FF3B30;
+        }
+        
+        .tool-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .tool-popup-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tool-popup-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-popup-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        
+        .tool-popup-close:hover {
+            color: #333;
+        }
+        
+        .tool-popup-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .tool-popup-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .tool-popup-args {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 12px;
+            color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .tool-popup-response {
+            background: #f0f9ff;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 12px;
+            color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .tool-popup-error {
+            background: #fef2f2;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #dc2626;
+        }
+        
+        .tool-popup-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .tool-popup.fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+    <!-- Tool Event Popup Container -->
+    <div class="tool-popup-container" id="toolPopupContainer"></div>
+    
     <!-- Side Menu -->
     <div class="side-menu" id="sideMenu">
         <div class="side-menu-header">
@@ -789,6 +953,8 @@
                 this.selectedModel = null;
                 this.currentReader = null;  // Store the current stream reader
                 this.isStreaming = false;   // Track streaming state
+                this.toolPopups = new Map();  // Store active tool popups
+                this.popupAutoCloseTimers = new Map();  // Store auto-close timers
                 
                 // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
@@ -1316,6 +1482,209 @@
                 }
             }
             
+            // Tool popup management methods
+            showToolCallPopup(event) {
+                const popupId = event.tool_call.id;
+                
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.className = 'tool-popup tool-call';
+                popup.id = `popup-${popupId}`;
+                
+                // Create popup HTML
+                popup.innerHTML = `
+                    <div class="tool-popup-header">
+                        <div class="tool-popup-title">
+                            <div class="tool-popup-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                            </div>
+                            Tool Call
+                        </div>
+                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+                    </div>
+                    <div class="tool-popup-content">
+                        <div class="tool-popup-name">${event.tool_call.name}</div>
+                        <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="tool-popup-spinner"></div>
+                            <span style="font-size: 12px; color: #666;">Executing...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add to container
+                const container = document.getElementById('toolPopupContainer');
+                container.appendChild(popup);
+                
+                // Store reference
+                this.toolPopups.set(popupId, popup);
+                
+                // Auto-close after 30 seconds if no response
+                const timer = setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 30000);
+                this.popupAutoCloseTimers.set(popupId, timer);
+            }
+            
+            updateToolResponsePopup(event) {
+                const popupId = event.tool_response.id;
+                const popup = this.toolPopups.get(popupId);
+                
+                if (!popup) {
+                    // If no existing popup, create a new one for the response
+                    this.showToolResponseOnlyPopup(event);
+                    return;
+                }
+                
+                // Clear auto-close timer
+                const timer = this.popupAutoCloseTimers.get(popupId);
+                if (timer) {
+                    clearTimeout(timer);
+                    this.popupAutoCloseTimers.delete(popupId);
+                }
+                
+                // Update popup class and content
+                const hasError = event.tool_response.error;
+                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+                
+                // Update content
+                const content = popup.querySelector('.tool-popup-content');
+                let responseHtml = `
+                    <div class="tool-popup-name">${event.tool_response.name}</div>
+                `;
+                
+                if (hasError) {
+                    responseHtml += `<div class="tool-popup-error">Error: ${event.tool_response.error}</div>`;
+                } else {
+                    const responseStr = typeof event.tool_response.response === 'string' 
+                        ? event.tool_response.response 
+                        : JSON.stringify(event.tool_response.response, null, 2);
+                    responseHtml += `<div class="tool-popup-response">${responseStr}</div>`;
+                }
+                
+                content.innerHTML = responseHtml;
+                
+                // Update icon
+                const icon = popup.querySelector('.tool-popup-icon');
+                if (icon) {
+                    if (hasError) {
+                        icon.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        `;
+                    } else {
+                        icon.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                        `;
+                    }
+                }
+                
+                // Update title
+                const title = popup.querySelector('.tool-popup-title');
+                if (title) {
+                    const titleText = hasError ? 'Tool Error' : 'Tool Response';
+                    title.innerHTML = icon.outerHTML + titleText;
+                }
+                
+                // Auto-close after 10 seconds
+                const newTimer = setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 10000);
+                this.popupAutoCloseTimers.set(popupId, newTimer);
+            }
+            
+            showToolResponseOnlyPopup(event) {
+                const popupId = event.tool_response.id || 'response-' + Date.now();
+                const hasError = event.tool_response.error;
+                
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+                popup.id = `popup-${popupId}`;
+                
+                const iconHtml = hasError ? `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                ` : `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                `;
+                
+                // Create popup HTML
+                popup.innerHTML = `
+                    <div class="tool-popup-header">
+                        <div class="tool-popup-title">
+                            <div class="tool-popup-icon">${iconHtml}</div>
+                            ${hasError ? 'Tool Error' : 'Tool Response'}
+                        </div>
+                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+                    </div>
+                    <div class="tool-popup-content">
+                        <div class="tool-popup-name">${event.tool_response.name}</div>
+                        ${hasError 
+                            ? `<div class="tool-popup-error">Error: ${event.tool_response.error}</div>`
+                            : `<div class="tool-popup-response">${typeof event.tool_response.response === 'string' 
+                                ? event.tool_response.response 
+                                : JSON.stringify(event.tool_response.response, null, 2)}</div>`
+                        }
+                    </div>
+                `;
+                
+                // Add to container
+                const container = document.getElementById('toolPopupContainer');
+                container.appendChild(popup);
+                
+                // Store reference
+                this.toolPopups.set(popupId, popup);
+                
+                // Auto-close after 10 seconds
+                const timer = setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 10000);
+                this.popupAutoCloseTimers.set(popupId, timer);
+            }
+            
+            closeToolPopup(popupId) {
+                const popup = this.toolPopups.get(popupId);
+                if (popup) {
+                    // Clear timer if exists
+                    const timer = this.popupAutoCloseTimers.get(popupId);
+                    if (timer) {
+                        clearTimeout(timer);
+                        this.popupAutoCloseTimers.delete(popupId);
+                    }
+                    
+                    // Add fade-out animation
+                    popup.classList.add('fade-out');
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        popup.remove();
+                        this.toolPopups.delete(popupId);
+                    }, 300);
+                }
+            }
+            
+            closeAllToolPopups() {
+                for (const popupId of this.toolPopups.keys()) {
+                    this.closeToolPopup(popupId);
+                }
+            }
+            
             async handleStreamingResponse(response) {
                 const reader = response.body.getReader();
                 this.currentReader = reader;  // Store the reader so we can cancel it
@@ -1359,7 +1728,16 @@
                                 
                                 try {
                                     const parsed = JSON.parse(data);
-                                    if (parsed.choices && parsed.choices[0]) {
+                                    
+                                    // Check for tool events
+                                    if (parsed.event_type === 'tool_call') {
+                                        console.log('Tool call event:', parsed);
+                                        this.showToolCallPopup(parsed);
+                                    } else if (parsed.event_type === 'tool_response') {
+                                        console.log('Tool response event:', parsed);
+                                        this.updateToolResponsePopup(parsed);
+                                    } else if (parsed.choices && parsed.choices[0]) {
+                                        // Handle regular chat completion chunks
                                         const delta = parsed.choices[0].delta;
                                         if (delta && delta.content) {
                                             assistantMessage += delta.content;

@@ -23,17 +23,26 @@ type ChatServer interface {
 	// ModelsDetail provides details for a specific model.
 	ModelDetail(ctx context.Context, modelID string) *Model
 	HandleCompletionRequest(context.Context, ChatCompletionRequest) (ChatCompletionResponse, error)
-	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error)
+	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan StreamEvent, error)
 }
 
 func NewOpenAIV1WithToolHandler(c ChatServer) *OpenAIV1WithToolHandler {
 	return &OpenAIV1WithToolHandler{
-		c: c,
+		c:             c,
+		withAllEvents: false, // Default behavior: only send content chunks
+	}
+}
+
+func NewOpenAIV1WithToolHandlerWithOptions(c ChatServer, withAllEvents bool) *OpenAIV1WithToolHandler {
+	return &OpenAIV1WithToolHandler{
+		c:             c,
+		withAllEvents: withAllEvents,
 	}
 }
 
 type OpenAIV1WithToolHandler struct {
-	c ChatServer
+	c             ChatServer
+	withAllEvents bool
 }
 
 // loggingResponseWriter intercepte la réponse et supporte http.Flusher

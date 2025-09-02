@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
 	"google.golang.org/genai"
 )
 
@@ -16,7 +16,7 @@ const serverPrefix = "server"
 // DispatchAgent handles tasks by directing them to appropriate tools
 type DispatchAgent struct {
 	genaiClient *genai.Client
-	gcpConfig   gemini.Configuration
+	gcpConfig   vertexai.Configuration
 	servers     []*MCPServerTool
 	tools       []*genai.Tool
 }
@@ -32,7 +32,7 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 	// Configure logging
 	SetupLogging(cfg)
 
-	gcpConfig, err := gemini.LoadConfig()
+	gcpConfig, err := vertexai.LoadConfig()
 	if err != nil {
 		return nil, err
 	}

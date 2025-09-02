@@ -70,7 +70,7 @@ func (engine *Engine) HandleCompletionRequest(_ context.Context, _ chatengine.Ch
 	panic("not implemented") // TODO: Implement
 }
 
-func (engine *Engine) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.ChatCompletionStreamResponse, error) {
+func (engine *Engine) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.StreamEvent, error) {
 	messages := make([]api.Message, len(req.Messages))
 	for i := range req.Messages {
 		msg := req.Messages[i]
@@ -87,8 +87,8 @@ func (engine *Engine) SendStreamingChatRequest(ctx context.Context, req chatengi
 		Tools:    engine.tools,
 	}
 
-	c := make(chan chatengine.ChatCompletionStreamResponse)
-	go func(ctx context.Context, c chan chatengine.ChatCompletionStreamResponse) {
+	c := make(chan chatengine.StreamEvent)
+	go func(ctx context.Context, c chan chatengine.StreamEvent) {
 		defer close(c)
 		respFunc := func(resp api.ChatResponse) error {
 			if resp.Message.ToolCalls != nil {
