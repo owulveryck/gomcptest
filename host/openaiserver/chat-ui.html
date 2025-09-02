@@ -22,6 +22,156 @@
             margin: 0;
         }
 
+        /* Side Menu Styles */
+        .side-menu {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: #1a1a2e;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .side-menu:hover,
+        .side-menu.active {
+            left: 0;
+        }
+        
+        .side-menu::after {
+            content: '❯';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 60px;
+            background: rgba(26, 26, 46, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .side-menu:hover::after {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .side-menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .side-menu-header h2 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .conversation-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .conversation-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .conversation-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .conversation-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .conversation-actions {
+            display: none;
+            gap: 5px;
+        }
+        
+        .conversation-item:hover .conversation-actions {
+            display: flex;
+        }
+        
+        .rename-btn, .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 2px;
+            transition: color 0.2s;
+        }
+        
+        .rename-btn:hover {
+            color: #3b82f6;
+        }
+        
+        .delete-btn:hover {
+            color: #ef4444;
+        }
+        
+        .rename-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
         .chat-container {
             background: #ffffff;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -31,6 +181,12 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .side-menu:hover ~ .chat-container,
+        .side-menu.active ~ .chat-container {
+            margin-left: 300px;
         }
 
         .chat-header {
@@ -547,6 +703,23 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2>Conversations</h2>
+            <button class="new-chat-btn" id="newChatBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New chat
+            </button>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be listed here -->
+        </div>
+    </div>
+    
     <div class="chat-container">
         <div class="chat-header">
             <div class="header-left">
@@ -608,6 +781,7 @@
                 this.models = [];
                 this.selectedModel = null;
                 
+                // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
                 this.chatInput = document.getElementById('chatInput');
                 this.sendButton = document.getElementById('sendButton');
@@ -616,8 +790,18 @@
                 this.modelDropdown = document.getElementById('modelDropdown');
                 this.modelsList = document.getElementById('modelsList');
                 this.selectedModelName = document.getElementById('selectedModelName');
+                this.sideMenu = document.getElementById('sideMenu');
+                this.conversationsList = document.getElementById('conversationsList');
+                this.newChatBtn = document.getElementById('newChatBtn');
+                
+                // Conversation management (after DOM elements are initialized)
+                this.conversations = this.loadConversations();
+                this.currentConversationId = null;
                 
                 this.init();
+                
+                // Initialize conversation after init
+                this.initializeConversation();
             }
             
             init() {
@@ -649,6 +833,171 @@
                 
                 // Load available models
                 this.loadModels();
+                
+                // Initialize conversation management
+                this.newChatBtn.addEventListener('click', () => this.createNewConversation());
+                this.renderConversationsList();
+                
+                // Auto-save on message send
+                this.originalSendMessage = this.sendMessage.bind(this);
+            }
+            
+            // Conversation Management Methods
+            loadConversations() {
+                const saved = localStorage.getItem('chat_conversations');
+                return saved ? JSON.parse(saved) : {};
+            }
+            
+            saveConversations() {
+                localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+            }
+            
+            initializeConversation() {
+                // Check if there are existing conversations
+                const conversationIds = Object.keys(this.conversations);
+                if (conversationIds.length > 0) {
+                    // Load the most recent conversation
+                    const sortedIds = conversationIds.sort((a, b) => 
+                        this.conversations[b].lastModified - this.conversations[a].lastModified
+                    );
+                    this.loadConversation(sortedIds[0]);
+                } else {
+                    // Create a new conversation
+                    this.createNewConversation();
+                }
+            }
+            
+            createNewConversation() {
+                const id = 'conv_' + Date.now();
+                const title = 'New Conversation';
+                
+                this.conversations[id] = {
+                    id: id,
+                    title: title,
+                    messages: [],
+                    createdAt: Date.now(),
+                    lastModified: Date.now()
+                };
+                
+                this.currentConversationId = id;
+                this.messages = [];
+                this.renderMessages();
+                this.saveConversations();
+                this.renderConversationsList();
+            }
+            
+            loadConversation(id) {
+                if (this.conversations[id]) {
+                    this.currentConversationId = id;
+                    this.messages = [...this.conversations[id].messages];
+                    this.renderMessages();
+                    this.renderConversationsList();
+                }
+            }
+            
+            saveCurrentConversation() {
+                if (this.currentConversationId && this.conversations[this.currentConversationId]) {
+                    this.conversations[this.currentConversationId].messages = [...this.messages];
+                    this.conversations[this.currentConversationId].lastModified = Date.now();
+                    
+                    // Auto-generate title from first message if still default
+                    if (this.conversations[this.currentConversationId].title === 'New Conversation' && 
+                        this.messages.length > 0) {
+                        const firstUserMessage = this.messages.find(m => m.role === 'user');
+                        if (firstUserMessage) {
+                            let title = firstUserMessage.content.substring(0, 50);
+                            if (firstUserMessage.content.length > 50) title += '...';
+                            this.conversations[this.currentConversationId].title = title;
+                        }
+                    }
+                    
+                    this.saveConversations();
+                    this.renderConversationsList();
+                }
+            }
+            
+            deleteConversation(id) {
+                if (confirm('Are you sure you want to delete this conversation?')) {
+                    delete this.conversations[id];
+                    this.saveConversations();
+                    
+                    if (id === this.currentConversationId) {
+                        this.initializeConversation();
+                    }
+                    
+                    this.renderConversationsList();
+                }
+            }
+            
+            renameConversation(id) {
+                const conversation = this.conversations[id];
+                if (conversation) {
+                    const newTitle = prompt('Enter new title:', conversation.title);
+                    if (newTitle && newTitle.trim()) {
+                        conversation.title = newTitle.trim();
+                        conversation.lastModified = Date.now();
+                        this.saveConversations();
+                        this.renderConversationsList();
+                    }
+                }
+            }
+            
+            renderConversationsList() {
+                this.conversationsList.innerHTML = '';
+                
+                const sortedIds = Object.keys(this.conversations).sort((a, b) => 
+                    this.conversations[b].lastModified - this.conversations[a].lastModified
+                );
+                
+                sortedIds.forEach(id => {
+                    const conv = this.conversations[id];
+                    const item = document.createElement('div');
+                    item.className = 'conversation-item';
+                    if (id === this.currentConversationId) {
+                        item.classList.add('active');
+                    }
+                    
+                    const title = document.createElement('span');
+                    title.className = 'conversation-title';
+                    title.textContent = conv.title;
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'conversation-actions';
+                    
+                    const renameBtn = document.createElement('button');
+                    renameBtn.className = 'rename-btn';
+                    renameBtn.innerHTML = '✏️';
+                    renameBtn.title = 'Rename';
+                    renameBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.renameConversation(id);
+                    };
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '🗑️';
+                    deleteBtn.title = 'Delete';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.deleteConversation(id);
+                    };
+                    
+                    actions.appendChild(renameBtn);
+                    actions.appendChild(deleteBtn);
+                    
+                    item.appendChild(title);
+                    item.appendChild(actions);
+                    
+                    item.onclick = () => {
+                        if (id !== this.currentConversationId) {
+                            // Save current conversation before switching
+                            this.saveCurrentConversation();
+                            this.loadConversation(id);
+                        }
+                    };
+                    
+                    this.conversationsList.appendChild(item);
+                });
             }
             
             async loadModels() {
@@ -768,6 +1117,7 @@
                 }
                 
                 this.renderMessages();
+                this.saveCurrentConversation(); // Auto-save after adding message
             }
             
             renderMessages() {
