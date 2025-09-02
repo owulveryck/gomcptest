@@ -1541,6 +1541,14 @@
             showToolCallPopup(event) {
                 const popupId = event.tool_call.id;
                 
+                // Check if popup already exists
+                if (this.toolPopups.has(popupId)) {
+                    console.log('Popup already exists for:', popupId);
+                    return;
+                }
+                
+                console.log('Creating tool call popup for:', popupId, event.tool_call.name);
+                
                 // Create popup element
                 const popup = document.createElement('div');
                 popup.className = 'tool-popup tool-call';
@@ -1611,11 +1619,14 @@
             
             updateToolResponsePopup(event) {
                 const popupId = event.tool_response.id;
+                console.log('Updating tool response popup for:', popupId, event.tool_response.name);
+                
                 const popup = this.toolPopups.get(popupId);
                 
                 if (!popup) {
-                    // If no existing popup, log but don't create a new one
-                    console.log('No matching tool call popup found for response:', popupId);
+                    // If no existing popup, create one for the response
+                    console.log('No matching tool call popup found for response, creating new one:', popupId);
+                    this.showToolResponseOnlyPopup(event);
                     return;
                 }
                 
@@ -1712,7 +1723,67 @@
                 }, 10000);
             }
             
-            // Removed showToolResponseOnlyPopup - tool responses now appear in chat stream only
+            showToolResponseOnlyPopup(event) {
+                const popupId = event.tool_response.id;
+                const hasError = event.tool_response.error;
+                
+                console.log('Creating response-only popup for:', popupId, event.tool_response.name);
+                
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+                popup.id = `popup-${popupId}`;
+                
+                const iconHtml = hasError ? `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                ` : `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                `;
+                
+                // Create popup HTML
+                popup.innerHTML = `
+                    <div class="tool-popup-header">
+                        <div class="tool-popup-title">
+                            <div class="tool-popup-icon">${iconHtml}</div>
+                            ${hasError ? 'Tool Failed' : 'Tool Completed'}: ${event.tool_response.name}
+                        </div>
+                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+                    </div>
+                    <div class="tool-popup-content">
+                        ${hasError 
+                            ? `<div class="tool-popup-error"><strong>Error:</strong> ${event.tool_response.error}</div>`
+                            : `<div>
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">
+                                    ${typeof event.tool_response.response === 'string' 
+                                        ? event.tool_response.response 
+                                        : `<pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre>`}
+                                </div>
+                               </div>`
+                        }
+                    </div>
+                `;
+                
+                // Add to container
+                const container = document.getElementById('toolPopupContainer');
+                container.appendChild(popup);
+                
+                // Store reference
+                this.toolPopups.set(popupId, popup);
+                
+                // Auto-close after 10 seconds
+                const timer = setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 10000);
+                this.popupAutoCloseTimers.set(popupId, timer);
+            }
             
             closeToolPopup(popupId) {
                 const popup = this.toolPopups.get(popupId);
