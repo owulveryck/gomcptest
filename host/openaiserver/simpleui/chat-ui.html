@@ -25,7 +25,7 @@
         /* Side Menu Styles */
         .side-menu {
             position: fixed;
-            left: -280px;
+            left: -300px;
             top: 0;
             width: 300px;
             height: 100vh;
@@ -37,19 +37,19 @@
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
         }
         
-        .side-menu:hover,
         .side-menu.active {
             left: 0;
         }
         
-        .side-menu::after {
-            content: '❯';
-            position: absolute;
-            right: -40px;
+        /* Separate hover trigger for the arrow */
+        .menu-trigger {
+            position: fixed;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
             width: 40px;
             height: 60px;
+            z-index: 999;
             background: rgba(26, 26, 46, 0.5);
             backdrop-filter: blur(10px);
             border-radius: 0 10px 10px 0;
@@ -62,7 +62,12 @@
             cursor: pointer;
         }
         
-        .side-menu:hover::after {
+        .menu-trigger:hover {
+            background: rgba(26, 26, 46, 0.7);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .side-menu.active ~ .menu-trigger {
             opacity: 0;
             pointer-events: none;
         }
@@ -184,7 +189,6 @@
             transition: margin-left 0.3s ease;
         }
         
-        .side-menu:hover ~ .chat-container,
         .side-menu.active ~ .chat-container {
             margin-left: 300px;
         }
@@ -720,6 +724,9 @@
         </div>
     </div>
     
+    <!-- Menu Trigger Arrow -->
+    <div class="menu-trigger" id="menuTrigger">❯</div>
+    
     <div class="chat-container">
         <div class="chat-header">
             <div class="header-left">
@@ -780,6 +787,8 @@
                 this.editingIndex = -1;
                 this.models = [];
                 this.selectedModel = null;
+                this.currentReader = null;  // Store the current stream reader
+                this.isStreaming = false;   // Track streaming state
                 
                 // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
@@ -793,6 +802,7 @@
                 this.sideMenu = document.getElementById('sideMenu');
                 this.conversationsList = document.getElementById('conversationsList');
                 this.newChatBtn = document.getElementById('newChatBtn');
+                this.menuTrigger = document.getElementById('menuTrigger');
                 
                 // Conversation management (after DOM elements are initialized)
                 this.conversations = this.loadConversations();
@@ -805,11 +815,19 @@
             }
             
             init() {
-                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.sendButton.addEventListener('click', () => {
+                    if (this.isStreaming) {
+                        this.stopStreaming();
+                    } else {
+                        this.sendMessage();
+                    }
+                });
                 this.chatInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        this.sendMessage();
+                        if (!this.isStreaming) {
+                            this.sendMessage();
+                        }
                     }
                 });
                 
@@ -837,6 +855,20 @@
                 // Initialize conversation management
                 this.newChatBtn.addEventListener('click', () => this.createNewConversation());
                 this.renderConversationsList();
+                
+                // Menu trigger handling
+                this.menuTrigger.addEventListener('click', () => {
+                    this.sideMenu.classList.add('active');
+                });
+                
+                // Click outside to close menu
+                document.addEventListener('click', (e) => {
+                    if (!this.sideMenu.contains(e.target) && 
+                        !this.menuTrigger.contains(e.target) &&
+                        this.sideMenu.classList.contains('active')) {
+                        this.sideMenu.classList.remove('active');
+                    }
+                });
                 
                 // Auto-save on message send
                 this.originalSendMessage = this.sendMessage.bind(this);
@@ -1232,6 +1264,8 @@
             async getAssistantResponse() {
                 this.typingIndicator.classList.add('active');
                 this.sendButton.disabled = true;
+                this.isStreaming = true;
+                this.updateSendButton();  // Update button to show "Stop"
                 
                 try {
                     const response = await fetch(this.apiUrl, {
@@ -1276,11 +1310,15 @@
                 } finally {
                     this.typingIndicator.classList.remove('active');
                     this.sendButton.disabled = false;
+                    this.isStreaming = false;
+                    this.currentReader = null;
+                    this.updateSendButton();  // Reset button to "Send"
                 }
             }
             
             async handleStreamingResponse(response) {
                 const reader = response.body.getReader();
+                this.currentReader = reader;  // Store the reader so we can cancel it
                 const decoder = new TextDecoder();
                 let assistantMessage = '';
                 let messageIndex = null;
@@ -1297,6 +1335,9 @@
                         const { value, done } = await reader.read();
                         if (done) {
                             isStreaming = false;
+                            this.isStreaming = false;
+                            this.currentReader = null;
+                            this.updateSendButton();
                             this.updateMessageContent(messageIndex, assistantMessage, false);
                             break;
                         }
@@ -1309,6 +1350,9 @@
                                 const data = line.slice(6);
                                 if (data === '[DONE]') {
                                     isStreaming = false;
+                                    this.isStreaming = false;
+                                    this.currentReader = null;
+                                    this.updateSendButton();
                                     this.updateMessageContent(messageIndex, assistantMessage, false);
                                     return;
                                 }
@@ -1378,6 +1422,32 @@
             
             scrollToBottom() {
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            updateSendButton() {
+                if (this.isStreaming) {
+                    this.sendButton.textContent = 'Stop';
+                    this.sendButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                    this.sendButton.disabled = false;  // Enable the button so user can click to stop
+                } else {
+                    this.sendButton.textContent = 'Send';
+                    this.sendButton.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                }
+            }
+            
+            async stopStreaming() {
+                if (this.currentReader) {
+                    try {
+                        await this.currentReader.cancel();
+                    } catch (error) {
+                        console.log('Stream cancellation:', error);
+                    }
+                    this.isStreaming = false;
+                    this.currentReader = null;
+                    this.typingIndicator.classList.remove('active');
+                    this.sendButton.disabled = false;
+                    this.updateSendButton();
+                }
             }
         }
         
