@@ -1508,6 +1508,8 @@
                     this.isStreaming = false;
                     this.currentReader = null;
                     this.updateSendButton();  // Reset button to "Send"
+                    // Close any remaining tool popups when stream ends
+                    this.closeAllToolPopups();
                 }
             }
             
@@ -1550,8 +1552,33 @@
                 // Store reference
                 this.toolPopups.set(popupId, popup);
                 
-                // Don't auto-close tool call popups - wait for response
-                // We'll close them when we get the response or after a timeout
+                // Auto-close after 5 seconds if no response received
+                const timer = setTimeout(() => {
+                    // Update popup to show timeout before closing
+                    const popup = this.toolPopups.get(popupId);
+                    if (popup) {
+                        const content = popup.querySelector('.tool-popup-content');
+                        if (content) {
+                            content.innerHTML = `
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12" y2="16"></line>
+                                    </svg>
+                                    <span style="font-size: 13px; color: #FFA500; font-weight: 500;">
+                                        Tool execution timeout
+                                    </span>
+                                </div>
+                            `;
+                        }
+                        // Close after showing timeout message
+                        setTimeout(() => {
+                            this.closeToolPopup(popupId);
+                        }, 1500);
+                    }
+                }, 5000);
+                this.popupAutoCloseTimers.set(popupId, timer)
             }
             
             updateToolResponsePopup(event) {
@@ -1695,6 +1722,13 @@
                                             this.messages[messageIndex].content = assistantMessage;
                                             this.updateMessageContent(messageIndex, assistantMessage, true);
                                         }
+                                        
+                                        // Check for finish reason to close popups
+                                        if (parsed.choices[0].finish_reason) {
+                                            setTimeout(() => {
+                                                this.closeAllToolPopups();
+                                            }, 1000);
+                                        }
                                     }
                                 } catch (e) {
                                     // Ignore JSON parse errors for incomplete chunks
@@ -1705,7 +1739,14 @@
                 } catch (error) {
                     console.error('Streaming error:', error);
                     this.updateMessageContent(messageIndex, assistantMessage, false);
+                    // Close any remaining tool popups on error
+                    this.closeAllToolPopups();
                     throw error;
+                } finally {
+                    // Ensure all tool popups are closed when streaming completes
+                    setTimeout(() => {
+                        this.closeAllToolPopups();
+                    }, 2000);
                 }
             }
             
