@@ -830,14 +830,25 @@
         
         .tool-popup-response {
             background: #f0f9ff;
-            border-radius: 6px;
-            padding: 8px;
-            margin-top: 8px;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            font-size: 12px;
+            font-size: 13px;
             color: #444;
             white-space: pre-wrap;
             word-break: break-word;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .tool-popup-response pre {
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            background: transparent;
         }
         
         .tool-popup-error {
@@ -1599,8 +1610,8 @@
                 const popup = this.toolPopups.get(popupId);
                 
                 if (!popup) {
-                    // If no existing popup, don't create a new one
-                    // Tool responses should appear in the chat, not as separate popups
+                    // If no existing popup, log but don't create a new one
+                    console.log('No matching tool call popup found for response:', popupId);
                     return;
                 }
                 
@@ -1611,39 +1622,66 @@
                     this.popupAutoCloseTimers.delete(popupId);
                 }
                 
-                // Simply close the tool call popup after a brief delay
-                // The response will appear in the chat stream
-                setTimeout(() => {
-                    this.closeToolPopup(popupId);
-                }, 1500);  // Close after 1.5 seconds to show completion
-                
-                // Update the popup briefly to show completion
+                // Update the popup to show the response
                 const hasError = event.tool_response.error;
                 popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
                 
-                // Update content to show completion status
-                const content = popup.querySelector('.tool-popup-content');
-                const icon = hasError ? `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                ` : `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9 12l2 2 4-4"></path>
-                    </svg>
-                `;
+                // Update the icon in the header
+                const iconElement = popup.querySelector('.tool-popup-icon');
+                if (iconElement) {
+                    if (hasError) {
+                        iconElement.innerHTML = `
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        `;
+                    } else {
+                        iconElement.innerHTML = `
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                        `;
+                    }
+                }
                 
-                content.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="tool-popup-icon">${icon}</div>
-                        <span style="font-size: 13px; color: ${hasError ? '#dc2626' : '#059669'}; font-weight: 500;">
-                            ${hasError ? 'Tool execution failed' : 'Tool executed successfully'}
-                        </span>
-                    </div>
-                `;
+                // Update title text
+                const titleElement = popup.querySelector('.tool-popup-title');
+                if (titleElement) {
+                    const titleText = titleElement.childNodes[1]; // Text node after icon
+                    if (titleText) {
+                        titleText.textContent = hasError ? ` Tool Failed: ${event.tool_response.name}` : ` Tool Completed: ${event.tool_response.name}`;
+                    }
+                }
+                
+                // Update content to show the response
+                const content = popup.querySelector('.tool-popup-content');
+                if (hasError) {
+                    content.innerHTML = `
+                        <div class="tool-popup-error">
+                            <strong>Error:</strong> ${event.tool_response.error}
+                        </div>
+                    `;
+                } else {
+                    // Format the response
+                    let responseHTML = '';
+                    if (typeof event.tool_response.response === 'string') {
+                        responseHTML = `<div class="tool-popup-response">${event.tool_response.response}</div>`;
+                    } else if (typeof event.tool_response.response === 'object' && event.tool_response.response !== null) {
+                        responseHTML = `<div class="tool-popup-response"><pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre></div>`;
+                    } else {
+                        responseHTML = `<div class="tool-popup-response">Tool executed successfully</div>`;
+                    }
+                    
+                    content.innerHTML = responseHTML;
+                }
+                
+                // Auto-close after 3 seconds to give user time to see the result
+                setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 3000);
             }
             
             // Removed showToolResponseOnlyPopup - tool responses now appear in chat stream only
@@ -1722,9 +1760,11 @@
                                     // Check for tool events
                                     if (parsed.event_type === 'tool_call') {
                                         console.log('Tool call event:', parsed);
+                                        console.log('Tool call ID:', parsed.tool_call?.id);
                                         this.showToolCallPopup(parsed);
                                     } else if (parsed.event_type === 'tool_response') {
                                         console.log('Tool response event:', parsed);
+                                        console.log('Tool response ID (correlation):', parsed.tool_response?.id);
                                         this.updateToolResponsePopup(parsed);
                                     } else if (parsed.choices && parsed.choices[0]) {
                                         // Handle regular chat completion chunks
