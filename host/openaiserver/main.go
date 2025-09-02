@@ -15,7 +15,8 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/claude"
 )
 
 // Config holds the configuration parameters.
@@ -25,14 +26,14 @@ type Config struct {
 }
 
 // loadGCPConfig loads and validates the GCP configuration from environment variables.
-func loadGCPConfig() (gcp.Configuration, error) {
-	var cfg gcp.Configuration
+func loadGCPConfig() (vertexai.Configuration, error) {
+	var cfg vertexai.Configuration
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		return gcp.Configuration{}, fmt.Errorf("failed to process GCP configuration: %w", err)
+		return vertexai.Configuration{}, fmt.Errorf("failed to process GCP configuration: %w", err)
 	}
 	if len(cfg.GeminiModels) == 0 {
-		return gcp.Configuration{}, fmt.Errorf("at least one Gemini model must be specified")
+		return vertexai.Configuration{}, fmt.Errorf("at least one Gemini model must be specified")
 	}
 	for _, model := range cfg.GeminiModels {
 		slog.Info("model", "model", model)
@@ -106,7 +107,8 @@ func main() {
 	}
 
 	ctx := context.Background()
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig))
+	// openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gemini.NewChatSession(ctx, gcpconfig))
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(claude.NewChatSession(ctx, gcpconfig))
 
 	servers := extractServers(*mcpServers)
 	for i := range servers {

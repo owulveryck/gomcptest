@@ -6,9 +6,9 @@ import (
 	"log"
 	"strings"
 
-	"google.golang.org/genai"
 	"github.com/fatih/color"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini"
+	"google.golang.org/genai"
 )
 
 const serverPrefix = "server"
@@ -16,7 +16,7 @@ const serverPrefix = "server"
 // DispatchAgent handles tasks by directing them to appropriate tools
 type DispatchAgent struct {
 	genaiClient *genai.Client
-	gcpConfig   gcp.Configuration
+	gcpConfig   gemini.Configuration
 	servers     []*MCPServerTool
 	tools       []*genai.Tool
 }
@@ -32,7 +32,7 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 	// Configure logging
 	SetupLogging(cfg)
 
-	gcpConfig, err := gcp.LoadConfig()
+	gcpConfig, err := gemini.LoadConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	// Set up the conversation with the LLM
 	var output strings.Builder
 	defaultModel := agent.gcpConfig.GeminiModels[0]
-	
+
 	// Load configuration for system instruction
 	cfg, err := LoadConfig()
 	if err != nil {
@@ -67,7 +67,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	if err != nil {
 		return "", err
 	}
-	
+
 	// Prepare system instruction
 	systemInstruction := &genai.Content{
 		Role: "user",
@@ -77,31 +77,31 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			"If you don't know something, say so and explain what you would need to know to help. " +
 			"If not indication, use the current working directory which is " + cwd)},
 	}
-	
+
 	// Add system instruction to history
 	contents := append([]*genai.Content{systemInstruction}, history...)
-	
+
 	// Add workflow instruction to the last message
 	lastMessage := contents[len(contents)-1]
 	lastMessage.Parts = append(lastMessage.Parts, genai.NewPartFromText("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"))
-	
+
 	// Configure generation settings
 	config := &genai.GenerateContentConfig{
-		Temperature:      &cfg.Temperature,
-		MaxOutputTokens:  cfg.MaxOutputTokens,
+		Temperature:     &cfg.Temperature,
+		MaxOutputTokens: cfg.MaxOutputTokens,
 	}
-	
+
 	// Add tools if available
 	if len(agent.tools) > 0 {
 		config.Tools = agent.tools
 	}
-	
+
 	// Generate content using the new API
 	res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
 	}
-	
+
 	out, functionCalls := processResponse(res)
 	output.WriteString(out)
 	// Print response with colorization
@@ -120,7 +120,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			}
 			functionResponses[i] = genai.NewPartFromFunctionResponse(functionResp.Name, functionResp.Response)
 		}
-		
+
 		// Add function responses to conversation
 		modelParts := make([]*genai.Part, len(functionCalls))
 		for i, fc := range functionCalls {
@@ -134,7 +134,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			Role:  "user",
 			Parts: functionResponses,
 		})
-		
+
 		res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 		if err != nil {
 			return "", err
