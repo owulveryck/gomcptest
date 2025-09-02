@@ -84,6 +84,85 @@
             font-weight: 500;
         }
         
+        /* System Prompt Styles */
+        .system-prompt-section {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .system-prompt-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .system-prompt-textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 200px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: all 0.2s;
+        }
+        
+        .system-prompt-textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .system-prompt-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .system-prompt-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .system-prompt-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .system-prompt-save {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .system-prompt-save:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+        
+        .system-prompt-reset {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .system-prompt-reset:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
         .new-chat-btn {
             width: 100%;
             padding: 10px;
@@ -919,6 +998,25 @@
                 New chat
             </button>
         </div>
+        <div class="system-prompt-section">
+            <div class="system-prompt-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                    <path d="M2 17L12 22L22 17"></path>
+                    <path d="M2 12L12 17L22 12"></path>
+                </svg>
+                System Prompt
+            </div>
+            <textarea 
+                id="systemPromptTextarea" 
+                class="system-prompt-textarea" 
+                placeholder="Enter system prompt (default: You are a helpful assistant)"
+            >You are a helpful assistant</textarea>
+            <div class="system-prompt-actions">
+                <button id="systemPromptSave" class="system-prompt-btn system-prompt-save">Save</button>
+                <button id="systemPromptReset" class="system-prompt-btn system-prompt-reset">Reset</button>
+            </div>
+        </div>
         <div class="conversations-list" id="conversationsList">
             <!-- Conversations will be listed here -->
         </div>
@@ -931,7 +1029,7 @@
         <div class="chat-header">
             <div class="header-left">
                 <div class="status-indicator"></div>
-                <h1>OpenAI Server Chat</h1>
+                <h1>gomcptest simple chat</h1>
             </div>
             <div class="model-selector">
                 <button class="model-button" id="modelButton">
@@ -991,6 +1089,7 @@
                 this.isStreaming = false;   // Track streaming state
                 this.toolPopups = new Map();  // Store active tool popups
                 this.popupAutoCloseTimers = new Map();  // Store auto-close timers
+                this.systemPrompt = 'You are a helpful assistant';  // Default system prompt
                 
                 // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
@@ -1005,6 +1104,9 @@
                 this.conversationsList = document.getElementById('conversationsList');
                 this.newChatBtn = document.getElementById('newChatBtn');
                 this.menuTrigger = document.getElementById('menuTrigger');
+                this.systemPromptTextarea = document.getElementById('systemPromptTextarea');
+                this.systemPromptSave = document.getElementById('systemPromptSave');
+                this.systemPromptReset = document.getElementById('systemPromptReset');
                 
                 // Conversation management (after DOM elements are initialized)
                 this.conversations = this.loadConversations();
@@ -1058,6 +1160,15 @@
                 this.newChatBtn.addEventListener('click', () => this.createNewConversation());
                 this.renderConversationsList();
                 
+                // System prompt event listeners
+                this.systemPromptSave.addEventListener('click', () => this.saveSystemPrompt());
+                this.systemPromptReset.addEventListener('click', () => this.resetSystemPrompt());
+                
+                // Auto-save system prompt on change
+                this.systemPromptTextarea.addEventListener('change', () => {
+                    this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                });
+                
                 // Menu trigger handling
                 this.menuTrigger.addEventListener('click', () => {
                     this.sideMenu.classList.add('active');
@@ -1109,6 +1220,7 @@
                     id: id,
                     title: title,
                     messages: [],
+                    systemPrompt: this.systemPrompt,  // Save current system prompt
                     createdAt: Date.now(),
                     lastModified: Date.now()
                 };
@@ -1124,6 +1236,9 @@
                 if (this.conversations[id]) {
                     this.currentConversationId = id;
                     this.messages = [...this.conversations[id].messages];
+                    // Load system prompt from conversation
+                    this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant';
+                    this.systemPromptTextarea.value = this.systemPrompt;
                     this.renderMessages();
                     this.renderConversationsList();
                 }
@@ -1132,6 +1247,7 @@
             saveCurrentConversation() {
                 if (this.currentConversationId && this.conversations[this.currentConversationId]) {
                     this.conversations[this.currentConversationId].messages = [...this.messages];
+                    this.conversations[this.currentConversationId].systemPrompt = this.systemPrompt;  // Save system prompt
                     this.conversations[this.currentConversationId].lastModified = Date.now();
                     
                     // Auto-generate title from first message if still default
@@ -1492,11 +1608,38 @@
                 await this.getAssistantResponse();
             }
             
+            saveSystemPrompt() {
+                this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                this.saveCurrentConversation();
+                // Flash the save button to indicate success
+                this.systemPromptSave.style.background = 'rgba(34, 197, 94, 0.5)';
+                setTimeout(() => {
+                    this.systemPromptSave.style.background = '';
+                }, 300);
+            }
+            
+            resetSystemPrompt() {
+                this.systemPrompt = 'You are a helpful assistant';
+                this.systemPromptTextarea.value = this.systemPrompt;
+                this.saveCurrentConversation();
+                // Flash the reset button to indicate success
+                this.systemPromptReset.style.background = 'rgba(239, 68, 68, 0.5)';
+                setTimeout(() => {
+                    this.systemPromptReset.style.background = '';
+                }, 300);
+            }
+            
             async getAssistantResponse() {
                 this.typingIndicator.classList.add('active');
                 this.sendButton.disabled = true;
                 this.isStreaming = true;
                 this.updateSendButton();  // Update button to show "Stop"
+                
+                // Prepare messages with system prompt
+                const messagesWithSystem = [
+                    { role: 'system', content: this.systemPrompt },
+                    ...this.messages
+                ];
                 
                 try {
                     const response = await fetch(this.apiUrl, {
@@ -1506,7 +1649,7 @@
                         },
                         body: JSON.stringify({
                             model: this.selectedModel || 'gemini-2.0-flash',
-                            messages: this.messages,
+                            messages: messagesWithSystem,
                             temperature: 0.7,
                             max_tokens: 2000,
                             stream: true  // Enable streaming
