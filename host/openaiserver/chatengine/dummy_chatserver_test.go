@@ -206,7 +206,9 @@ func TestOpenAIV1WithToolHandler_ServeHTTP(t *testing.T) {
 	// Replace the OpenAI host with the test server URL
 	openAIHandler := &OpenAIV1WithToolHandler{
 		// Assuming you have a way to configure the OpenAI host.  Adapt this to your actual implementation.
-		c: &dummyEngine{},
+		c: &dummyEngine{
+			c: make(chan StreamEvent),
+		},
 	}
 
 	// Test case 1: GET /v1/models

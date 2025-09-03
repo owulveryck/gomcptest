@@ -1,4 +1,4 @@
-package gcp
+package gemini
 
 import (
 	"context"
@@ -19,14 +19,14 @@ const (
 )
 
 type streamProcessor struct {
-	c             chan<- chatengine.ChatCompletionStreamResponse
+	c             chan<- chatengine.StreamEvent
 	chatsession   *ChatSession
 	stringBuilder strings.Builder // Reuse the string builder
 	completionID  string          // Unique ID for this completion
 	modelName     string          // Model being used
 }
 
-func newStreamProcessor(c chan<- chatengine.ChatCompletionStreamResponse, chatsession *ChatSession, modelName string) *streamProcessor {
+func newStreamProcessor(c chan<- chatengine.StreamEvent, chatsession *ChatSession, modelName string) *streamProcessor {
 	return &streamProcessor{
 		c:            c,
 		chatsession:  chatsession,
@@ -183,14 +183,33 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 					return err, nil, nil
 				}
 			} else if part.FunctionCall != nil {
+				// Send tool call event to stream
+				toolCallID := generateToolCallID()
+				toolCallEvent := NewToolCallEvent(s.completionID, toolCallID, part.FunctionCall.Name, part.FunctionCall.Args)
+				if err := s.sendToolCallEvent(ctx, toolCallEvent); err != nil {
+					slog.Error("Failed to send tool call event", "error", err)
+				}
+
 				var fnResp *genai.FunctionResponse
 				var err error
 				fnResp, err = s.chatsession.Call(ctx, *part.FunctionCall)
+
+				// Send tool response event to stream
 				if err != nil {
 					fnResp = &genai.FunctionResponse{}
+					toolResponseEvent := NewToolResponseEvent(s.completionID, toolCallID, part.FunctionCall.Name, nil, err)
+					if err := s.sendToolResponseEvent(ctx, toolResponseEvent); err != nil {
+						slog.Error("Failed to send tool response event", "error", err)
+					}
 					err := s.sendChunk(ctx, err.Error(), "error")
 					if err != nil {
 						return err, nil, nil
+					}
+				} else {
+					// Send successful tool response event
+					toolResponseEvent := NewToolResponseEvent(s.completionID, toolCallID, fnResp.Name, fnResp.Response, nil)
+					if err := s.sendToolResponseEvent(ctx, toolResponseEvent); err != nil {
+						slog.Error("Failed to send tool response event", "error", err)
 					}
 				}
 
@@ -368,6 +387,26 @@ func (s *streamProcessor) sendChunk(ctx context.Context, content string, finishR
 			},
 		},
 	}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// sendToolCallEvent sends a tool call event to the stream
+func (s *streamProcessor) sendToolCallEvent(ctx context.Context, event ToolCallEvent) error {
+	select {
+	case s.c <- event:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// sendToolResponseEvent sends a tool response event to the stream
+func (s *streamProcessor) sendToolResponseEvent(ctx context.Context, event ToolResponseEvent) error {
+	select {
+	case s.c <- event:
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()

@@ -15,7 +15,8 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini"
 )
 
 // Config holds the configuration parameters.
@@ -25,14 +26,14 @@ type Config struct {
 }
 
 // loadGCPConfig loads and validates the GCP configuration from environment variables.
-func loadGCPConfig() (gcp.Configuration, error) {
-	var cfg gcp.Configuration
+func loadGCPConfig() (vertexai.Configuration, error) {
+	var cfg vertexai.Configuration
 	err := envconfig.Process("", &cfg)
 	if err != nil {
-		return gcp.Configuration{}, fmt.Errorf("failed to process GCP configuration: %w", err)
+		return vertexai.Configuration{}, fmt.Errorf("failed to process GCP configuration: %w", err)
 	}
 	if len(cfg.GeminiModels) == 0 {
-		return gcp.Configuration{}, fmt.Errorf("at least one Gemini model must be specified")
+		return vertexai.Configuration{}, fmt.Errorf("at least one Gemini model must be specified")
 	}
 	for _, model := range cfg.GeminiModels {
 		slog.Info("model", "model", model)
@@ -97,6 +98,7 @@ func main() {
 	slog.SetDefault(logger)
 
 	mcpServers := flag.String("mcpservers", "", "Input string of MCP servers")
+	withAllEvents := flag.Bool("withAllEvents", false, "Include all events (tool calls, tool responses) in stream output, not just content chunks")
 	flag.Parse()
 
 	gcpconfig, err := loadGCPConfig()
@@ -106,7 +108,8 @@ func main() {
 	}
 
 	ctx := context.Background()
-	openAIHandler := chatengine.NewOpenAIV1WithToolHandler(gcp.NewChatSession(ctx, gcpconfig))
+	openAIHandler := chatengine.NewOpenAIV1WithToolHandlerWithOptions(gemini.NewChatSession(ctx, gcpconfig), *withAllEvents)
+	// openAIHandler := chatengine.NewOpenAIV1WithToolHandlerWithOptions(claude.NewChatSession(ctx, gcpconfig), *withAllEvents)
 
 	servers := extractServers(*mcpServers)
 	for i := range servers {
@@ -131,9 +134,14 @@ func main() {
 	slog.SetDefault(logger)
 
 	slog.Info("Starting web server", "port", cfg.Port)
-	http.Handle("/", openAIHandler)
 
-	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil)
+	// Set up routing
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ui", ServeUI)
+	mux.HandleFunc("/ui/", ServeUI)
+	mux.Handle("/", openAIHandler)
+
+	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux)
 	if err != nil {
 		slog.Error("Failed to start web server", "error", err)
 		os.Exit(1)

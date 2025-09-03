@@ -7,7 +7,7 @@ all: tools servers
 BIN_DIR := bin
 
 # Tools to build
-TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash imagen imagen_edit plantuml_check
+TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash imagen imagen_edit plantuml_check sleep
 
 # Servers to build
 SERVERS := cliGCP openaiserver
@@ -70,6 +70,9 @@ $(BIN_DIR)/imagen_edit: tools/imagen_edit/cmd/main.go
 
 $(BIN_DIR)/plantuml_check: tools/plantuml_check/cmd/main.go
 	cd tools/plantuml_check && go build -o ../../$(BIN_DIR)/plantuml_check ./cmd
+
+$(BIN_DIR)/sleep: tools/sleep/main.go
+	go build -o $(BIN_DIR)/sleep ./tools/sleep
 
 # Build and run a specific tool
 # Usage: make run TOOL=Bash

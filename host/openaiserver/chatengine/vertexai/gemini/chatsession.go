@@ -1,9 +1,10 @@
-package gcp
+package gemini
 
 import (
 	"context"
 	"log"
 
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
 	"google.golang.org/genai"
 )
 
@@ -15,7 +16,7 @@ type ChatSession struct {
 	tools      []*genai.Tool
 }
 
-func NewChatSession(ctx context.Context, config Configuration) *ChatSession {
+func NewChatSession(ctx context.Context, config vertexai.Configuration) *ChatSession {
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		Project:  config.GCPProject,
 		Location: config.GCPRegion,

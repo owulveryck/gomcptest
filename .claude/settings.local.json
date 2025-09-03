@@ -39,7 +39,16 @@
       "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
       "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
       "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
-      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)"
+      "Read(/Users/olivier.wulveryck/GOPROJECTS/pkg/mod/google.golang.org/genai@v1.16.0/**)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_evaluate",
+      "Bash(git diff:*)"
     ],
     "deny": []
   }

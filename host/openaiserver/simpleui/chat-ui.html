@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI - OpenAI Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Side Menu Styles */
+        .side-menu {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: #1a1a2e;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .side-menu.active {
+            left: 0;
+        }
+        
+        /* Separate hover trigger for the arrow */
+        .menu-trigger {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 60px;
+            z-index: 999;
+            background: rgba(26, 26, 46, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 0 10px 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .menu-trigger:hover {
+            background: rgba(26, 26, 46, 0.7);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .side-menu.active ~ .menu-trigger {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .side-menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .side-menu-header h2 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        /* System Prompt Styles */
+        .system-prompt-section {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .system-prompt-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .system-prompt-textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 200px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            transition: all 0.2s;
+        }
+        
+        .system-prompt-textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .system-prompt-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .system-prompt-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .system-prompt-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .system-prompt-save {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .system-prompt-save:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+        
+        .system-prompt-reset {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .system-prompt-reset:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .new-chat-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .new-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .conversation-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .conversation-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .conversation-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: white;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .conversation-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .conversation-actions {
+            display: none;
+            gap: 5px;
+        }
+        
+        .conversation-item:hover .conversation-actions {
+            display: flex;
+        }
+        
+        .rename-btn, .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 2px;
+            transition: color 0.2s;
+        }
+        
+        .rename-btn:hover {
+            color: #3b82f6;
+        }
+        
+        .delete-btn:hover {
+            color: #ef4444;
+        }
+        
+        .rename-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .chat-container {
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .side-menu.active ~ .chat-container {
+            margin-left: 300px;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #1a1a2e;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 20px;
+            background: #f8f9fa;
+        }
+
+        .message-group {
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .assistant-avatar {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+
+        .message-content {
+            flex: 1;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            position: relative;
+            border: 1px solid #e5e7eb;
+        }
+
+        .message-content.editing {
+            background: #fef3c7;
+        }
+
+        .message-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .action-button {
+            background: #f3f4f6;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .action-button:hover {
+            background: #e5e7eb;
+        }
+
+        .edit-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .edit-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-buttons button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .save-button {
+            background: #10b981;
+            color: white;
+        }
+
+        .save-button:hover {
+            background: #059669;
+        }
+
+        .cancel-button {
+            background: #ef4444;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background: #dc2626;
+        }
+
+        .chat-input-container {
+            padding: 12px 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.2s;
+            font-family: inherit;
+            background: #f9fafb;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-button {
+            padding: 11px 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            margin-left: 51px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9ca3af;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Markdown styles */
+        .message-content h1 {
+            font-size: 1.5em;
+            margin: 0.5em 0;
+            color: #1f2937;
+        }
+
+        .message-content h2 {
+            font-size: 1.3em;
+            margin: 0.5em 0;
+            color: #374151;
+        }
+
+        .message-content h3 {
+            font-size: 1.1em;
+            margin: 0.5em 0;
+            color: #4b5563;
+        }
+
+        .message-content p {
+            margin: 0.5em 0;
+            line-height: 1.6;
+        }
+
+        .message-content code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 0.5em 0;
+            padding-left: 2em;
+        }
+
+        .message-content li {
+            margin: 0.3em 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 1em;
+            margin: 0.5em 0;
+            color: #6b7280;
+        }
+
+        .message-content a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+
+        .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .message-content th, .message-content td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+        
+        /* SVG styles - responsive sizing */
+        .message-content svg {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;  /* Limit height to 70% of viewport */
+            object-fit: contain;  /* Maintain aspect ratio */
+            display: block;
+            margin: 10px 0;
+        }
+        
+        .message-content img[src*=".svg"],
+        .message-content img[src*="image/svg"] {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;  /* Limit height to 70% of viewport */
+            object-fit: contain;  /* Maintain aspect ratio */
+            display: block;
+            margin: 10px 0;
+        }
+        
+        /* Object tag styles for SVG display - responsive sizing */
+        .message-content object[type="image/svg+xml"] {
+            width: 100%;
+            height: auto;
+            min-height: 400px;  /* Minimum height for visibility */
+            max-height: 70vh;  /* Maximum 70% of viewport height */
+            display: block;
+            margin: 10px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            overflow: auto;  /* Allow scrolling if needed */
+        }
+        
+        /* For larger screens, allow SVGs to be bigger */
+        @media (min-width: 1200px) {
+            .message-content svg,
+            .message-content img[src*=".svg"],
+            .message-content img[src*="image/svg"],
+            .message-content object[type="image/svg+xml"] {
+                max-height: 80vh;  /* Allow up to 80% viewport height on larger screens */
+            }
+            
+            .message-content object[type="image/svg+xml"] {
+                min-height: 500px;  /* Larger minimum on bigger screens */
+            }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        /* Model selector styles */
+        .model-selector {
+            position: relative;
+        }
+        
+        .model-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .model-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .model-button::after {
+            content: '▼';
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        .model-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .model-dropdown.active {
+            display: block;
+            animation: dropdownFadeIn 0.2s ease-in;
+        }
+        
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .model-dropdown-header {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .model-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #4b5563;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .model-option:hover {
+            background: #f3f4f6;
+        }
+        
+        .model-option.selected {
+            background: #f0f9ff;
+            color: #2563eb;
+            font-weight: 500;
+        }
+        
+        .model-option .model-name {
+            font-weight: 500;
+        }
+        
+        .model-option .model-owner {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .loading-models {
+            padding: 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        /* Streaming indicator */
+        .streaming-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 16px;
+            background: #3b82f6;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+        
+        @keyframes blink {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+        
+        .message-content.streaming {
+            position: relative;
+        }
+        
+        /* Tool Event Popup Styles */
+        .tool-popup-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .tool-popup {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 24px;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #007AFF;
+            position: relative;
+            min-width: 600px;
+            max-width: 800px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .tool-popup.tool-call {
+            border-left-color: #007AFF;
+        }
+        
+        .tool-popup.tool-response {
+            border-left-color: #34C759;
+        }
+        
+        .tool-popup.tool-error {
+            border-left-color: #FF3B30;
+        }
+        
+        .tool-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .tool-popup-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tool-popup-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-popup-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 20px;
+            line-height: 1;
+            transition: color 0.2s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .tool-popup-close:hover {
+            color: #333;
+            background: #f3f4f6;
+        }
+        
+        .tool-popup-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+        
+        .tool-popup-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .tool-popup-args {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .tool-popup-response {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 12px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            color: #444;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .tool-popup-response pre {
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            background: transparent;
+        }
+        
+        .tool-popup-error {
+            background: #fef2f2;
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #dc2626;
+        }
+        
+        .tool-popup-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .tool-popup.fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <!-- Tool Event Popup Container -->
+    <div class="tool-popup-container" id="toolPopupContainer"></div>
+    
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2>Conversations</h2>
+            <button class="new-chat-btn" id="newChatBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New chat
+            </button>
+        </div>
+        <div class="system-prompt-section">
+            <div class="system-prompt-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                    <path d="M2 17L12 22L22 17"></path>
+                    <path d="M2 12L12 17L22 12"></path>
+                </svg>
+                System Prompt
+            </div>
+            <textarea 
+                id="systemPromptTextarea" 
+                class="system-prompt-textarea" 
+                placeholder="Enter system prompt (default: You are a helpful assistant)"
+            >You are a helpful assistant</textarea>
+            <div class="system-prompt-actions">
+                <button id="systemPromptSave" class="system-prompt-btn system-prompt-save">Save</button>
+                <button id="systemPromptReset" class="system-prompt-btn system-prompt-reset">Reset</button>
+            </div>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be listed here -->
+        </div>
+    </div>
+    
+    <!-- Menu Trigger Arrow -->
+    <div class="menu-trigger" id="menuTrigger">❯</div>
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="status-indicator"></div>
+                <h1>gomcptest simple chat</h1>
+            </div>
+            <div class="model-selector">
+                <button class="model-button" id="modelButton">
+                    <span id="selectedModelName">Loading models...</span>
+                </button>
+                <div class="model-dropdown" id="modelDropdown">
+                    <div class="model-dropdown-header">Select Model</div>
+                    <div id="modelsList">
+                        <div class="loading-models">Loading available models...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be added here -->
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    id="chatInput" 
+                    class="chat-input" 
+                    placeholder="Type your message here... (Markdown supported)"
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" class="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatUI {
+            constructor() {
+                // Check if we're running from file:// protocol
+                const isFileProtocol = window.location.protocol === 'file:';
+                
+                // Use a relative URL if served from the same server, otherwise use localhost
+                this.baseUrl = isFileProtocol ? 
+                    'http://localhost:4000' : 
+                    '';
+                this.apiUrl = this.baseUrl + '/v1/chat/completions';
+                    
+                this.messages = [];
+                this.editingIndex = -1;
+                this.models = [];
+                this.selectedModel = null;
+                this.currentReader = null;  // Store the current stream reader
+                this.isStreaming = false;   // Track streaming state
+                this.toolPopups = new Map();  // Store active tool popups
+                this.popupAutoCloseTimers = new Map();  // Store auto-close timers
+                this.systemPrompt = 'You are a helpful assistant';  // Default system prompt
+                
+                // DOM elements (must be initialized first)
+                this.chatMessages = document.getElementById('chatMessages');
+                this.chatInput = document.getElementById('chatInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.typingIndicator = document.getElementById('typingIndicator');
+                this.modelButton = document.getElementById('modelButton');
+                this.modelDropdown = document.getElementById('modelDropdown');
+                this.modelsList = document.getElementById('modelsList');
+                this.selectedModelName = document.getElementById('selectedModelName');
+                this.sideMenu = document.getElementById('sideMenu');
+                this.conversationsList = document.getElementById('conversationsList');
+                this.newChatBtn = document.getElementById('newChatBtn');
+                this.menuTrigger = document.getElementById('menuTrigger');
+                this.systemPromptTextarea = document.getElementById('systemPromptTextarea');
+                this.systemPromptSave = document.getElementById('systemPromptSave');
+                this.systemPromptReset = document.getElementById('systemPromptReset');
+                
+                // Conversation management (after DOM elements are initialized)
+                this.conversations = this.loadConversations();
+                this.currentConversationId = null;
+                
+                this.init();
+                
+                // Initialize conversation after init
+                this.initializeConversation();
+            }
+            
+            init() {
+                this.sendButton.addEventListener('click', () => {
+                    if (this.isStreaming) {
+                        this.stopStreaming();
+                    } else {
+                        this.sendMessage();
+                    }
+                });
+                this.chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!this.isStreaming) {
+                            this.sendMessage();
+                        }
+                    }
+                });
+                
+                // Auto-resize textarea
+                this.chatInput.addEventListener('input', () => {
+                    this.chatInput.style.height = 'auto';
+                    this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 150) + 'px';
+                });
+                
+                // Model selector events
+                this.modelButton.addEventListener('click', () => {
+                    this.modelDropdown.classList.toggle('active');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!this.modelButton.contains(e.target) && !this.modelDropdown.contains(e.target)) {
+                        this.modelDropdown.classList.remove('active');
+                    }
+                });
+                
+                // Load available models
+                this.loadModels();
+                
+                // Initialize conversation management
+                this.newChatBtn.addEventListener('click', () => this.createNewConversation());
+                this.renderConversationsList();
+                
+                // System prompt event listeners
+                this.systemPromptSave.addEventListener('click', () => this.saveSystemPrompt());
+                this.systemPromptReset.addEventListener('click', () => this.resetSystemPrompt());
+                
+                // Auto-save system prompt on change
+                this.systemPromptTextarea.addEventListener('change', () => {
+                    this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                });
+                
+                // Menu trigger handling
+                this.menuTrigger.addEventListener('click', () => {
+                    this.sideMenu.classList.add('active');
+                });
+                
+                // Click outside to close menu
+                document.addEventListener('click', (e) => {
+                    if (!this.sideMenu.contains(e.target) && 
+                        !this.menuTrigger.contains(e.target) &&
+                        this.sideMenu.classList.contains('active')) {
+                        this.sideMenu.classList.remove('active');
+                    }
+                });
+                
+                // Auto-save on message send
+                this.originalSendMessage = this.sendMessage.bind(this);
+            }
+            
+            // Conversation Management Methods
+            loadConversations() {
+                const saved = localStorage.getItem('chat_conversations');
+                return saved ? JSON.parse(saved) : {};
+            }
+            
+            saveConversations() {
+                localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+            }
+            
+            initializeConversation() {
+                // Check if there are existing conversations
+                const conversationIds = Object.keys(this.conversations);
+                if (conversationIds.length > 0) {
+                    // Load the most recent conversation
+                    const sortedIds = conversationIds.sort((a, b) => 
+                        this.conversations[b].lastModified - this.conversations[a].lastModified
+                    );
+                    this.loadConversation(sortedIds[0]);
+                } else {
+                    // Create a new conversation
+                    this.createNewConversation();
+                }
+            }
+            
+            createNewConversation() {
+                const id = 'conv_' + Date.now();
+                const title = 'New Conversation';
+                
+                this.conversations[id] = {
+                    id: id,
+                    title: title,
+                    messages: [],
+                    systemPrompt: this.systemPrompt,  // Save current system prompt
+                    createdAt: Date.now(),
+                    lastModified: Date.now()
+                };
+                
+                this.currentConversationId = id;
+                this.messages = [];
+                this.renderMessages();
+                this.saveConversations();
+                this.renderConversationsList();
+            }
+            
+            loadConversation(id) {
+                if (this.conversations[id]) {
+                    this.currentConversationId = id;
+                    this.messages = [...this.conversations[id].messages];
+                    // Load system prompt from conversation
+                    this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant';
+                    this.systemPromptTextarea.value = this.systemPrompt;
+                    this.renderMessages();
+                    this.renderConversationsList();
+                }
+            }
+            
+            saveCurrentConversation() {
+                if (this.currentConversationId && this.conversations[this.currentConversationId]) {
+                    this.conversations[this.currentConversationId].messages = [...this.messages];
+                    this.conversations[this.currentConversationId].systemPrompt = this.systemPrompt;  // Save system prompt
+                    this.conversations[this.currentConversationId].lastModified = Date.now();
+                    
+                    // Auto-generate title from first message if still default
+                    if (this.conversations[this.currentConversationId].title === 'New Conversation' && 
+                        this.messages.length > 0) {
+                        const firstUserMessage = this.messages.find(m => m.role === 'user');
+                        if (firstUserMessage) {
+                            let title = firstUserMessage.content.substring(0, 50);
+                            if (firstUserMessage.content.length > 50) title += '...';
+                            this.conversations[this.currentConversationId].title = title;
+                        }
+                    }
+                    
+                    this.saveConversations();
+                    this.renderConversationsList();
+                }
+            }
+            
+            deleteConversation(id) {
+                if (confirm('Are you sure you want to delete this conversation?')) {
+                    delete this.conversations[id];
+                    this.saveConversations();
+                    
+                    if (id === this.currentConversationId) {
+                        this.initializeConversation();
+                    }
+                    
+                    this.renderConversationsList();
+                }
+            }
+            
+            renameConversation(id) {
+                const conversation = this.conversations[id];
+                if (conversation) {
+                    const newTitle = prompt('Enter new title:', conversation.title);
+                    if (newTitle && newTitle.trim()) {
+                        conversation.title = newTitle.trim();
+                        conversation.lastModified = Date.now();
+                        this.saveConversations();
+                        this.renderConversationsList();
+                    }
+                }
+            }
+            
+            renderConversationsList() {
+                this.conversationsList.innerHTML = '';
+                
+                const sortedIds = Object.keys(this.conversations).sort((a, b) => 
+                    this.conversations[b].lastModified - this.conversations[a].lastModified
+                );
+                
+                sortedIds.forEach(id => {
+                    const conv = this.conversations[id];
+                    const item = document.createElement('div');
+                    item.className = 'conversation-item';
+                    if (id === this.currentConversationId) {
+                        item.classList.add('active');
+                    }
+                    
+                    const title = document.createElement('span');
+                    title.className = 'conversation-title';
+                    title.textContent = conv.title;
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'conversation-actions';
+                    
+                    const renameBtn = document.createElement('button');
+                    renameBtn.className = 'rename-btn';
+                    renameBtn.innerHTML = '✏️';
+                    renameBtn.title = 'Rename';
+                    renameBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.renameConversation(id);
+                    };
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '🗑️';
+                    deleteBtn.title = 'Delete';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.deleteConversation(id);
+                    };
+                    
+                    actions.appendChild(renameBtn);
+                    actions.appendChild(deleteBtn);
+                    
+                    item.appendChild(title);
+                    item.appendChild(actions);
+                    
+                    item.onclick = () => {
+                        if (id !== this.currentConversationId) {
+                            // Save current conversation before switching
+                            this.saveCurrentConversation();
+                            this.loadConversation(id);
+                        }
+                    };
+                    
+                    this.conversationsList.appendChild(item);
+                });
+            }
+            
+            async loadModels() {
+                try {
+                    const response = await fetch(this.baseUrl + '/v1/models');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.models = data.data || [];
+                    
+                    if (this.models.length > 0) {
+                        // Select the first model by default
+                        this.selectedModel = this.models[0].id;
+                        this.selectedModelName.textContent = this.selectedModel;
+                        this.renderModelsList();
+                    } else {
+                        this.selectedModelName.textContent = 'No models available';
+                    }
+                } catch (error) {
+                    console.error('Error loading models:', error);
+                    this.selectedModelName.textContent = 'Error loading models';
+                }
+            }
+            
+            renderModelsList() {
+                this.modelsList.innerHTML = '';
+                
+                this.models.forEach(model => {
+                    const option = document.createElement('div');
+                    option.className = 'model-option';
+                    if (model.id === this.selectedModel) {
+                        option.classList.add('selected');
+                    }
+                    
+                    option.innerHTML = `
+                        <span class="model-name">${model.id}</span>
+                        <span class="model-owner">${model.owned_by || 'Unknown'}</span>
+                    `;
+                    
+                    option.addEventListener('click', () => {
+                        this.selectModel(model.id);
+                    });
+                    
+                    this.modelsList.appendChild(option);
+                });
+            }
+            
+            selectModel(modelId) {
+                this.selectedModel = modelId;
+                this.selectedModelName.textContent = modelId;
+                this.renderModelsList();
+                this.modelDropdown.classList.remove('active');
+            }
+            
+            renderMarkdown(text) {
+                // Configure marked to allow HTML (including SVG)
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    sanitize: false,  // Allow HTML/SVG
+                    renderer: this.getCustomRenderer()
+                });
+                
+                let html = marked.parse(text || '');
+                
+                // Handle SVG URLs - convert them to object tags for better compatibility
+                html = html.replace(/<img([^>]*?)src=["']([^"']+\.svg[^"']*)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
+                    // Use object tag for SVG files to ensure they display properly
+                    return `<object type="image/svg+xml" data="${src}">
+                        <img src="${src}" alt="SVG Image">
+                    </object>`;
+                });
+                
+                // Also handle SVG URLs that might be in markdown link format
+                html = html.replace(/!\[([^\]]*)\]\(([^)]+\.svg[^)]*)\)/g, (match, alt, src) => {
+                    return `<object type="image/svg+xml" data="${src}">
+                        <img src="${src}" alt="${alt}">
+                    </object>`;
+                });
+                
+                return html;
+            }
+            
+            getCustomRenderer() {
+                const renderer = new marked.Renderer();
+                
+                // Custom image renderer to handle SVG URLs properly
+                renderer.image = function(href, title, text) {
+                    // The href parameter might be an object, extract the actual href
+                    let url = '';
+                    if (typeof href === 'object' && href !== null && href.href) {
+                        url = String(href.href);
+                    } else if (typeof href === 'string') {
+                        url = href;
+                    } else {
+                        url = String(href || '');
+                    }
+                    
+                    const altText = String(text || '');
+                    const titleText = String(title || '');
+                    
+                    // Check if it's an SVG URL
+                    if (url && (url.includes('.svg') || url.endsWith('.svg'))) {
+                        // Use object tag for better SVG compatibility - CSS handles styling
+                        return `<object type="image/svg+xml" data="${url}" title="${titleText}">
+                            <img src="${url}" alt="${altText}" title="${titleText}">
+                        </object>`;
+                    }
+                    
+                    // Check if it's another type of image generation URL (also likely SVG)
+                    if (url && (url.includes('wardley_map') || 
+                                url.includes('localhost:8585') ||
+                                url.includes('image/svg'))) {
+                        return `<img src="${url}" alt="${altText}" title="${titleText}">`;
+                    }
+                    
+                    // Default image rendering
+                    return `<img src="${url}" alt="${altText}" title="${titleText}">`;
+                };
+                
+                return renderer;
+            }
+            
+            addMessage(role, content, index = null) {
+                const messageData = { role, content };
+                
+                if (index !== null) {
+                    this.messages[index] = messageData;
+                } else {
+                    this.messages.push(messageData);
+                    index = this.messages.length - 1;
+                }
+                
+                this.renderMessages();
+                this.saveCurrentConversation(); // Auto-save after adding message
+            }
+            
+            renderMessages() {
+                this.chatMessages.innerHTML = '';
+                
+                this.messages.forEach((msg, index) => {
+                    const messageGroup = document.createElement('div');
+                    messageGroup.className = 'message-group';
+                    
+                    const message = document.createElement('div');
+                    message.className = 'message';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = `avatar ${msg.role === 'user' ? 'user-avatar' : 'assistant-avatar'}`;
+                    avatar.textContent = msg.role === 'user' ? 'U' : 'A';
+                    
+                    const messageContent = document.createElement('div');
+                    messageContent.className = 'message-content';
+                    
+                    // Show typing indicator if message is being typed
+                    if (msg.isTyping && !msg.content) {
+                        messageContent.innerHTML = `
+                            <div class="typing-dots" style="display: flex; gap: 4px; padding: 10px 0;">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        `;
+                    } else {
+                        messageContent.innerHTML = this.renderMarkdown(msg.content);
+                    }
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'message-actions';
+                    
+                    const editButton = document.createElement('button');
+                    editButton.className = 'action-button';
+                    editButton.textContent = 'Edit';
+                    editButton.onclick = () => this.startEdit(index);
+                    
+                    const replayButton = document.createElement('button');
+                    replayButton.className = 'action-button';
+                    replayButton.textContent = 'Replay from here';
+                    replayButton.onclick = () => this.replayFrom(index);
+                    
+                    actions.appendChild(editButton);
+                    if (msg.role === 'user') {
+                        actions.appendChild(replayButton);
+                    }
+                    
+                    messageContent.appendChild(actions);
+                    message.appendChild(avatar);
+                    message.appendChild(messageContent);
+                    messageGroup.appendChild(message);
+                    
+                    this.chatMessages.appendChild(messageGroup);
+                });
+                
+                this.scrollToBottom();
+            }
+            
+            startEdit(index) {
+                const messageGroups = this.chatMessages.querySelectorAll('.message-group');
+                const messageContent = messageGroups[index].querySelector('.message-content');
+                
+                messageContent.classList.add('editing');
+                messageContent.innerHTML = '';
+                
+                const textarea = document.createElement('textarea');
+                textarea.className = 'edit-textarea';
+                textarea.value = this.messages[index].content;
+                
+                const editButtons = document.createElement('div');
+                editButtons.className = 'edit-buttons';
+                
+                const saveButton = document.createElement('button');
+                saveButton.className = 'save-button';
+                saveButton.textContent = 'Save';
+                saveButton.onclick = () => this.saveEdit(index, textarea.value);
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'cancel-button';
+                cancelButton.textContent = 'Cancel';
+                cancelButton.onclick = () => this.cancelEdit();
+                
+                editButtons.appendChild(saveButton);
+                editButtons.appendChild(cancelButton);
+                
+                messageContent.appendChild(textarea);
+                messageContent.appendChild(editButtons);
+                
+                textarea.focus();
+            }
+            
+            saveEdit(index, newContent) {
+                this.messages[index].content = newContent;
+                this.renderMessages();
+            }
+            
+            cancelEdit() {
+                this.renderMessages();
+            }
+            
+            replayFrom(index) {
+                // Remove all messages after this index
+                this.messages = this.messages.slice(0, index + 1);
+                this.renderMessages();
+                
+                // Regenerate assistant response
+                this.getAssistantResponse();
+            }
+            
+            async sendMessage() {
+                const content = this.chatInput.value.trim();
+                if (!content) return;
+                
+                this.chatInput.value = '';
+                this.chatInput.style.height = 'auto';
+                
+                this.addMessage('user', content);
+                await this.getAssistantResponse();
+            }
+            
+            saveSystemPrompt() {
+                this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                this.saveCurrentConversation();
+                // Flash the save button to indicate success
+                this.systemPromptSave.style.background = 'rgba(34, 197, 94, 0.5)';
+                setTimeout(() => {
+                    this.systemPromptSave.style.background = '';
+                }, 300);
+            }
+            
+            resetSystemPrompt() {
+                this.systemPrompt = 'You are a helpful assistant';
+                this.systemPromptTextarea.value = this.systemPrompt;
+                this.saveCurrentConversation();
+                // Flash the reset button to indicate success
+                this.systemPromptReset.style.background = 'rgba(239, 68, 68, 0.5)';
+                setTimeout(() => {
+                    this.systemPromptReset.style.background = '';
+                }, 300);
+            }
+            
+            async getAssistantResponse() {
+                this.typingIndicator.classList.add('active');
+                this.sendButton.disabled = true;
+                this.isStreaming = true;
+                this.updateSendButton();  // Update button to show "Stop"
+                
+                // Prepare messages with system prompt
+                const messagesWithSystem = [
+                    { role: 'system', content: this.systemPrompt },
+                    ...this.messages
+                ];
+                
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: this.selectedModel || 'gemini-2.0-flash',
+                            messages: messagesWithSystem,
+                            temperature: 0.7,
+                            max_tokens: 2000,
+                            stream: true  // Enable streaming
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    // Check if response is streaming
+                    const contentType = response.headers.get('content-type');
+                    console.log('Response content-type:', contentType);
+                    
+                    if (contentType && contentType.includes('text/event-stream')) {
+                        console.log('Handling streaming response...');
+                        // Handle streaming response
+                        await this.handleStreamingResponse(response);
+                    } else {
+                        console.log('Handling regular JSON response...');
+                        // Handle non-streaming response
+                        const data = await response.json();
+                        if (data.choices && data.choices[0] && data.choices[0].message) {
+                            this.addMessage('assistant', data.choices[0].message.content);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError(`Failed to get response: ${error.message}`);
+                } finally {
+                    this.typingIndicator.classList.remove('active');
+                    this.sendButton.disabled = false;
+                    this.isStreaming = false;
+                    this.currentReader = null;
+                    this.updateSendButton();  // Reset button to "Send"
+                    // Close any remaining tool popups when stream ends
+                    this.closeAllToolPopups();
+                }
+            }
+            
+            // Tool popup management methods
+            showToolCallPopup(event) {
+                const popupId = event.tool_call.id;
+                
+                // Check if popup already exists
+                if (this.toolPopups.has(popupId)) {
+                    console.log('Popup already exists for:', popupId);
+                    return;
+                }
+                
+                console.log('Creating tool call popup for:', popupId, event.tool_call.name);
+                
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.className = 'tool-popup tool-call';
+                popup.id = `popup-${popupId}`;
+                
+                // Create popup HTML
+                popup.innerHTML = `
+                    <div class="tool-popup-header">
+                        <div class="tool-popup-title">
+                            <div class="tool-popup-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                            </div>
+                            Tool Executing: ${event.tool_call.name}
+                        </div>
+                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+                    </div>
+                    <div class="tool-popup-content">
+                        <div>
+                            <strong style="color: #333; font-size: 13px;">Arguments:</strong>
+                            <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
+                        </div>
+                        <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                            <div class="tool-popup-spinner"></div>
+                            <span style="font-size: 14px; color: #666;">Waiting for response...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add to container
+                const container = document.getElementById('toolPopupContainer');
+                container.appendChild(popup);
+                
+                // Store reference
+                this.toolPopups.set(popupId, popup);
+                
+                // Set a longer timeout (30 seconds) for tools that take a while
+                // This will only trigger if no response is received
+                const timer = setTimeout(() => {
+                    // Update popup to show timeout before closing
+                    const popup = this.toolPopups.get(popupId);
+                    if (popup) {
+                        const content = popup.querySelector('.tool-popup-content');
+                        if (content) {
+                            content.innerHTML = `
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12" y2="16"></line>
+                                    </svg>
+                                    <span style="font-size: 14px; color: #FFA500; font-weight: 500;">
+                                        Tool execution timeout - no response received
+                                    </span>
+                                </div>
+                            `;
+                        }
+                        // Close after showing timeout message
+                        setTimeout(() => {
+                            this.closeToolPopup(popupId);
+                        }, 2000);
+                    }
+                }, 30000);
+                this.popupAutoCloseTimers.set(popupId, timer)
+            }
+            
+            updateToolResponsePopup(event) {
+                const popupId = event.tool_response.id;
+                console.log('Updating tool response popup for:', popupId, event.tool_response.name);
+                
+                const popup = this.toolPopups.get(popupId);
+                
+                if (!popup) {
+                    // If no existing popup, create one for the response
+                    console.log('No matching tool call popup found for response, creating new one:', popupId);
+                    this.showToolResponseOnlyPopup(event);
+                    return;
+                }
+                
+                // Clear any existing auto-close timer
+                const timer = this.popupAutoCloseTimers.get(popupId);
+                if (timer) {
+                    clearTimeout(timer);
+                    this.popupAutoCloseTimers.delete(popupId);
+                }
+                
+                // Update the popup to show the response
+                const hasError = event.tool_response.error;
+                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+                
+                // Update the icon in the header
+                const iconElement = popup.querySelector('.tool-popup-icon');
+                if (iconElement) {
+                    if (hasError) {
+                        iconElement.innerHTML = `
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        `;
+                    } else {
+                        iconElement.innerHTML = `
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                        `;
+                    }
+                }
+                
+                // Update title to show status
+                const titleElement = popup.querySelector('.tool-popup-title');
+                if (titleElement) {
+                    // Keep the icon and update the text
+                    const iconHTML = iconElement ? iconElement.outerHTML : '';
+                    titleElement.innerHTML = iconHTML + (hasError ? ` Tool Failed: ${event.tool_response.name}` : ` Tool Completed: ${event.tool_response.name}`);
+                }
+                
+                // Get existing content div
+                const content = popup.querySelector('.tool-popup-content');
+                
+                // Keep the arguments that were already displayed and add the response
+                const existingArgs = popup.querySelector('.tool-popup-args');
+                let argsHTML = '';
+                if (existingArgs) {
+                    argsHTML = existingArgs.outerHTML;
+                }
+                
+                // Build the complete content with both arguments and response
+                let responseHTML = '';
+                if (hasError) {
+                    responseHTML = `
+                        <div class="tool-popup-error">
+                            <strong>Error:</strong> ${event.tool_response.error}
+                        </div>
+                    `;
+                } else {
+                    // Format the response
+                    if (typeof event.tool_response.response === 'string') {
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">${event.tool_response.response}</div>
+                            </div>
+                        `;
+                    } else if (typeof event.tool_response.response === 'object' && event.tool_response.response !== null) {
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response"><pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre></div>
+                            </div>
+                        `;
+                    } else {
+                        responseHTML = `
+                            <div style="margin-top: 12px;">
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">Tool executed successfully</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Update content with both arguments and response
+                content.innerHTML = argsHTML + responseHTML;
+                
+                // Auto-close after 10 seconds to give user time to see the result
+                setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 10000);
+            }
+            
+            showToolResponseOnlyPopup(event) {
+                const popupId = event.tool_response.id;
+                const hasError = event.tool_response.error;
+                
+                console.log('Creating response-only popup for:', popupId, event.tool_response.name);
+                
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+                popup.id = `popup-${popupId}`;
+                
+                const iconHtml = hasError ? `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                ` : `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                `;
+                
+                // Create popup HTML
+                popup.innerHTML = `
+                    <div class="tool-popup-header">
+                        <div class="tool-popup-title">
+                            <div class="tool-popup-icon">${iconHtml}</div>
+                            ${hasError ? 'Tool Failed' : 'Tool Completed'}: ${event.tool_response.name}
+                        </div>
+                        <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+                    </div>
+                    <div class="tool-popup-content">
+                        ${hasError 
+                            ? `<div class="tool-popup-error"><strong>Error:</strong> ${event.tool_response.error}</div>`
+                            : `<div>
+                                <strong style="color: #333; font-size: 13px;">Response:</strong>
+                                <div class="tool-popup-response">
+                                    ${typeof event.tool_response.response === 'string' 
+                                        ? event.tool_response.response 
+                                        : `<pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre>`}
+                                </div>
+                               </div>`
+                        }
+                    </div>
+                `;
+                
+                // Add to container
+                const container = document.getElementById('toolPopupContainer');
+                container.appendChild(popup);
+                
+                // Store reference
+                this.toolPopups.set(popupId, popup);
+                
+                // Auto-close after 10 seconds
+                const timer = setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 10000);
+                this.popupAutoCloseTimers.set(popupId, timer);
+            }
+            
+            closeToolPopup(popupId) {
+                const popup = this.toolPopups.get(popupId);
+                if (popup) {
+                    // Clear timer if exists
+                    const timer = this.popupAutoCloseTimers.get(popupId);
+                    if (timer) {
+                        clearTimeout(timer);
+                        this.popupAutoCloseTimers.delete(popupId);
+                    }
+                    
+                    // Add fade-out animation
+                    popup.classList.add('fade-out');
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        popup.remove();
+                        this.toolPopups.delete(popupId);
+                    }, 300);
+                }
+            }
+            
+            closeAllToolPopups() {
+                for (const popupId of this.toolPopups.keys()) {
+                    this.closeToolPopup(popupId);
+                }
+            }
+            
+            async handleStreamingResponse(response) {
+                const reader = response.body.getReader();
+                this.currentReader = reader;  // Store the reader so we can cancel it
+                const decoder = new TextDecoder();
+                let assistantMessage = '';
+                let messageIndex = null;
+                
+                // Add empty assistant message with typing indicator
+                this.messages.push({ role: 'assistant', content: '', isTyping: true });
+                messageIndex = this.messages.length - 1;
+                this.renderMessages();
+                
+                try {
+                    let isStreaming = true;
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            isStreaming = false;
+                            this.isStreaming = false;
+                            this.currentReader = null;
+                            this.updateSendButton();
+                            this.messages[messageIndex].isTyping = false;
+                            this.updateMessageContent(messageIndex, assistantMessage, false);
+                            break;
+                        }
+                        
+                        const chunk = decoder.decode(value, { stream: true });
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const data = line.slice(6);
+                                if (data === '[DONE]') {
+                                    isStreaming = false;
+                                    this.isStreaming = false;
+                                    this.currentReader = null;
+                                    this.updateSendButton();
+                                    this.messages[messageIndex].isTyping = false;
+                                    this.updateMessageContent(messageIndex, assistantMessage, false);
+                                    return;
+                                }
+                                
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    
+                                    // Check for tool events
+                                    if (parsed.event_type === 'tool_call') {
+                                        console.log('Tool call event:', parsed);
+                                        console.log('Tool call ID:', parsed.tool_call?.id);
+                                        this.showToolCallPopup(parsed);
+                                    } else if (parsed.event_type === 'tool_response') {
+                                        console.log('Tool response event:', parsed);
+                                        console.log('Tool response ID (correlation):', parsed.tool_response?.id);
+                                        this.updateToolResponsePopup(parsed);
+                                    } else if (parsed.choices && parsed.choices[0]) {
+                                        // Handle regular chat completion chunks
+                                        const delta = parsed.choices[0].delta;
+                                        if (delta && delta.content) {
+                                            // Remove typing indicator on first content
+                                            if (this.messages[messageIndex].isTyping) {
+                                                this.messages[messageIndex].isTyping = false;
+                                            }
+                                            assistantMessage += delta.content;
+                                            // Update the message in real-time with streaming indicator
+                                            this.messages[messageIndex].content = assistantMessage;
+                                            this.updateMessageContent(messageIndex, assistantMessage, true);
+                                        }
+                                        
+                                        // Check for finish reason to close popups
+                                        if (parsed.choices[0].finish_reason) {
+                                            setTimeout(() => {
+                                                this.closeAllToolPopups();
+                                            }, 1000);
+                                        }
+                                    }
+                                } catch (e) {
+                                    // Ignore JSON parse errors for incomplete chunks
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Streaming error:', error);
+                    this.updateMessageContent(messageIndex, assistantMessage, false);
+                    // Close any remaining tool popups on error
+                    this.closeAllToolPopups();
+                    throw error;
+                } finally {
+                    // Ensure all tool popups are closed when streaming completes
+                    setTimeout(() => {
+                        this.closeAllToolPopups();
+                    }, 2000);
+                }
+            }
+            
+            updateMessageContent(index, content, isStreaming = false) {
+                const messageGroups = this.chatMessages.querySelectorAll('.message-group');
+                if (messageGroups[index]) {
+                    const messageContent = messageGroups[index].querySelector('.message-content');
+                    // Preserve the actions div
+                    const actions = messageContent.querySelector('.message-actions');
+                    
+                    // Add or remove streaming class
+                    if (isStreaming) {
+                        messageContent.classList.add('streaming');
+                    } else {
+                        messageContent.classList.remove('streaming');
+                    }
+                    
+                    // Render content with optional cursor
+                    let html = this.renderMarkdown(content);
+                    if (isStreaming) {
+                        html += '<span class="streaming-cursor"></span>';
+                    }
+                    
+                    messageContent.innerHTML = html;
+                    if (actions) {
+                        messageContent.appendChild(actions);
+                    }
+                    this.scrollToBottom();
+                }
+            }
+            
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                
+                const lastMessage = this.chatMessages.lastElementChild;
+                if (lastMessage) {
+                    lastMessage.appendChild(errorDiv);
+                }
+            }
+            
+            scrollToBottom() {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            updateSendButton() {
+                if (this.isStreaming) {
+                    this.sendButton.textContent = 'Stop';
+                    this.sendButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                    this.sendButton.disabled = false;  // Enable the button so user can click to stop
+                } else {
+                    this.sendButton.textContent = 'Send';
+                    this.sendButton.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                }
+            }
+            
+            async stopStreaming() {
+                if (this.currentReader) {
+                    try {
+                        await this.currentReader.cancel();
+                    } catch (error) {
+                        console.log('Stream cancellation:', error);
+                    }
+                    this.isStreaming = false;
+                    this.currentReader = null;
+                    this.typingIndicator.classList.remove('active');
+                    this.sendButton.disabled = false;
+                    this.updateSendButton();
+                }
+            }
+        }
+        
+        // Initialize the chat UI
+        const chatUI = new ChatUI();
+    </script>
+</body>
+</html>

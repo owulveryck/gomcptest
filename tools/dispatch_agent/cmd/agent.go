@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai"
 	"google.golang.org/genai"
-	"github.com/owulveryck/gomcptest/host/openaiserver/chatengine/gcp"
 )
 
 const serverPrefix = "server"
@@ -17,7 +17,7 @@ const serverPrefix = "server"
 // DispatchAgent handles tasks by directing them to appropriate tools
 type DispatchAgent struct {
 	genaiClient *genai.Client
-	gcpConfig   gcp.Configuration
+	gcpConfig   vertexai.Configuration
 	servers     []*MCPServerTool
 	tools       []*genai.Tool
 }
@@ -33,7 +33,7 @@ func NewDispatchAgent() (*DispatchAgent, error) {
 	// Configure logging
 	SetupLogging(cfg)
 
-	gcpConfig, err := gcp.LoadConfig()
+	gcpConfig, err := vertexai.LoadConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	// Set up the conversation with the LLM
 	var output strings.Builder
 	defaultModel := agent.gcpConfig.GeminiModels[0]
-	
+
 	// Prepare system instruction
 	systemInstruction := &genai.Content{
 		Role: "user",
@@ -67,10 +67,10 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			"You should not make up information. " +
 			"If you don't know something, say so and explain what you would need to know to help.")},
 	}
-	
+
 	// Add system instruction to history
 	contents := append([]*genai.Content{systemInstruction}, history...)
-	
+
 	// Add working directory information if provided
 	workingDirInstruction := ""
 	if workingPath != "" {
@@ -80,24 +80,24 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 	// Add workflow instruction to the last message
 	lastMessage := contents[len(contents)-1]
 	lastMessage.Parts = append(lastMessage.Parts, genai.NewPartFromText("You will first describe your workflow: what tool you will call, what you expect to find, and input you will give them"+workingDirInstruction))
-	
+
 	// Configure generation settings
 	temperature := float32(0.2) // Lower temperature for more deterministic responses
 	config := &genai.GenerateContentConfig{
 		Temperature: &temperature,
 	}
-	
+
 	// Add tools if available
 	if len(agent.tools) > 0 {
 		config.Tools = agent.tools
 	}
-	
+
 	// Generate content using the new API
 	res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 	if err != nil {
 		return "", fmt.Errorf("error in LLM request: %w", err)
 	}
-	
+
 	out, functionCalls := processResponse(res)
 	output.WriteString(out)
 	fmt.Println(out)
@@ -131,7 +131,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			}
 			functionResponses[i] = genai.NewPartFromFunctionResponse(functionResponse.Name, functionResponse.Response)
 		}
-		
+
 		// Add function responses to conversation
 		modelParts := make([]*genai.Part, len(functionCalls))
 		for i, fc := range functionCalls {
@@ -145,7 +145,7 @@ func (agent *DispatchAgent) ProcessTask(ctx context.Context, history []*genai.Co
 			Role:  "user",
 			Parts: functionResponses,
 		})
-		
+
 		res, err := agent.genaiClient.Models.GenerateContent(ctx, defaultModel, contents, config)
 		if err != nil {
 			// Restore original directory if we changed it
