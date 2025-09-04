@@ -822,7 +822,8 @@
             top: 20px;
             right: 20px;
             z-index: 1000;
-            max-width: 400px;
+            max-width: calc(100vw - 40px);
+            width: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -836,10 +837,11 @@
             animation: slideIn 0.3s ease-out;
             border-left: 4px solid #007AFF;
             position: relative;
-            min-width: 600px;
-            max-width: 800px;
+            min-width: 300px;
+            max-width: min(600px, calc(100vw - 40px));
             max-height: 600px;
             overflow-y: auto;
+            word-wrap: break-word;
         }
         
         .tool-popup.tool-call {
@@ -852,6 +854,25 @@
         
         .tool-popup.tool-error {
             border-left-color: #FF3B30;
+        }
+        
+        /* Adjust popup positioning when side menu is active */
+        .side-menu.active ~ .tool-popup-container {
+            max-width: calc(100vw - 340px);
+        }
+        
+        /* Ensure popup doesn't exceed available space */
+        @media (max-width: 768px) {
+            .tool-popup-container {
+                left: 10px;
+                right: 10px;
+                max-width: calc(100vw - 20px);
+            }
+            
+            .tool-popup {
+                min-width: 250px;
+                max-width: 100%;
+            }
         }
         
         .tool-popup-header {
@@ -1893,10 +1914,10 @@
                 // Update content with both arguments and response
                 content.innerHTML = argsHTML + responseHTML;
                 
-                // Auto-close after 10 seconds to give user time to see the result
+                // Auto-close after 3 seconds to give user time to see the result
                 setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 10000);
+                }, 3000);
             }
             
             showToolResponseOnlyPopup(event) {
@@ -1954,10 +1975,10 @@
                 // Store reference
                 this.toolPopups.set(popupId, popup);
                 
-                // Auto-close after 10 seconds
+                // Auto-close after 3 seconds
                 const timer = setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 10000);
+                }, 3000);
                 this.popupAutoCloseTimers.set(popupId, timer);
             }
             
