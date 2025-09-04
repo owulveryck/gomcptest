@@ -1914,10 +1914,10 @@
                 // Update content with both arguments and response
                 content.innerHTML = argsHTML + responseHTML;
                 
-                // Auto-close after 3 seconds to give user time to see the result
+                // Auto-close after 5.5 seconds to give user time to see the result
                 setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 3000);
+                }, 5500);
             }
             
             showToolResponseOnlyPopup(event) {
@@ -1975,10 +1975,10 @@
                 // Store reference
                 this.toolPopups.set(popupId, popup);
                 
-                // Auto-close after 3 seconds
+                // Auto-close after 5.5 seconds
                 const timer = setTimeout(() => {
                     this.closeToolPopup(popupId);
-                }, 3000);
+                }, 5500);
                 this.popupAutoCloseTimers.set(popupId, timer);
             }
             
@@ -2032,6 +2032,7 @@
                             this.updateSendButton();
                             this.messages[messageIndex].isTyping = false;
                             this.updateMessageContent(messageIndex, assistantMessage, false);
+                            this.saveCurrentConversation(); // Save when streaming completes
                             break;
                         }
                         
@@ -2048,6 +2049,7 @@
                                     this.updateSendButton();
                                     this.messages[messageIndex].isTyping = false;
                                     this.updateMessageContent(messageIndex, assistantMessage, false);
+                                    this.saveCurrentConversation(); // Save when streaming completes
                                     return;
                                 }
                                 
@@ -2079,6 +2081,10 @@
                                         
                                         // Check for finish reason to close popups
                                         if (parsed.choices[0].finish_reason) {
+                                            // Update final message content and save
+                                            this.messages[messageIndex].content = assistantMessage;
+                                            this.messages[messageIndex].isTyping = false;
+                                            this.saveCurrentConversation();
                                             setTimeout(() => {
                                                 this.closeAllToolPopups();
                                             }, 1000);
@@ -2093,6 +2099,7 @@
                 } catch (error) {
                     console.error('Streaming error:', error);
                     this.updateMessageContent(messageIndex, assistantMessage, false);
+                    this.saveCurrentConversation(); // Save even on error
                     // Close any remaining tool popups on error
                     this.closeAllToolPopups();
                     throw error;
