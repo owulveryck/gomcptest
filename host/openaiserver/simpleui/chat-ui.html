@@ -1771,7 +1771,7 @@
             }
             
             // Add permanent tool notification to conversation
-            addToolNotification(toolName) {
+            addToolNotification(toolName, messageIndex) {
                 // Add tool notification as a special message type
                 const toolMessage = { 
                     role: 'tool', 
@@ -1780,9 +1780,16 @@
                 };
                 
                 this.messages.push(toolMessage);
+                
+                // Now add the assistant message after the tool notification
+                this.messages.push({ role: 'assistant', content: '', isTyping: true });
+                const newMessageIndex = this.messages.length - 1;
+                
                 this.renderMessages();
                 this.saveCurrentConversation(); // Save tool notification
                 this.scrollToBottom();
+                
+                return newMessageIndex; // Return the assistant message index
             }
             
             // Tool popup management methods
@@ -2067,10 +2074,8 @@
                 let assistantMessage = '';
                 let messageIndex = null;
                 
-                // Add empty assistant message with typing indicator
-                this.messages.push({ role: 'assistant', content: '', isTyping: true });
-                messageIndex = this.messages.length - 1;
-                this.renderMessages();
+                // Don't add assistant message yet - wait for tool calls to complete first
+                // We'll add it when we get the first content or when no tools are called
                 
                 try {
                     let isStreaming = true;
@@ -2111,7 +2116,7 @@
                                     if (parsed.event_type === 'tool_call') {
                                         console.log('Tool call event:', parsed);
                                         console.log('Tool call ID:', parsed.tool_call?.id);
-                                        this.addToolNotification(parsed.tool_call.name);
+                                        messageIndex = this.addToolNotification(parsed.tool_call.name);
                                         this.showToolCallPopup(parsed);
                                     } else if (parsed.event_type === 'tool_response') {
                                         console.log('Tool response event:', parsed);
@@ -2121,6 +2126,13 @@
                                         // Handle regular chat completion chunks
                                         const delta = parsed.choices[0].delta;
                                         if (delta && delta.content) {
+                                            // If we don't have a message index yet (no tool calls), create assistant message now
+                                            if (messageIndex === null) {
+                                                this.messages.push({ role: 'assistant', content: '', isTyping: true });
+                                                messageIndex = this.messages.length - 1;
+                                                this.renderMessages();
+                                            }
+                                            
                                             // Remove typing indicator on first content
                                             if (this.messages[messageIndex].isTyping) {
                                                 this.messages[messageIndex].isTyping = false;
