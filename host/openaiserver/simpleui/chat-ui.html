@@ -689,6 +689,28 @@
             margin-top: 10px;
         }
         
+        /* Tool notification styles */
+        .tool-notification {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-size: 13px;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.3s ease-in;
+            font-style: italic;
+        }
+        
+        .tool-notification-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+        
         /* Model selector styles */
         .model-selector {
             position: relative;
@@ -1533,6 +1555,20 @@
                 this.chatMessages.innerHTML = '';
                 
                 this.messages.forEach((msg, index) => {
+                    // Handle tool notifications differently
+                    if (msg.role === 'tool') {
+                        const toolNotification = document.createElement('div');
+                        toolNotification.className = 'tool-notification';
+                        toolNotification.innerHTML = `
+                            <svg class="tool-notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                            <span>${msg.content}</span>
+                        `;
+                        this.chatMessages.appendChild(toolNotification);
+                        return;
+                    }
+                    
                     const messageGroup = document.createElement('div');
                     messageGroup.className = 'message-group';
                     
@@ -1732,6 +1768,21 @@
                     // Close any remaining tool popups when stream ends
                     this.closeAllToolPopups();
                 }
+            }
+            
+            // Add permanent tool notification to conversation
+            addToolNotification(toolName) {
+                // Add tool notification as a special message type
+                const toolMessage = { 
+                    role: 'tool', 
+                    content: `Calling tool: ${toolName}`,
+                    toolName: toolName
+                };
+                
+                this.messages.push(toolMessage);
+                this.renderMessages();
+                this.saveCurrentConversation(); // Save tool notification
+                this.scrollToBottom();
             }
             
             // Tool popup management methods
@@ -2060,6 +2111,7 @@
                                     if (parsed.event_type === 'tool_call') {
                                         console.log('Tool call event:', parsed);
                                         console.log('Tool call ID:', parsed.tool_call?.id);
+                                        this.addToolNotification(parsed.tool_call.name);
                                         this.showToolCallPopup(parsed);
                                     } else if (parsed.event_type === 'tool_response') {
                                         console.log('Tool response event:', parsed);
