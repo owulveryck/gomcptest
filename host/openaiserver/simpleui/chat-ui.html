@@ -2086,7 +2086,15 @@
                             this.isStreaming = false;
                             this.currentReader = null;
                             this.updateSendButton();
-                            this.messages[messageIndex].isTyping = false;
+                            
+                            // Handle case where no content was received but streaming is done
+                            if (messageIndex === null) {
+                                this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                                messageIndex = this.messages.length - 1;
+                            } else {
+                                this.messages[messageIndex].isTyping = false;
+                            }
+                            
                             this.updateMessageContent(messageIndex, assistantMessage, false);
                             this.saveCurrentConversation(); // Save when streaming completes
                             break;
@@ -2103,7 +2111,15 @@
                                     this.isStreaming = false;
                                     this.currentReader = null;
                                     this.updateSendButton();
-                                    this.messages[messageIndex].isTyping = false;
+                                    
+                                    // Handle case where no content was received but streaming is done
+                                    if (messageIndex === null) {
+                                        this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                                        messageIndex = this.messages.length - 1;
+                                    } else {
+                                        this.messages[messageIndex].isTyping = false;
+                                    }
+                                    
                                     this.updateMessageContent(messageIndex, assistantMessage, false);
                                     this.saveCurrentConversation(); // Save when streaming completes
                                     return;
@@ -2145,9 +2161,16 @@
                                         
                                         // Check for finish reason to close popups
                                         if (parsed.choices[0].finish_reason) {
-                                            // Update final message content and save
-                                            this.messages[messageIndex].content = assistantMessage;
-                                            this.messages[messageIndex].isTyping = false;
+                                            // If we don't have a message index yet (no content received), create assistant message now
+                                            if (messageIndex === null) {
+                                                this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                                                messageIndex = this.messages.length - 1;
+                                            } else {
+                                                // Update final message content and save
+                                                this.messages[messageIndex].content = assistantMessage;
+                                                this.messages[messageIndex].isTyping = false;
+                                            }
+                                            this.renderMessages();
                                             this.saveCurrentConversation();
                                             setTimeout(() => {
                                                 this.closeAllToolPopups();
