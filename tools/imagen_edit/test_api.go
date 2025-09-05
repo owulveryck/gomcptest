@@ -45,7 +45,7 @@ func main() {
 	}
 
 	fmt.Println("Making API call to generate content...")
-	
+
 	// Make the API call using direct method like Go example (not streaming)
 	response, err := client.Models.GenerateContent(ctx, "gemini-2.0-flash-preview-image-generation", []*genai.Content{content}, generateConfig)
 	if err != nil {
@@ -53,21 +53,21 @@ func main() {
 	}
 
 	fmt.Printf("Success! Generated %d candidates\n", len(response.Candidates))
-	
+
 	// Process response (similar to processEditResponse)
 	for i, candidate := range response.Candidates {
 		if candidate.Content == nil {
 			continue
 		}
-		
+
 		fmt.Printf("Candidate %d:\n", i+1)
 		for j, part := range candidate.Content.Parts {
 			fmt.Printf("  Part %d: Text='%s', InlineData=%v\n", j+1, part.Text, part.InlineData != nil)
-			
+
 			if part.Text != "" {
 				fmt.Printf("  Text Response: %s\n", part.Text)
 			}
-			
+
 			if part.InlineData != nil && len(part.InlineData.Data) > 0 {
 				fmt.Printf("  Image found, size: %d bytes\n", len(part.InlineData.Data))
 				// Save the image

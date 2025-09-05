@@ -156,7 +156,7 @@ func (agent *DispatchAgent) AddMCPTool(mcpClient client.MCPClient) error {
 		}
 		schema.Required = tool.InputSchema.Required
 		slog.Debug("So far, only one tool is supported, we cheat by adding appending functions to the tool")
-		
+
 		// Add tool to agent's tools
 		if len(agent.tools) == 0 {
 			agent.tools = make([]*genai.Tool, 1)

@@ -108,7 +108,7 @@ func TestMCPStructs(t *testing.T) {
 	bytes, _ := json.MarshalIndent(textResult, "", "  ")
 	fmt.Printf("Text Result struct: %s\n", bytes)
 
-	// Test errors - just print something for the test to pass 
+	// Test errors - just print something for the test to pass
 	errorMessage := "test error"
 	bytes, _ = json.MarshalIndent(errorMessage, "", "  ")
 	fmt.Printf("Error message: %s\n", bytes)

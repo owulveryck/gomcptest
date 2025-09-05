@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +9,9 @@ import (
 	"net/http/httputil"
 	"net/url"
 )
+
+//go:embed favicon.png
+var faviconPNG []byte
 
 func main() {
 	var (
@@ -41,6 +45,10 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			http.ServeFile(w, r, *htmlFile)
+		} else if r.URL.Path == "/favicon.png" {
+			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(faviconPNG)
 		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" {
 			// Add CORS headers
 			w.Header().Set("Access-Control-Allow-Origin", "*")

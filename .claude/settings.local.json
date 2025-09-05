@@ -48,7 +48,11 @@
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_evaluate",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_wait_for",
+      "Bash(git tag:*)",
+      "mcp__playwright__browser_file_upload"
     ],
     "deny": []
   }

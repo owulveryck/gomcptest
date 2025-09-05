@@ -48,7 +48,7 @@ func lsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 	if !ok {
 		return nil, errors.New("arguments must be a map")
 	}
-	
+
 	path, ok := args["path"].(string)
 	if !ok {
 		return nil, errors.New("path must be a string")

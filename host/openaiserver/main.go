@@ -139,6 +139,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ui", ServeUI)
 	mux.HandleFunc("/ui/", ServeUI)
+	mux.HandleFunc("/favicon.png", ServeFavicon)
 	mux.Handle("/", openAIHandler)
 
 	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux)

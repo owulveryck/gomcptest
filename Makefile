@@ -32,47 +32,45 @@ install: all
 	cp $(BIN_DIR)/cliGCP $(BIN_DIR)/openaiserver $(INSTALL_DIR)
 	cp $(addprefix $(BIN_DIR)/, $(TOOLS)) $(INSTALL_DIR)/bin
 
-# Special case for tools with main.go in the root directory
+# Build tools using recursive make
+$(BIN_DIR)/LS:
+	$(MAKE) -C tools/LS build
 
-$(BIN_DIR)/duckdbserver: tools/duckdbserver/main.go
-	go build -o $(BIN_DIR)/duckdbserver ./tools/duckdbserver
+$(BIN_DIR)/GrepTool:
+	$(MAKE) -C tools/GrepTool build
 
-# Rule for tools with main.go in cmd/ subdirectory
-$(BIN_DIR)/LS: tools/LS/cmd/main.go
-	go build -o $(BIN_DIR)/LS ./tools/LS/cmd
+$(BIN_DIR)/Edit:
+	$(MAKE) -C tools/Edit build
 
-$(BIN_DIR)/GrepTool: tools/GrepTool/cmd/main.go
-	go build -o $(BIN_DIR)/GrepTool ./tools/GrepTool/cmd
+$(BIN_DIR)/GlobTool:
+	$(MAKE) -C tools/GlobTool build
 
-$(BIN_DIR)/Edit: tools/Edit/cmd/main.go
-	go build -o $(BIN_DIR)/Edit ./tools/Edit/cmd
+$(BIN_DIR)/Replace:
+	$(MAKE) -C tools/Replace build
 
-$(BIN_DIR)/GlobTool: tools/GlobTool/cmd/main.go
-	go build -o $(BIN_DIR)/GlobTool ./tools/GlobTool/cmd
+$(BIN_DIR)/View:
+	$(MAKE) -C tools/View build
 
-$(BIN_DIR)/Replace: tools/Replace/cmd/main.go
-	go build -o $(BIN_DIR)/Replace ./tools/Replace/cmd
+$(BIN_DIR)/dispatch_agent:
+	$(MAKE) -C tools/dispatch_agent build
 
-$(BIN_DIR)/View: tools/View/cmd/main.go
-	go build -o $(BIN_DIR)/View ./tools/View/cmd
+$(BIN_DIR)/Bash:
+	$(MAKE) -C tools/Bash build
 
-$(BIN_DIR)/dispatch_agent: tools/dispatch_agent/cmd/main.go
-	go build -o $(BIN_DIR)/dispatch_agent ./tools/dispatch_agent/cmd
+$(BIN_DIR)/imagen:
+	$(MAKE) -C tools/imagen build
 
-$(BIN_DIR)/Bash: tools/Bash/cmd/main.go
-	go build -o $(BIN_DIR)/Bash ./tools/Bash/cmd
+$(BIN_DIR)/imagen_edit:
+	$(MAKE) -C tools/imagen_edit build
 
-$(BIN_DIR)/imagen: tools/imagen/cmd/main.go
-	go build -o $(BIN_DIR)/imagen ./tools/imagen/cmd
+$(BIN_DIR)/plantuml_check:
+	$(MAKE) -C tools/plantuml_check build
 
-$(BIN_DIR)/imagen_edit: tools/imagen_edit/cmd/main.go
-	go build -o $(BIN_DIR)/imagen_edit ./tools/imagen_edit/cmd
+$(BIN_DIR)/duckdbserver:
+	$(MAKE) -C tools/duckdbserver build
 
-$(BIN_DIR)/plantuml_check: tools/plantuml_check/cmd/main.go
-	cd tools/plantuml_check && go build -o ../../$(BIN_DIR)/plantuml_check ./cmd
-
-$(BIN_DIR)/sleep: tools/sleep/main.go
-	go build -o $(BIN_DIR)/sleep ./tools/sleep
+$(BIN_DIR)/sleep:
+	$(MAKE) -C tools/sleep build
 
 # Build and run a specific tool
 # Usage: make run TOOL=Bash
@@ -90,12 +88,12 @@ run:
 	@echo "Running $(TOOL)..."
 	@cd tools/$(TOOL)/cmd && go run main.go
 
-# Server binaries
-$(BIN_DIR)/cliGCP: host/cliGCP/cmd/main.go
-	go build -o $(BIN_DIR)/cliGCP ./host/cliGCP/cmd
+# Build servers using recursive make
+$(BIN_DIR)/cliGCP:
+	$(MAKE) -C host/cliGCP build
 
-$(BIN_DIR)/openaiserver: host/openaiserver/main.go
-	go build -o $(BIN_DIR)/openaiserver ./host/openaiserver
+$(BIN_DIR)/openaiserver:
+	$(MAKE) -C host/openaiserver build
 
 # Clean the bin directory
 clean:

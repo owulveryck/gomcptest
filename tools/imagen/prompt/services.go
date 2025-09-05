@@ -23,13 +23,13 @@ type StyleTemplate struct {
 
 // PromptAnalysis contains analysis results for a prompt
 type PromptAnalysis struct {
-	TokenCount       int
-	HasSubject       bool
-	HasContext       bool
-	HasStyle         bool
-	HasQualityMods   bool
-	Suggestions      []string
-	Score            int // 0-100
+	TokenCount     int
+	HasSubject     bool
+	HasContext     bool
+	HasStyle       bool
+	HasQualityMods bool
+	Suggestions    []string
+	Score          int // 0-100
 }
 
 // EnhancementOptions configures prompt enhancement

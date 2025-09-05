@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"google.golang.org/genai"
 	"github.com/fatih/color"
 	"github.com/peterh/liner"
+	"google.golang.org/genai"
 )
 
 // RunInteractiveMode runs the agent in interactive mode (useful for testing)
