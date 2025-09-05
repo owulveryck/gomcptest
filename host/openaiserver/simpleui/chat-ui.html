@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat UI - OpenAI Server</title>
+    <link rel="icon" type="image/png" href="data:image/png;base64,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">
     <style>
         * {
             margin: 0;
@@ -456,6 +457,95 @@
             display: flex;
             gap: 12px;
             align-items: flex-end;
+        }
+        
+        .input-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .image-preview-container {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .image-preview {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            object-fit: cover;
+        }
+        
+        .image-preview .remove-image {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            line-height: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .image-preview .remove-image:hover {
+            background: #dc2626;
+        }
+        
+        .input-controls {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        
+        .image-upload-btn {
+            padding: 8px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .image-upload-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        
+        .image-upload-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+        
+        .image-upload-input {
+            display: none;
         }
 
         .chat-input {
@@ -1185,13 +1275,28 @@
         
         <div class="chat-input-container">
             <div class="input-wrapper">
-                <textarea 
-                    id="chatInput" 
-                    class="chat-input" 
-                    placeholder="Type your message here... (Markdown supported)"
-                    rows="1"
-                ></textarea>
-                <button id="sendButton" class="send-button">Send</button>
+                <div class="input-section">
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                        <!-- Image previews will be added here -->
+                    </div>
+                    <textarea 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Type your message here... (Markdown supported)"
+                        rows="1"
+                    ></textarea>
+                </div>
+                <div class="input-controls">
+                    <button class="image-upload-btn" id="imageUploadBtn" title="Add image">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                    </button>
+                    <input type="file" id="imageUploadInput" class="image-upload-input" accept="image/*" multiple>
+                    <button id="sendButton" class="send-button">Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1217,6 +1322,7 @@
                 this.toolPopups = new Map();  // Store active tool popups
                 this.popupAutoCloseTimers = new Map();  // Store auto-close timers
                 this.systemPrompt = 'You are a helpful assistant';  // Default system prompt
+                this.selectedImages = [];  // Store selected images as base64 data URIs
                 
                 // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
@@ -1235,6 +1341,9 @@
                 this.systemPromptSave = document.getElementById('systemPromptSave');
                 this.systemPromptReset = document.getElementById('systemPromptReset');
                 this.copySelectionButton = document.getElementById('copySelectionButton');
+                this.imageUploadBtn = document.getElementById('imageUploadBtn');
+                this.imageUploadInput = document.getElementById('imageUploadInput');
+                this.imagePreviewContainer = document.getElementById('imagePreviewContainer');
                 
                 // Conversation management (after DOM elements are initialized)
                 this.conversations = this.loadConversations();
@@ -1316,6 +1425,9 @@
                 
                 // Text selection handling for copy functionality
                 this.initTextSelectionHandling();
+                
+                // Image upload handling
+                this.initImageUploadHandling();
             }
             
             // Text selection and copy functionality
@@ -1649,6 +1761,115 @@
                 return markdownContent.trim();
             }
             
+            // Image upload functionality
+            initImageUploadHandling() {
+                // Image upload button click handler
+                this.imageUploadBtn.addEventListener('click', () => {
+                    this.imageUploadInput.click();
+                });
+                
+                // File input change handler
+                this.imageUploadInput.addEventListener('change', (e) => {
+                    this.handleImageSelection(e.target.files);
+                });
+                
+                // Drag and drop support
+                this.chatInput.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+                
+                this.chatInput.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const files = Array.from(e.dataTransfer.files).filter(file => 
+                        file.type.startsWith('image/')
+                    );
+                    
+                    if (files.length > 0) {
+                        this.handleImageSelection(files);
+                    }
+                });
+            }
+            
+            async handleImageSelection(files) {
+                for (const file of files) {
+                    if (file.type.startsWith('image/')) {
+                        try {
+                            const dataURL = await this.fileToDataURL(file);
+                            this.addImagePreview(dataURL, file.name);
+                        } catch (error) {
+                            console.error('Error processing image:', error);
+                            this.showError(`Failed to process image: ${file.name}`);
+                        }
+                    }
+                }
+                
+                // Clear the file input so the same file can be selected again
+                this.imageUploadInput.value = '';
+            }
+            
+            fileToDataURL(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            addImagePreview(dataURL, fileName) {
+                // Store the image data
+                const imageData = {
+                    dataURL: dataURL,
+                    fileName: fileName,
+                    id: Date.now() + Math.random() // Simple unique ID
+                };
+                
+                this.selectedImages.push(imageData);
+                
+                // Create preview element
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                preview.dataset.imageId = imageData.id;
+                
+                preview.innerHTML = `
+                    <img src="${dataURL}" alt="${fileName}" title="${fileName}">
+                    <button class="remove-image" onclick="chatUI.removeImagePreview('${imageData.id}')">×</button>
+                `;
+                
+                this.imagePreviewContainer.appendChild(preview);
+                this.updateImagePreviewVisibility();
+            }
+            
+            removeImagePreview(imageId) {
+                // Remove from selectedImages array
+                this.selectedImages = this.selectedImages.filter(img => img.id != imageId);
+                
+                // Remove preview element
+                const preview = this.imagePreviewContainer.querySelector(`[data-image-id="${imageId}"]`);
+                if (preview) {
+                    preview.remove();
+                }
+                
+                this.updateImagePreviewVisibility();
+            }
+            
+            updateImagePreviewVisibility() {
+                if (this.selectedImages.length > 0) {
+                    this.imagePreviewContainer.style.display = 'flex';
+                } else {
+                    this.imagePreviewContainer.style.display = 'none';
+                }
+            }
+            
+            clearImagePreviews() {
+                this.selectedImages = [];
+                this.imagePreviewContainer.innerHTML = '';
+                this.updateImagePreviewVisibility();
+            }
+            
             // Conversation Management Methods
             loadConversations() {
                 const saved = localStorage.getItem('chat_conversations');
@@ -1935,6 +2156,27 @@
                 return renderer;
             }
             
+            renderMessageContent(content) {
+                if (typeof content === 'string') {
+                    // Simple text content
+                    return this.renderMarkdown(content);
+                } else if (Array.isArray(content)) {
+                    // Multimodal content with text and images
+                    let html = '';
+                    for (const item of content) {
+                        if (item.type === 'text') {
+                            html += this.renderMarkdown(item.text);
+                        } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                            html += `<div class="message-image"><img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; margin: 8px 0; border: 1px solid #e5e7eb;"></div>`;
+                        }
+                    }
+                    return html;
+                } else {
+                    // Fallback for other content types
+                    return this.renderMarkdown(String(content));
+                }
+            }
+            
             addMessage(role, content, index = null) {
                 const messageData = { role, content };
                 
@@ -1997,7 +2239,7 @@
                             </div>
                         `;
                     } else {
-                        messageContent.innerHTML = this.renderMarkdown(msg.content);
+                        messageContent.innerHTML = this.renderMessageContent(msg.content);
                     }
                     
                     const actions = document.createElement('div');
@@ -2081,13 +2323,43 @@
             }
             
             async sendMessage() {
-                const content = this.chatInput.value.trim();
-                if (!content) return;
+                const textContent = this.chatInput.value.trim();
+                if (!textContent && this.selectedImages.length === 0) return;
                 
+                // Create message content based on whether we have images
+                let messageContent;
+                if (this.selectedImages.length > 0) {
+                    // Multimodal message with images
+                    messageContent = [];
+                    
+                    // Add text content if present
+                    if (textContent) {
+                        messageContent.push({
+                            type: "text",
+                            text: textContent
+                        });
+                    }
+                    
+                    // Add images
+                    for (const image of this.selectedImages) {
+                        messageContent.push({
+                            type: "image_url",
+                            image_url: {
+                                url: image.dataURL
+                            }
+                        });
+                    }
+                } else {
+                    // Text-only message
+                    messageContent = textContent;
+                }
+                
+                // Clear inputs
                 this.chatInput.value = '';
                 this.chatInput.style.height = 'auto';
+                this.clearImagePreviews();
                 
-                this.addMessage('user', content);
+                this.addMessage('user', messageContent);
                 await this.getAssistantResponse();
             }
             
