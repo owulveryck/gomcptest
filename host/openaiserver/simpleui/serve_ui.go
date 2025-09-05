@@ -4,22 +4,39 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 )
 
-//go:embed favicon.png
-var faviconPNG []byte
+//go:embed favicon.svg
+var faviconSVG []byte
+
+//go:embed chat-ui.html.tmpl
+var chatUITemplate string
+
+// UIData represents data passed to the HTML template
+type UIData struct {
+	BaseURL string
+}
 
 func main() {
 	var (
-		uiPort   = flag.String("ui-port", "8080", "Port to serve the UI")
-		apiURL   = flag.String("api-url", "http://localhost:4000", "OpenAI server API URL")
-		htmlFile = flag.String("html", "chat-ui.html", "Path to the HTML file")
+		uiPort = flag.String("ui-port", "8080", "Port to serve the UI")
+		apiURL = flag.String("api-url", "", "OpenAI server API URL (default from OPENAISERVER_URL env var)")
 	)
 	flag.Parse()
+
+	// Get API URL from environment variable if not provided via flag
+	if *apiURL == "" {
+		*apiURL = os.Getenv("OPENAISERVER_URL")
+		if *apiURL == "" {
+			*apiURL = "http://localhost:4000" // Default fallback
+		}
+	}
 
 	// Parse the API URL
 	apiURLParsed, err := url.Parse(*apiURL)
@@ -41,14 +58,31 @@ func main() {
 		return nil
 	}
 
+	// Parse and prepare the template
+	tmpl, err := template.New("chat-ui").Parse(chatUITemplate)
+	if err != nil {
+		log.Fatalf("Failed to parse template: %v", err)
+	}
+
 	// Set up routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, *htmlFile)
-		} else if r.URL.Path == "/favicon.png" {
-			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+			// When served from simpleui, baseURL should be the API server URL
+			data := UIData{
+				BaseURL: *apiURL,
+			}
+
+			err := tmpl.Execute(w, data)
+			if err != nil {
+				http.Error(w, "Failed to execute template", http.StatusInternalServerError)
+				return
+			}
+		} else if r.URL.Path == "/favicon.svg" {
+			w.Header().Set("Content-Type", "image/svg+xml")
 			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
-			w.Write(faviconPNG)
+			w.Write(faviconSVG)
 		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" {
 			// Add CORS headers
 			w.Header().Set("Access-Control-Allow-Origin", "*")

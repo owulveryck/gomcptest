@@ -2,14 +2,20 @@ package main
 
 import (
 	_ "embed"
+	"html/template"
 	"net/http"
 )
 
-//go:embed simpleui/chat-ui.html
-var chatUIHTML []byte
+//go:embed simpleui/chat-ui.html.tmpl
+var chatUITemplate string
 
-//go:embed simpleui/favicon.png
-var faviconPNG []byte
+//go:embed simpleui/favicon.svg
+var faviconSVG []byte
+
+// UIData represents data passed to the HTML template
+type UIData struct {
+	BaseURL string
+}
 
 // ServeUI handles the /ui endpoint and serves the embedded HTML
 func ServeUI(w http.ResponseWriter, r *http.Request) {
@@ -19,13 +25,29 @@ func ServeUI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	tmpl, err := template.New("chat-ui").Parse(chatUITemplate)
+	if err != nil {
+		http.Error(w, "Failed to parse template", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(chatUIHTML)
+
+	// When served from openaiserver, baseURL should be empty (same server)
+	data := UIData{
+		BaseURL: "",
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Failed to execute template", http.StatusInternalServerError)
+		return
+	}
 }
 
-// ServeFavicon handles the /favicon.png endpoint and serves the embedded favicon
+// ServeFavicon handles the /favicon.svg endpoint and serves the embedded favicon
 func ServeFavicon(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Type", "image/svg+xml")
 	w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
-	w.Write(faviconPNG)
+	w.Write(faviconSVG)
 }

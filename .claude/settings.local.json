@@ -52,7 +52,8 @@
       "mcp__playwright__browser_snapshot",
       "mcp__playwright__browser_wait_for",
       "Bash(git tag:*)",
-      "mcp__playwright__browser_file_upload"
+      "mcp__playwright__browser_file_upload",
+      "Bash(go run:*)"
     ],
     "deny": []
   }
