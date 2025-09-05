@@ -2460,15 +2460,15 @@
                 
                 this.messages.push(toolMessage);
                 
-                // Now add the assistant message after the tool notification
-                this.messages.push({ role: 'assistant', content: '', isTyping: true });
-                const newMessageIndex = this.messages.length - 1;
+                // Don't automatically add assistant message here anymore
+                // The assistant message will be created when we actually receive content
+                // or when streaming finishes without tools
                 
                 this.renderMessages();
                 this.saveCurrentConversation(); // Save tool notification
                 this.scrollToBottom();
                 
-                return newMessageIndex; // Return the assistant message index
+                return null; // Return null since no assistant message was created
             }
             
             // Tool popup management methods
@@ -2914,8 +2914,9 @@
                                     if (parsed.event_type === 'tool_call') {
                                         console.log('Tool call event:', parsed);
                                         console.log('Tool call ID:', parsed.tool_call?.id);
-                                        messageIndex = this.addToolNotification(parsed.tool_call.name, parsed);
+                                        this.addToolNotification(parsed.tool_call.name, parsed);
                                         this.showToolCallPopup(parsed);
+                                        // Don't set messageIndex here since we're not creating an assistant message yet
                                     } else if (parsed.event_type === 'tool_response') {
                                         console.log('Tool response event:', parsed);
                                         console.log('Tool response ID (correlation):', parsed.tool_response?.id);
