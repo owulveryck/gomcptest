@@ -1056,8 +1056,9 @@
         /* Copy selection button styles */
         .copy-selection-button {
             position: fixed;
-            top: 20px;
+            top: 50%;
             right: 20px;
+            transform: translateY(-50%);
             background: #3b82f6;
             color: white;
             border: none;
@@ -1074,7 +1075,7 @@
         
         .copy-selection-button:hover {
             background: #2563eb;
-            transform: translateY(-1px);
+            transform: translateY(-50%) translateY(-1px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
         
@@ -1444,8 +1445,9 @@
                 const message = selectedMessages[0];
                 const selectedText = selection.toString().trim();
                 
-                // If the entire message is selected, return the full markdown
-                if (this.isEntireMessageSelected(message, selectedText)) {
+                // Check if user actually selected the entire message content area
+                // (not just text that happens to match most of the message)
+                if (this.isActuallyEntireMessageSelected(range, message, selectedText)) {
                     return message.content;
                 }
                 
@@ -1455,87 +1457,196 @@
             
             findMessagesInSelection(range) {
                 const selectedMessages = [];
-                const startContainer = range.startContainer;
-                const endContainer = range.endContainer;
                 
-                // Find message elements that contain the selection
-                let element = startContainer;
-                while (element && element !== this.chatMessages) {
-                    if (element.classList && element.classList.contains('message-content')) {
-                        // Find the corresponding message index
-                        const messageGroup = element.closest('.message-group');
-                        if (messageGroup) {
-                            const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
-                            const messageIndex = messageGroups.indexOf(messageGroup);
-                            if (messageIndex >= 0 && messageIndex < this.messages.length) {
-                                const message = this.messages[messageIndex];
-                                if (message && !selectedMessages.includes(message)) {
-                                    selectedMessages.push(message);
-                                }
+                // Get all message groups in the chat
+                const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
+                
+                // Check each message group to see if the selection intersects with it
+                messageGroups.forEach((messageGroup, index) => {
+                    const messageContent = messageGroup.querySelector('.message-content');
+                    if (messageContent && this.doesSelectionIntersectElement(range, messageContent)) {
+                        // Make sure we have a corresponding message in our array
+                        if (index < this.messages.length) {
+                            const message = this.messages[index];
+                            // Only include user and assistant messages (skip tool notifications)
+                            if (message && (message.role === 'user' || message.role === 'assistant') && !selectedMessages.includes(message)) {
+                                selectedMessages.push(message);
                             }
                         }
-                        break;
                     }
-                    element = element.parentElement;
-                }
+                });
                 
                 return selectedMessages;
             }
             
-            isEntireMessageSelected(message, selectedText) {
-                // Simple heuristic: if selection contains most of the message content
-                const messageText = message.content.replace(/[#*`_\[\]()]/g, '').trim();
-                const selectionText = selectedText.replace(/\s+/g, ' ').trim();
+            doesSelectionIntersectElement(range, element) {
+                try {
+                    // Create a range that spans the entire element
+                    const elementRange = document.createRange();
+                    elementRange.selectNodeContents(element);
+                    
+                    // Check if the selection range intersects with the element range
+                    return range.compareBoundaryPoints(Range.END_TO_START, elementRange) <= 0 &&
+                           range.compareBoundaryPoints(Range.START_TO_END, elementRange) >= 0;
+                } catch (e) {
+                    // Fallback: check if element contains any part of the selection
+                    return element.contains(range.startContainer) || element.contains(range.endContainer);
+                }
+            }
+            
+            isActuallyEntireMessageSelected(range, message, selectedText) {
+                // Find the message content element for this message
+                const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
+                const messageIndex = this.messages.indexOf(message);
                 
-                // If selection is more than 80% of the message, consider it "entire"
-                return selectionText.length > messageText.length * 0.8;
+                if (messageIndex < 0 || messageIndex >= messageGroups.length) {
+                    return false;
+                }
+                
+                const messageGroup = messageGroups[messageIndex];
+                const messageContent = messageGroup.querySelector('.message-content');
+                
+                if (!messageContent) {
+                    return false;
+                }
+                
+                try {
+                    // Create a range that spans the entire message content
+                    const fullMessageRange = document.createRange();
+                    fullMessageRange.selectNodeContents(messageContent);
+                    
+                    // Check if the user's selection covers most of the message content area
+                    const selectionCoversStart = range.compareBoundaryPoints(Range.START_TO_START, fullMessageRange) <= 0;
+                    const selectionCoversEnd = range.compareBoundaryPoints(Range.END_TO_END, fullMessageRange) >= 0;
+                    
+                    // Also check if the selection includes action buttons (indicating full selection)
+                    const includesActionButtons = selectedText.includes('Edit') && selectedText.includes('Replay from here');
+                    
+                    return (selectionCoversStart && selectionCoversEnd) || includesActionButtons;
+                } catch (e) {
+                    // Fallback to text-based heuristic if range comparison fails
+                    return this.isEntireMessageSelectedFallback(message, selectedText);
+                }
+            }
+            
+            isEntireMessageSelectedFallback(message, selectedText) {
+                // Clean up the selection text by removing action buttons and extra whitespace
+                const cleanSelection = selectedText
+                    .replace(/\s*Edit\s*Replay from here\s*/g, '') // Remove action buttons
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                
+                // Clean up the message content for comparison
+                const messageText = message.content
+                    .replace(/[#*`_\[\]()]/g, '') // Remove markdown formatting
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                
+                // Only consider it "entire" if the cleaned selection is very close to the full message
+                const similarityRatio = cleanSelection.length / messageText.length;
+                
+                // Be more strict - only return true if selection is 90%+ of the message
+                return similarityRatio > 0.9;
             }
             
             mapSelectionToMarkdown(markdownContent, selectedText) {
-                // This is the most complex part - mapping HTML selection back to markdown
-                // For now, we'll use a simplified approach
-                
-                // Remove extra whitespace from selection for comparison
+                // Clean up the selected text for comparison
                 const cleanSelection = selectedText.replace(/\s+/g, ' ').trim();
                 
-                // Try to find the selected text within the markdown
-                const cleanMarkdown = markdownContent.replace(/\s+/g, ' ').trim();
-                
-                if (cleanMarkdown.includes(cleanSelection)) {
-                    // Find the approximate location in the original markdown
-                    const startIndex = cleanMarkdown.indexOf(cleanSelection);
-                    const endIndex = startIndex + cleanSelection.length;
-                    
-                    // Try to map back to original markdown with formatting
-                    // This is a simplified approach - a full implementation would need
-                    // more sophisticated parsing
-                    return markdownContent.substring(
-                        this.findMarkdownIndex(markdownContent, startIndex),
-                        this.findMarkdownIndex(markdownContent, endIndex)
-                    ).trim();
+                // If the selection is very small or empty, return as is
+                if (cleanSelection.length < 3) {
+                    return selectedText;
                 }
                 
-                // Fallback to the selected text if we can't map it back
-                return selectedText;
-            }
-            
-            findMarkdownIndex(markdown, targetIndex) {
-                // Helper method to find approximate positions in markdown
-                // accounting for formatting characters
-                let realIndex = 0;
-                let virtualIndex = 0;
+                // Try exact substring match first (for simple cases)
+                if (markdownContent.includes(cleanSelection)) {
+                    const startIndex = markdownContent.indexOf(cleanSelection);
+                    const endIndex = startIndex + cleanSelection.length;
+                    return markdownContent.substring(startIndex, endIndex);
+                }
                 
-                for (let i = 0; i < markdown.length && virtualIndex < targetIndex; i++) {
-                    const char = markdown[i];
-                    realIndex = i;
+                // For more complex cases, try to find approximate matches
+                // Split into words and try to find word sequences
+                const selectionWords = cleanSelection.split(/\s+/);
+                const markdownWords = markdownContent.split(/\s+/);
+                
+                if (selectionWords.length >= 3) {
+                    // Look for a sequence of at least 3 words
+                    const firstWords = selectionWords.slice(0, 3).join(' ');
+                    const lastWords = selectionWords.slice(-3).join(' ');
                     
-                    // Skip markdown formatting characters in virtual count
-                    if (!/[#*`_\[\]()]/.test(char) && !/\s/.test(char)) {
-                        virtualIndex++;
+                    // Find approximate start and end positions
+                    let startPos = markdownContent.indexOf(firstWords);
+                    let endPos = markdownContent.lastIndexOf(lastWords);
+                    
+                    if (startPos >= 0 && endPos >= 0 && endPos >= startPos) {
+                        endPos += lastWords.length;
+                        return markdownContent.substring(startPos, endPos).trim();
                     }
                 }
                 
-                return Math.min(realIndex, markdown.length);
+                // Advanced approach: try to match by removing HTML formatting effects
+                const renderedContent = this.renderMarkdown(markdownContent);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = renderedContent;
+                const renderedText = tempDiv.textContent || tempDiv.innerText || '';
+                const cleanRendered = renderedText.replace(/\s+/g, ' ').trim();
+                
+                if (cleanRendered.includes(cleanSelection)) {
+                    const startIndex = cleanRendered.indexOf(cleanSelection);
+                    const endIndex = startIndex + cleanSelection.length;
+                    
+                    // Try to map character positions back to markdown
+                    return this.mapRenderedPositionsToMarkdown(markdownContent, renderedText, startIndex, endIndex);
+                }
+                
+                // If all else fails, return the selection as-is
+                return selectedText;
+            }
+            
+            mapRenderedPositionsToMarkdown(markdownContent, renderedText, startPos, endPos) {
+                // This function attempts to map positions in rendered text back to markdown
+                let markdownPos = 0;
+                let renderedPos = 0;
+                let markdownStart = -1;
+                let markdownEnd = -1;
+                
+                // Walk through the markdown character by character
+                while (markdownPos < markdownContent.length && renderedPos <= Math.max(startPos, endPos)) {
+                    const markdownChar = markdownContent[markdownPos];
+                    
+                    // Skip markdown formatting characters that don't appear in rendered text
+                    if (/[*_`#\[\]()]/.test(markdownChar)) {
+                        markdownPos++;
+                        continue;
+                    }
+                    
+                    // Mark start position
+                    if (renderedPos === startPos && markdownStart === -1) {
+                        markdownStart = markdownPos;
+                    }
+                    
+                    // Mark end position
+                    if (renderedPos === endPos && markdownEnd === -1) {
+                        markdownEnd = markdownPos;
+                        break;
+                    }
+                    
+                    markdownPos++;
+                    renderedPos++;
+                }
+                
+                // If we found both positions, return the substring
+                if (markdownStart >= 0 && markdownEnd >= 0) {
+                    return markdownContent.substring(markdownStart, markdownEnd).trim();
+                }
+                
+                // Fallback: return a reasonable portion of the markdown
+                if (markdownStart >= 0) {
+                    return markdownContent.substring(markdownStart, Math.min(markdownStart + (endPos - startPos), markdownContent.length)).trim();
+                }
+                
+                return markdownContent.trim();
             }
             
             // Conversation Management Methods
