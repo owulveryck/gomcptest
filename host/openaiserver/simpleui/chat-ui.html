@@ -1052,12 +1052,65 @@
                 transform: translateX(100%);
             }
         }
+        
+        /* Copy selection button styles */
+        .copy-selection-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            z-index: 1001;
+            transition: all 0.2s ease;
+            display: none;
+        }
+        
+        .copy-selection-button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .copy-selection-button.success {
+            background: #10b981;
+        }
+        
+        .copy-selection-button.success:hover {
+            background: #059669;
+        }
+        
+        /* Adjust copy button position when side menu is active */
+        .side-menu.active ~ * .copy-selection-button,
+        .side-menu.active + * .copy-selection-button {
+            right: 320px; /* 300px menu width + 20px margin */
+        }
+        
+        /* Alternative approach - use body class to control positioning */
+        .side-menu-open .copy-selection-button {
+            right: 320px; /* 300px menu width + 20px margin */
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <!-- Tool Event Popup Container -->
     <div class="tool-popup-container" id="toolPopupContainer"></div>
+    
+    <!-- Copy Selection Button -->
+    <button class="copy-selection-button" id="copySelectionButton">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy
+    </button>
     
     <!-- Side Menu -->
     <div class="side-menu" id="sideMenu">
@@ -1180,6 +1233,7 @@
                 this.systemPromptTextarea = document.getElementById('systemPromptTextarea');
                 this.systemPromptSave = document.getElementById('systemPromptSave');
                 this.systemPromptReset = document.getElementById('systemPromptReset');
+                this.copySelectionButton = document.getElementById('copySelectionButton');
                 
                 // Conversation management (after DOM elements are initialized)
                 this.conversations = this.loadConversations();
@@ -1258,6 +1312,230 @@
                 
                 // Auto-save on message send
                 this.originalSendMessage = this.sendMessage.bind(this);
+                
+                // Text selection handling for copy functionality
+                this.initTextSelectionHandling();
+            }
+            
+            // Text selection and copy functionality
+            initTextSelectionHandling() {
+                // Track text selection in chat messages
+                document.addEventListener('selectionchange', () => {
+                    this.handleSelectionChange();
+                });
+                
+                // Copy button click handler
+                this.copySelectionButton.addEventListener('click', () => {
+                    this.copySelectedMarkdown();
+                });
+                
+                // Hide copy button when clicking elsewhere (but not immediately)
+                document.addEventListener('click', (e) => {
+                    if (!this.copySelectionButton.contains(e.target)) {
+                        // Use a small delay to allow selection change event to fire first
+                        setTimeout(() => {
+                            const selection = window.getSelection();
+                            if (selection.rangeCount === 0 || selection.isCollapsed) {
+                                this.hideCopyButton();
+                            }
+                        }, 10);
+                    }
+                });
+            }
+            
+            handleSelectionChange() {
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0 || selection.isCollapsed) {
+                    this.hideCopyButton();
+                    return;
+                }
+                
+                // Check if selection is within chat messages
+                const range = selection.getRangeAt(0);
+                const chatMessagesContainer = this.chatMessages;
+                
+                if (!chatMessagesContainer.contains(range.commonAncestorContainer)) {
+                    this.hideCopyButton();
+                    return;
+                }
+                
+                // Show copy button near selection
+                this.showCopyButton(range);
+            }
+            
+            showCopyButton(range) {
+                const button = this.copySelectionButton;
+                
+                // Show button in fixed position (CSS handles positioning)
+                button.style.display = 'block';
+                
+                // Reset button state
+                button.className = 'copy-selection-button';
+                button.innerHTML = `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                `;
+            }
+            
+            hideCopyButton() {
+                this.copySelectionButton.style.display = 'none';
+            }
+            
+            async copySelectedMarkdown() {
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0 || selection.isCollapsed) {
+                    return;
+                }
+                
+                try {
+                    // Get the markdown source for the selected content
+                    const markdownText = this.extractMarkdownFromSelection(selection);
+                    
+                    // Copy to clipboard
+                    await navigator.clipboard.writeText(markdownText);
+                    
+                    // Show success feedback
+                    const button = this.copySelectionButton;
+                    button.className = 'copy-selection-button success';
+                    button.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                        Copied!
+                    `;
+                    
+                    // Hide button after short delay
+                    setTimeout(() => {
+                        this.hideCopyButton();
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('Failed to copy text:', error);
+                    
+                    // Show error feedback
+                    const button = this.copySelectionButton;
+                    button.innerHTML = 'Failed to copy';
+                    setTimeout(() => {
+                        this.hideCopyButton();
+                    }, 2000);
+                }
+            }
+            
+            extractMarkdownFromSelection(selection) {
+                const range = selection.getRangeAt(0);
+                
+                // Find which message(s) the selection spans
+                const selectedMessages = this.findMessagesInSelection(range);
+                
+                if (selectedMessages.length === 0) {
+                    // Fallback to plain text if we can't find the source
+                    return selection.toString();
+                }
+                
+                // If selection spans multiple messages, combine their markdown
+                if (selectedMessages.length > 1) {
+                    return selectedMessages.map(msg => msg.content).join('\n\n');
+                }
+                
+                // Single message - try to extract the relevant portion
+                const message = selectedMessages[0];
+                const selectedText = selection.toString().trim();
+                
+                // If the entire message is selected, return the full markdown
+                if (this.isEntireMessageSelected(message, selectedText)) {
+                    return message.content;
+                }
+                
+                // Try to map the selected HTML back to markdown portions
+                return this.mapSelectionToMarkdown(message.content, selectedText);
+            }
+            
+            findMessagesInSelection(range) {
+                const selectedMessages = [];
+                const startContainer = range.startContainer;
+                const endContainer = range.endContainer;
+                
+                // Find message elements that contain the selection
+                let element = startContainer;
+                while (element && element !== this.chatMessages) {
+                    if (element.classList && element.classList.contains('message-content')) {
+                        // Find the corresponding message index
+                        const messageGroup = element.closest('.message-group');
+                        if (messageGroup) {
+                            const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
+                            const messageIndex = messageGroups.indexOf(messageGroup);
+                            if (messageIndex >= 0 && messageIndex < this.messages.length) {
+                                const message = this.messages[messageIndex];
+                                if (message && !selectedMessages.includes(message)) {
+                                    selectedMessages.push(message);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    element = element.parentElement;
+                }
+                
+                return selectedMessages;
+            }
+            
+            isEntireMessageSelected(message, selectedText) {
+                // Simple heuristic: if selection contains most of the message content
+                const messageText = message.content.replace(/[#*`_\[\]()]/g, '').trim();
+                const selectionText = selectedText.replace(/\s+/g, ' ').trim();
+                
+                // If selection is more than 80% of the message, consider it "entire"
+                return selectionText.length > messageText.length * 0.8;
+            }
+            
+            mapSelectionToMarkdown(markdownContent, selectedText) {
+                // This is the most complex part - mapping HTML selection back to markdown
+                // For now, we'll use a simplified approach
+                
+                // Remove extra whitespace from selection for comparison
+                const cleanSelection = selectedText.replace(/\s+/g, ' ').trim();
+                
+                // Try to find the selected text within the markdown
+                const cleanMarkdown = markdownContent.replace(/\s+/g, ' ').trim();
+                
+                if (cleanMarkdown.includes(cleanSelection)) {
+                    // Find the approximate location in the original markdown
+                    const startIndex = cleanMarkdown.indexOf(cleanSelection);
+                    const endIndex = startIndex + cleanSelection.length;
+                    
+                    // Try to map back to original markdown with formatting
+                    // This is a simplified approach - a full implementation would need
+                    // more sophisticated parsing
+                    return markdownContent.substring(
+                        this.findMarkdownIndex(markdownContent, startIndex),
+                        this.findMarkdownIndex(markdownContent, endIndex)
+                    ).trim();
+                }
+                
+                // Fallback to the selected text if we can't map it back
+                return selectedText;
+            }
+            
+            findMarkdownIndex(markdown, targetIndex) {
+                // Helper method to find approximate positions in markdown
+                // accounting for formatting characters
+                let realIndex = 0;
+                let virtualIndex = 0;
+                
+                for (let i = 0; i < markdown.length && virtualIndex < targetIndex; i++) {
+                    const char = markdown[i];
+                    realIndex = i;
+                    
+                    // Skip markdown formatting characters in virtual count
+                    if (!/[#*`_\[\]()]/.test(char) && !/\s/.test(char)) {
+                        virtualIndex++;
+                    }
+                }
+                
+                return Math.min(realIndex, markdown.length);
             }
             
             // Conversation Management Methods
