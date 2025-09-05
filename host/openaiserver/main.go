@@ -52,7 +52,7 @@ func createMCPClient(server string) (client.MCPClient, error) {
 	if len(env) == 0 {
 		env = nil
 	}
-	if len(args) > 1 {
+	if len(args) > 0 {
 		// TODO: process environment variables
 		slog.Info("Registering", "command", cmd, "args", args, "env", env)
 		mcpClient, err = client.NewStdioMCPClient(cmd, env, args...)
