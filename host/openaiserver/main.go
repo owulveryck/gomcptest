@@ -140,6 +140,7 @@ func main() {
 	mux.HandleFunc("/ui", ServeUI)
 	mux.HandleFunc("/ui/", ServeUI)
 	mux.HandleFunc("/favicon.svg", ServeFavicon)
+	mux.HandleFunc("/apple-touch-icon-180x180.png", ServeAppleTouchIcon)
 	mux.Handle("/", openAIHandler)
 
 	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux)

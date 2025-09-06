@@ -53,7 +53,15 @@
       "mcp__playwright__browser_wait_for",
       "Bash(git tag:*)",
       "mcp__playwright__browser_file_upload",
-      "Bash(go run:*)"
+      "Bash(go run:*)",
+      "Bash(/Users/olivier.wulveryck/openaiserver/bin/wardleyMCP:*)",
+      "Bash(./bin/openaiserver:*)",
+      "Bash(./simpleui:*)",
+      "Bash(./host/openaiserver/simpleui/simpleui)",
+      "Bash(PORT=4000 ./bin/openaiserver -mcpservers=\"./bin/Bash\" -withAllEvents)",
+      "mcp__playwright__browser_resize",
+      "Bash(convert:*)",
+      "Bash(magick:*)"
     ],
     "deny": []
   }

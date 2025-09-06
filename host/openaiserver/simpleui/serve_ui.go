@@ -15,6 +15,9 @@ import (
 //go:embed favicon.svg
 var faviconSVG []byte
 
+//go:embed apple-touch-icon-180x180.png
+var appleTouchIcon []byte
+
 //go:embed chat-ui.html.tmpl
 var chatUITemplate string
 
@@ -83,6 +86,10 @@ func main() {
 			w.Header().Set("Content-Type", "image/svg+xml")
 			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
 			w.Write(faviconSVG)
+		} else if r.URL.Path == "/apple-touch-icon-180x180.png" {
+			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(appleTouchIcon)
 		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" {
 			// Add CORS headers
 			w.Header().Set("Access-Control-Allow-Origin", "*")
