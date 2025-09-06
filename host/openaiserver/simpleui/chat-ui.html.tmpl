@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AgentFlow">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1a2e">
     <title>AgentFlow - Agentic System Chat</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
     <style>
         * {
             margin: 0;
@@ -16,11 +22,16 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 0;
             margin: 0;
+            /* Prevent iOS bounce scroll */
+            overscroll-behavior: none;
+            /* Ensure touch actions work properly */
+            touch-action: manipulation;
         }
 
         /* Side Menu Styles */
@@ -263,6 +274,7 @@
             width: 100%;
             max-width: 100%;
             height: 100vh;
+            height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1187,6 +1199,134 @@
         .side-menu-open .copy-selection-button {
             right: 320px; /* 300px menu width + 20px margin */
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .side-menu.active ~ .chat-container {
+                margin-left: 0; /* No margin shift on mobile */
+            }
+            
+            .side-menu {
+                width: 85vw; /* Use most of screen width on mobile */
+                max-width: 300px;
+            }
+            
+            .menu-trigger {
+                left: 10px; /* Move trigger in a bit from edge */
+                width: 35px;
+                height: 50px;
+                background: rgba(26, 26, 46, 0.8);
+                backdrop-filter: blur(15px);
+                border-radius: 0 8px 8px 0;
+            }
+            
+            .chat-header {
+                padding: 15px 15px;
+            }
+            
+            .chat-messages {
+                padding: 10px 15px;
+            }
+            
+            .chat-input-container {
+                padding: 10px 15px;
+                /* Ensure input area is above virtual keyboard */
+                padding-bottom: env(safe-area-inset-bottom, 10px);
+            }
+            
+            .chat-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+                min-height: 44px; /* Minimum touch target size */
+            }
+            
+            .send-button {
+                min-height: 44px; /* Minimum touch target size */
+                min-width: 44px;
+                padding: 11px 16px;
+            }
+            
+            .image-upload-btn {
+                min-height: 44px; /* Minimum touch target size */
+                min-width: 44px;
+            }
+            
+            /* Improve message avatars on mobile */
+            .avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .message {
+                gap: 10px;
+            }
+            
+            /* Improve action buttons on mobile */
+            .action-button {
+                padding: 8px 12px;
+                min-height: 36px;
+                font-size: 13px;
+            }
+            
+            /* Optimize tool popups for mobile */
+            .tool-popup-container {
+                left: 10px;
+                right: 10px;
+                top: 10px;
+                max-width: calc(100vw - 20px);
+            }
+            
+            .tool-popup {
+                min-width: auto;
+                max-width: 100%;
+            }
+        }
+
+        /* iPhone specific optimizations */
+        @media (max-width: 480px) {
+            .header-left h1 {
+                font-size: 18px;
+            }
+            
+            .model-button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .system-prompt-textarea {
+                min-height: 60px;
+            }
+            
+            .conversation-item {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            /* Optimize for one-handed use */
+            .side-menu-header {
+                padding: 15px;
+            }
+            
+            .new-chat-btn {
+                padding: 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* Handle safe areas for iPhone notch */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .chat-header {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+            
+            .side-menu {
+                padding-top: env(safe-area-inset-top);
+            }
+            
+            .chat-input-container {
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -1304,8 +1444,8 @@
     <script>
         class ChatUI {
             constructor() {
-                // Use baseURL provided by the server template
-                this.baseUrl = '{{.BaseURL}}';
+                // Use relative URLs when served through simpleui proxy
+                this.baseUrl = '';
                 this.apiUrl = this.baseUrl + '/v1/chat/completions';
                     
                 this.messages = [];
@@ -2194,6 +2334,7 @@
                     if (msg.role === 'tool') {
                         const toolNotification = document.createElement('div');
                         toolNotification.className = 'tool-notification';
+                        toolNotification.style.animation = 'fadeIn 0.3s ease-in';
                         toolNotification.innerHTML = `
                             <svg class="tool-notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
@@ -2455,19 +2596,21 @@
                 
                 this.messages.push(toolMessage);
                 
-                // Don't automatically add assistant message here anymore
-                // The assistant message will be created when we actually receive content
-                // or when streaming finishes without tools
-                
+                // Force re-render to show the tool notification immediately
                 this.renderMessages();
                 this.saveCurrentConversation(); // Save tool notification
                 this.scrollToBottom();
                 
-                return null; // Return null since no assistant message was created
+                return this.messages.length - 1; // Return the index of the tool message
             }
             
             // Tool popup management methods
             showToolCallPopup(event) {
+                if (!event || !event.tool_call || !event.tool_call.id) {
+                    console.error('Invalid tool call event for popup:', event);
+                    return;
+                }
+                
                 const popupId = event.tool_call.id;
                 
                 // Check if popup already exists
@@ -2905,18 +3048,43 @@
                                 try {
                                     const parsed = JSON.parse(data);
                                     
-                                    // Check for tool events
+                                    // Enhanced debugging with more details
+                                    if (parsed.event_type) {
+                                        console.log('🔧 Tool event received:', {
+                                            type: parsed.event_type,
+                                            object: parsed.object,
+                                            data: parsed
+                                        });
+                                    }
+                                    
+                                    // Check for tool events with comprehensive validation
                                     if (parsed.event_type === 'tool_call') {
-                                        console.log('Tool call event:', parsed);
-                                        console.log('Tool call ID:', parsed.tool_call?.id);
-                                        this.addToolNotification(parsed.tool_call.name, parsed);
-                                        this.showToolCallPopup(parsed);
-                                        // Don't set messageIndex here since we're not creating an assistant message yet
+                                        console.log('🚀 Tool call event detected:', parsed);
+                                        if (parsed.tool_call && parsed.tool_call.name && parsed.tool_call.id) {
+                                            console.log('✅ Valid tool call, adding notification and popup');
+                                            this.addToolNotification(parsed.tool_call.name, parsed);
+                                            this.showToolCallPopup(parsed);
+                                        } else {
+                                            console.warn('❌ Invalid tool call event structure:', {
+                                                hasToolCall: !!parsed.tool_call,
+                                                hasName: !!(parsed.tool_call && parsed.tool_call.name),
+                                                hasId: !!(parsed.tool_call && parsed.tool_call.id),
+                                                fullData: parsed
+                                            });
+                                        }
                                     } else if (parsed.event_type === 'tool_response') {
-                                        console.log('Tool response event:', parsed);
-                                        console.log('Tool response ID (correlation):', parsed.tool_response?.id);
-                                        this.updateToolResponsePopup(parsed);
-                                        this.storeToolResponse(parsed);
+                                        console.log('📥 Tool response event detected:', parsed);
+                                        if (parsed.tool_response && parsed.tool_response.id) {
+                                            console.log('✅ Valid tool response, updating popup');
+                                            this.updateToolResponsePopup(parsed);
+                                            this.storeToolResponse(parsed);
+                                        } else {
+                                            console.warn('❌ Invalid tool response event structure:', {
+                                                hasToolResponse: !!parsed.tool_response,
+                                                hasId: !!(parsed.tool_response && parsed.tool_response.id),
+                                                fullData: parsed
+                                            });
+                                        }
                                     } else if (parsed.choices && parsed.choices[0]) {
                                         // Handle regular chat completion chunks
                                         const delta = parsed.choices[0].delta;
@@ -2957,7 +3125,10 @@
                                         }
                                     }
                                 } catch (e) {
-                                    // Ignore JSON parse errors for incomplete chunks
+                                    // Log JSON parse errors for debugging, but continue processing
+                                    if (data.trim() && !data.includes('[DONE]')) {
+                                        console.debug('JSON parse error for chunk:', data, 'Error:', e.message);
+                                    }
                                 }
                             }
                         }
@@ -3049,6 +3220,35 @@
         
         // Initialize the chat UI
         const chatUI = new ChatUI();
+        
+        // Debug function for testing tool popups (only available in development)
+        window.testToolPopup = function() {
+            const testEvent = {
+                event_type: 'tool_call',
+                tool_call: {
+                    id: 'test_call_123',
+                    name: 'TestTool',
+                    arguments: { test: 'argument' }
+                }
+            };
+            console.log('🧪 Testing tool popup with:', testEvent);
+            chatUI.addToolNotification(testEvent.tool_call.name, testEvent);
+            chatUI.showToolCallPopup(testEvent);
+            
+            // Simulate response after 2 seconds
+            setTimeout(() => {
+                const responseEvent = {
+                    event_type: 'tool_response',
+                    tool_response: {
+                        id: 'test_call_123',
+                        name: 'TestTool',
+                        response: 'Test response successful'
+                    }
+                };
+                console.log('🧪 Testing tool response with:', responseEvent);
+                chatUI.updateToolResponsePopup(responseEvent);
+            }, 2000);
+        };
     </script>
 </body>
 </html>
