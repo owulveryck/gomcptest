@@ -15,7 +15,7 @@ import (
 
 // from the examples of https://platform.openai.com/docs/api-reference/models
 type dummyEngine struct {
-	c chan ChatCompletionStreamResponse
+	c chan StreamEvent
 }
 
 // AddMCPTool registers an MCPClient, enabling the ChatServer to utilize the client's
@@ -24,7 +24,7 @@ func (dummyengine *dummyEngine) AddMCPTool(_ client.MCPClient) error {
 	panic("not implemented") // TODO: Implement
 }
 
-func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan ChatCompletionStreamResponse, error) {
+func (dummyengine *dummyEngine) SendStreamingChatRequest(_ context.Context, _ ChatCompletionRequest) (<-chan StreamEvent, error) {
 	go func() {
 		for i, v := range "It Works!" {
 			dummyengine.c <- ChatCompletionStreamResponse{

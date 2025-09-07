@@ -18,6 +18,13 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 		return
 	}
 
+	// Process system messages through template middleware
+	templateMiddleware := NewTemplateMiddleware()
+	if err := templateMiddleware.ProcessRequest(&req); err != nil {
+		http.Error(w, "Error processing template", http.StatusInternalServerError)
+		return
+	}
+
 	ctx := r.Context()
 	stream, err := o.c.SendStreamingChatRequest(ctx, req)
 	if err != nil {

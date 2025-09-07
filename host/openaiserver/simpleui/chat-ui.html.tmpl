@@ -1368,8 +1368,9 @@
             <textarea 
                 id="systemPromptTextarea" 
                 class="system-prompt-textarea" 
-                placeholder="Enter system prompt (default: You are a helpful assistant)"
-            >You are a helpful assistant</textarea>
+                placeholder="Enter system prompt (default: You are a helpful assistant with current time)"
+            >You are a helpful assistant.
+Current time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}</textarea>
             <div class="system-prompt-actions">
                 <button id="systemPromptSave" class="system-prompt-btn system-prompt-save">Save</button>
                 <button id="systemPromptReset" class="system-prompt-btn system-prompt-reset">Reset</button>
@@ -1457,7 +1458,7 @@
                 this.isStreaming = false;   // Track streaming state
                 this.toolPopups = new Map();  // Store active tool popups
                 this.popupAutoCloseTimers = new Map();  // Store auto-close timers
-                this.systemPrompt = 'You are a helpful assistant';  // Default system prompt
+                this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';  // Default system prompt
                 this.selectedImages = [];  // Store selected images as base64 data URIs
                 
                 // DOM elements (must be initialized first)
@@ -1539,7 +1540,7 @@
                 
                 // Auto-save system prompt on change
                 this.systemPromptTextarea.addEventListener('change', () => {
-                    this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                    this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
                 });
                 
                 // Menu trigger handling
@@ -2056,7 +2057,7 @@
                     this.currentConversationId = id;
                     this.messages = [...this.conversations[id].messages];
                     // Load system prompt from conversation
-                    this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant';
+                    this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
                     this.systemPromptTextarea.value = this.systemPrompt;
                     this.renderMessages();
                     this.renderConversationsList();
@@ -2501,7 +2502,7 @@
             }
             
             saveSystemPrompt() {
-                this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant';
+                this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
                 this.saveCurrentConversation();
                 // Flash the save button to indicate success
                 this.systemPromptSave.style.background = 'rgba(34, 197, 94, 0.5)';
@@ -2511,7 +2512,7 @@
             }
             
             resetSystemPrompt() {
-                this.systemPrompt = 'You are a helpful assistant';
+                this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
                 this.systemPromptTextarea.value = this.systemPrompt;
                 this.saveCurrentConversation();
                 // Flash the reset button to indicate success
