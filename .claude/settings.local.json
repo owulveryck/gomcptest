@@ -61,7 +61,9 @@
       "Bash(PORT=4000 ./bin/openaiserver -mcpservers=\"./bin/Bash\" -withAllEvents)",
       "mcp__playwright__browser_resize",
       "Bash(convert:*)",
-      "Bash(magick:*)"
+      "Bash(magick:*)",
+      "Bash(./bin/simpleui:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }
