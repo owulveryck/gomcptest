@@ -25,3 +25,4 @@ sandbox/
 # OS specific files
 .DS_Store
 host/.claude/settings.local.json
+.playwright-mcp/
