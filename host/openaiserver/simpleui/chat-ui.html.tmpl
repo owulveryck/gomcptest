@@ -1707,20 +1707,36 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             findMessagesInSelection(range) {
                 const selectedMessages = [];
                 
-                // Get all message groups in the chat
+                // Get all message groups in the chat (excludes tool notifications)
                 const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
                 
-                // Check each message group to see if the selection intersects with it
-                messageGroups.forEach((messageGroup, index) => {
+                // Create a mapping between DOM elements and message indices
+                let messageIndex = 0;
+                
+                messageGroups.forEach((messageGroup) => {
                     const messageContent = messageGroup.querySelector('.message-content');
                     if (messageContent && this.doesSelectionIntersectElement(range, messageContent)) {
-                        // Make sure we have a corresponding message in our array
-                        if (index < this.messages.length) {
-                            const message = this.messages[index];
-                            // Only include user and assistant messages (skip tool notifications)
-                            if (message && (message.role === 'user' || message.role === 'assistant') && !selectedMessages.includes(message)) {
-                                selectedMessages.push(message);
+                        // Find the corresponding message in our array (skip tool notifications)
+                        while (messageIndex < this.messages.length) {
+                            const message = this.messages[messageIndex];
+                            if (message && (message.role === 'user' || message.role === 'assistant')) {
+                                if (!selectedMessages.includes(message)) {
+                                    selectedMessages.push(message);
+                                }
+                                messageIndex++;
+                                break;
                             }
+                            messageIndex++;
+                        }
+                    } else {
+                        // Skip this message group, advance index to next user/assistant message
+                        while (messageIndex < this.messages.length) {
+                            const message = this.messages[messageIndex];
+                            if (message && (message.role === 'user' || message.role === 'assistant')) {
+                                messageIndex++;
+                                break;
+                            }
+                            messageIndex++;
                         }
                     }
                 });
@@ -1746,14 +1762,27 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             isActuallyEntireMessageSelected(range, message, selectedText) {
                 // Find the message content element for this message
                 const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
-                const messageIndex = this.messages.indexOf(message);
                 
-                if (messageIndex < 0 || messageIndex >= messageGroups.length) {
+                // Find the correct DOM element for this message by matching content
+                let targetMessageGroup = null;
+                let domMessageIndex = 0;
+                
+                for (let i = 0; i < this.messages.length; i++) {
+                    const msg = this.messages[i];
+                    if (msg.role === 'user' || msg.role === 'assistant') {
+                        if (msg === message) {
+                            targetMessageGroup = messageGroups[domMessageIndex];
+                            break;
+                        }
+                        domMessageIndex++;
+                    }
+                }
+                
+                if (!targetMessageGroup) {
                     return false;
                 }
                 
-                const messageGroup = messageGroups[messageIndex];
-                const messageContent = messageGroup.querySelector('.message-content');
+                const messageContent = targetMessageGroup.querySelector('.message-content');
                 
                 if (!messageContent) {
                     return false;
@@ -1807,96 +1836,75 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     return selectedText;
                 }
                 
+                // Remove action buttons from selection if present
+                const cleanSelectionNoButtons = cleanSelection
+                    .replace(/\s*Edit\s*Replay from here\s*/g, '')
+                    .replace(/\s*Edit\s*/g, '')
+                    .replace(/\s*Replay from here\s*/g, '')
+                    .trim();
+                
                 // Try exact substring match first (for simple cases)
+                if (markdownContent.includes(cleanSelectionNoButtons)) {
+                    const startIndex = markdownContent.indexOf(cleanSelectionNoButtons);
+                    const endIndex = startIndex + cleanSelectionNoButtons.length;
+                    return markdownContent.substring(startIndex, endIndex);
+                }
+                
+                // Try direct match with cleaned selection
                 if (markdownContent.includes(cleanSelection)) {
                     const startIndex = markdownContent.indexOf(cleanSelection);
                     const endIndex = startIndex + cleanSelection.length;
                     return markdownContent.substring(startIndex, endIndex);
                 }
                 
-                // For more complex cases, try to find approximate matches
-                // Split into words and try to find word sequences
-                const selectionWords = cleanSelection.split(/\s+/);
-                const markdownWords = markdownContent.split(/\s+/);
+                // Split into words and look for word sequences
+                const selectionWords = cleanSelectionNoButtons.split(/\s+/).filter(w => w.length > 0);
                 
-                if (selectionWords.length >= 3) {
-                    // Look for a sequence of at least 3 words
-                    const firstWords = selectionWords.slice(0, 3).join(' ');
-                    const lastWords = selectionWords.slice(-3).join(' ');
+                if (selectionWords.length >= 2) {
+                    // Look for the first few and last few words to find boundaries
+                    const numWordsToMatch = Math.min(3, Math.floor(selectionWords.length / 2));
+                    const firstWords = selectionWords.slice(0, numWordsToMatch).join(' ');
+                    const lastWords = selectionWords.slice(-numWordsToMatch).join(' ');
                     
-                    // Find approximate start and end positions
-                    let startPos = markdownContent.indexOf(firstWords);
-                    let endPos = markdownContent.lastIndexOf(lastWords);
+                    const startPos = markdownContent.indexOf(firstWords);
+                    const endPos = markdownContent.lastIndexOf(lastWords);
                     
                     if (startPos >= 0 && endPos >= 0 && endPos >= startPos) {
-                        endPos += lastWords.length;
-                        return markdownContent.substring(startPos, endPos).trim();
+                        return markdownContent.substring(startPos, endPos + lastWords.length).trim();
                     }
                 }
                 
-                // Advanced approach: try to match by removing HTML formatting effects
-                const renderedContent = this.renderMarkdown(markdownContent);
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = renderedContent;
-                const renderedText = tempDiv.textContent || tempDiv.innerText || '';
-                const cleanRendered = renderedText.replace(/\s+/g, ' ').trim();
-                
-                if (cleanRendered.includes(cleanSelection)) {
-                    const startIndex = cleanRendered.indexOf(cleanSelection);
-                    const endIndex = startIndex + cleanSelection.length;
-                    
-                    // Try to map character positions back to markdown
-                    return this.mapRenderedPositionsToMarkdown(markdownContent, renderedText, startIndex, endIndex);
+                // Fallback: try to find any substantial portion of the text
+                if (selectionWords.length >= 5) {
+                    const middleWords = selectionWords.slice(1, -1).join(' ');
+                    const middlePos = markdownContent.indexOf(middleWords);
+                    if (middlePos >= 0) {
+                        // Expand around the middle match
+                        let start = middlePos;
+                        let end = middlePos + middleWords.length;
+                        
+                        // Try to expand backwards
+                        const wordBefore = selectionWords[0];
+                        const expandedStart = markdownContent.lastIndexOf(wordBefore, start);
+                        if (expandedStart >= 0 && start - expandedStart < 50) {
+                            start = expandedStart;
+                        }
+                        
+                        // Try to expand forwards
+                        const wordAfter = selectionWords[selectionWords.length - 1];
+                        const expandedEnd = markdownContent.indexOf(wordAfter, end);
+                        if (expandedEnd >= 0 && expandedEnd - end < 50) {
+                            end = expandedEnd + wordAfter.length;
+                        }
+                        
+                        return markdownContent.substring(start, end).trim();
+                    }
                 }
                 
-                // If all else fails, return the selection as-is
+                // If all else fails, return the original selection
                 return selectedText;
             }
             
-            mapRenderedPositionsToMarkdown(markdownContent, renderedText, startPos, endPos) {
-                // This function attempts to map positions in rendered text back to markdown
-                let markdownPos = 0;
-                let renderedPos = 0;
-                let markdownStart = -1;
-                let markdownEnd = -1;
-                
-                // Walk through the markdown character by character
-                while (markdownPos < markdownContent.length && renderedPos <= Math.max(startPos, endPos)) {
-                    const markdownChar = markdownContent[markdownPos];
-                    
-                    // Skip markdown formatting characters that don't appear in rendered text
-                    if (/[*_`#\[\]()]/.test(markdownChar)) {
-                        markdownPos++;
-                        continue;
-                    }
-                    
-                    // Mark start position
-                    if (renderedPos === startPos && markdownStart === -1) {
-                        markdownStart = markdownPos;
-                    }
-                    
-                    // Mark end position
-                    if (renderedPos === endPos && markdownEnd === -1) {
-                        markdownEnd = markdownPos;
-                        break;
-                    }
-                    
-                    markdownPos++;
-                    renderedPos++;
-                }
-                
-                // If we found both positions, return the substring
-                if (markdownStart >= 0 && markdownEnd >= 0) {
-                    return markdownContent.substring(markdownStart, markdownEnd).trim();
-                }
-                
-                // Fallback: return a reasonable portion of the markdown
-                if (markdownStart >= 0) {
-                    return markdownContent.substring(markdownStart, Math.min(markdownStart + (endPos - startPos), markdownContent.length)).trim();
-                }
-                
-                return markdownContent.trim();
-            }
             
             // Image upload functionality
             initImageUploadHandling() {
