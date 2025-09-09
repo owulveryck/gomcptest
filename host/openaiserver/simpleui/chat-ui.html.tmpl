@@ -1574,7 +1574,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
         class ChatUI {
             constructor() {
                 // Use relative URLs when served through simpleui proxy
-                this.baseUrl = '';
+                this.baseUrl = '{{.BaseURL}}';
                 this.apiUrl = this.baseUrl + '/v1/chat/completions';
                     
                 this.messages = [];
@@ -2423,20 +2423,36 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 
                 let html = marked.parse(text || '');
                 
-                // Handle SVG URLs - convert them to object tags for better compatibility
-                html = html.replace(/<img([^>]*?)src=["']([^"']+\.svg[^"']*)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
+                // Handle SVG URLs - convert them to object tags for better compatibility (including PlantUML)
+                html = html.replace(/<img([^>]*?)src=["']([^"']*(?:\.svg|\/plantuml\/svg\/)[^"']*)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
                     // Use object tag for SVG files to ensure they display properly
                     return `<object type="image/svg+xml" data="${src}">
                         <img src="${src}" alt="SVG Image">
                     </object>`;
                 });
                 
-                // Also handle SVG URLs that might be in markdown link format
-                html = html.replace(/!\[([^\]]*)\]\(([^)]+\.svg[^)]*)\)/g, (match, alt, src) => {
+                // Also handle SVG URLs that might be in markdown link format (including PlantUML)
+                html = html.replace(/!\[([^\]]*)\]\(([^)]*(?:\.svg|\/plantuml\/svg\/)[^)]*)\)/g, (match, alt, src) => {
                     return `<object type="image/svg+xml" data="${src}">
                         <img src="${src}" alt="${alt}">
                     </object>`;
                 });
+                
+                return html;
+            }
+            
+            // Rewrite PlantUML URLs to use the proxy when needed
+            rewritePlantUMLUrls(html) {
+                if (!this.baseUrl) {
+                    // If baseUrl is empty, we're served from the main server, no rewriting needed
+                    return html;
+                }
+                
+                // Rewrite PlantUML URLs in object tags
+                html = html.replace(/data="http:\/\/localhost:9999\/plantuml\//g, `data="${this.baseUrl}/plantuml/`);
+                
+                // Rewrite PlantUML URLs in img tags
+                html = html.replace(/src="http:\/\/localhost:9999\/plantuml\//g, `src="${this.baseUrl}/plantuml/`);
                 
                 return html;
             }
@@ -2459,8 +2475,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     const altText = String(text || '');
                     const titleText = String(title || '');
                     
-                    // Check if it's an SVG URL
-                    if (url && (url.includes('.svg') || url.endsWith('.svg'))) {
+                    // Check if it's an SVG URL (including PlantUML SVG URLs)
+                    if (url && (url.includes('.svg') || url.endsWith('.svg') || url.includes('/plantuml/svg/'))) {
                         // Use object tag for better SVG compatibility - CSS handles styling
                         return `<object type="image/svg+xml" data="${url}" title="${titleText}">
                             <img src="${url}" alt="${altText}" title="${titleText}">
@@ -2470,7 +2486,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     // Check if it's another type of image generation URL (also likely SVG)
                     if (url && (url.includes('wardley_map') || 
                                 url.includes('localhost:8585') ||
-                                url.includes('image/svg'))) {
+                                url.includes('image/svg') ||
+                                url.includes('/plantuml/png/'))) {
                         return `<img src="${url}" alt="${altText}" title="${titleText}">`;
                     }
                     
@@ -2484,7 +2501,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             renderMessageContent(content) {
                 if (typeof content === 'string') {
                     // Simple text content
-                    return this.renderMarkdown(content);
+                    let html = this.renderMarkdown(content);
+                    return this.rewritePlantUMLUrls(html);
                 } else if (Array.isArray(content)) {
                     // Multimodal content with text and images
                     let html = '';
@@ -2495,10 +2513,11 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                             html += `<div class="message-image"><img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; margin: 8px 0; border: 1px solid #e5e7eb;"></div>`;
                         }
                     }
-                    return html;
+                    return this.rewritePlantUMLUrls(html);
                 } else {
                     // Fallback for other content types
-                    return this.renderMarkdown(String(content));
+                    let html = this.renderMarkdown(String(content));
+                    return this.rewritePlantUMLUrls(html);
                 }
             }
             
@@ -2514,6 +2533,17 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 
                 this.renderMessages();
                 this.saveCurrentConversation(); // Auto-save after adding message
+            }
+            
+            // Helper function to map message index to DOM index (accounting for tool notifications)
+            getMessageDomIndex(messageIndex) {
+                let domIndex = 0;
+                for (let i = 0; i < messageIndex; i++) {
+                    if (this.messages[i].role === 'user' || this.messages[i].role === 'assistant') {
+                        domIndex++;
+                    }
+                }
+                return domIndex;
             }
             
             renderMessages() {
@@ -2635,8 +2665,13 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             startEdit(index) {
+                const domIndex = this.getMessageDomIndex(index);
                 const messageGroups = this.chatMessages.querySelectorAll('.message-group');
-                const messageContent = messageGroups[index].querySelector('.message-content');
+                if (domIndex >= messageGroups.length) {
+                    console.error('Invalid message index for editing:', index, 'domIndex:', domIndex, 'available groups:', messageGroups.length);
+                    return;
+                }
+                const messageContent = messageGroups[domIndex].querySelector('.message-content');
                 
                 messageContent.classList.add('editing');
                 messageContent.innerHTML = '';
@@ -3409,9 +3444,10 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             updateMessageContent(index, content, isStreaming = false) {
+                const domIndex = this.getMessageDomIndex(index);
                 const messageGroups = this.chatMessages.querySelectorAll('.message-group');
-                if (messageGroups[index]) {
-                    const messageContent = messageGroups[index].querySelector('.message-content');
+                if (messageGroups[domIndex]) {
+                    const messageContent = messageGroups[domIndex].querySelector('.message-content');
                     // Preserve the actions div
                     const actions = messageContent.querySelector('.message-actions');
                     
@@ -3424,6 +3460,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     
                     // Render content with optional cursor
                     let html = this.renderMarkdown(content);
+                    html = this.rewritePlantUMLUrls(html);
                     if (isStreaming) {
                         html += '<span class="streaming-cursor"></span>';
                     }

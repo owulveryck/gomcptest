@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -103,6 +104,56 @@ func main() {
 
 			// Proxy the request to the API server
 			proxy.ServeHTTP(w, r)
+		} else if len(r.URL.Path) > 9 && r.URL.Path[:9] == "/plantuml" {
+			// Proxy PlantUML requests to avoid CORS issues
+			plantumlURL := "http://localhost:9999" + r.URL.Path
+			if r.URL.RawQuery != "" {
+				plantumlURL += "?" + r.URL.RawQuery
+			}
+			
+			// Create a new request to the PlantUML server
+			req, err := http.NewRequest(r.Method, plantumlURL, r.Body)
+			if err != nil {
+				http.Error(w, "Failed to create PlantUML request", http.StatusInternalServerError)
+				return
+			}
+			
+			// Copy headers
+			for name, values := range r.Header {
+				for _, value := range values {
+					req.Header.Add(name, value)
+				}
+			}
+			
+			// Make the request
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				http.Error(w, "Failed to reach PlantUML server", http.StatusBadGateway)
+				return
+			}
+			defer resp.Body.Close()
+			
+			// Add CORS headers for PlantUML responses
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			
+			// Copy response headers
+			for name, values := range resp.Header {
+				for _, value := range values {
+					w.Header().Add(name, value)
+				}
+			}
+			
+			// Copy status code
+			w.WriteHeader(resp.StatusCode)
+			
+			// Copy response body
+			_, err = io.Copy(w, resp.Body)
+			if err != nil {
+				log.Printf("Error copying PlantUML response: %v", err)
+			}
 		} else {
 			http.NotFound(w, r)
 		}
