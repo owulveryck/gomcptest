@@ -9,8 +9,9 @@ This document provides context about the gomcptest project for AI assistants lik
 ## Key Components
 
 ### Host Applications
-- **`host/openaiserver`**: Custom OpenAI-compatible API server using Google Gemini
+- **`host/openaiserver`**: Custom OpenAI-compatible API server using Google Gemini with embedded chat UI
 - **`host/cliGCP`**: CLI tool similar to Claude Code for testing agentic interactions
+- **`host/openaiserver/simpleui`**: Standalone UI server that provides a web-based chat interface
 
 ### MCP Tools (in `tools/` directory)
 - **Bash**: Execute bash commands
@@ -62,6 +63,51 @@ Tests are available for most components. Use standard Go testing:
 go test ./...
 ```
 
+## Web UI
+
+The project includes a modern web-based chat interface called **AgentFlow** for interacting with the agentic system:
+
+### UI Access Methods
+
+1. **Embedded UI** (via main openaiserver):
+   ```bash
+   # Start the main server
+   ./bin/openaiserver
+   # Access UI at: http://localhost:8080/ui
+   ```
+
+2. **Standalone UI Server** (via simpleui):
+   ```bash
+   # Start the main API server
+   ./bin/openaiserver -port=4000
+   
+   # In another terminal, start the UI server
+   cd host/openaiserver/simpleui
+   go run . -ui-port=8081 -api-url=http://localhost:4000
+   # Access UI at: http://localhost:8081
+   ```
+
+### UI Features
+
+- **Mobile-optimized**: Responsive design with mobile web app capabilities
+- **Real-time chat**: Streaming responses with proper SSE handling
+- **Modern interface**: Clean, professional design with gradient backgrounds
+- **Template-based**: Uses Go templates for flexible configuration
+- **CORS support**: Proper cross-origin headers for API communication
+
+### UI Configuration
+
+The UI server supports the following options:
+- `-ui-port`: Port to serve the UI (default: 8080)
+- `-api-url`: OpenAI server API URL to proxy requests to
+- `OPENAISERVER_URL`: Environment variable for API URL (default: http://localhost:4000)
+
+### Template Architecture
+
+The UI uses a Go template system (`chat-ui.html.tmpl`) that receives a `BaseURL` parameter:
+- When served by main openaiserver (`/ui` endpoint): `BaseURL` is empty (same server)
+- When served by simpleui server: `BaseURL` points to the separate API server
+
 ## Safety Considerations
 
 ⚠️ **WARNING**: These tools can execute commands and modify files. Use in a sandboxed environment when possible.
@@ -79,6 +125,8 @@ The documentation is auto-generated using Hugo and includes:
 ## Current State
 
 The project is actively maintained with recent commits focusing on:
+- **AgentFlow UI**: Modern web-based chat interface with mobile optimization
+- **Template system**: Flexible UI template architecture supporting multiple deployment modes
 - Comprehensive Imagen tool suite with HTTP server
 - Rationalized build system with single root Makefile
 - Better logging mechanisms
@@ -93,3 +141,5 @@ When working with this codebase:
 3. Each tool has its own README with specific usage instructions
 4. Tests provide good examples of expected behavior
 5. The host applications demonstrate how to integrate with external APIs (Google Gemini)
+6. **UI testing**: Use the simpleui server for isolated UI development and testing
+7. **Template modifications**: The chat UI template supports both embedded and standalone modes

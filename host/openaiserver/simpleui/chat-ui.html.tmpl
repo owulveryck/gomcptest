@@ -242,13 +242,14 @@
             display: flex;
         }
         
-        .rename-btn, .delete-btn {
+        .rename-btn, .delete-btn, .duplicate-btn {
             background: none;
             border: none;
             color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
             padding: 2px;
             transition: color 0.2s;
+            font-size: 12px;
         }
         
         .rename-btn:hover {
@@ -257,6 +258,10 @@
         
         .delete-btn:hover {
             color: #ef4444;
+        }
+        
+        .duplicate-btn:hover {
+            color: #10b981;
         }
         
         .rename-input {
@@ -353,25 +358,47 @@
         }
 
         .avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
             flex-shrink: 0;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .user-avatar {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
             color: white;
+            border-color: rgba(30, 64, 175, 0.2);
         }
 
         .assistant-avatar {
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
+            border-color: rgba(5, 150, 105, 0.2);
+        }
+
+        .avatar svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        .avatar:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Improved accessibility with semantic roles */
+        .avatar[role="img"] {
+            cursor: help;
         }
 
         .message-content {
@@ -382,6 +409,106 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             position: relative;
             border: 1px solid #e5e7eb;
+        }
+
+        /* User message styling - improved accessibility and contrast */
+        .user-message .message-content {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+            position: relative;
+        }
+
+        .user-message .message-content::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            bottom: -2px;
+            width: 4px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 2px 0 0 2px;
+        }
+
+        /* Assistant message styling - improved accessibility and contrast */
+        .assistant-message .message-content {
+            background: #f8fffe;
+            border: 2px solid #e6fffa;
+            border-left: 4px solid #10b981;
+            position: relative;
+        }
+
+        .assistant-message .message-content::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: -2px;
+            bottom: -2px;
+            width: 4px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 2px 0 0 2px;
+        }
+
+        /* Fallback for browsers that support :has() */
+        .message:has(.user-avatar) .message-content {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .message:has(.assistant-avatar) .message-content {
+            background: #f8fffe;
+            border: 2px solid #e6fffa;
+            border-left: 4px solid #10b981;
+        }
+
+        /* Focus states for accessibility */
+        .message-content:focus-within {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .user-message .message-content {
+                background: #ffffff;
+                border: 3px solid #000000;
+                border-left: 6px solid #0000ff;
+            }
+            
+            .assistant-message .message-content {
+                background: #ffffff;
+                border: 3px solid #000000;
+                border-left: 6px solid #008000;
+            }
+            
+            .avatar {
+                border: 3px solid #000000;
+            }
+        }
+
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .avatar {
+                transition: none;
+            }
+            
+            .message-content {
+                transition: none;
+            }
+        }
+
+        /* Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .message-content.editing {
@@ -1495,7 +1622,19 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             init() {
                 this.sendButton.addEventListener('click', () => {
                     if (this.isStreaming) {
-                        this.stopStreaming();
+                        // Prevent multiple stop clicks
+                        if (this.sendButton.disabled) return;
+                        
+                        // Temporarily disable button to prevent spam clicking
+                        this.sendButton.disabled = true;
+                        this.sendButton.textContent = 'Stopping...';
+                        
+                        this.stopStreaming().then(() => {
+                            // Re-enable after a short delay
+                            setTimeout(() => {
+                                this.sendButton.disabled = false;
+                            }, 500);
+                        });
                     } else {
                         this.sendMessage();
                     }
@@ -2120,6 +2259,37 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 }
             }
             
+            duplicateConversation(id) {
+                const conversation = this.conversations[id];
+                if (conversation) {
+                    // Generate a new unique ID
+                    const newId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    // Create a deep copy of the conversation
+                    const duplicatedConversation = {
+                        id: newId,
+                        title: `${conversation.title} (Copy)`,
+                        messages: JSON.parse(JSON.stringify(conversation.messages)), // Deep copy messages
+                        systemPrompt: conversation.systemPrompt,
+                        createdAt: Date.now(),
+                        lastModified: Date.now()
+                    };
+                    
+                    // Add the duplicated conversation to the conversations object
+                    this.conversations[newId] = duplicatedConversation;
+                    
+                    // Save conversations and update UI
+                    this.saveConversations();
+                    this.renderConversationsList();
+                    
+                    // Optional: Switch to the new duplicated conversation
+                    this.saveCurrentConversation(); // Save current before switching
+                    this.loadConversation(newId);
+                    
+                    console.log(`📋 Conversation duplicated: "${conversation.title}" -> "${duplicatedConversation.title}"`);
+                }
+            }
+            
             renderConversationsList() {
                 this.conversationsList.innerHTML = '';
                 
@@ -2142,6 +2312,15 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     const actions = document.createElement('div');
                     actions.className = 'conversation-actions';
                     
+                    const duplicateBtn = document.createElement('button');
+                    duplicateBtn.className = 'duplicate-btn';
+                    duplicateBtn.innerHTML = '📋';
+                    duplicateBtn.title = 'Duplicate conversation';
+                    duplicateBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.duplicateConversation(id);
+                    };
+                    
                     const renameBtn = document.createElement('button');
                     renameBtn.className = 'rename-btn';
                     renameBtn.innerHTML = '✏️';
@@ -2160,6 +2339,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         this.deleteConversation(id);
                     };
                     
+                    actions.appendChild(duplicateBtn);
                     actions.appendChild(renameBtn);
                     actions.appendChild(deleteBtn);
                     
@@ -2366,26 +2546,63 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     messageGroup.className = 'message-group';
                     
                     const message = document.createElement('div');
-                    message.className = 'message';
+                    message.className = `message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}`;
                     
                     const avatar = document.createElement('div');
                     avatar.className = `avatar ${msg.role === 'user' ? 'user-avatar' : 'assistant-avatar'}`;
-                    avatar.textContent = msg.role === 'user' ? 'U' : 'A';
+                    
+                    // Add accessibility attributes
+                    avatar.setAttribute('role', 'img');
+                    avatar.setAttribute('aria-label', msg.role === 'user' ? 'User message' : 'Assistant message');
+                    avatar.setAttribute('tabindex', '0');
+                    
+                    // Use professional icons instead of letters
+                    if (msg.role === 'user') {
+                        avatar.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        `;
+                    } else {
+                        avatar.innerHTML = `
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                                <path d="M2 17L12 22L22 17"/>
+                                <path d="M2 12L12 17L22 12"/>
+                            </svg>
+                        `;
+                    }
                     
                     const messageContent = document.createElement('div');
                     messageContent.className = 'message-content';
                     
+                    // Add accessibility attributes for message content
+                    messageContent.setAttribute('role', 'article');
+                    messageContent.setAttribute('aria-labelledby', `message-${index}-label`);
+                    
+                    // Add hidden label for screen readers
+                    const messageLabel = document.createElement('span');
+                    messageLabel.id = `message-${index}-label`;
+                    messageLabel.className = 'sr-only';
+                    messageLabel.textContent = `${msg.role === 'user' ? 'User' : 'Assistant'} message ${index + 1}`;
+                    messageContent.appendChild(messageLabel);
+                    
                     // Show typing indicator if message is being typed
                     if (msg.isTyping && !msg.content) {
-                        messageContent.innerHTML = `
+                        const typingContent = document.createElement('div');
+                        typingContent.innerHTML = `
                             <div class="typing-dots" style="display: flex; gap: 4px; padding: 10px 0;">
                                 <div class="typing-dot"></div>
                                 <div class="typing-dot"></div>
                                 <div class="typing-dot"></div>
                             </div>
                         `;
+                        messageContent.appendChild(typingContent);
                     } else {
-                        messageContent.innerHTML = this.renderMessageContent(msg.content);
+                        const contentDiv = document.createElement('div');
+                        contentDiv.innerHTML = this.renderMessageContent(msg.content);
+                        messageContent.appendChild(contentDiv);
                     }
                     
                     const actions = document.createElement('div');
@@ -3010,7 +3227,20 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 try {
                     let isStreaming = true;
                     while (true) {
+                        // Check if streaming was stopped by user before each read
+                        if (!this.isStreaming) {
+                            console.log('🛑 Streaming stopped by user - breaking from loop');
+                            break;
+                        }
+                        
                         const { value, done } = await reader.read();
+                        
+                        // Check again after read in case user stopped while waiting
+                        if (!this.isStreaming) {
+                            console.log('🛑 Streaming stopped by user after read - breaking from loop');
+                            break;
+                        }
+                        
                         if (done) {
                             isStreaming = false;
                             this.isStreaming = false;
@@ -3034,6 +3264,11 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         const lines = chunk.split('\n');
                         
                         for (const line of lines) {
+                            // Check if streaming was stopped during chunk processing
+                            if (!this.isStreaming) {
+                                console.log('🛑 Streaming stopped by user during chunk processing');
+                                return; // Exit immediately
+                            }
                             if (line.startsWith('data: ')) {
                                 const data = line.slice(6);
                                 if (data === '[DONE]') {
@@ -3144,12 +3379,27 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         }
                     }
                 } catch (error) {
-                    console.error('Streaming error:', error);
-                    this.updateMessageContent(messageIndex, assistantMessage, false);
-                    this.saveCurrentConversation(); // Save even on error
-                    // Close any remaining tool popups on error
+                    // Check if this is a user-initiated stop (cancelled stream)
+                    if (error.name === 'AbortError' || error.message.includes('abort') || !this.isStreaming) {
+                        console.log('🛑 Stream cancelled by user');
+                        // Don't treat user cancellation as an error
+                    } else {
+                        console.error('Streaming error:', error);
+                    }
+                    
+                    // Always finalize the message, whether it's an error or user stop
+                    if (messageIndex !== null) {
+                        this.updateMessageContent(messageIndex, assistantMessage, false);
+                    }
+                    this.saveCurrentConversation(); // Save even on error/stop
+                    
+                    // Close any remaining tool popups
                     this.closeAllToolPopups();
-                    throw error;
+                    
+                    // Only re-throw if it's not a user-initiated stop
+                    if (error.name !== 'AbortError' && !error.message.includes('abort') && this.isStreaming) {
+                        throw error;
+                    }
                 } finally {
                     // Ensure all tool popups are closed when streaming completes
                     setTimeout(() => {
@@ -3213,18 +3463,69 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             async stopStreaming() {
+                console.log('🛑 Stop streaming requested');
+                
+                // Immediately set streaming state to false to prevent further processing
+                this.isStreaming = false;
+                
+                // Update UI immediately
+                this.typingIndicator.classList.remove('active');
+                this.sendButton.disabled = false;
+                this.updateSendButton();
+                
+                // Cancel the stream reader if it exists
                 if (this.currentReader) {
                     try {
+                        console.log('🛑 Cancelling stream reader');
                         await this.currentReader.cancel();
                     } catch (error) {
-                        console.log('Stream cancellation:', error);
+                        console.log('Stream cancellation error (expected):', error);
                     }
-                    this.isStreaming = false;
                     this.currentReader = null;
-                    this.typingIndicator.classList.remove('active');
-                    this.sendButton.disabled = false;
-                    this.updateSendButton();
                 }
+                
+                // Flush any partial message content and finalize the current message
+                this.flushPartialMessage();
+                
+                // Close any open tool popups immediately
+                this.closeAllToolPopups();
+                
+                // Save the conversation state
+                this.saveCurrentConversation();
+                
+                console.log('🛑 Streaming stopped successfully');
+            }
+            
+            flushPartialMessage() {
+                // Find the last message that might be incomplete
+                const lastMessageIndex = this.messages.length - 1;
+                if (lastMessageIndex >= 0) {
+                    const lastMessage = this.messages[lastMessageIndex];
+                    
+                    // If the last message is an assistant message that was being streamed
+                    if (lastMessage && lastMessage.role === 'assistant') {
+                        // Remove streaming state and finalize the message
+                        lastMessage.isTyping = false;
+                        
+                        // If the message is empty or just whitespace, add a stopped indicator
+                        if (!lastMessage.content || lastMessage.content.trim() === '') {
+                            lastMessage.content = '*Response stopped by user*';
+                        } else {
+                            // Add a clear indication that the response was stopped
+                            if (!lastMessage.content.endsWith('...') && !lastMessage.content.endsWith('*stopped*')) {
+                                lastMessage.content += ' *[stopped]*';
+                            }
+                        }
+                        
+                        // Update the message display immediately
+                        this.updateMessageContent(lastMessageIndex, lastMessage.content, false);
+                        
+                        console.log('🛑 Flushed partial message:', lastMessage.content.substring(0, 50) + '...');
+                    }
+                }
+                
+                // Ensure the UI is re-rendered to show the final state
+                this.renderMessages();
             }
         }
         
