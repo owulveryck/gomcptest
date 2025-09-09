@@ -63,7 +63,14 @@
       "Bash(convert:*)",
       "Bash(magick:*)",
       "Bash(./bin/simpleui:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:plantuml.com)",
+      "Bash(chmod:*)",
+      "Bash(./test_plantuml.sh:*)",
+      "Bash(export GCP_PROJECT=\"bsjxygz-gcp-octo-lille\")",
+      "Bash(export GCP_REGION=\"europe-west9\")",
+      "Bash(export GCP_PROJECT=test-project)",
+      "Bash(./test_plantuml_server.sh:*)"
     ],
     "deny": []
   }

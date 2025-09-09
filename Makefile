@@ -7,7 +7,7 @@ all: tools servers
 BIN_DIR := bin
 
 # Tools to build
-TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash imagen imagen_edit plantuml_check sleep
+TOOLS := LS GrepTool Edit GlobTool Replace View duckdbserver dispatch_agent Bash imagen imagen_edit plantuml plantuml_check sleep
 
 # Servers to build
 SERVERS := cliGCP openaiserver
@@ -62,6 +62,9 @@ $(BIN_DIR)/imagen:
 
 $(BIN_DIR)/imagen_edit:
 	$(MAKE) -C tools/imagen_edit build
+
+$(BIN_DIR)/plantuml:
+	$(MAKE) -C tools/plantuml build
 
 $(BIN_DIR)/plantuml_check:
 	$(MAKE) -C tools/plantuml_check build
