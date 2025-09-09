@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -25,7 +26,7 @@ var (
 
 const maxRetryAttempts = 3
 
-// renderPlantUMLHandler handles the render_plantuml tool
+// renderPlantUMLHandler handles the render_plantuml tool - now returns URLs instead of content
 func renderPlantUMLHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	slog.Debug("Processing render_plantuml request")
 
@@ -57,85 +58,71 @@ func renderPlantUMLHandler(ctx context.Context, request mcp.CallToolRequest) (*m
 		}
 	}
 
-	slog.Info("Rendering PlantUML diagram", "format", outputFormat, "code_length", len(plantumlCode))
+	slog.Debug("Generating PlantUML URL", "format", outputFormat, "code_length", len(plantumlCode))
 
-	// Validate output format
+	// Validate output format (only svg and png supported for URLs)
 	validFormats := map[string]bool{
-		"svg":     true,
-		"png":     true,
-		"txt":     true,
-		"encoded": true,
+		"svg": true,
+		"png": true,
 	}
 	if !validFormats[outputFormat] {
 		slog.Error("Invalid output format requested", "format", outputFormat)
-		return mcp.NewToolResultError("Invalid output format. Supported formats: svg, png, txt, encoded"), nil
+		return mcp.NewToolResultError("Invalid output format. Supported formats: svg, png"), nil
 	}
 
-	// Determine if input is already encoded or plain text
-	var processedCode string
-	var isEncoded bool
-
-	// Check if input looks like encoded PlantUML (base64-like characters only)
-	if isPlantUMLEncoded(plantumlCode) {
-		slog.Debug("Input detected as encoded PlantUML")
-		processedCode = plantumlCode
-		isEncoded = true
-	} else {
-		slog.Debug("Input detected as plain text PlantUML, encoding...")
-		// Plain text input, encode it
-		encoded, err := encodePlantUML(plantumlCode)
-		if err != nil {
-			slog.Error("Failed to encode PlantUML text", "error", err)
-			return mcp.NewToolResultErrorFromErr("Failed to encode PlantUML text", err), nil
-		}
-		processedCode = encoded
-		isEncoded = false
-		slog.Debug("Successfully encoded PlantUML text")
+	// Load configuration for server URL
+	cfg, err := loadConfig()
+	if err != nil {
+		slog.Error("Failed to load configuration", "error", err)
+		return mcp.NewToolResultErrorFromErr("Failed to load configuration", err), nil
 	}
 
-	// Handle different output formats
-	switch outputFormat {
-	case "encoded":
-		slog.Debug("Returning encoded format")
-		// Return the encoded format
-		return mcp.NewToolResultText(processedCode), nil
-
-	case "txt":
-		slog.Debug("Returning plain text format")
-		// If input was encoded, decode it
-		if isEncoded {
-			decoded, err := decodePlantUML(processedCode)
-			if err != nil {
-				slog.Error("Failed to decode PlantUML text", "error", err)
-				return mcp.NewToolResultErrorFromErr("Failed to decode PlantUML text", err), nil
-			}
-			return mcp.NewToolResultText(decoded), nil
-		} else {
-			// Input was already plain text
-			return mcp.NewToolResultText(plantumlCode), nil
-		}
-
-	case "svg", "png":
-		slog.Debug("Rendering diagram using local server", "format", outputFormat)
-		// Load configuration for server URL
-		cfg, err := loadConfig()
-		if err != nil {
-			slog.Error("Failed to load configuration", "error", err)
-			return mcp.NewToolResultErrorFromErr("Failed to load configuration", err), nil
-		}
-		// Try local PlantUML server with retry protection
-		result, err := renderWithLocalServerAndCorrection(ctx, processedCode, outputFormat, plantumlCode, cfg)
-		if err != nil {
-			slog.Error("Failed to render diagram", "format", outputFormat, "error", err)
-			return mcp.NewToolResultErrorFromErr(fmt.Sprintf("Failed to render %s", outputFormat), err), nil
-		}
-		slog.Info("Successfully rendered diagram", "format", outputFormat)
-		return mcp.NewToolResultText(result), nil
-
-	default:
-		slog.Error("Unsupported output format", "format", outputFormat)
-		return mcp.NewToolResultError("Unsupported output format"), nil
+	// Generate URL with validation and correction
+	url, err := generatePlantUMLURLWithValidation(ctx, plantumlCode, outputFormat, cfg)
+	if err != nil {
+		slog.Error("Failed to generate PlantUML URL", "format", outputFormat, "error", err)
+		return mcp.NewToolResultErrorFromErr(fmt.Sprintf("Failed to generate %s URL", outputFormat), err), nil
 	}
+
+	slog.Debug("Successfully generated PlantUML URL", "format", outputFormat, "url", url)
+	return mcp.NewToolResultText(url), nil
+}
+
+// decodePlantUMLHandler handles the decode_plantuml_url tool
+func decodePlantUMLHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	slog.Debug("Processing decode_plantuml_url request")
+
+	// First convert Arguments to map[string]interface{}
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		slog.Error("Invalid arguments format", "type", fmt.Sprintf("%T", request.Params.Arguments))
+		return nil, fmt.Errorf("arguments must be a map")
+	}
+
+	// Extract url_or_encoded parameter
+	urlOrEncodedArg, exists := args["url_or_encoded"]
+	if !exists || urlOrEncodedArg == nil {
+		slog.Error("Missing required parameter", "parameter", "url_or_encoded")
+		return nil, fmt.Errorf("url_or_encoded parameter is required")
+	}
+
+	urlOrEncoded, ok := urlOrEncodedArg.(string)
+	if !ok {
+		slog.Error("Invalid parameter type", "parameter", "url_or_encoded", "type", fmt.Sprintf("%T", urlOrEncodedArg))
+		return nil, fmt.Errorf("url_or_encoded parameter must be a string")
+	}
+
+	slog.Debug("Decoding PlantUML", "input_length", len(urlOrEncoded))
+
+	// Decode the input
+	plantumlCode, err := decodePlantUMLFromURLOrEncoded(urlOrEncoded)
+	if err != nil {
+		slog.Error("Failed to decode PlantUML", "error", err)
+		return mcp.NewToolResultErrorFromErr("Failed to decode PlantUML", err), nil
+	}
+
+	slog.Debug("Successfully decoded PlantUML", "output_length", len(plantumlCode))
+	return mcp.NewToolResultText(plantumlCode), nil
 }
 
 // isPlantUMLEncoded checks if a string looks like PlantUML encoded format
@@ -367,6 +354,186 @@ func renderWithLocalServerAndCorrection(ctx context.Context, encoded string, for
 	return responseText, nil
 }
 
+// generatePlantUMLURLWithValidation generates a PlantUML URL with syntax validation and correction
+func generatePlantUMLURLWithValidation(ctx context.Context, plantumlCode, format string, cfg Config) (string, error) {
+	slog.Debug("Starting URL generation with validation", "format", format)
+
+	// Encode the PlantUML code
+	encoded, err := encodePlantUML(plantumlCode)
+	if err != nil {
+		slog.Error("Failed to encode PlantUML text", "error", err)
+		return "", fmt.Errorf("failed to encode PlantUML text: %v", err)
+	}
+
+	// Validate syntax by calling the txt endpoint
+	serverURL := fmt.Sprintf("%s/txt/%s", cfg.PlantUMLServer, url.PathEscape(encoded))
+	slog.Debug("Validating syntax with txt endpoint", "url", serverURL)
+
+	resp, err := http.Get(serverURL)
+	if err != nil {
+		slog.Error("Failed to connect to PlantUML server for validation", "error", err)
+		return "", fmt.Errorf("PlantUML server is not available: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("PlantUML server returned error status during validation", "status", resp.StatusCode)
+		return "", fmt.Errorf("PlantUML server returned status %d", resp.StatusCode)
+	}
+
+	// Read the response to check for errors
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, resp.Body)
+	if err != nil {
+		slog.Error("Failed to read validation response", "error", err)
+		return "", fmt.Errorf("failed to read validation response: %v", err)
+	}
+
+	responseText := buf.String()
+
+	// Check if there are syntax errors
+	if strings.Contains(responseText, "Error") || strings.Contains(responseText, "Exception") {
+		slog.Warn("PlantUML syntax errors detected, attempting correction with GenAI", "error", responseText)
+
+		// Use GenAI to correct the syntax
+		correctedCode, err := correctPlantUMLWithGenaiForURL(ctx, plantumlCode, responseText, cfg)
+		if err != nil {
+			slog.Error("Failed to correct PlantUML syntax", "error", err)
+			return "", fmt.Errorf("failed to correct PlantUML syntax: %v", err)
+		}
+
+		// Re-encode the corrected code
+		encoded, err = encodePlantUML(correctedCode)
+		if err != nil {
+			slog.Error("Failed to encode corrected PlantUML text", "error", err)
+			return "", fmt.Errorf("failed to encode corrected PlantUML text: %v", err)
+		}
+
+		slog.Debug("Successfully corrected and re-encoded PlantUML")
+	}
+
+	// Generate the final URL
+	finalURL := fmt.Sprintf("%s/%s/%s", cfg.PlantUMLServer, format, url.PathEscape(encoded))
+	slog.Debug("Generated final URL", "url", finalURL)
+
+	return finalURL, nil
+}
+
+// decodePlantUMLFromURLOrEncoded extracts and decodes PlantUML from a URL or encoded string
+func decodePlantUMLFromURLOrEncoded(input string) (string, error) {
+	slog.Debug("Processing input for decoding", "input", input)
+
+	var encoded string
+
+	// Check if input is a full URL
+	if strings.HasPrefix(input, "http://") || strings.HasPrefix(input, "https://") {
+		slog.Debug("Input detected as full URL")
+
+		// Extract encoded part from URL using regex
+		// Pattern: scheme://host:port/path/plantuml/(svg|png|txt)/ENCODED
+		re := regexp.MustCompile(`/plantuml/(?:svg|png|txt)/([^/?#]+)`)
+		matches := re.FindStringSubmatch(input)
+
+		if len(matches) < 2 {
+			slog.Error("Invalid PlantUML URL format", "url", input)
+			return "", fmt.Errorf("invalid PlantUML URL format: %s", input)
+		}
+
+		encoded = matches[1]
+		slog.Debug("Extracted encoded part from URL", "encoded", encoded)
+	} else {
+		slog.Debug("Input detected as encoded string")
+		encoded = input
+	}
+
+	// URL decode if necessary
+	if decodedURL, err := url.PathUnescape(encoded); err == nil {
+		encoded = decodedURL
+		slog.Debug("URL unescaped encoded string")
+	}
+
+	// Decode the PlantUML
+	plantumlCode, err := decodePlantUML(encoded)
+	if err != nil {
+		slog.Error("Failed to decode PlantUML", "error", err)
+		return "", fmt.Errorf("failed to decode PlantUML: %v", err)
+	}
+
+	slog.Debug("Successfully decoded PlantUML", "length", len(plantumlCode))
+	return plantumlCode, nil
+}
+
+// correctPlantUMLWithGenaiForURL uses Gemini to fix PlantUML errors for URL generation
+func correctPlantUMLWithGenaiForURL(ctx context.Context, plantumlCode, errorMessage string, cfg Config) (string, error) {
+	slog.Debug("Starting GenAI correction for URL generation", "error", errorMessage)
+
+	// Create genai client
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		Project:  cfg.GCPProject,
+		Location: cfg.GCPRegion,
+		Backend:  genai.BackendVertexAI,
+	})
+	if err != nil {
+		slog.Error("Failed to create GenAI client", "error", err)
+		return "", fmt.Errorf("failed to create genai client: %v", err)
+	}
+
+	modelName := "gemini-2.5-flash"
+	slog.Debug("Using GenAI model for correction", "model", modelName)
+
+	// Create prompt for fixing the error
+	prompt := fmt.Sprintf(`You are a PlantUML expert. The following PlantUML code has an error:
+
+PlantUML Code:
+%s
+
+Error:
+%s
+
+Please fix the error and return ONLY the corrected PlantUML code. Do not include any explanations, just the corrected code starting with @startuml and ending with @enduml.`, plantumlCode, errorMessage)
+
+	// Create content for the API
+	contents := []*genai.Content{
+		{
+			Role: "user",
+			Parts: []*genai.Part{
+				genai.NewPartFromText(prompt),
+			},
+		},
+	}
+
+	config := &genai.GenerateContentConfig{}
+
+	slog.Debug("Requesting GenAI content generation for correction")
+	resp, err := client.Models.GenerateContent(ctx, modelName, contents, config)
+	if err != nil {
+		slog.Error("Failed to generate content from GenAI", "error", err)
+		return "", fmt.Errorf("failed to generate content: %v", err)
+	}
+
+	if len(resp.Candidates) == 0 {
+		slog.Error("No response from GenAI")
+		return "", fmt.Errorf("no response from genai")
+	}
+
+	// Extract the corrected code
+	correctedCode := ""
+	for _, part := range resp.Candidates[0].Content.Parts {
+		if part.Text != "" {
+			correctedCode += part.Text
+		}
+	}
+
+	// Clean up the response
+	correctedCode = strings.TrimSpace(correctedCode)
+	correctedCode = strings.ReplaceAll(correctedCode, "```plantuml", "")
+	correctedCode = strings.ReplaceAll(correctedCode, "```", "")
+	correctedCode = strings.TrimSpace(correctedCode)
+
+	slog.Debug("Successfully corrected PlantUML code", "length", len(correctedCode))
+	return correctedCode, nil
+}
+
 // correctPlantUMLWithGenai uses Gemini to fix PlantUML errors
 func correctPlantUMLWithGenai(ctx context.Context, plantumlCode, errorMessage, format string, cfg Config) (string, error) {
 	slog.Debug("Starting GenAI correction process", "error", errorMessage)
@@ -489,7 +656,7 @@ Please fix the error and return ONLY the corrected PlantUML code. Do not include
 			continue
 		}
 
-		slog.Info("Successfully corrected PlantUML code", "attempt", attempt+1)
+		slog.Debug("Successfully corrected PlantUML code", "attempt", attempt+1)
 
 		// Success! Return the result in requested format
 		if format == "svg" {

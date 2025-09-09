@@ -12,7 +12,7 @@ import (
 type Config struct {
 	GCPProject     string `envconfig:"GCP_PROJECT" required:"true"`
 	GCPRegion      string `envconfig:"GCP_REGION" default:"us-central1"`
-	LogLevel       string `envconfig:"LOG_LEVEL" default:"INFO"`
+	LogLevel       string `envconfig:"LOG_LEVEL" default:"ERROR"`
 	LogOutput      string `envconfig:"LOG_OUTPUT" default:"STDERR"`
 	PlantUMLServer string `envconfig:"PLANTUML_SERVER" default:"http://localhost:9999/plantuml"`
 }

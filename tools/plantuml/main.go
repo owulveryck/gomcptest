@@ -31,20 +31,30 @@ func main() {
 		server.WithToolCapabilities(false),
 	)
 
-	// render_plantuml tool
+	// render_plantuml tool - now returns URLs instead of content
 	renderPlantUMLTool := mcp.NewTool("render_plantuml",
-		mcp.WithDescription("🌱 RENDER: Render PlantUML diagrams from plain text or encoded format. Supports multiple output formats including SVG, PNG, plain text, and encoded versions."),
+		mcp.WithDescription("🌱 RENDER: Generate PlantUML diagram URLs from plain text. Returns URLs pointing to the PlantUML server for SVG/PNG rendering. Validates syntax and corrects errors using GenAI if needed."),
 		mcp.WithString("plantuml_code",
 			mcp.Required(),
-			mcp.Description("PlantUML diagram code in plain text format (e.g., '@startuml\nAlice -> Bob: Hello\n@enduml') or in encoded format (base64-like encoded string). The tool will automatically detect the format."),
+			mcp.Description("PlantUML diagram code in plain text format (e.g., '@startuml\nAlice -> Bob: Hello\n@enduml')."),
 		),
 		mcp.WithString("output_format",
-			mcp.Description("Output format: 'svg' for SVG vector graphics (default), 'png' for PNG image, 'txt' for plain text representation, 'encoded' for PlantUML encoded format"),
+			mcp.Description("Output format: 'svg' for SVG URL (default), 'png' for PNG URL"),
 		),
 	)
 
-	// Add tool handler
+	// decode_plantuml_url tool - decodes URLs back to plain text
+	decodePlantUMLTool := mcp.NewTool("decode_plantuml_url",
+		mcp.WithDescription("🔍 DECODE: Decode PlantUML URLs or encoded strings back to plain text PlantUML code."),
+		mcp.WithString("url_or_encoded",
+			mcp.Required(),
+			mcp.Description("Either a full PlantUML server URL (e.g., 'http://localhost:9999/plantuml/svg/ENCODED') or just the encoded part (e.g., 'ENCODED')."),
+		),
+	)
+
+	// Add tool handlers
 	s.AddTool(renderPlantUMLTool, renderPlantUMLHandler)
+	s.AddTool(decodePlantUMLTool, decodePlantUMLHandler)
 
 	// Start the stdio server
 	if err := server.ServeStdio(s); err != nil {
