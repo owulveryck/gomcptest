@@ -2909,28 +2909,130 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             startEdit(index) {
+                // Extract text content and attachments from message
+                const message = this.messages[index];
+                let textContent = '';
+                let attachments = [];
+                
+                if (typeof message.content === 'string') {
+                    textContent = message.content;
+                } else if (Array.isArray(message.content)) {
+                    // Separate text content from attachments
+                    message.content.forEach(item => {
+                        if (item.type === 'text') {
+                            textContent += item.text;
+                        } else if (item.type === 'image_url' || item.type === 'file') {
+                            attachments.push(item);
+                        }
+                    });
+                }
+                
+                // Use the helper method to render the edit interface
+                this.renderEditInterface(index, textContent, attachments);
+            }
+            
+            saveEdit(index, newContent) {
+                this.messages[index].content = newContent;
+                this.renderMessages();
+            }
+            
+            renderEditInterface(index, currentTextContent, currentAttachments) {
                 const domIndex = this.getMessageDomIndex(index);
                 const messageGroups = this.chatMessages.querySelectorAll('.message-group');
-                if (domIndex >= messageGroups.length) {
-                    console.error('Invalid message index for editing:', index, 'domIndex:', domIndex, 'available groups:', messageGroups.length);
-                    return;
-                }
                 const messageContent = messageGroups[domIndex].querySelector('.message-content');
                 
                 messageContent.classList.add('editing');
                 messageContent.innerHTML = '';
                 
+                // Create edit container
+                const editContainer = document.createElement('div');
+                editContainer.className = 'edit-container';
+                
+                // Create attachments preview section if there are attachments
+                if (currentAttachments.length > 0) {
+                    const attachmentsSection = document.createElement('div');
+                    attachmentsSection.className = 'edit-attachments';
+                    attachmentsSection.innerHTML = '<div style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #374151;">Attachments:</div>';
+                    
+                    currentAttachments.forEach((attachment, attachIndex) => {
+                        const attachmentItem = document.createElement('div');
+                        attachmentItem.className = 'edit-attachment-item';
+                        attachmentItem.style.cssText = `
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 8px 12px;
+                            background: #f3f4f6;
+                            border: 1px solid #d1d5db;
+                            border-radius: 6px;
+                            margin-bottom: 8px;
+                        `;
+                        
+                        if (attachment.type === 'image_url') {
+                            attachmentItem.innerHTML = `
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21,15 16,10 5,21"/>
+                                </svg>
+                                <span style="flex: 1; font-size: 14px; color: #374151;">Image attachment</span>
+                                <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                                    background: #ef4444;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    width: 20px;
+                                    height: 20px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 12px;
+                                ">×</button>
+                            `;
+                        } else if (attachment.type === 'file') {
+                            const filename = attachment.file?.filename || 'Unknown file';
+                            attachmentItem.innerHTML = `
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                                <span style="flex: 1; font-size: 14px; color: #374151;">${filename}</span>
+                                <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                                    background: #ef4444;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    width: 20px;
+                                    height: 20px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 12px;
+                                ">×</button>
+                            `;
+                        }
+                        
+                        attachmentsSection.appendChild(attachmentItem);
+                    });
+                    
+                    editContainer.appendChild(attachmentsSection);
+                }
+                
+                // Create textarea for text content
                 const textarea = document.createElement('textarea');
                 textarea.className = 'edit-textarea';
-                textarea.value = this.messages[index].content;
+                textarea.value = currentTextContent;
+                textarea.style.marginTop = currentAttachments.length > 0 ? '8px' : '0';
                 
+                // Create edit buttons
                 const editButtons = document.createElement('div');
                 editButtons.className = 'edit-buttons';
                 
                 const saveButton = document.createElement('button');
                 saveButton.className = 'save-button';
                 saveButton.textContent = 'Save';
-                saveButton.onclick = () => this.saveEdit(index, textarea.value);
+                saveButton.onclick = () => this.saveEditWithAttachments(index, textarea.value, currentAttachments);
                 
                 const cancelButton = document.createElement('button');
                 cancelButton.className = 'cancel-button';
@@ -2940,15 +3042,51 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 editButtons.appendChild(saveButton);
                 editButtons.appendChild(cancelButton);
                 
-                messageContent.appendChild(textarea);
-                messageContent.appendChild(editButtons);
+                editContainer.appendChild(textarea);
+                editContainer.appendChild(editButtons);
+                messageContent.appendChild(editContainer);
+                
+                // Add event listeners for attachment removal
+                editContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-attachment')) {
+                        const attachIndex = parseInt(e.target.dataset.attachIndex);
+                        currentAttachments.splice(attachIndex, 1);
+                        // Re-render the edit interface with updated attachments
+                        this.renderEditInterface(index, textarea.value, currentAttachments);
+                    }
+                });
                 
                 textarea.focus();
             }
             
-            saveEdit(index, newContent) {
-                this.messages[index].content = newContent;
+            saveEditWithAttachments(index, textContent, attachments) {
+                // Reconstruct the message content with text and remaining attachments
+                if (attachments.length === 0 && textContent.trim() === '') {
+                    // If no attachments and no text, just set empty string
+                    this.messages[index].content = '';
+                } else if (attachments.length === 0) {
+                    // Only text content
+                    this.messages[index].content = textContent;
+                } else {
+                    // Multimodal content with text and attachments
+                    const newContent = [];
+                    
+                    // Add text content if present
+                    if (textContent.trim()) {
+                        newContent.push({
+                            type: 'text',
+                            text: textContent
+                        });
+                    }
+                    
+                    // Add remaining attachments
+                    newContent.push(...attachments);
+                    
+                    this.messages[index].content = newContent;
+                }
+                
                 this.renderMessages();
+                this.saveCurrentConversation(); // Save the updated message
             }
             
             cancelEdit() {
