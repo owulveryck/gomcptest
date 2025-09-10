@@ -2315,8 +2315,34 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         this.messages.length > 0) {
                         const firstUserMessage = this.messages.find(m => m.role === 'user');
                         if (firstUserMessage) {
-                            let title = firstUserMessage.content.substring(0, 50);
-                            if (firstUserMessage.content.length > 50) title += '...';
+                            let titleContent = '';
+                            
+                            // Handle both string and multimodal content
+                            if (typeof firstUserMessage.content === 'string') {
+                                titleContent = firstUserMessage.content;
+                            } else if (Array.isArray(firstUserMessage.content)) {
+                                // Extract text content from multimodal array
+                                const textParts = firstUserMessage.content
+                                    .filter(item => item.type === 'text')
+                                    .map(item => item.text);
+                                titleContent = textParts.join(' ');
+                                
+                                // If no text content, use a generic title based on file types
+                                if (!titleContent.trim()) {
+                                    const fileTypes = firstUserMessage.content
+                                        .filter(item => item.type === 'image_url' || item.type === 'file')
+                                        .map(item => {
+                                            if (item.type === 'file') return 'PDF';
+                                            return 'Image';
+                                        });
+                                    titleContent = fileTypes.length > 0 ? `Uploaded ${fileTypes.join(', ')}` : 'Multimodal message';
+                                }
+                            } else {
+                                titleContent = String(firstUserMessage.content);
+                            }
+                            
+                            let title = titleContent.substring(0, 50);
+                            if (titleContent.length > 50) title += '...';
                             this.conversations[this.currentConversationId].title = title;
                         }
                     }
