@@ -1554,6 +1554,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             <div class="system-prompt-actions">
                 <button id="systemPromptSave" class="system-prompt-btn system-prompt-save">Save</button>
                 <button id="systemPromptReset" class="system-prompt-btn system-prompt-reset">Reset</button>
+                <button id="cleanupStorage" class="system-prompt-btn system-prompt-reset" title="Clear old conversations to free storage space">Cleanup</button>
             </div>
         </div>
         <div class="conversations-list" id="conversationsList">
@@ -1729,6 +1730,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 // System prompt event listeners
                 this.systemPromptSave.addEventListener('click', () => this.saveSystemPrompt());
                 this.systemPromptReset.addEventListener('click', () => this.resetSystemPrompt());
+                document.getElementById('cleanupStorage').addEventListener('click', () => this.manualCleanupStorage());
                 
                 // Auto-save system prompt on change
                 this.systemPromptTextarea.addEventListener('change', () => {
@@ -2254,7 +2256,76 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             saveConversations() {
-                localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+                try {
+                    localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+                } catch (error) {
+                    if (error.name === 'QuotaExceededError') {
+                        // Try to free up space by removing oldest conversations
+                        this.cleanupOldConversations();
+                        // Try saving again
+                        try {
+                            localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+                        } catch (retryError) {
+                            console.error('Failed to save even after cleanup:', retryError);
+                            throw retryError;
+                        }
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+            
+            cleanupOldConversations() {
+                const conversationIds = Object.keys(this.conversations);
+                
+                // If we have more than 10 conversations, remove the oldest ones
+                if (conversationIds.length > 10) {
+                    const sortedIds = conversationIds.sort((a, b) => 
+                        this.conversations[a].lastModified - this.conversations[b].lastModified
+                    );
+                    
+                    // Remove oldest conversations (keep only 10 most recent)
+                    const toRemove = sortedIds.slice(0, conversationIds.length - 10);
+                    toRemove.forEach(id => {
+                        delete this.conversations[id];
+                    });
+                    
+                    console.log(`Cleaned up ${toRemove.length} old conversations to free storage space`);
+                }
+                
+                // Also clean up any conversations with large file data that wasn't properly sanitized
+                Object.keys(this.conversations).forEach(id => {
+                    const conv = this.conversations[id];
+                    if (conv.messages) {
+                        conv.messages = conv.messages.map(msg => {
+                            if (Array.isArray(msg.content)) {
+                                msg.content = msg.content.map(item => {
+                                    if (item.type === 'file' && item.file && item.file.file_data) {
+                                        return {
+                                            type: 'file',
+                                            file: {
+                                                filename: item.file.filename,
+                                                metadata: '[File data removed to save space]'
+                                            }
+                                        };
+                                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                                        const url = item.image_url.url;
+                                        if (url.startsWith('data:') && url.length > 100000) {
+                                            return {
+                                                type: 'image_url',
+                                                image_url: {
+                                                    url: '[Large image data removed to save space]'
+                                                }
+                                            };
+                                        }
+                                    }
+                                    return item;
+                                });
+                            }
+                            return msg;
+                        });
+                    }
+                });
             }
             
             initializeConversation() {
@@ -2306,7 +2377,40 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             
             saveCurrentConversation() {
                 if (this.currentConversationId && this.conversations[this.currentConversationId]) {
-                    this.conversations[this.currentConversationId].messages = [...this.messages];
+                    // Create a copy of messages for storage, excluding large file data
+                    const messagesToSave = this.messages.map(msg => {
+                        if (Array.isArray(msg.content)) {
+                            // For multimodal content, replace large file data with metadata
+                            const sanitizedContent = msg.content.map(item => {
+                                if (item.type === 'file' && item.file && item.file.file_data) {
+                                    // Store only metadata for files, not the actual data
+                                    return {
+                                        type: 'file',
+                                        file: {
+                                            filename: item.file.filename,
+                                            metadata: '[File data not stored in localStorage]'
+                                        }
+                                    };
+                                } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                                    // Check if image URL is a large data URI
+                                    const url = item.image_url.url;
+                                    if (url.startsWith('data:') && url.length > 100000) { // > 100KB
+                                        return {
+                                            type: 'image_url',
+                                            image_url: {
+                                                url: '[Large image data not stored in localStorage]'
+                                            }
+                                        };
+                                    }
+                                }
+                                return item;
+                            });
+                            return { ...msg, content: sanitizedContent };
+                        }
+                        return msg;
+                    });
+                    
+                    this.conversations[this.currentConversationId].messages = messagesToSave;
                     this.conversations[this.currentConversationId].systemPrompt = this.systemPrompt;  // Save system prompt
                     this.conversations[this.currentConversationId].lastModified = Date.now();
                     
@@ -2347,8 +2451,20 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         }
                     }
                     
-                    this.saveConversations();
-                    this.renderConversationsList();
+                    // Try to save conversations, handle quota exceeded error
+                    try {
+                        this.saveConversations();
+                        this.renderConversationsList();
+                    } catch (error) {
+                        if (error.name === 'QuotaExceededError') {
+                            console.warn('localStorage quota exceeded, unable to save conversation');
+                            // Show user-friendly error message
+                            this.showError('Unable to save conversation: storage quota exceeded. Consider clearing old conversations.');
+                        } else {
+                            console.error('Error saving conversation:', error);
+                            this.showError('Error saving conversation: ' + error.message);
+                        }
+                    }
                 }
             }
             
@@ -2920,6 +3036,24 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 setTimeout(() => {
                     this.systemPromptReset.style.background = '';
                 }, 300);
+            }
+            
+            manualCleanupStorage() {
+                const conversationCount = Object.keys(this.conversations).length;
+                if (confirm(`This will remove old conversations to free up storage space. You have ${conversationCount} conversations. Continue?`)) {
+                    this.cleanupOldConversations();
+                    this.saveConversations();
+                    this.renderConversationsList();
+                    
+                    // Flash the cleanup button to indicate success
+                    const cleanupBtn = document.getElementById('cleanupStorage');
+                    cleanupBtn.style.background = 'rgba(34, 197, 94, 0.5)';
+                    cleanupBtn.textContent = 'Done!';
+                    setTimeout(() => {
+                        cleanupBtn.style.background = '';
+                        cleanupBtn.textContent = 'Cleanup';
+                    }, 1500);
+                }
             }
             
             async getAssistantResponse() {

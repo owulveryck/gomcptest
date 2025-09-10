@@ -143,7 +143,10 @@ func main() {
 	mux.HandleFunc("/apple-touch-icon-180x180.png", ServeAppleTouchIcon)
 	mux.Handle("/", openAIHandler)
 
-	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux)
+	// Wrap the entire mux with CORS middleware
+	corsHandler := CORSMiddleware(mux)
+
+	err = http.ListenAndServe(":"+strconv.Itoa(cfg.Port), corsHandler)
 	if err != nil {
 		slog.Error("Failed to start web server", "error", err)
 		os.Exit(1)
