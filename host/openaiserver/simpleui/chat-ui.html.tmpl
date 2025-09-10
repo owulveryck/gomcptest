@@ -606,7 +606,7 @@
             gap: 8px;
         }
         
-        .image-preview-container {
+        .file-preview-container, .image-preview-container {
             display: none;
             flex-wrap: wrap;
             gap: 8px;
@@ -617,12 +617,13 @@
             margin-bottom: 8px;
         }
         
-        .image-preview {
+        .file-preview, .image-preview {
             position: relative;
             display: inline-block;
+            min-width: 100px;
         }
         
-        .image-preview img {
+        .file-preview img, .image-preview img {
             max-width: 100px;
             max-height: 100px;
             border-radius: 6px;
@@ -630,7 +631,29 @@
             object-fit: cover;
         }
         
-        .image-preview .remove-image {
+        .file-preview .pdf-icon {
+            width: 100px;
+            height: 100px;
+            background: #dc2626;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .file-preview .pdf-icon svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 4px;
+        }
+        
+        .file-preview .remove-file, .image-preview .remove-image {
             position: absolute;
             top: -8px;
             right: -8px;
@@ -649,7 +672,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
-        .image-preview .remove-image:hover {
+        .file-preview .remove-file:hover, .image-preview .remove-image:hover {
             background: #dc2626;
         }
         
@@ -659,6 +682,36 @@
             align-items: flex-end;
         }
         
+        .file-upload-btn {
+            padding: 8px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .file-upload-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        
+        .file-upload-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+        
+        .file-upload-input {
+            display: none;
+        }
+        
+        /* Keep legacy class for compatibility */
         .image-upload-btn {
             padding: 8px;
             background: #f3f4f6;
@@ -1373,7 +1426,7 @@
                 padding: 11px 16px;
             }
             
-            .image-upload-btn {
+            .image-upload-btn, .file-upload-btn {
                 min-height: 44px; /* Minimum touch target size */
                 min-width: 44px;
             }
@@ -1545,8 +1598,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
         <div class="chat-input-container">
             <div class="input-wrapper">
                 <div class="input-section">
-                    <div class="image-preview-container" id="imagePreviewContainer">
-                        <!-- Image previews will be added here -->
+                    <div class="file-preview-container" id="filePreviewContainer">
+                        <!-- File previews will be added here -->
                     </div>
                     <textarea 
                         id="chatInput" 
@@ -1556,14 +1609,14 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     ></textarea>
                 </div>
                 <div class="input-controls">
-                    <button class="image-upload-btn" id="imageUploadBtn" title="Add image">
+                    <button class="image-upload-btn" id="imageUploadBtn" title="Add image or PDF">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                             <circle cx="8.5" cy="8.5" r="1.5"/>
                             <polyline points="21,15 16,10 5,21"/>
                         </svg>
                     </button>
-                    <input type="file" id="imageUploadInput" class="image-upload-input" accept="image/*" multiple>
+                    <input type="file" id="imageUploadInput" class="image-upload-input" accept="image/*,application/pdf" multiple>
                     <button id="sendButton" class="send-button">Send</button>
                 </div>
             </div>
@@ -1586,7 +1639,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.toolPopups = new Map();  // Store active tool popups
                 this.popupAutoCloseTimers = new Map();  // Store auto-close timers
                 this.systemPrompt = 'You are a helpful assistant.\\nCurrent time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}`}}';  // Default system prompt
-                this.selectedImages = [];  // Store selected images as base64 data URIs
+                this.selectedFiles = [];  // Store selected files (images/PDFs) as base64 data URIs
                 
                 // DOM elements (must be initialized first)
                 this.chatMessages = document.getElementById('chatMessages');
@@ -1607,7 +1660,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.copySelectionButton = document.getElementById('copySelectionButton');
                 this.imageUploadBtn = document.getElementById('imageUploadBtn');
                 this.imageUploadInput = document.getElementById('imageUploadInput');
-                this.imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                this.filePreviewContainer = document.getElementById('filePreviewContainer');
                 
                 // Conversation management (after DOM elements are initialized)
                 this.conversations = this.loadConversations();
@@ -1702,8 +1755,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 // Text selection handling for copy functionality
                 this.initTextSelectionHandling();
                 
-                // Image upload handling
-                this.initImageUploadHandling();
+                // File upload handling (images and PDFs)
+                this.initFileUploadHandling();
             }
             
             // Text selection and copy functionality
@@ -2045,16 +2098,16 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             
-            // Image upload functionality
-            initImageUploadHandling() {
-                // Image upload button click handler
+            // File upload functionality (images and PDFs)
+            initFileUploadHandling() {
+                // File upload button click handler
                 this.imageUploadBtn.addEventListener('click', () => {
                     this.imageUploadInput.click();
                 });
                 
                 // File input change handler
                 this.imageUploadInput.addEventListener('change', (e) => {
-                    this.handleImageSelection(e.target.files);
+                    this.handleFileSelection(e.target.files);
                 });
                 
                 // Drag and drop support
@@ -2068,30 +2121,35 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     e.stopPropagation();
                     
                     const files = Array.from(e.dataTransfer.files).filter(file => 
-                        file.type.startsWith('image/')
+                        file.type.startsWith('image/') || file.type === 'application/pdf'
                     );
                     
                     if (files.length > 0) {
-                        this.handleImageSelection(files);
+                        this.handleFileSelection(files);
                     }
                 });
             }
             
-            async handleImageSelection(files) {
+            async handleFileSelection(files) {
                 for (const file of files) {
-                    if (file.type.startsWith('image/')) {
+                    if (file.type.startsWith('image/') || file.type === 'application/pdf') {
                         try {
                             const dataURL = await this.fileToDataURL(file);
-                            this.addImagePreview(dataURL, file.name);
+                            this.addFilePreview(dataURL, file.name, file.type);
                         } catch (error) {
-                            console.error('Error processing image:', error);
-                            this.showError(`Failed to process image: ${file.name}`);
+                            console.error('Error processing file:', error);
+                            this.showError(`Failed to process file: ${file.name}`);
                         }
                     }
                 }
                 
                 // Clear the file input so the same file can be selected again
                 this.imageUploadInput.value = '';
+            }
+            
+            // Keep backward compatibility
+            async handleImageSelection(files) {
+                return this.handleFileSelection(files);
             }
             
             fileToDataURL(file) {
@@ -2103,55 +2161,90 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 });
             }
             
-            addImagePreview(dataURL, fileName) {
-                // Store the image data
-                const imageData = {
+            addFilePreview(dataURL, fileName, fileType) {
+                // Store the file data
+                const fileData = {
                     dataURL: dataURL,
                     fileName: fileName,
+                    fileType: fileType,
                     id: Date.now() + Math.random() // Simple unique ID
                 };
                 
-                this.selectedImages.push(imageData);
+                this.selectedFiles.push(fileData);
                 
                 // Create preview element
                 const preview = document.createElement('div');
-                preview.className = 'image-preview';
-                preview.dataset.imageId = imageData.id;
+                preview.className = 'file-preview';
+                preview.dataset.fileId = fileData.id;
                 
-                preview.innerHTML = `
-                    <img src="${dataURL}" alt="${fileName}" title="${fileName}">
-                    <button class="remove-image" onclick="chatUI.removeImagePreview('${imageData.id}')">×</button>
-                `;
+                if (fileType.startsWith('image/')) {
+                    // Image preview
+                    preview.innerHTML = `
+                        <img src="${dataURL}" alt="${fileName}" title="${fileName}">
+                        <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+                    `;
+                } else if (fileType === 'application/pdf') {
+                    // PDF preview
+                    preview.innerHTML = `
+                        <div class="pdf-icon" title="${fileName}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                        </div>
+                        <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+                    `;
+                }
                 
-                this.imagePreviewContainer.appendChild(preview);
-                this.updateImagePreviewVisibility();
+                this.filePreviewContainer.appendChild(preview);
+                this.updateFilePreviewVisibility();
             }
             
-            removeImagePreview(imageId) {
-                // Remove from selectedImages array
-                this.selectedImages = this.selectedImages.filter(img => img.id != imageId);
+            // Keep backward compatibility
+            addImagePreview(dataURL, fileName) {
+                return this.addFilePreview(dataURL, fileName, 'image/jpeg');
+            }
+            
+            removeFilePreview(fileId) {
+                // Remove from selectedFiles array
+                this.selectedFiles = this.selectedFiles.filter(file => file.id != fileId);
                 
                 // Remove preview element
-                const preview = this.imagePreviewContainer.querySelector(`[data-image-id="${imageId}"]`);
+                const preview = this.filePreviewContainer.querySelector(`[data-file-id="${fileId}"]`);
                 if (preview) {
                     preview.remove();
                 }
                 
-                this.updateImagePreviewVisibility();
+                this.updateFilePreviewVisibility();
             }
             
-            updateImagePreviewVisibility() {
-                if (this.selectedImages.length > 0) {
-                    this.imagePreviewContainer.style.display = 'flex';
+            // Keep backward compatibility
+            removeImagePreview(imageId) {
+                return this.removeFilePreview(imageId);
+            }
+            
+            updateFilePreviewVisibility() {
+                if (this.selectedFiles.length > 0) {
+                    this.filePreviewContainer.style.display = 'flex';
                 } else {
-                    this.imagePreviewContainer.style.display = 'none';
+                    this.filePreviewContainer.style.display = 'none';
                 }
             }
             
+            // Keep backward compatibility
+            updateImagePreviewVisibility() {
+                return this.updateFilePreviewVisibility();
+            }
+            
+            clearFilePreviews() {
+                this.selectedFiles = [];
+                this.filePreviewContainer.innerHTML = '';
+                this.updateFilePreviewVisibility();
+            }
+            
+            // Keep backward compatibility
             clearImagePreviews() {
-                this.selectedImages = [];
-                this.imagePreviewContainer.innerHTML = '';
-                this.updateImagePreviewVisibility();
+                return this.clearFilePreviews();
             }
             
             // Conversation Management Methods
@@ -2511,6 +2604,15 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                             html += this.renderMarkdown(item.text);
                         } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
                             html += `<div class="message-image"><img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; margin: 8px 0; border: 1px solid #e5e7eb;"></div>`;
+                        } else if (item.type === 'file' && item.file && item.file.filename) {
+                            // Display file attachment
+                            const filename = item.file.filename;
+                            html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                                <span style="font-size: 14px; color: #374151;">${filename}</span>
+                            </div>`;
                         }
                     }
                     return this.rewritePlantUMLUrls(html);
@@ -2722,12 +2824,12 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             
             async sendMessage() {
                 const textContent = this.chatInput.value.trim();
-                if (!textContent && this.selectedImages.length === 0) return;
+                if (!textContent && this.selectedFiles.length === 0) return;
                 
-                // Create message content based on whether we have images
+                // Create message content based on whether we have files
                 let messageContent;
-                if (this.selectedImages.length > 0) {
-                    // Multimodal message with images
+                if (this.selectedFiles.length > 0) {
+                    // Multimodal message with files
                     messageContent = [];
                     
                     // Add text content if present
@@ -2738,14 +2840,26 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         });
                     }
                     
-                    // Add images
-                    for (const image of this.selectedImages) {
-                        messageContent.push({
-                            type: "image_url",
-                            image_url: {
-                                url: image.dataURL
-                            }
-                        });
+                    // Add files
+                    for (const file of this.selectedFiles) {
+                        if (file.fileType.startsWith('image/')) {
+                            // Handle images with the existing image_url format
+                            messageContent.push({
+                                type: "image_url",
+                                image_url: {
+                                    url: file.dataURL
+                                }
+                            });
+                        } else if (file.fileType === 'application/pdf') {
+                            // Handle PDFs with the file format
+                            messageContent.push({
+                                type: "file",
+                                file: {
+                                    file_data: file.dataURL,
+                                    filename: file.fileName
+                                }
+                            });
+                        }
                     }
                 } else {
                     // Text-only message
@@ -2755,7 +2869,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 // Clear inputs
                 this.chatInput.value = '';
                 this.chatInput.style.height = 'auto';
-                this.clearImagePreviews();
+                this.clearFilePreviews();
                 
                 this.addMessage('user', messageContent);
                 await this.getAssistantResponse();

@@ -21,6 +21,7 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
 		returnedParts := make([]*genai.Part, 0)
 		for _, item := range v {
 			if m, ok := item.(map[string]interface{}); ok {
+				// Handle image_url content type
 				if imgurl, ok := m["image_url"].(map[string]interface{}); ok {
 					if url, ok := imgurl["url"].(string); ok {
 						mime, data, err := chatengine.ExtractImageData(url)
@@ -30,11 +31,24 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
 						returnedParts = append(returnedParts, genai.NewPartFromBytes(data, mime))
 					}
 				}
+				// Handle file content type
+				if file, ok := m["file"].(map[string]interface{}); ok {
+					if fileData, ok := file["file_data"].(string); ok {
+						mime, data, err := chatengine.ExtractFileData(fileData)
+						if err != nil {
+							return nil, fmt.Errorf("failed to extract file data: %w", err)
+						}
+						slog.Debug("Processing file", "mime_type", mime, "size", len(data))
+						returnedParts = append(returnedParts, genai.NewPartFromBytes(data, mime))
+					}
+				}
+				// Handle text content type (nested object)
 				if textMap, ok := m["text"].(map[string]interface{}); ok {
 					if value, ok := textMap["value"].(string); ok {
 						returnedParts = append(returnedParts, genai.NewPartFromText(value))
 					}
 				}
+				// Handle text content type (direct string)
 				if text, ok := m["text"].(string); ok {
 					returnedParts = append(returnedParts, genai.NewPartFromText(text))
 				}

@@ -8,6 +8,12 @@ import (
 
 // ExtractImageData extracts the mime type and decoded byte slice from a data URI string.
 func ExtractImageData(dataURI string) (string, []byte, error) {
+	return ExtractFileData(dataURI)
+}
+
+// ExtractFileData extracts the mime type and decoded byte slice from a data URI string.
+// This function handles any file type, not just images.
+func ExtractFileData(dataURI string) (string, []byte, error) {
 	// Split the data URI string into parts
 	parts := strings.SplitN(dataURI, ",", 2)
 	if len(parts) != 2 {
@@ -31,10 +37,10 @@ func ExtractImageData(dataURI string) (string, []byte, error) {
 	}
 
 	// Decode the base64 data
-	imgData, err := base64.StdEncoding.DecodeString(base64Data)
+	fileData, err := base64.StdEncoding.DecodeString(base64Data)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to decode base64  %w", err)
 	}
 
-	return mimeType, imgData, nil
+	return mimeType, fileData, nil
 }
