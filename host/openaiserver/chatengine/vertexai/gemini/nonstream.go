@@ -11,9 +11,12 @@ import (
 )
 
 func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (chatengine.ChatCompletionResponse, error) {
+	// Parse model and tool names from the request
+	modelName, requestedToolNames := req.ParseModelAndTools()
+
 	var modelIsPresent bool
 	for _, model := range chatsession.modelNames {
-		if model == req.Model {
+		if model == modelName {
 			modelIsPresent = true
 			break
 		}
@@ -87,9 +90,10 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 		config.SystemInstruction = systemInstruction
 	}
 
-	// Add tools if available
-	if len(chatsession.tools) > 0 {
-		config.Tools = chatsession.tools
+	// Add tools if available, filtering based on requested tools
+	filteredTools := chatsession.FilterTools(requestedToolNames)
+	if len(filteredTools) > 0 {
+		config.Tools = filteredTools
 		config.ToolConfig = &genai.ToolConfig{
 			FunctionCallingConfig: &genai.FunctionCallingConfig{
 				Mode: genai.FunctionCallingConfigModeValidated,
@@ -99,7 +103,8 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 
 	// Log the model call details for debugging
 	slog.Debug("Making model call",
-		"model", req.Model,
+		"model", modelName,
+		"requested_tools", requestedToolNames,
 		"contents_count", len(contents),
 		"config_temperature", config.Temperature,
 		"tools_count", len(config.Tools),
@@ -107,23 +112,23 @@ func (chatsession *ChatSession) HandleCompletionRequest(ctx context.Context, req
 		"config", formatConfigForLogging(config))
 
 	// Generate content using the new API
-	resp, err := chatsession.client.Models.GenerateContent(ctx, req.Model, contents, config)
+	resp, err := chatsession.client.Models.GenerateContent(ctx, modelName, contents, config)
 	if err != nil {
 		slog.Debug("Model call failed",
-			"model", req.Model,
+			"model", modelName,
 			"error", err)
 		return chatengine.ChatCompletionResponse{}, fmt.Errorf("cannot generate content: %w", err)
 	}
 
 	// Log the model response for debugging
 	slog.Debug("Model call completed",
-		"model", req.Model,
+		"model", modelName,
 		"response_id", resp.ResponseID,
 		"model_version", resp.ModelVersion,
 		"candidates_count", len(resp.Candidates),
 		"usage_metadata", resp.UsageMetadata,
 		"full_response", resp)
 
-	res, err := chatsession.processChatResponse(ctx, resp, contents, req.Model)
+	res, err := chatsession.processChatResponse(ctx, resp, contents, modelName)
 	return *res, err
 }

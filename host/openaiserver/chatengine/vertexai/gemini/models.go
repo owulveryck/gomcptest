@@ -37,3 +37,21 @@ func (chatsession *ChatSession) ModelDetail(_ context.Context, modelID string) *
 	}
 	return nil
 }
+
+// ListTools provides a list of available tools.
+func (chatsession *ChatSession) ListTools(_ context.Context) []chatengine.ListToolResponse {
+	var tools []chatengine.ListToolResponse
+
+	for _, tool := range chatsession.tools {
+		for _, function := range tool.FunctionDeclarations {
+			tools = append(tools, chatengine.ListToolResponse{
+				Name:        function.Name,
+				Description: function.Description,
+				Protocol:    "MCP",
+				Server:      "Gemini Chat Session",
+			})
+		}
+	}
+
+	return tools
+}

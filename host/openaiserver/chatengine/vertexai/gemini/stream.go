@@ -12,9 +12,12 @@ import (
 )
 
 func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, req chatengine.ChatCompletionRequest) (<-chan chatengine.StreamEvent, error) {
+	// Parse model and tool names from the request
+	modelName, requestedToolNames := req.ParseModelAndTools()
+
 	var modelIsPresent bool
 	for _, model := range chatsession.modelNames {
-		if model == req.Model {
+		if model == modelName {
 			modelIsPresent = true
 			break
 		}
@@ -64,7 +67,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	// Create the channel for streaming responses
 	c := make(chan chatengine.StreamEvent)
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, chatsession, req.Model)
+	sp := newStreamProcessor(c, chatsession, modelName)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {
@@ -94,9 +97,10 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			config.SystemInstruction = systemInstruction
 		}
 
-		// Add tools if available
-		if len(chatsession.tools) > 0 {
-			config.Tools = chatsession.tools
+		// Add tools if available, filtering based on requested tools
+		filteredTools := chatsession.FilterTools(requestedToolNames)
+		if len(filteredTools) > 0 {
+			config.Tools = filteredTools
 			config.ToolConfig = &genai.ToolConfig{
 				FunctionCallingConfig: &genai.FunctionCallingConfig{
 					Mode: genai.FunctionCallingConfigModeValidated,
@@ -105,7 +109,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 		}
 
 		// Process the stream using the new API
-		stream := sp.generateContentStream(streamCtx, req.Model, contents, config)
+		stream := sp.generateContentStream(streamCtx, modelName, contents, config)
 		err := sp.processIterator(streamCtx, stream, contents)
 
 		// Signal normal completion

@@ -28,6 +28,34 @@ type ChatCompletionRequest struct {
 	} `json:"stream_options"`
 }
 
+// ParseModelAndTools extracts the model name and tool names from the Model field.
+// If the Model field is in the format "model|tool1|tool2|...", it returns
+// the model name and a slice of tool names. Otherwise, it returns the original
+// model string and an empty slice.
+func (req *ChatCompletionRequest) ParseModelAndTools() (string, []string) {
+	parts := strings.Split(req.Model, "|")
+	if len(parts) <= 1 {
+		return req.Model, nil
+	}
+
+	modelName := strings.TrimSpace(parts[0])
+	toolNames := make([]string, 0, len(parts)-1)
+
+	for i := 1; i < len(parts); i++ {
+		toolName := strings.TrimSpace(parts[i])
+		if toolName != "" {
+			toolNames = append(toolNames, toolName)
+		}
+	}
+
+	return modelName, toolNames
+}
+
+// Example usage and tests (these would normally be in a separate test file)
+// ParseModelAndTools("gpt-4") returns ("gpt-4", nil)
+// ParseModelAndTools("gpt-4|tool1|tool2") returns ("gpt-4", ["tool1", "tool2"])
+// ParseModelAndTools("gemini-pro|bash|edit") returns ("gemini-pro", ["bash", "edit"])
+
 // ComputePreviousChecksum computes a SHA256 checksum of the ChatCompletionRequest,
 // excluding the last message in the Messages slice.  If the Messages slice
 // is empty, it computes the checksum of the request as is.

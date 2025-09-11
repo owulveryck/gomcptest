@@ -9,9 +9,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a1a2e">
     <title>AgentFlow - Agentic System Chat</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="apple-touch-icon" href="apple-touch-icon-180x180.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <style>
         * {
             margin: 0;
@@ -1003,6 +1005,169 @@
             opacity: 0.8;
         }
         
+        /* Tool selector styles */
+        .tool-selector {
+            position: relative;
+            margin-right: 15px;
+        }
+        
+        .tool-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .tool-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .tool-button::after {
+            content: '⚙️';
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .tool-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+            min-width: 320px;
+            max-height: 450px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .tool-dropdown.active {
+            display: block;
+            animation: dropdownFadeIn 0.2s ease-in;
+        }
+        
+        .tool-dropdown-header {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tool-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .tool-toggle-all {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .tool-toggle-all:hover {
+            background: #2563eb;
+        }
+        
+        .tool-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #4b5563;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .tool-option:last-child {
+            border-bottom: none;
+        }
+        
+        .tool-option:hover {
+            background: #f9fafb;
+        }
+        
+        .tool-option.selected {
+            background: #f8fafc;
+        }
+        
+        .tool-option.selected .tool-name {
+            color: #2563eb;
+        }
+        
+        .tool-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .tool-option .tool-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+        }
+        
+        .tool-option .tool-description {
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+        
+        .tool-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        
+        .tool-checkbox.checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .tool-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 10px;
+            top: -1px;
+            left: 1px;
+            font-weight: bold;
+        }
+        
+        .loading-tools {
+            padding: 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
         /* Model selector styles */
         .model-selector {
             position: relative;
@@ -1383,6 +1548,33 @@
 
         /* Mobile optimizations */
         @media (max-width: 768px) {
+            .tool-selector {
+                margin-right: 10px;
+            }
+            
+            .tool-button, .model-button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .tool-dropdown {
+                min-width: 280px;
+                max-width: calc(100vw - 20px);
+                left: 0;
+                right: auto;
+            }
+            
+            .tool-option {
+                padding: 14px 12px;
+            }
+            
+            .tool-option .tool-name {
+                font-size: 14px;
+            }
+            
+            .tool-option .tool-description {
+                font-size: 12px;
+            }
             .side-menu.active ~ .chat-container {
                 margin-left: 0; /* No margin shift on mobile */
             }
@@ -1571,14 +1763,33 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 <div class="status-indicator"></div>
                 <h1>AgentFlow</h1>
             </div>
-            <div class="model-selector">
-                <button class="model-button" id="modelButton">
-                    <span id="selectedModelName">Loading models...</span>
-                </button>
-                <div class="model-dropdown" id="modelDropdown">
-                    <div class="model-dropdown-header">Select Model</div>
-                    <div id="modelsList">
-                        <div class="loading-models">Loading available models...</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="tool-selector">
+                    <button class="tool-button" id="toolButton">
+                        <span id="selectedToolsCount">Tools: All</span>
+                    </button>
+                    <div class="tool-dropdown" id="toolDropdown">
+                        <div class="tool-dropdown-header">
+                            <span>Select Tools</span>
+                            <div class="tool-controls">
+                                <button class="tool-toggle-all" id="toolToggleAll">All</button>
+                                <button class="tool-toggle-all" id="toolToggleNone" style="background: #ef4444;">None</button>
+                            </div>
+                        </div>
+                        <div id="toolsList">
+                            <div class="loading-tools">Loading available tools...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="model-selector">
+                    <button class="model-button" id="modelButton">
+                        <span id="selectedModelName">Loading models...</span>
+                    </button>
+                    <div class="model-dropdown" id="modelDropdown">
+                        <div class="model-dropdown-header">Select Model</div>
+                        <div id="modelsList">
+                            <div class="loading-models">Loading available models...</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1635,6 +1846,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.editingIndex = -1;
                 this.models = [];
                 this.selectedModel = null;
+                this.tools = [];
+                this.selectedTools = new Set();  // Store selected tool names
                 this.currentReader = null;  // Store the current stream reader
                 this.isStreaming = false;   // Track streaming state
                 this.toolPopups = new Map();  // Store active tool popups
@@ -1651,6 +1864,12 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.modelDropdown = document.getElementById('modelDropdown');
                 this.modelsList = document.getElementById('modelsList');
                 this.selectedModelName = document.getElementById('selectedModelName');
+                this.toolButton = document.getElementById('toolButton');
+                this.toolDropdown = document.getElementById('toolDropdown');
+                this.toolsList = document.getElementById('toolsList');
+                this.selectedToolsCount = document.getElementById('selectedToolsCount');
+                this.toolToggleAll = document.getElementById('toolToggleAll');
+                this.toolToggleNone = document.getElementById('toolToggleNone');
                 this.sideMenu = document.getElementById('sideMenu');
                 this.conversationsList = document.getElementById('conversationsList');
                 this.newChatBtn = document.getElementById('newChatBtn');
@@ -1718,10 +1937,27 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     if (!this.modelButton.contains(e.target) && !this.modelDropdown.contains(e.target)) {
                         this.modelDropdown.classList.remove('active');
                     }
+                    if (!this.toolButton.contains(e.target) && !this.toolDropdown.contains(e.target)) {
+                        this.toolDropdown.classList.remove('active');
+                    }
                 });
                 
-                // Load available models
+                // Tool selector events
+                this.toolButton.addEventListener('click', () => {
+                    this.toolDropdown.classList.toggle('active');
+                });
+                
+                this.toolToggleAll.addEventListener('click', () => {
+                    this.selectAllTools();
+                });
+                
+                this.toolToggleNone.addEventListener('click', () => {
+                    this.selectNoTools();
+                });
+                
+                // Load available models and tools
                 this.loadModels();
+                this.loadTools();
                 
                 // Initialize conversation management
                 this.newChatBtn.addEventListener('click', () => this.createNewConversation());
@@ -2647,6 +2883,109 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.modelDropdown.classList.remove('active');
             }
             
+            async loadTools() {
+                try {
+                    const response = await fetch(this.baseUrl + '/v1/tools');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.tools = data || [];
+                    
+                    // Initially select all tools
+                    this.tools.forEach(tool => {
+                        this.selectedTools.add(tool.Name);
+                    });
+                    
+                    this.renderToolsList();
+                    this.updateToolsCountDisplay();
+                } catch (error) {
+                    console.error('Error loading tools:', error);
+                    this.selectedToolsCount.textContent = 'Tools: Error';
+                }
+            }
+            
+            renderToolsList() {
+                this.toolsList.innerHTML = '';
+                
+                if (this.tools.length === 0) {
+                    this.toolsList.innerHTML = '<div class="loading-tools">No tools available</div>';
+                    return;
+                }
+                
+                this.tools.forEach(tool => {
+                    const option = document.createElement('div');
+                    option.className = 'tool-option';
+                    if (this.selectedTools.has(tool.Name)) {
+                        option.classList.add('selected');
+                    }
+                    
+                    option.innerHTML = `
+                        <div class="tool-info">
+                            <div class="tool-name">${tool.Name}</div>
+                            <div class="tool-description">${tool.Description || 'No description available'}</div>
+                        </div>
+                        <div class="tool-checkbox ${this.selectedTools.has(tool.Name) ? 'checked' : ''}"></div>
+                    `;
+                    
+                    option.addEventListener('click', () => {
+                        this.toggleTool(tool.Name);
+                    });
+                    
+                    this.toolsList.appendChild(option);
+                });
+            }
+            
+            toggleTool(toolName) {
+                if (this.selectedTools.has(toolName)) {
+                    this.selectedTools.delete(toolName);
+                } else {
+                    this.selectedTools.add(toolName);
+                }
+                this.renderToolsList();
+                this.updateToolsCountDisplay();
+            }
+            
+            selectAllTools() {
+                this.tools.forEach(tool => {
+                    this.selectedTools.add(tool.Name);
+                });
+                this.renderToolsList();
+                this.updateToolsCountDisplay();
+            }
+            
+            selectNoTools() {
+                this.selectedTools.clear();
+                this.renderToolsList();
+                this.updateToolsCountDisplay();
+            }
+            
+            updateToolsCountDisplay() {
+                const selectedCount = this.selectedTools.size;
+                const totalCount = this.tools.length;
+                
+                if (selectedCount === totalCount) {
+                    this.selectedToolsCount.textContent = 'Tools: All';
+                } else if (selectedCount === 0) {
+                    this.selectedToolsCount.textContent = 'Tools: None';
+                } else {
+                    this.selectedToolsCount.textContent = `Tools: ${selectedCount}/${totalCount}`;
+                }
+            }
+            
+            buildModelWithTools() {
+                let modelString = this.selectedModel;
+                
+                if (this.selectedTools.size > 0 && this.selectedTools.size < this.tools.length) {
+                    // Only add tools if not all are selected (all selected means use all tools)
+                    const toolNames = Array.from(this.selectedTools);
+                    modelString += '|' + toolNames.join('|');
+                }
+                
+                return modelString;
+            }
+            
             renderMarkdown(text) {
                 // Configure marked to allow HTML (including SVG)
                 marked.setOptions({
@@ -3213,7 +3552,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            model: this.selectedModel || 'gemini-2.0-flash',
+                            model: this.buildModelWithTools() || 'gemini-2.0-flash',
                             messages: messagesWithSystem,
                             temperature: 0.7,
                             max_tokens: 2000,

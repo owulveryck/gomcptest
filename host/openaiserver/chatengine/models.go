@@ -12,3 +12,10 @@ type ListModelsResponse struct {
 	Object string  `json:"object"`
 	Data   []Model `json:"data"`
 }
+
+type ListToolResponse struct {
+	Name        string
+	Description string
+	Protocol    string
+	Server      string
+}

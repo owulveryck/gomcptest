@@ -41,3 +41,15 @@ func (o *OpenAIV1WithToolHandler) getModelDetails(w http.ResponseWriter, r *http
 		return
 	}
 }
+
+// listTools handles the listing of available tools.
+func (o *OpenAIV1WithToolHandler) listTools(w http.ResponseWriter, r *http.Request) {
+	tools := o.c.ListTools(r.Context())
+
+	enc := json.NewEncoder(w)
+	w.Header().Set("Content-Type", "application/json")
+	if err := enc.Encode(tools); err != nil {
+		http.Error(w, "Error marshaling response", http.StatusInternalServerError)
+		return
+	}
+}

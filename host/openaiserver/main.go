@@ -140,7 +140,12 @@ func main() {
 	mux.HandleFunc("/ui", ServeUI)
 	mux.HandleFunc("/ui/", ServeUI)
 	mux.HandleFunc("/favicon.svg", ServeFavicon)
-	mux.HandleFunc("/apple-touch-icon-180x180.png", ServeAppleTouchIcon)
+	mux.HandleFunc("/favicon.ico", ServeFaviconICO)
+	mux.HandleFunc("/favicon-96x96.png", ServeFavicon96PNG)
+	mux.HandleFunc("/apple-touch-icon.png", ServeAppleTouchIcon)
+	mux.HandleFunc("/site.webmanifest", ServeSiteWebmanifest)
+	mux.HandleFunc("/web-app-manifest-192x192.png", ServeWebAppManifest192)
+	mux.HandleFunc("/web-app-manifest-512x512.png", ServeWebAppManifest512)
 	mux.Handle("/", openAIHandler)
 
 	// Wrap the entire mux with CORS middleware

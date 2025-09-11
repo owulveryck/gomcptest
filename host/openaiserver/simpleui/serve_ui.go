@@ -16,8 +16,23 @@ import (
 //go:embed favicon.svg
 var faviconSVG []byte
 
-//go:embed apple-touch-icon-180x180.png
+//go:embed favicon.ico
+var faviconICO []byte
+
+//go:embed favicon-96x96.png
+var favicon96PNG []byte
+
+//go:embed apple-touch-icon.png
 var appleTouchIcon []byte
+
+//go:embed site.webmanifest
+var siteWebmanifest []byte
+
+//go:embed web-app-manifest-192x192.png
+var webAppManifest192 []byte
+
+//go:embed web-app-manifest-512x512.png
+var webAppManifest512 []byte
 
 //go:embed chat-ui.html.tmpl
 var chatUITemplate string
@@ -87,10 +102,30 @@ func main() {
 			w.Header().Set("Content-Type", "image/svg+xml")
 			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
 			w.Write(faviconSVG)
-		} else if r.URL.Path == "/apple-touch-icon-180x180.png" {
+		} else if r.URL.Path == "/favicon.ico" {
+			w.Header().Set("Content-Type", "image/x-icon")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(faviconICO)
+		} else if r.URL.Path == "/favicon-96x96.png" {
+			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(favicon96PNG)
+		} else if r.URL.Path == "/apple-touch-icon.png" {
 			w.Header().Set("Content-Type", "image/png")
 			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
 			w.Write(appleTouchIcon)
+		} else if r.URL.Path == "/site.webmanifest" {
+			w.Header().Set("Content-Type", "application/manifest+json")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(siteWebmanifest)
+		} else if r.URL.Path == "/web-app-manifest-192x192.png" {
+			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(webAppManifest192)
+		} else if r.URL.Path == "/web-app-manifest-512x512.png" {
+			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+			w.Write(webAppManifest512)
 		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" {
 			// Add CORS headers
 			w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -110,21 +145,21 @@ func main() {
 			if r.URL.RawQuery != "" {
 				plantumlURL += "?" + r.URL.RawQuery
 			}
-			
+
 			// Create a new request to the PlantUML server
 			req, err := http.NewRequest(r.Method, plantumlURL, r.Body)
 			if err != nil {
 				http.Error(w, "Failed to create PlantUML request", http.StatusInternalServerError)
 				return
 			}
-			
+
 			// Copy headers
 			for name, values := range r.Header {
 				for _, value := range values {
 					req.Header.Add(name, value)
 				}
 			}
-			
+
 			// Make the request
 			client := &http.Client{}
 			resp, err := client.Do(req)
@@ -133,22 +168,22 @@ func main() {
 				return
 			}
 			defer resp.Body.Close()
-			
+
 			// Add CORS headers for PlantUML responses
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-			
+
 			// Copy response headers
 			for name, values := range resp.Header {
 				for _, value := range values {
 					w.Header().Add(name, value)
 				}
 			}
-			
+
 			// Copy status code
 			w.WriteHeader(resp.StatusCode)
-			
+
 			// Copy response body
 			_, err = io.Copy(w, resp.Body)
 			if err != nil {

@@ -22,6 +22,7 @@ type ChatServer interface {
 	ModelList(context.Context) ListModelsResponse
 	// ModelsDetail provides details for a specific model.
 	ModelDetail(ctx context.Context, modelID string) *Model
+	ListTools(ctx context.Context) []ListToolResponse
 	HandleCompletionRequest(context.Context, ChatCompletionRequest) (ChatCompletionResponse, error)
 	SendStreamingChatRequest(context.Context, ChatCompletionRequest) (<-chan StreamEvent, error)
 }
@@ -111,6 +112,10 @@ func (o *OpenAIV1WithToolHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 			return
 		} else if strings.HasPrefix(r.URL.Path, "/v1/models/") {
 			o.getModelDetails(lrw, r)
+			logger.Debug("HTTP response", slog.Int("status", lrw.statusCode), slog.String("reply", lrw.body.String()))
+			return
+		} else if r.URL.Path == "/v1/tools" {
+			o.listTools(lrw, r)
 			logger.Debug("HTTP response", slog.Int("status", lrw.statusCode), slog.String("reply", lrw.body.String()))
 			return
 		}

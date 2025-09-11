@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/ui.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/main.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/simpleui/serve_ui.go)",
+      "Bash(go build -o /tmp/test-openaiserver .)",
+      "Bash(go build -o /tmp/test-simpleui .)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/chat_structure.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/chatsession.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/stream.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/nonstream.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/models.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/handle_models.go)",
+      "Bash(go build -o /tmp/test-openaiserver ./host/openaiserver)",
+      "Bash(go build -o /tmp/test-simpleui ./host/openaiserver/simpleui)",
+      "Bash(git add .)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
