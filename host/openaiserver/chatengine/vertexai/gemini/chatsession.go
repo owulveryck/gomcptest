@@ -25,13 +25,23 @@ func NewChatSession(ctx context.Context, config vertexai.Configuration) *ChatSes
 	if err != nil {
 		log.Fatalf("Failed to create the client: %v", err)
 	}
-	return &ChatSession{
+	cs := &ChatSession{
 		client:     client,
 		modelNames: config.GeminiModels,
 		servers:    make([]*MCPServerTool, 0),
 		port:       config.Port,
 		tools:      make([]*genai.Tool, 0),
 	}
+	if config.VertexAICodeExecution {
+		cs.tools = append(cs.tools, &genai.Tool{CodeExecution: &genai.ToolCodeExecution{}})
+	}
+	if config.VertexAIGoogleSearchRetrieval {
+		cs.tools = append(cs.tools, &genai.Tool{GoogleSearchRetrieval: &genai.GoogleSearchRetrieval{}})
+	}
+	if config.VertexAIGoogleSearch {
+		cs.tools = append(cs.tools, &genai.Tool{GoogleSearch: &genai.GoogleSearch{}})
+	}
+	return cs
 }
 
 // FilterTools returns a new tools slice containing only the tools with the specified names.
@@ -52,23 +62,38 @@ func (chatsession *ChatSession) FilterTools(requestedToolNames []string) []*gena
 	// Filter tools
 	var filteredTools []*genai.Tool
 
-	for _, tool := range chatsession.tools {
-		var filteredFunctions []*genai.FunctionDeclaration
+	// First, collect all function declarations that match the requested tools
+	var filteredFunctions []*genai.FunctionDeclaration
 
-		for _, function := range tool.FunctionDeclarations {
-			if requestedMap[function.Name] {
-				filteredFunctions = append(filteredFunctions, function)
-				// Mark as found
-				delete(requestedMap, function.Name)
+	for _, tool := range chatsession.tools {
+		// Handle Vertex AI built-in tools separately
+		switch {
+		case tool.CodeExecution != nil && requestedMap[VERTEXAI_CODE_EXECUTION]:
+			filteredTools = append(filteredTools, &genai.Tool{CodeExecution: tool.CodeExecution})
+			delete(requestedMap, VERTEXAI_CODE_EXECUTION)
+		case tool.GoogleSearch != nil && requestedMap[VERTEXAI_GOOGLE_SEARCH]:
+			filteredTools = append(filteredTools, &genai.Tool{GoogleSearch: tool.GoogleSearch})
+			delete(requestedMap, VERTEXAI_GOOGLE_SEARCH)
+		case tool.GoogleSearchRetrieval != nil && requestedMap[VERTEXAI_GOOGLE_SEARCH_RETRIEVAL]:
+			filteredTools = append(filteredTools, &genai.Tool{GoogleSearchRetrieval: tool.GoogleSearchRetrieval})
+			delete(requestedMap, VERTEXAI_GOOGLE_SEARCH_RETRIEVAL)
+		default:
+			// Handle function declarations
+			for _, function := range tool.FunctionDeclarations {
+				if requestedMap[function.Name] {
+					filteredFunctions = append(filteredFunctions, function)
+					// Mark as found
+					delete(requestedMap, function.Name)
+				}
 			}
 		}
+	}
 
-		// Only add the tool if it has filtered functions
-		if len(filteredFunctions) > 0 {
-			filteredTools = append(filteredTools, &genai.Tool{
-				FunctionDeclarations: filteredFunctions,
-			})
-		}
+	// Add function declarations as a separate tool if any were found
+	if len(filteredFunctions) > 0 {
+		filteredTools = append(filteredTools, &genai.Tool{
+			FunctionDeclarations: filteredFunctions,
+		})
 	}
 
 	// Log warnings for tools that were not found
