@@ -177,12 +177,13 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 
 	if cand.Content != nil && len(cand.Content.Parts) > 0 {
 		for _, part := range cand.Content.Parts {
-			if part.Text != "" {
+			switch {
+			case part.Text != "":
 				err := s.sendChunk(ctx, part.Text, finishReason)
 				if err != nil {
 					return err, nil, nil
 				}
-			} else if part.FunctionCall != nil {
+			case part.FunctionCall != nil:
 				// Send tool call event to stream
 				toolCallID := generateToolCallID()
 				toolCallEvent := NewToolCallEvent(s.completionID, toolCallID, part.FunctionCall.Name, part.FunctionCall.Args)
@@ -222,7 +223,18 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 				}
 
 				fnResps = append(fnResps, genai.NewPartFromFunctionResponse(fnResp.Name, fnResp.Response))
-			} else {
+			case part.ExecutableCode != nil:
+				err := s.sendChunk(ctx, "```\n"+part.ExecutableCode.Code+"\n```\n", finishReason)
+				if err != nil {
+					return err, nil, nil
+				}
+			case part.CodeExecutionResult != nil:
+				err := s.sendChunk(ctx, part.CodeExecutionResult.Output, finishReason)
+				if err != nil {
+					return err, nil, nil
+				}
+
+			default:
 				// Provide detailed information about the unsupported part type
 				var partDetails strings.Builder
 				partDetails.WriteString(fmt.Sprintf("unsupported part type: %T", part))
@@ -242,10 +254,6 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 				if part.CodeExecutionResult != nil {
 					partDetails.WriteString(fmt.Sprintf(", CodeExecutionResult: {Outcome: %v}",
 						part.CodeExecutionResult.Outcome))
-				}
-				if part.ExecutableCode != nil {
-					partDetails.WriteString(fmt.Sprintf(", ExecutableCode: {Language: %v}",
-						part.ExecutableCode.Language))
 				}
 
 				// Log additional details for debugging
