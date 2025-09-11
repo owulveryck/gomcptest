@@ -1,20 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/ui.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/main.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/simpleui/serve_ui.go)",
-      "Bash(go build -o /tmp/test-openaiserver .)",
-      "Bash(go build -o /tmp/test-simpleui .)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/chat_structure.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/chatsession.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/stream.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/nonstream.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/models.go)",
-      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/handle_models.go)",
-      "Bash(go build -o /tmp/test-openaiserver ./host/openaiserver)",
-      "Bash(go build -o /tmp/test-simpleui ./host/openaiserver/simpleui)",
-      "Bash(git add .)"
+      "Bash(git add /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/chatsession.go)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix tool filtering to prevent mixing tool types\n\n- Separate Vertex AI built-in tools (CodeExecution, GoogleSearch, etc.) from function declarations\n- Each tool type gets its own genai.Tool instance to avoid proto validation errors\n- Prevents \"tools[0].tool_type: one_of 'tool_type' has more than one initialized field\" error\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_tools.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_prompts.go)",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_resources.go)",
+      "Bash(git add /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_tools.go /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_prompts.go /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/add_mcp_resources.go)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix MCP tool addition to prevent tool type mixing\n\n- Ensure MCP tools are added to dedicated function declaration tools\n- Prevent mixing FunctionDeclarations with Vertex AI built-in tools (CodeExecution, GoogleSearch, etc.)\n- Find existing function declaration tool or create new one when adding MCP tools\n- Fixes \"tools[0].tool_type: one_of 'tool_type' has more than one initialized field\" error\n- Updated all MCP addition functions: tools, prompts, resources, and resource templates\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(goimports -w /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/stream_processor.go)",
+      "Bash(git add /Users/olivier.wulveryck/github.com/owulveryck/gomcptest/host/openaiserver/chatengine/vertexai/gemini/stream_processor.go)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nImprove unsupported part type error message with detailed information\n\n- Replace generic \"unsupported part type: %T\" with detailed breakdown\n- Add specific information for InlineData, FileData, VideoMetadata, CodeExecutionResult, ExecutableCode\n- Include comprehensive logging with part details for debugging\n- Show MIME types, data sizes, and other relevant metadata when available\n- Helps developers understand exactly what part type was received and why it''s unsupported\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd support for ExecutableCode and CodeExecutionResult parts in streaming\n\n- Handle ExecutableCode parts by wrapping code in markdown code blocks  \n- Handle CodeExecutionResult parts by displaying the execution output\n- Convert if-else chain to switch statement for better readability\n- Maintain existing error handling for truly unsupported part types\n- Enables proper display of code execution results from Vertex AI tools\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

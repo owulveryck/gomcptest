@@ -262,8 +262,11 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 					"part_details", fmt.Sprintf("%+v", part),
 					"model", s.modelName,
 					"completion_id", s.completionID)
-
-				return fmt.Errorf(partDetails.String()), nil, nil
+				err := s.sendChunk(ctx, "No content generated with this request\n", finishReason)
+				if err != nil {
+					return err, nil, nil
+				}
+				// return fmt.Errorf(partDetails.String()), nil, nil
 			}
 		}
 	} else {
