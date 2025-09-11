@@ -36,15 +36,27 @@ func (chatsession *ChatSession) addMCPTool(mcpClient client.MCPClient, mcpServer
 		slog.Debug("Adding MCP tool as a function")
 		functionName := mcpServerName + toolPrefix + "_" + tool.Name
 
-		// Ensure we have a tool to add functions to
-		if len(chatsession.tools) == 0 {
-			chatsession.tools = []*genai.Tool{{
-				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
-			}}
+		// Find or create a tool for function declarations
+		var functionTool *genai.Tool
+		for _, tool := range chatsession.tools {
+			// Find a tool that only has function declarations (not Vertex AI tools)
+			if tool.FunctionDeclarations != nil && tool.CodeExecution == nil &&
+				tool.GoogleSearch == nil && tool.GoogleSearchRetrieval == nil {
+				functionTool = tool
+				break
+			}
 		}
 
-		// Add the function declaration to the first tool
-		chatsession.tools[0].FunctionDeclarations = append(chatsession.tools[0].FunctionDeclarations,
+		// If no function declaration tool exists, create one
+		if functionTool == nil {
+			functionTool = &genai.Tool{
+				FunctionDeclarations: make([]*genai.FunctionDeclaration, 0),
+			}
+			chatsession.tools = append(chatsession.tools, functionTool)
+		}
+
+		// Add the function declaration to the function tool
+		functionTool.FunctionDeclarations = append(functionTool.FunctionDeclarations,
 			&genai.FunctionDeclaration{
 				Name:        functionName,
 				Description: tool.Description,
