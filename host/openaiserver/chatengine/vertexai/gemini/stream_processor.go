@@ -223,7 +223,39 @@ func (s *streamProcessor) processContentResponse(ctx context.Context, resp *gena
 
 				fnResps = append(fnResps, genai.NewPartFromFunctionResponse(fnResp.Name, fnResp.Response))
 			} else {
-				return fmt.Errorf("unsupported part type: %T", part), nil, nil
+				// Provide detailed information about the unsupported part type
+				var partDetails strings.Builder
+				partDetails.WriteString(fmt.Sprintf("unsupported part type: %T", part))
+
+				// Add more specific details about the part structure
+				if part.InlineData != nil {
+					partDetails.WriteString(fmt.Sprintf(", InlineData: {MIMEType: %q, DataSize: %d}",
+						part.InlineData.MIMEType, len(part.InlineData.Data)))
+				}
+				if part.FileData != nil {
+					partDetails.WriteString(fmt.Sprintf(", FileData: {FileURI: %q, MIMEType: %q}",
+						part.FileData.FileURI, part.FileData.MIMEType))
+				}
+				if part.VideoMetadata != nil {
+					partDetails.WriteString(", VideoMetadata: present")
+				}
+				if part.CodeExecutionResult != nil {
+					partDetails.WriteString(fmt.Sprintf(", CodeExecutionResult: {Outcome: %v}",
+						part.CodeExecutionResult.Outcome))
+				}
+				if part.ExecutableCode != nil {
+					partDetails.WriteString(fmt.Sprintf(", ExecutableCode: {Language: %v}",
+						part.ExecutableCode.Language))
+				}
+
+				// Log additional details for debugging
+				slog.Error("Encountered unsupported part type",
+					"part_type", fmt.Sprintf("%T", part),
+					"part_details", fmt.Sprintf("%+v", part),
+					"model", s.modelName,
+					"completion_id", s.completionID)
+
+				return fmt.Errorf(partDetails.String()), nil, nil
 			}
 		}
 	} else {
