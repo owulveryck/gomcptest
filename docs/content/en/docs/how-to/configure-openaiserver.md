@@ -3,10 +3,10 @@ title: "How to Configure the OpenAI-Compatible Server"
 linkTitle: "Configure OpenAI Server"
 weight: 2
 description: >-
-  Customize the OpenAI-compatible server for different use cases
+  Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment
 ---
 
-This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest for different use cases.
+This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest with the AgentFlow web interface for different use cases.
 
 ## Prerequisites
 
@@ -44,6 +44,76 @@ export GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash
 ```
 
 **Note**: `IMAGEN_MODELS` and `IMAGE_DIR` environment variables are no longer needed for the openaiserver. Image generation is now handled by the independent `tools/imagen` MCP server.
+
+### Vertex AI Tools Configuration
+
+Enable additional Vertex AI built-in tools:
+
+```bash
+# Enable code execution capabilities
+export VERTEX_AI_CODE_EXECUTION=true
+
+# Enable Google Search integration
+export VERTEX_AI_GOOGLE_SEARCH=true
+
+# Enable Google Search with retrieval and grounding
+export VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL=true
+```
+
+## AgentFlow UI Configuration
+
+The AgentFlow web interface provides several configuration options for enhanced user experience.
+
+### Accessing AgentFlow
+
+Once your server is running, access AgentFlow at:
+```
+http://localhost:8080/ui
+```
+
+### Tool Selection Configuration
+
+AgentFlow allows granular control over tool availability:
+
+1. **Default Behavior**: All tools are available by default
+2. **Tool Filtering**: Use the tool selection dropdown to choose specific tools
+3. **Model String Format**: Selected tools are encoded as `model|tool1|tool2|tool3`
+
+Example tool selection scenarios:
+- **Development**: Enable only `Edit`, `View`, `GlobTool`, and `GrepTool` for code editing tasks
+- **File Management**: Enable only `LS`, `View`, `Bash` for system administration
+- **Content Creation**: Enable `View`, `Replace`, `Edit` for document editing
+
+### Event Monitoring Configuration
+
+AgentFlow provides real-time tool event monitoring:
+
+- **Tool Call Events**: See when AI decides to use tools
+- **Tool Response Events**: Monitor tool execution results
+- **Event Persistence**: All events are saved in conversation history
+- **Event Details**: Click notifications for detailed argument/response information
+
+### Mobile and PWA Configuration
+
+For mobile deployment, AgentFlow supports Progressive Web App features:
+
+1. **Apple Touch Icons**: Pre-configured for iOS web app installation
+2. **Responsive Design**: Optimized for mobile devices
+3. **Web App Manifest**: Supports "Add to Home Screen" functionality
+4. **Offline Capability**: Conversations persist offline
+
+### UI Customization
+
+You can customize AgentFlow by modifying the template file:
+```
+host/openaiserver/simpleui/chat-ui.html.tmpl
+```
+
+Key customization areas:
+- **Color Scheme**: Modify CSS gradient backgrounds
+- **Tool Notification Styling**: Customize event notification appearance  
+- **Mobile Behavior**: Adjust responsive breakpoints
+- **Branding**: Update titles, icons, and metadata
 
 ### Setting Up a Production Environment
 

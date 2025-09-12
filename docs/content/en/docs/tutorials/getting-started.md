@@ -110,8 +110,8 @@ These credentials will be used by gomcptest when interacting with Google Cloud s
    ```
 
 3. **Choose Interface**: 
-   - Run the OpenAI-compatible server: See the [OpenAI Server Tutorial](../openaiserver-tutorial/)
-   - Use the CLI directly: See the [cliGCP Tutorial](../cligcp-tutorial/)
+   - **Recommended**: Run the OpenAI-compatible server with AgentFlow UI: See the [OpenAI Server Tutorial](../openaiserver-tutorial/)
+   - Legacy CLI: See the [cliGCP Tutorial](../cligcp-tutorial/) (**⚠️ DEPRECATED** - Use AgentFlow UI instead)
 
 ## What's Next
 

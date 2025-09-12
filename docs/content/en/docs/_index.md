@@ -54,6 +54,7 @@ Explanation documents discuss and clarify concepts to broaden the reader's under
 |-------------|-------------|
 | [gomcptest Architecture](explanation/architecture/) | Deep dive into the system architecture, design decisions, and how the various components interact to create a custom MCP host. |
 | [Understanding the Model Context Protocol (MCP)](explanation/mcp-protocol/) | Exploration of what MCP is, how it works, design decisions behind it, and how it compares to alternative approaches for LLM tool integration. |
+| [AgentFlow: Modern Web Interface](explanation/agentflow/) | Comprehensive guide to AgentFlow's features including tool selection, real-time event notifications, mobile optimization, and conversation management. |
 
 ## Project Components
 

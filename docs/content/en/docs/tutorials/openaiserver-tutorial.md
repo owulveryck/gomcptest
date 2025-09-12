@@ -3,10 +3,10 @@ title: "Building Your First OpenAI-Compatible Server"
 linkTitle: "OpenAI Server Tutorial"
 weight: 2
 description: >-
-  Set up and run an OpenAI-compatible server with MCP tool support
+  Set up and run an OpenAI-compatible server with AgentFlow UI for interactive tool management and real-time event monitoring
 ---
 
-This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest. By the end, you'll have a working server that can communicate with LLM models and execute MCP tools.
+This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest with the AgentFlow web interface. By the end, you'll have a working server with a modern UI that provides tool selection, real-time event monitoring, and interactive chat capabilities.
 
 ## Prerequisites
 
@@ -46,9 +46,9 @@ Load the environment variables:
 source .envrc
 ```
 
-## Step 2: Start the OpenAI Server
+## Step 2: Start the OpenAI Server with AgentFlow UI
 
-Now you can start the OpenAI-compatible server:
+Now you can start the OpenAI-compatible server with the embedded AgentFlow interface:
 
 ```bash
 cd host/openaiserver
@@ -57,29 +57,66 @@ go run . -mcpservers "../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../b
 
 You should see output indicating that the server has started and registered the MCP tools.
 
-## Step 3: Test the Server with a Simple Request
+## Step 3: Access the AgentFlow Web Interface
 
-Open a new terminal window and use curl to test the server:
+Open your web browser and navigate to:
 
-```bash
-curl http://localhost:8080/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gemini-2.0-flash",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Hello, what can you do?"
-      }
-    ]
-  }'
+```
+http://localhost:8080/ui
 ```
 
-You should receive a response from the model explaining its capabilities.
+You'll see the AgentFlow interface with:
+- **Modern chat interface** with mobile-optimized design
+- **Tool selection dropdown** showing all available MCP tools (GlobTool, GrepTool, LS, View, Bash, Replace)
+- **Model selection** with Vertex AI tools support
+- **Real-time event monitoring** for tool calls and responses
 
-## Step 4: Test Function Calling
+### Using Tool Selection
 
-Now let's test function calling by asking the model to list files in a directory:
+1. **View Available Tools**: Click the "Tools: All" button to see the tool dropdown
+2. **Select Specific Tools**: Uncheck tools you don't want to use for focused interactions
+3. **Tool Information**: Each tool shows its name and description
+4. **Apply Selection**: Your selection is automatically applied to new conversations
+
+### Monitoring Tool Events
+
+As you interact with the AI agent, you'll see real-time notifications when:
+- **Tool Calls**: Blue notifications appear when the AI decides to use a tool
+- **Tool Responses**: Results are displayed as they complete
+- **Event Details**: Click notifications to see detailed tool arguments and responses
+
+## Step 4: Test AgentFlow with Interactive Chat
+
+In the AgentFlow interface, try these interactive examples:
+
+### Basic Chat Test
+1. Type in the chat input: "Hello, what can you do?"
+2. Send the message and observe the response
+3. Notice how the AI explains its capabilities and available tools
+
+### Tool Interaction Test  
+1. Ask: "List the files in the current directory"
+2. Watch as AgentFlow shows:
+   - **Tool Call Notification**: "Calling tool: LS" appears immediately
+   - **Tool Call Popup**: Shows the LS tool being called with its arguments
+   - **Tool Response**: Displays the directory listing result
+   - **AI Response**: The model interprets and explains the results
+
+### Tool Selection Test
+1. Click "Tools: All" to open the tool selector
+2. Uncheck all tools except "View" and "LS"
+3. Ask: "Show me the contents of README.md"
+4. Notice how the AI can only use the selected tools (View for reading, LS for listing)
+
+### Event Monitoring
+Throughout your interactions, observe:
+- **Real-time Events**: Tool calls appear instantly as blue notifications
+- **Event History**: All tool interactions are preserved in the chat
+- **Detailed Information**: Click on tool notifications to see arguments and responses
+
+## Step 5: Alternative API Testing (Optional)
+
+You can also test the server programmatically using curl:
 
 ```bash
 curl http://localhost:8080/v1/chat/completions \
@@ -95,23 +132,34 @@ curl http://localhost:8080/v1/chat/completions \
   }'
 ```
 
-The model should respond by calling the LS tool and returning the results.
+However, the AgentFlow UI provides much richer feedback and interaction capabilities.
 
 ## What You've Learned
 
 In this tutorial, you've:
-1. Set up the environment for the OpenAI-compatible server
+1. Set up the environment for the OpenAI-compatible server with AgentFlow UI
 2. Built and registered MCP tools
-3. Started the server
-4. Tested basic chat completion
-5. Demonstrated function calling capabilities
+3. Started the server with embedded web interface
+4. Accessed the modern AgentFlow web interface
+5. Used interactive tool selection and monitoring
+6. Experienced real-time tool event notifications
+7. Tested both UI and API interactions
+
+## Key AgentFlow Features Demonstrated
+
+- **Tool Selection**: Granular control over which tools are available to the AI
+- **Real-time Events**: Live monitoring of tool calls and responses
+- **Event Notifications**: Visual feedback for tool interactions
+- **Mobile Optimization**: Responsive design that works on all devices
+- **Interactive Chat**: Modern conversation interface with rich formatting
 
 ## Next Steps
 
-Now that you have a working OpenAI-compatible server, you can:
-- Explore the API by sending different types of requests
-- Add custom tools to expand the server's capabilities
-- Connect a client like the cliGCP to interact with the server
-- Experiment with different Gemini models
+Now that you have a working AgentFlow-enabled server, you can:
+- **Explore Advanced Features**: Learn more about [AgentFlow's capabilities](../../explanation/agentflow/)
+- **Configure Advanced Settings**: Check out the [OpenAI Server Configuration Guide](../../how-to/configure-openaiserver/)
+- **Create Custom Tools**: Follow the [Custom Tool Creation Guide](../../how-to/create-custom-tool/)
+- **Experiment with Models**: Try different Gemini models and Vertex AI tools
+- **Mobile Usage**: Install AgentFlow as a Progressive Web App on your mobile device
 
-Check out the [How to Configure the OpenAI Server](../../how-to/configure-openaiserver/) guide for more advanced configuration options.
+For detailed information about tool selection, event monitoring, and other AgentFlow features, see the comprehensive [AgentFlow Documentation](../../explanation/agentflow/).
