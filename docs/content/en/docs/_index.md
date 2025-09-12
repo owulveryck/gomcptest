@@ -34,6 +34,7 @@ How-to guides are recipes that guide you through the steps involved in addressin
 |--------------|-------------|
 | [How to Create a Custom MCP Tool](how-to/create-custom-tool/) | Practical steps to create a new custom tool compatible with the Model Context Protocol, including code templates and examples. |
 | [How to Configure the OpenAI-Compatible Server](how-to/configure-openaiserver/) | Solutions for configuring and customizing the OpenAI server with AgentFlow UI, including environment variables, Vertex AI tools, and production setup. |
+| [How to Query OpenAI Server with Tool Events](how-to/query-openaiserver-with-tools/) | Programmatically interact with the server using curl, Python, or shell commands to execute tools and monitor their execution events in real-time. |
 | [How to Configure the cliGCP Command Line Interface](how-to/configure-cligcp/) | **⚠️ DEPRECATED**: Legacy configuration guide. Use AgentFlow UI configuration instead. |
 
 ## Reference: Information-oriented content
