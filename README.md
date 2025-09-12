@@ -27,7 +27,8 @@ The tools use the default GCP login credentials configured by `gcloud auth login
 
 ![Architecture Diagram](doc/diagram.svg)
 
--   **`host/openaiserver`**: Implements a custom host that mimics the OpenAI API, using Google Gemini and function calling. This is the core of the POC.
+-   **`host/openaiserver`**: Implements a custom host that mimics the OpenAI API, using Google Gemini and function calling. This is the core of the POC and includes the modern **AgentFlow** web UI.
+-   **`host/cliGCP`**: CLI tool similar to Claude Code for testing agentic interactions. **⚠️ Note: This component is deprecated in favor of the AgentFlow web UI.**
 -   **`tools`**: Contains various MCP-compatible tools that can be used with the host:
     - **Bash**: Execute bash commands
     - **Edit**: Edit file contents
@@ -49,8 +50,9 @@ The tools use the default GCP login credentials configured by `gcloud auth login
 -   **Streaming Support:** The server supports streaming responses.
 -   **Function Calling:** Allows Gemini to call external functions and incorporate their results into chat responses.
 -   **MCP Server Interaction:** Demonstrates interaction with MCP (Model Context Protocol) servers for tool execution.
--   **Single Chat Session:** The application uses single chat session, and new conversation will not trigger a new session.
--   **CLI Interface:** Interactive command-line interface for testing agentic systems with natural language.
+-   **AgentFlow Web UI:** Modern, mobile-optimized web interface for testing agentic systems with natural language.
+-   **Vertex AI Built-in Tools:** Support for Google's native tools including Code Execution, Google Search, and Google Search Retrieval.
+-   **Template Engine:** Flexible template system supporting multiple deployment modes.
 
 ## Building the Tools
 
@@ -84,19 +86,51 @@ Set up the required environment variables for the host applications:
 export GCP_PROJECT=your-project-id
 export GCP_REGION=your-region
 export GEMINI_MODELS=gemini-2.0-flash
+
+# Optional: Enable Vertex AI built-in tools
+export VERTEX_AI_CODE_EXECUTION=true
+export VERTEX_AI_GOOGLE_SEARCH=true
+export VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL=true
 ```
 
 Note: `IMAGEN_MODELS` and `IMAGE_DIR` are no longer needed for the hosts as imagen functionality is now provided by the independent MCP tool in `tools/imagen`.
 
-## Testing the CLI
+## AgentFlow Web UI
 
-You can test the CLI (a tool similar to _Claude Code_) from the `bin` directory with:
+**AgentFlow** is the modern web-based interface for interacting with the agentic system. It is **embedded directly in the openaiserver binary** and provides a professional, mobile-optimized chat experience with real-time streaming responses.
+
+### Features
+- **Mobile-First Design**: Optimized for iPhone and mobile devices with Apple touch icon support
+- **Real-time Streaming**: Server-sent events for immediate response display
+- **Professional Styling**: Clean, modern interface with gradient backgrounds
+- **Conversation Management**: Persistent conversation history with easy navigation
+- **Attachment Support**: Upload and manage files including PDFs
+- **Embedded Architecture**: Built into the main openaiserver for easy deployment
+
+### How to Access AgentFlow
+
+Simply start the openaiserver and access the UI at the `/ui` endpoint:
+
+```bash
+./bin/openaiserver
+# AgentFlow UI available at: http://localhost:8080/ui
+```
+
+That's it! No separate UI server needed - AgentFlow is embedded in the main binary.
+
+### Development Note
+
+The `simpleui` directory contains a standalone UI server used only for development and testing purposes. Regular users should use the embedded UI via `/ui` endpoint.
+
+## Testing the CLI (Deprecated)
+
+⚠️ **Note: The CLI tool is deprecated in favor of the AgentFlow web UI.**
+
+You can still test the legacy CLI from the `bin` directory with:
 
 ```bash
 ./cliGCP -mcpservers "./GlobTool;./GrepTool;./LS;./View;./dispatch_agent -glob-path ./GlobTool -grep-path ./GrepTool -ls-path ./LS -view-path ./View;./Bash;./Replace;./imagen"
 ```
-
-The CLI provides an interactive interface for testing MCP tools with natural language commands, similar to Claude Code.
 
 ## Caution
 
@@ -158,6 +192,14 @@ The `openaiserver` application is configured using environment variables. The fo
 | `GCP_PROJECT`  | Google Cloud Project ID                      |                           | Yes      |
 | `GEMINI_MODELS` | Comma-separated list of Gemini models      | `gemini-1.5-pro,gemini-2.0-flash` | No       |
 | `GCP_REGION`   | Google Cloud Region                          | `us-central1`             | No       |
+
+### Vertex AI Built-in Tools
+
+| Variable       | Description                                  | Default                   | Required |
+| -------------- | -------------------------------------------- | ------------------------- | -------- |
+| `VERTEX_AI_CODE_EXECUTION` | Enable Vertex AI Code Execution tool | `false` | No |
+| `VERTEX_AI_GOOGLE_SEARCH` | Enable Vertex AI Google Search tool | `false` | No |
+| `VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL` | Enable Vertex AI Google Search Retrieval tool | `false` | No |
 
 **Note**: `IMAGEN_MODELS` and `IMAGE_DIR` environment variables are no longer needed for the hosts. Image generation is now handled by the independent `tools/imagen` MCP server.
 

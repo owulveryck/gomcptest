@@ -12,7 +12,31 @@ This reference guide provides detailed technical documentation on the OpenAI-com
 
 ## Overview
 
-The OpenAI-compatible server is a core component of the gomcptest system. It implements an API surface compatible with the OpenAI Chat Completions API while connecting to Google's Vertex AI for model inference. The server acts as a bridge between clients (like the cliGCP tool) and the underlying LLM models, handling session management, function calling, and tool execution.
+The OpenAI-compatible server is a core component of the gomcptest system. It implements an API surface compatible with the OpenAI Chat Completions API while connecting to Google's Vertex AI for model inference. The server acts as a bridge between clients (like the modern AgentFlow web UI) and the underlying LLM models, handling session management, function calling, and tool execution.
+
+## AgentFlow Web UI
+
+The server includes **AgentFlow**, a modern web-based interface that is **embedded directly in the openaiserver binary**. It provides:
+
+- **Mobile-First Design**: Optimized for iPhone and mobile devices
+- **Real-time Streaming**: Server-sent events for immediate response display
+- **Professional Styling**: Clean, modern interface with accessibility features
+- **Conversation Management**: Persistent conversation history
+- **Attachment Support**: File uploads including PDF support
+- **Embedded Architecture**: Built into the main server binary for easy deployment
+
+### UI Access
+
+Access AgentFlow by starting the openaiserver and navigating to the `/ui` endpoint:
+
+```bash
+./bin/openaiserver
+# AgentFlow available at: http://localhost:8080/ui
+```
+
+### Development Note
+
+The `host/openaiserver/simpleui` directory contains a standalone UI server used exclusively for development and testing. Production users should use the embedded UI via the `/ui` endpoint.
 
 ## API Endpoints
 
@@ -101,8 +125,17 @@ data: [DONE]
 
 The server supports the following Vertex AI models:
 
-- `gemini-pro`
-- `gemini-pro-vision`
+- `gemini-1.5-pro`
+- `gemini-2.0-flash`
+- `gemini-pro-vision` (legacy)
+
+### Vertex AI Built-in Tools
+
+The server supports Google's native Vertex AI tools:
+
+- **Code Execution**: Enables the model to execute code as part of generation
+- **Google Search**: Specialized search tool powered by Google
+- **Google Search Retrieval**: Advanced retrieval tool with Google search backend
 
 ### Parameters
 
@@ -160,16 +193,31 @@ Handles streaming responses to clients in SSE format, ensuring low latency and p
 
 The server can be configured using environment variables:
 
+### Core Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GCP_PROJECT` | Google Cloud project ID | - |
+| `GCP_REGION` | Google Cloud region | `us-central1` |
+| `GEMINI_MODELS` | Comma-separated list of available models | `gemini-1.5-pro,gemini-2.0-flash` |
+| `PORT` | HTTP server port | `8080` |
+| `LOG_LEVEL` | Logging level (DEBUG, INFO, WARN, ERROR) | `INFO` |
+
+### Vertex AI Tools Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VERTEX_AI_CODE_EXECUTION` | Enable Code Execution tool | `false` |
+| `VERTEX_AI_GOOGLE_SEARCH` | Enable Google Search tool | `false` |
+| `VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL` | Enable Google Search Retrieval tool | `false` |
+
+### Legacy Configuration
+
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to Google Cloud credentials file | - |
-| `GOOGLE_CLOUD_PROJECT` | Google Cloud project ID | - |
-| `GOOGLE_CLOUD_LOCATION` | Google Cloud region | `us-central1` |
-| `PORT` | HTTP server port | `8080` |
-| `MCP_TOOLS_PATH` | Path to MCP tools | `./tools` |
-| `DEFAULT_MODEL` | Default model to use | `gemini-pro` |
-| `MAX_HISTORY_TOKENS` | Maximum tokens to keep in history | `4000` |
-| `REQUEST_TIMEOUT` | Request timeout in seconds | `300` |
+| `GOOGLE_CLOUD_PROJECT` | Legacy alias for GCP_PROJECT | - |
+| `GOOGLE_CLOUD_LOCATION` | Legacy alias for GCP_REGION | `us-central1` |
 
 ## Error Handling
 
@@ -211,17 +259,36 @@ The server does not implement authentication or authorization by default. In pro
 ### Basic Usage
 
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/credentials.json"
-export GOOGLE_CLOUD_PROJECT="your-project-id"
+export GCP_PROJECT="your-project-id"
+export GCP_REGION="us-central1"
 ./bin/openaiserver
+# Access AgentFlow UI at: http://localhost:8080/ui
 ```
 
-### With Custom Tools
+### With Vertex AI Tools
 
 ```bash
-export MCP_TOOLS_PATH="/path/to/tools"
+export GCP_PROJECT="your-project-id"
+export VERTEX_AI_CODE_EXECUTION=true
+export VERTEX_AI_GOOGLE_SEARCH=true
 ./bin/openaiserver
+# AgentFlow UI with Vertex AI tools at: http://localhost:8080/ui
 ```
+
+### Development UI Server (For Developers Only)
+
+```bash
+# Terminal 1: Start API server
+export GCP_PROJECT="your-project-id"
+./bin/openaiserver -port=4000
+
+# Terminal 2: Start development UI server
+cd host/openaiserver/simpleui
+go run . -ui-port=8081 -api-url=http://localhost:4000
+# Development UI at: http://localhost:8081
+```
+
+**Note**: The standalone UI server is for development purposes only. Production users should use the embedded UI via `/ui`.
 
 ### Client Connection
 
@@ -229,7 +296,7 @@ export MCP_TOOLS_PATH="/path/to/tools"
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gemini-pro",
+    "model": "gemini-2.0-flash",
     "messages": [{"role": "user", "content": "Hello, world!"}]
   }'
 ```

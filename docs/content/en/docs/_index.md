@@ -22,9 +22,9 @@ Tutorials are lessons that take you by the hand through a series of steps to com
 
 | Tutorial | Description |
 |----------|-------------|
-| [Getting Started with gomcptest](tutorials/getting-started/) | A complete beginner's guide to setting up the environment, building tools, and running your first agent. Perfect for first-time users. |
-| [Building Your First OpenAI-Compatible Server](tutorials/openaiserver-tutorial/) | Step-by-step instructions for running and configuring the OpenAI-compatible server that communicates with LLM models and executes MCP tools. |
-| [Using the cliGCP Command Line Interface](tutorials/cligcp-tutorial/) | Hands-on guide to setting up and using the cliGCP tool to interact with LLMs and perform tasks using MCP tools. |
+| [Getting Started with gomcptest](tutorials/getting-started/) | A complete beginner's guide to setting up the environment, building tools, and running your first agent with the AgentFlow UI. Perfect for first-time users. |
+| [Building Your First OpenAI-Compatible Server](tutorials/openaiserver-tutorial/) | Step-by-step instructions for running and configuring the OpenAI-compatible server with the modern AgentFlow web interface. |
+| [Using the cliGCP Command Line Interface](tutorials/cligcp-tutorial/) | **⚠️ DEPRECATED**: Legacy guide for the cliGCP tool. Use AgentFlow UI instead. |
 
 ## How-to Guides: Problem-oriented content
 
@@ -33,8 +33,8 @@ How-to guides are recipes that guide you through the steps involved in addressin
 | How-to Guide | Description |
 |--------------|-------------|
 | [How to Create a Custom MCP Tool](how-to/create-custom-tool/) | Practical steps to create a new custom tool compatible with the Model Context Protocol, including code templates and examples. |
-| [How to Configure the OpenAI-Compatible Server](how-to/configure-openaiserver/) | Solutions for configuring and customizing the OpenAI server for different use cases, including environment variables, tool configuration, and production setup. |
-| [How to Configure the cliGCP Command Line Interface](how-to/configure-cligcp/) | Guides for customizing the cliGCP tool with environment variables, command-line arguments, and specialized configurations for different tasks. |
+| [How to Configure the OpenAI-Compatible Server](how-to/configure-openaiserver/) | Solutions for configuring and customizing the OpenAI server with AgentFlow UI, including environment variables, Vertex AI tools, and production setup. |
+| [How to Configure the cliGCP Command Line Interface](how-to/configure-cligcp/) | **⚠️ DEPRECATED**: Legacy configuration guide. Use AgentFlow UI configuration instead. |
 
 ## Reference: Information-oriented content
 
@@ -43,8 +43,8 @@ Reference guides are technical descriptions of the machinery and how to operate 
 | Reference | Description |
 |-----------|-------------|
 | [Tools Reference](reference/tools/) | Comprehensive reference of all available MCP-compatible tools, their parameters, response formats, and error handling. |
-| [OpenAI-Compatible Server Reference](reference/openaiserver/) | Technical documentation of the server's architecture, API endpoints, configuration options, and integration details with Vertex AI. |
-| [cliGCP Reference](reference/cligcp/) | Detailed reference of the cliGCP command structure, components, parameters, interaction patterns, and internal states. |
+| [OpenAI-Compatible Server Reference](reference/openaiserver/) | Technical documentation of the server's architecture, AgentFlow UI, API endpoints, configuration options, and Vertex AI integration. |
+| [cliGCP Reference](reference/cligcp/) | **⚠️ DEPRECATED**: Legacy CLI reference. Use AgentFlow UI instead. |
 
 ## Explanation: Understanding-oriented content
 
@@ -61,8 +61,21 @@ gomcptest consists of several key components that work together:
 
 ### Host Components
 
-- **OpenAI-compatible server** (`host/openaiserver`): A server that implements the OpenAI API interface and connects to Google's Vertex AI for model inference.
-- **cliGCP** (`host/cliGCP`): A command-line interface similar to Claude Code or ChatGPT that interacts with Gemini models and MCP tools.
+- **OpenAI-compatible server** (`host/openaiserver`): A server that implements the OpenAI API interface and connects to Google's Vertex AI for model inference. Includes the modern **AgentFlow web UI** for interactive chat.
+- **cliGCP** (`host/cliGCP`): **⚠️ DEPRECATED** - Legacy command-line interface. Use the AgentFlow web UI instead.
+
+### AgentFlow Web UI
+
+The modern web-based interface is **embedded in the openaiserver binary** and provides:
+
+- **Mobile-optimized design** with Apple touch icon support
+- **Real-time streaming responses** via Server-Sent Events
+- **Professional styling** with accessibility features
+- **Conversation management** with persistent history
+- **File upload support** including PDFs
+- **Embedded architecture** for easy deployment via `/ui` endpoint
+
+Access AgentFlow by running `./bin/openaiserver` and visiting `http://localhost:8080/ui`
 
 ### Tools
 

@@ -1,18 +1,20 @@
 ---
-title: "cliGCP Reference"
+title: "cliGCP Reference (Deprecated)"
 linkTitle: "cliGCP"
 weight: 3
 description: >
-  Detailed reference of the cliGCP command-line interface
+  Detailed reference of the cliGCP command-line interface (deprecated in favor of AgentFlow UI)
 ---
 
-{{% pageinfo %}}
-This reference guide provides detailed documentation of the cliGCP command structure, components, parameters, interaction patterns, and internal states.
+{{% pageinfo color="warning" %}}
+**⚠️ DEPRECATED**: The cliGCP command-line interface is deprecated in favor of the modern **AgentFlow web UI**. New users should use the [AgentFlow UI](/docs/reference/openaiserver/#agentflow-web-ui) instead. This documentation is maintained for legacy users.
 {{% /pageinfo %}}
 
 ## Overview
 
-The cliGCP (Command Line Interface for Google Cloud Platform) is a command-line tool that provides a chat interface similar to tools like "Claude Code" or "ChatGPT". It connects to an OpenAI-compatible server and allows users to interact with LLMs and MCP tools through a conversational interface.
+The cliGCP (Command Line Interface for Google Cloud Platform) is a legacy command-line tool that provides a chat interface similar to tools like "Claude Code" or "ChatGPT". It connects to an OpenAI-compatible server and allows users to interact with LLMs and MCP tools through a conversational interface.
+
+**For new projects, we recommend using the [AgentFlow web UI](/docs/reference/openaiserver/#agentflow-web-ui) which provides a modern, mobile-optimized interface with better features and user experience.**
 
 ## Command Structure
 
