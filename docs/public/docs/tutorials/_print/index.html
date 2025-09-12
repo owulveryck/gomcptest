@@ -1,10 +1,10 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
-  <head><script src="/gomcptest/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=gomcptest/livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="canonical" type="text/html" href="http://localhost:1313/gomcptest/docs/tutorials/">
-<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/gomcptest/docs/tutorials/index.xml">
+<link rel="canonical" type="text/html" href="https://owulveryck.github.io/gomcptest/docs/tutorials/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://owulveryck.github.io/gomcptest/docs/tutorials/index.xml">
 <meta name="robots" content="noindex, nofollow">
 
 
@@ -21,7 +21,7 @@
 
 <title>Tutorials | GoMCPTest</title>
 <meta name="description" content="Step-by-step guides to get you started with gomcptest">
-<meta property="og:url" content="http://localhost:1313/gomcptest/docs/tutorials/">
+<meta property="og:url" content="https://owulveryck.github.io/gomcptest/docs/tutorials/">
   <meta property="og:site_name" content="GoMCPTest">
   <meta property="og:title" content="Tutorials">
   <meta property="og:description" content="Step-by-step guides to get you started with gomcptest">
@@ -35,7 +35,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Tutorials">
   <meta name="twitter:description" content="Step-by-step guides to get you started with gomcptest">
-<link href="/gomcptest/scss/main.css" rel="stylesheet">
+<link rel="preload" href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" as="style" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
+<link href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" rel="stylesheet" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -162,42 +163,15 @@ This is the multi-page printable view of this section.
     
 	<h1 id="pg-fde8652c74594a64ff8ea9829ed8ccb8">1 - Getting Started with gomcptest</h1>
     <div class="lead">Get gomcptest up and running quickly with this beginner&rsquo;s guide</div>
-	<p>This tutorial will guide you through setting up the gomcptest system and configuring Google Cloud authentication for the project.</p>
-<h2 id="what-is-gomcptest">What is gomcptest?<a class="td-heading-self-link" href="#what-is-gomcptest" aria-label="Heading self-link"></a></h2>
-<p>gomcptest is a proof of concept (POC) implementation of the Model Context Protocol (MCP) with a custom-built host. It enables AI models like Google&rsquo;s Gemini to interact with their environment through a set of tools, creating powerful agentic systems.</p>
-<h3 id="key-components">Key Components<a class="td-heading-self-link" href="#key-components" aria-label="Heading self-link"></a></h3>
-<p>The project consists of three main parts:</p>
-<ol>
-<li>
-<p><strong>Host Components</strong>:</p>
-<ul>
-<li><strong>cliGCP</strong>: A command-line interface similar to Claude Code or ChatGPT, allowing direct interaction with AI models and tools</li>
-<li><strong>openaiserver</strong>: A server that implements the OpenAI API interface, enabling compatibility with existing OpenAI clients while using Google&rsquo;s Vertex AI behind the scenes</li>
-</ul>
-</li>
-<li>
-<p><strong>MCP Tools</strong>:</p>
-<ul>
-<li><strong>Bash</strong>: Execute shell commands</li>
-<li><strong>Edit/Replace</strong>: Modify file contents</li>
-<li><strong>GlobTool/GrepTool</strong>: Find files and search content</li>
-<li><strong>LS/View</strong>: Navigate and read the filesystem</li>
-<li><strong>dispatch_agent</strong>: Create sub-agents with specific tasks</li>
-</ul>
-</li>
-<li>
-<p><strong>MCP Protocol</strong>: The standardized communication layer that allows models to discover, invoke, and receive results from tools</p>
-</li>
-</ol>
-<h3 id="use-cases">Use Cases<a class="td-heading-self-link" href="#use-cases" aria-label="Heading self-link"></a></h3>
-<p>gomcptest enables a variety of agent-based applications:</p>
-<ul>
-<li>Code assistance and pair programming</li>
-<li>File system navigation and management</li>
-<li>Data analysis and processing</li>
-<li>Automated documentation</li>
-<li>Custom domain-specific agents</li>
-</ul>
+	<p>This tutorial will take you through building and running your first AI agent system with gomcptest. By the end, you&rsquo;ll have a working agent that can help you manage files and execute commands on your system.</p>
+
+
+<div class="pageinfo pageinfo-primary">
+<p><strong>What you&rsquo;ll accomplish</strong>: Set up gomcptest, build the tools, and have your first conversation with an AI agent that can actually help you with real tasks.</p>
+<p>For background on what gomcptest is and how it works, see the <a href="../../explanation/architecture/">Architecture explanation</a>.</p>
+
+</div>
+
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
 <ul>
 <li>Go &gt;= 1.21 installed on your system</li>
@@ -238,23 +212,89 @@ This is the multi-page printable view of this section.
 </span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> gomcptest
 </span></span></code></pre></div></li>
 <li>
-<p><strong>Build Tools</strong>: Compile all MCP-compatible tools</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make tools
+<p><strong>Build All Components</strong>: Compile tools and servers using the root Makefile</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Build all tools and servers</span>
+</span></span><span style="display:flex;"><span>make all
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Or build only tools</span>
+</span></span><span style="display:flex;"><span>make tools
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Or build only servers</span>
+</span></span><span style="display:flex;"><span>make servers
 </span></span></code></pre></div></li>
 <li>
-<p><strong>Choose Interface</strong>:</p>
+<p><strong>Set up your environment</strong>: Configure Google Cloud Project</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Set your project ID (replace with your actual project ID)</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;your-project-id&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;us-central1&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;gemini-2.0-flash&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">PORT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">8080</span>
+</span></span></code></pre></div></li>
+</ol>
+<h2 id="step-4-start-your-first-ai-agent">Step 4: Start Your First AI Agent<a class="td-heading-self-link" href="#step-4-start-your-first-ai-agent" aria-label="Heading self-link"></a></h2>
+<p>Now let&rsquo;s start the OpenAI-compatible server with the AgentFlow web interface:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/openaiserver
+</span></span><span style="display:flex;"><span>go run . -mcpservers <span style="color:#4e9a06">&#34;../../bin/LS;../../bin/View;../../bin/Bash;../../bin/GlobTool&#34;</span>
+</span></span></code></pre></div><p>You should see output like:</p>
+<pre tabindex="0"><code>2024/01/15 10:30:00 Starting OpenAI-compatible server on port 8080
+2024/01/15 10:30:00 Registered MCP tool: LS
+2024/01/15 10:30:00 Registered MCP tool: View  
+2024/01/15 10:30:00 Registered MCP tool: Bash
+2024/01/15 10:30:00 Registered MCP tool: GlobTool
+2024/01/15 10:30:00 AgentFlow UI available at: http://localhost:8080/ui
+</code></pre><h2 id="step-5-have-your-first-agent-conversation">Step 5: Have Your First Agent Conversation<a class="td-heading-self-link" href="#step-5-have-your-first-agent-conversation" aria-label="Heading self-link"></a></h2>
+<ol>
+<li>
+<p><strong>Open the AgentFlow UI</strong>: Navigate to <code>http://localhost:8080/ui</code> in your browser</p>
+</li>
+<li>
+<p><strong>Test basic interaction</strong>: Type this message in the chat:</p>
+<pre tabindex="0"><code>Hello! Can you help me understand what files are in the current directory?
+</code></pre></li>
+<li>
+<p><strong>Watch the magic happen</strong>: You&rsquo;ll see:</p>
 <ul>
-<li>Run the OpenAI-compatible server: See the <a href="../openaiserver-tutorial/">OpenAI Server Tutorial</a></li>
-<li>Use the CLI directly: See the <a href="../cligcp-tutorial/">cliGCP Tutorial</a></li>
+<li>The AI agent decides to use the LS tool</li>
+<li>A blue notification appears showing &ldquo;Calling tool: LS&rdquo;</li>
+<li>The tool executes and shows your directory contents</li>
+<li>The AI explains what it found</li>
+</ul>
+</li>
+<li>
+<p><strong>Try a more advanced task</strong>: Ask the agent:</p>
+<pre tabindex="0"><code>Find all .go files in this project and tell me about the project structure
+</code></pre><p>Watch as the agent:</p>
+<ul>
+<li>Uses GlobTool to find .go files</li>
+<li>Uses View to examine some files</li>
+<li>Gives you an analysis of the project structure</li>
 </ul>
 </li>
 </ol>
-<h2 id="whats-next">What&rsquo;s Next<a class="td-heading-self-link" href="#whats-next" aria-label="Heading self-link"></a></h2>
-<p>After completing the basic setup:</p>
+<h2 id="congratulations-">Congratulations! 🎉<a class="td-heading-self-link" href="#congratulations-" aria-label="Heading self-link"></a></h2>
+<p>You&rsquo;ve just built and run your first AI agent system! Your agent can now:</p>
 <ul>
-<li>Explore the different tools in the <code>tools</code> directory</li>
-<li>Try creating agent tasks with gomcptest</li>
-<li>Check out the how-to guides for specific use cases</li>
+<li>✅ Navigate your file system</li>
+<li>✅ Read file contents</li>
+<li>✅ Execute commands</li>
+<li>✅ Find files matching patterns</li>
+<li>✅ Provide intelligent analysis of what it discovers</li>
+</ul>
+<h2 id="what-youve-learned">What You&rsquo;ve Learned<a class="td-heading-self-link" href="#what-youve-learned" aria-label="Heading self-link"></a></h2>
+<p>Through this hands-on experience, you&rsquo;ve:</p>
+<ul>
+<li>Set up authentication with Google Cloud</li>
+<li>Built MCP-compatible tools from source</li>
+<li>Started an OpenAI-compatible server</li>
+<li>Used the AgentFlow web interface</li>
+<li>Watched an AI agent use tools to accomplish real tasks</li>
+</ul>
+<h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
+<p>Now that your agent is working, explore what else it can do:</p>
+<ul>
+<li>Try the <a href="../openaiserver-tutorial/">OpenAI Server Tutorial</a> to learn about advanced features</li>
+<li>Read about <a href="../../how-to/create-custom-tool/">Creating Custom Tools</a> to extend your agent&rsquo;s capabilities</li>
+<li>Learn about the <a href="../../explanation/event-system/">Event System</a> to understand how the real-time notifications work</li>
 </ul>
 
 </div>
@@ -272,8 +312,8 @@ This is the multi-page printable view of this section.
 <div class="td-content" style="page-break-before: always">
     
 	<h1 id="pg-d1e31c239e3f4bb5c0ff07585d9d378e">2 - Building Your First OpenAI-Compatible Server</h1>
-    <div class="lead">Set up and run an OpenAI-compatible server with MCP tool support</div>
-	<p>This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest. By the end, you&rsquo;ll have a working server that can communicate with LLM models and execute MCP tools.</p>
+    <div class="lead">Set up and run an OpenAI-compatible server with AgentFlow UI for interactive tool management and real-time event monitoring</div>
+	<p>This tutorial will guide you step-by-step through running and configuring the OpenAI-compatible server in gomcptest with the AgentFlow web interface. By the end, you&rsquo;ll have a working server with a modern UI that provides tool selection, real-time event monitoring, and interactive chat capabilities.</p>
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
 <ul>
 <li>Go &gt;= 1.21 installed</li>
@@ -290,38 +330,79 @@ This is the multi-page printable view of this section.
 <pre tabindex="0"><code># Server configuration
 PORT=8080
 LOG_LEVEL=INFO
-IMAGE_DIR=/tmp/images
 
 # GCP configuration
 GCP_PROJECT=your-gcp-project-id
 GCP_REGION=us-central1
 GEMINI_MODELS=gemini-2.0-flash
-IMAGEN_MODELS=imagen-3.0-generate-002
-</code></pre><p>Ensure the image directory exists:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p /tmp/images
-</span></span></code></pre></div><p>Load the environment variables:</p>
+</code></pre><p><strong>Note</strong>: <code>IMAGE_DIR</code> and <code>IMAGEN_MODELS</code> environment variables are no longer needed for the openaiserver host. Image generation is now handled by the independent <code>tools/imagen</code> MCP server.</p>
+<p>Load the environment variables:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">source</span> .envrc
-</span></span></code></pre></div><h2 id="step-2-start-the-openai-server">Step 2: Start the OpenAI Server<a class="td-heading-self-link" href="#step-2-start-the-openai-server" aria-label="Heading self-link"></a></h2>
-<p>Now you can start the OpenAI-compatible server:</p>
+</span></span></code></pre></div><h2 id="step-2-start-the-openai-server-with-agentflow-ui">Step 2: Start the OpenAI Server with AgentFlow UI<a class="td-heading-self-link" href="#step-2-start-the-openai-server-with-agentflow-ui" aria-label="Heading self-link"></a></h2>
+<p>Now you can start the OpenAI-compatible server with the embedded AgentFlow interface:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/openaiserver
 </span></span><span style="display:flex;"><span>go run . -mcpservers <span style="color:#4e9a06">&#34;../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../bin/Bash;../bin/Replace&#34;</span>
 </span></span></code></pre></div><p>You should see output indicating that the server has started and registered the MCP tools.</p>
-<h2 id="step-3-test-the-server-with-a-simple-request">Step 3: Test the Server with a Simple Request<a class="td-heading-self-link" href="#step-3-test-the-server-with-a-simple-request" aria-label="Heading self-link"></a></h2>
-<p>Open a new terminal window and use curl to test the server:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      {
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;role&#34;: &#34;user&#34;,
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;content&#34;: &#34;Hello, what can you do?&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ]
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
-</span></span></code></pre></div><p>You should receive a response from the model explaining its capabilities.</p>
-<h2 id="step-4-test-function-calling">Step 4: Test Function Calling<a class="td-heading-self-link" href="#step-4-test-function-calling" aria-label="Heading self-link"></a></h2>
-<p>Now let&rsquo;s test function calling by asking the model to list files in a directory:</p>
+<h2 id="step-3-access-the-agentflow-web-interface">Step 3: Access the AgentFlow Web Interface<a class="td-heading-self-link" href="#step-3-access-the-agentflow-web-interface" aria-label="Heading self-link"></a></h2>
+<p>Open your web browser and navigate to:</p>
+<pre tabindex="0"><code>http://localhost:8080/ui
+</code></pre><p>You&rsquo;ll see the AgentFlow interface with:</p>
+<ul>
+<li><strong>Modern chat interface</strong> with mobile-optimized design</li>
+<li><strong>Tool selection dropdown</strong> showing all available MCP tools (GlobTool, GrepTool, LS, View, Bash, Replace)</li>
+<li><strong>Model selection</strong> with Vertex AI tools support</li>
+<li><strong>Real-time event monitoring</strong> for tool calls and responses</li>
+</ul>
+<h3 id="using-tool-selection">Using Tool Selection<a class="td-heading-self-link" href="#using-tool-selection" aria-label="Heading self-link"></a></h3>
+<ol>
+<li><strong>View Available Tools</strong>: Click the &ldquo;Tools: All&rdquo; button to see the tool dropdown</li>
+<li><strong>Select Specific Tools</strong>: Uncheck tools you don&rsquo;t want to use for focused interactions</li>
+<li><strong>Tool Information</strong>: Each tool shows its name and description</li>
+<li><strong>Apply Selection</strong>: Your selection is automatically applied to new conversations</li>
+</ol>
+<h3 id="monitoring-tool-events">Monitoring Tool Events<a class="td-heading-self-link" href="#monitoring-tool-events" aria-label="Heading self-link"></a></h3>
+<p>As you interact with the AI agent, you&rsquo;ll see real-time notifications when:</p>
+<ul>
+<li><strong>Tool Calls</strong>: Blue notifications appear when the AI decides to use a tool</li>
+<li><strong>Tool Responses</strong>: Results are displayed as they complete</li>
+<li><strong>Event Details</strong>: Click notifications to see detailed tool arguments and responses</li>
+</ul>
+<h2 id="step-4-test-agentflow-with-interactive-chat">Step 4: Test AgentFlow with Interactive Chat<a class="td-heading-self-link" href="#step-4-test-agentflow-with-interactive-chat" aria-label="Heading self-link"></a></h2>
+<p>In the AgentFlow interface, try these interactive examples:</p>
+<h3 id="basic-chat-test">Basic Chat Test<a class="td-heading-self-link" href="#basic-chat-test" aria-label="Heading self-link"></a></h3>
+<ol>
+<li>Type in the chat input: &ldquo;Hello, what can you do?&rdquo;</li>
+<li>Send the message and observe the response</li>
+<li>Notice how the AI explains its capabilities and available tools</li>
+</ol>
+<h3 id="tool-interaction-test">Tool Interaction Test<a class="td-heading-self-link" href="#tool-interaction-test" aria-label="Heading self-link"></a></h3>
+<ol>
+<li>Ask: &ldquo;List the files in the current directory&rdquo;</li>
+<li>Watch as AgentFlow shows:
+<ul>
+<li><strong>Tool Call Notification</strong>: &ldquo;Calling tool: LS&rdquo; appears immediately</li>
+<li><strong>Tool Call Popup</strong>: Shows the LS tool being called with its arguments</li>
+<li><strong>Tool Response</strong>: Displays the directory listing result</li>
+<li><strong>AI Response</strong>: The model interprets and explains the results</li>
+</ul>
+</li>
+</ol>
+<h3 id="tool-selection-test">Tool Selection Test<a class="td-heading-self-link" href="#tool-selection-test" aria-label="Heading self-link"></a></h3>
+<ol>
+<li>Click &ldquo;Tools: All&rdquo; to open the tool selector</li>
+<li>Uncheck all tools except &ldquo;View&rdquo; and &ldquo;LS&rdquo;</li>
+<li>Ask: &ldquo;Show me the contents of README.md&rdquo;</li>
+<li>Notice how the AI can only use the selected tools (View for reading, LS for listing)</li>
+</ol>
+<h3 id="event-monitoring">Event Monitoring<a class="td-heading-self-link" href="#event-monitoring" aria-label="Heading self-link"></a></h3>
+<p>Throughout your interactions, observe:</p>
+<ul>
+<li><strong>Real-time Events</strong>: Tool calls appear instantly as blue notifications</li>
+<li><strong>Event History</strong>: All tool interactions are preserved in the chat</li>
+<li><strong>Detailed Information</strong>: Click on tool notifications to see arguments and responses</li>
+</ul>
+<h2 id="step-5-alternative-api-testing-optional">Step 5: Alternative API Testing (Optional)<a class="td-heading-self-link" href="#step-5-alternative-api-testing-optional" aria-label="Heading self-link"></a></h2>
+<p>You can also test the server programmatically using curl:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
@@ -333,25 +414,36 @@ IMAGEN_MODELS=imagen-3.0-generate-002
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ]
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
-</span></span></code></pre></div><p>The model should respond by calling the LS tool and returning the results.</p>
+</span></span></code></pre></div><p>However, the AgentFlow UI provides much richer feedback and interaction capabilities.</p>
 <h2 id="what-youve-learned">What You&rsquo;ve Learned<a class="td-heading-self-link" href="#what-youve-learned" aria-label="Heading self-link"></a></h2>
 <p>In this tutorial, you&rsquo;ve:</p>
 <ol>
-<li>Set up the environment for the OpenAI-compatible server</li>
+<li>Set up the environment for the OpenAI-compatible server with AgentFlow UI</li>
 <li>Built and registered MCP tools</li>
-<li>Started the server</li>
-<li>Tested basic chat completion</li>
-<li>Demonstrated function calling capabilities</li>
+<li>Started the server with embedded web interface</li>
+<li>Accessed the modern AgentFlow web interface</li>
+<li>Used interactive tool selection and monitoring</li>
+<li>Experienced real-time tool event notifications</li>
+<li>Tested both UI and API interactions</li>
 </ol>
-<h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
-<p>Now that you have a working OpenAI-compatible server, you can:</p>
+<h2 id="key-agentflow-features-demonstrated">Key AgentFlow Features Demonstrated<a class="td-heading-self-link" href="#key-agentflow-features-demonstrated" aria-label="Heading self-link"></a></h2>
 <ul>
-<li>Explore the API by sending different types of requests</li>
-<li>Add custom tools to expand the server&rsquo;s capabilities</li>
-<li>Connect a client like the cliGCP to interact with the server</li>
-<li>Experiment with different Gemini models</li>
+<li><strong>Tool Selection</strong>: Granular control over which tools are available to the AI</li>
+<li><strong>Real-time Events</strong>: Live monitoring of tool calls and responses</li>
+<li><strong>Event Notifications</strong>: Visual feedback for tool interactions</li>
+<li><strong>Mobile Optimization</strong>: Responsive design that works on all devices</li>
+<li><strong>Interactive Chat</strong>: Modern conversation interface with rich formatting</li>
 </ul>
-<p>Check out the <a href="../../how-to/configure-openaiserver/">How to Configure the OpenAI Server</a> guide for more advanced configuration options.</p>
+<h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
+<p>Now that you have a working AgentFlow-enabled server, you can:</p>
+<ul>
+<li><strong>Explore Advanced Features</strong>: Learn more about <a href="../../explanation/agentflow/">AgentFlow&rsquo;s capabilities</a></li>
+<li><strong>Configure Advanced Settings</strong>: Check out the <a href="../../how-to/configure-openaiserver/">OpenAI Server Configuration Guide</a></li>
+<li><strong>Create Custom Tools</strong>: Follow the <a href="../../how-to/create-custom-tool/">Custom Tool Creation Guide</a></li>
+<li><strong>Experiment with Models</strong>: Try different Gemini models and Vertex AI tools</li>
+<li><strong>Mobile Usage</strong>: Install AgentFlow as a Progressive Web App on your mobile device</li>
+</ul>
+<p>For detailed information about tool selection, event monitoring, and other AgentFlow features, see the comprehensive <a href="../../explanation/agentflow/">AgentFlow Documentation</a>.</p>
 
 </div>
 
@@ -394,9 +486,8 @@ IMAGEN_MODELS=imagen-3.0-generate-002
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-2.0-flash
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/tmp/images
-</span></span></code></pre></div><p>Load the environment variables:</p>
+</span></span></code></pre></div><p><strong>Note</strong>: <code>IMAGEN_MODELS</code> and <code>IMAGE_DIR</code> are no longer needed for the cliGCP host. Image generation is available through the independent <code>tools/imagen</code> MCP server.</p>
+<p>Load the environment variables:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">source</span> .envrc
 </span></span></code></pre></div><h2 id="step-4-run-the-cligcp-tool">Step 4: Run the cliGCP Tool<a class="td-heading-self-link" href="#step-4-run-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
 <p>Now you can run the cliGCP tool with MCP tools:</p>
@@ -491,8 +582,8 @@ IMAGEN_MODELS=imagen-3.0-generate-002
 </footer>
 
     </div>
-    <script src="/gomcptest/js/main.js"></script>
-<script defer src="/gomcptest/js/click-to-copy.js" crossorigin="anonymous"></script>
+    <script src="/gomcptest/js/main.min.89aa145a2213e507c6ff43c902243d28aa02cb6ba1818926cb888252762ae53e.js" integrity="sha256-iaoUWiIT5QfG/0PJAiQ9KKoCy2uhgYkmy4iCUnYq5T4=" crossorigin="anonymous"></script>
+<script defer src="/gomcptest/js/click-to-copy.min.73478a7d4807698aed7e355eb23f9890ca18fea3158604c8471746d046702bad.js" integrity="sha256-c0eKfUgHaYrtfjVesj&#43;YkMoY/qMVhgTIRxdG0EZwK60=" crossorigin="anonymous"></script>
 <script src='/gomcptest/js/tabpane-persist.js'></script>
 
   </body>

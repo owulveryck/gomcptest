@@ -1,10 +1,10 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
-  <head><script src="/gomcptest/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=gomcptest/livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="canonical" type="text/html" href="http://localhost:1313/gomcptest/docs/reference/">
-<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/gomcptest/docs/reference/index.xml">
+<link rel="canonical" type="text/html" href="https://owulveryck.github.io/gomcptest/docs/reference/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://owulveryck.github.io/gomcptest/docs/reference/index.xml">
 <meta name="robots" content="noindex, nofollow">
 
 
@@ -21,7 +21,7 @@
 
 <title>Reference | GoMCPTest</title>
 <meta name="description" content="Technical reference documentation for gomcptest components and tools">
-<meta property="og:url" content="http://localhost:1313/gomcptest/docs/reference/">
+<meta property="og:url" content="https://owulveryck.github.io/gomcptest/docs/reference/">
   <meta property="og:site_name" content="GoMCPTest">
   <meta property="og:title" content="Reference">
   <meta property="og:description" content="Technical reference documentation for gomcptest components and tools">
@@ -35,7 +35,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Reference">
   <meta name="twitter:description" content="Technical reference documentation for gomcptest components and tools">
-<link href="/gomcptest/scss/main.css" rel="stylesheet">
+<link rel="preload" href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" as="style" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
+<link href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" rel="stylesheet" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -121,7 +122,7 @@ This is the multi-page printable view of this section.
     
     
 	
-<li>3: <a href="#pg-2d55ee040b4d2da5feeb8c0dc85e1391">cliGCP Reference</a></li>
+<li>3: <a href="#pg-2d55ee040b4d2da5feeb8c0dc85e1391">cliGCP Reference (Deprecated)</a></li>
 
 
     
@@ -434,6 +435,198 @@ This is the multi-page printable view of this section.
 </table>
 <h3 id="response-7">Response<a class="td-heading-self-link" href="#response-7" aria-label="Heading self-link"></a></h3>
 <p>The result of the agent&rsquo;s task execution.</p>
+<h2 id="imagen">imagen<a class="td-heading-self-link" href="#imagen" aria-label="Heading self-link"></a></h2>
+<p>Generates and manipulates images using Google&rsquo;s Imagen API.</p>
+<h3 id="parameters-8">Parameters<a class="td-heading-self-link" href="#parameters-8" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>prompt</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>Description of the image to generate</td>
+      </tr>
+      <tr>
+          <td><code>aspectRatio</code></td>
+          <td>string</td>
+          <td>No</td>
+          <td>Aspect ratio for the image (default: &ldquo;1:1&rdquo;)</td>
+      </tr>
+      <tr>
+          <td><code>safetyFilterLevel</code></td>
+          <td>string</td>
+          <td>No</td>
+          <td>Safety filter level (default: &ldquo;block_some&rdquo;)</td>
+      </tr>
+      <tr>
+          <td><code>personGeneration</code></td>
+          <td>string</td>
+          <td>No</td>
+          <td>Person generation policy (default: &ldquo;dont_allow&rdquo;)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-8">Response<a class="td-heading-self-link" href="#response-8" aria-label="Heading self-link"></a></h3>
+<p>Returns a JSON object with the generated image path and metadata.</p>
+<h2 id="duckdbserver">duckdbserver<a class="td-heading-self-link" href="#duckdbserver" aria-label="Heading self-link"></a></h2>
+<p>Provides data processing capabilities using DuckDB.</p>
+<h3 id="parameters-9">Parameters<a class="td-heading-self-link" href="#parameters-9" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>query</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>SQL query to execute</td>
+      </tr>
+      <tr>
+          <td><code>database</code></td>
+          <td>string</td>
+          <td>No</td>
+          <td>Database file path (default: in-memory)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-9">Response<a class="td-heading-self-link" href="#response-9" aria-label="Heading self-link"></a></h3>
+<p>Query results in JSON format.</p>
+<h2 id="imagen_edit">imagen_edit<a class="td-heading-self-link" href="#imagen_edit" aria-label="Heading self-link"></a></h2>
+<p>Edits images using Google&rsquo;s Gemini 2.0 Flash model with natural language instructions.</p>
+<h3 id="parameters-10">Parameters<a class="td-heading-self-link" href="#parameters-10" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>base64_image</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>Base64 encoded image data (without data:image/&hellip; prefix)</td>
+      </tr>
+      <tr>
+          <td><code>mime_type</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>MIME type of the image (e.g., &ldquo;image/jpeg&rdquo;, &ldquo;image/png&rdquo;)</td>
+      </tr>
+      <tr>
+          <td><code>edit_instruction</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>Text describing the edit to perform</td>
+      </tr>
+      <tr>
+          <td><code>temperature</code></td>
+          <td>number</td>
+          <td>No</td>
+          <td>Randomness in generation (0.0-2.0, default: 1.0)</td>
+      </tr>
+      <tr>
+          <td><code>top_p</code></td>
+          <td>number</td>
+          <td>No</td>
+          <td>Nucleus sampling parameter (0.0-1.0, default: 0.95)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-10">Response<a class="td-heading-self-link" href="#response-10" aria-label="Heading self-link"></a></h3>
+<p>Returns edited image information including file path and HTTP URL.</p>
+<h2 id="plantuml">plantuml<a class="td-heading-self-link" href="#plantuml" aria-label="Heading self-link"></a></h2>
+<p>Generates PlantUML diagram URLs from plain text diagrams with syntax validation and error correction.</p>
+<h3 id="parameters-11">Parameters<a class="td-heading-self-link" href="#parameters-11" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>plantuml_code</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>PlantUML diagram code in plain text format</td>
+      </tr>
+      <tr>
+          <td><code>output_format</code></td>
+          <td>string</td>
+          <td>No</td>
+          <td>Output format: &ldquo;svg&rdquo; (default) or &ldquo;png&rdquo;</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-11">Response<a class="td-heading-self-link" href="#response-11" aria-label="Heading self-link"></a></h3>
+<p>Returns URL pointing to PlantUML server for SVG/PNG rendering.</p>
+<h2 id="plantuml_check">plantuml_check<a class="td-heading-self-link" href="#plantuml_check" aria-label="Heading self-link"></a></h2>
+<p>Validates PlantUML file syntax using the official PlantUML processor.</p>
+<h3 id="parameters-12">Parameters<a class="td-heading-self-link" href="#parameters-12" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>file_path</code></td>
+          <td>string</td>
+          <td>Yes</td>
+          <td>Path to PlantUML file (.puml, .plantuml, .pu)</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-12">Response<a class="td-heading-self-link" href="#response-12" aria-label="Heading self-link"></a></h3>
+<p>Returns validation result with detailed error messages if syntax issues are found.</p>
+<h2 id="sleep">sleep<a class="td-heading-self-link" href="#sleep" aria-label="Heading self-link"></a></h2>
+<p>Pauses execution for a specified number of seconds (useful for testing and demonstrations).</p>
+<h3 id="parameters-13">Parameters<a class="td-heading-self-link" href="#parameters-13" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Parameter</th>
+          <th>Type</th>
+          <th>Required</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>seconds</code></td>
+          <td>number</td>
+          <td>Yes</td>
+          <td>Number of seconds to sleep</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="response-13">Response<a class="td-heading-self-link" href="#response-13" aria-label="Heading self-link"></a></h3>
+<p>Confirmation message after sleep completion.</p>
 <h2 id="tool-response-format">Tool Response Format<a class="td-heading-self-link" href="#tool-response-format" aria-label="Heading self-link"></a></h2>
 <p>Most tools return JSON responses with the following structure:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
@@ -479,7 +672,23 @@ This is the multi-page printable view of this section.
 </div>
 
 <h2 id="overview">Overview<a class="td-heading-self-link" href="#overview" aria-label="Heading self-link"></a></h2>
-<p>The OpenAI-compatible server is a core component of the gomcptest system. It implements an API surface compatible with the OpenAI Chat Completions API while connecting to Google&rsquo;s Vertex AI for model inference. The server acts as a bridge between clients (like the cliGCP tool) and the underlying LLM models, handling session management, function calling, and tool execution.</p>
+<p>The OpenAI-compatible server is a core component of the gomcptest system. It implements an API surface compatible with the OpenAI Chat Completions API while connecting to Google&rsquo;s Vertex AI for model inference. The server acts as a bridge between clients (like the modern AgentFlow web UI) and the underlying LLM models, handling session management, function calling, and tool execution.</p>
+<h2 id="agentflow-web-ui">AgentFlow Web UI<a class="td-heading-self-link" href="#agentflow-web-ui" aria-label="Heading self-link"></a></h2>
+<p>The server includes <strong>AgentFlow</strong>, a modern web-based interface that is <strong>embedded directly in the openaiserver binary</strong>. It provides:</p>
+<ul>
+<li><strong>Mobile-First Design</strong>: Optimized for iPhone and mobile devices</li>
+<li><strong>Real-time Streaming</strong>: Server-sent events for immediate response display</li>
+<li><strong>Professional Styling</strong>: Clean, modern interface with accessibility features</li>
+<li><strong>Conversation Management</strong>: Persistent conversation history</li>
+<li><strong>Attachment Support</strong>: File uploads including PDF support</li>
+<li><strong>Embedded Architecture</strong>: Built into the main server binary for easy deployment</li>
+</ul>
+<h3 id="ui-access">UI Access<a class="td-heading-self-link" href="#ui-access" aria-label="Heading self-link"></a></h3>
+<p>Access AgentFlow by starting the openaiserver and navigating to the <code>/ui</code> endpoint:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./bin/openaiserver
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># AgentFlow available at: http://localhost:8080/ui</span>
+</span></span></code></pre></div><h3 id="development-note">Development Note<a class="td-heading-self-link" href="#development-note" aria-label="Heading self-link"></a></h3>
+<p>The <code>host/openaiserver/simpleui</code> directory contains a standalone UI server used exclusively for development and testing. Production users should use the embedded UI via the <code>/ui</code> endpoint.</p>
 <h2 id="api-endpoints">API Endpoints<a class="td-heading-self-link" href="#api-endpoints" aria-label="Heading self-link"></a></h2>
 <h3 id="post-v1chatcompletions">POST /v1/chat/completions<a class="td-heading-self-link" href="#post-v1chatcompletions" aria-label="Heading self-link"></a></h3>
 <p>The primary endpoint that mimics the OpenAI Chat Completions API.</p>
@@ -549,8 +758,16 @@ data: [DONE]
 <h3 id="models">Models<a class="td-heading-self-link" href="#models" aria-label="Heading self-link"></a></h3>
 <p>The server supports the following Vertex AI models:</p>
 <ul>
-<li><code>gemini-pro</code></li>
-<li><code>gemini-pro-vision</code></li>
+<li><code>gemini-1.5-pro</code></li>
+<li><code>gemini-2.0-flash</code></li>
+<li><code>gemini-pro-vision</code> (legacy)</li>
+</ul>
+<h3 id="vertex-ai-built-in-tools">Vertex AI Built-in Tools<a class="td-heading-self-link" href="#vertex-ai-built-in-tools" aria-label="Heading self-link"></a></h3>
+<p>The server supports Google&rsquo;s native Vertex AI tools:</p>
+<ul>
+<li><strong>Code Execution</strong>: Enables the model to execute code as part of generation</li>
+<li><strong>Google Search</strong>: Specialized search tool powered by Google</li>
+<li><strong>Google Search Retrieval</strong>: Advanced retrieval tool with Google search backend</li>
 </ul>
 <h3 id="parameters">Parameters<a class="td-heading-self-link" href="#parameters" aria-label="Heading self-link"></a></h3>
 <table>
@@ -640,6 +857,71 @@ data: [DONE]
 <p>Handles streaming responses to clients in SSE format, ensuring low latency and progressive rendering.</p>
 <h2 id="configuration">Configuration<a class="td-heading-self-link" href="#configuration" aria-label="Heading self-link"></a></h2>
 <p>The server can be configured using environment variables:</p>
+<h3 id="core-configuration">Core Configuration<a class="td-heading-self-link" href="#core-configuration" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Default</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>GCP_PROJECT</code></td>
+          <td>Google Cloud project ID</td>
+          <td>-</td>
+      </tr>
+      <tr>
+          <td><code>GCP_REGION</code></td>
+          <td>Google Cloud region</td>
+          <td><code>us-central1</code></td>
+      </tr>
+      <tr>
+          <td><code>GEMINI_MODELS</code></td>
+          <td>Comma-separated list of available models</td>
+          <td><code>gemini-1.5-pro,gemini-2.0-flash</code></td>
+      </tr>
+      <tr>
+          <td><code>PORT</code></td>
+          <td>HTTP server port</td>
+          <td><code>8080</code></td>
+      </tr>
+      <tr>
+          <td><code>LOG_LEVEL</code></td>
+          <td>Logging level (DEBUG, INFO, WARN, ERROR)</td>
+          <td><code>INFO</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="vertex-ai-tools-configuration">Vertex AI Tools Configuration<a class="td-heading-self-link" href="#vertex-ai-tools-configuration" aria-label="Heading self-link"></a></h3>
+<table>
+  <thead>
+      <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Default</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>VERTEX_AI_CODE_EXECUTION</code></td>
+          <td>Enable Code Execution tool</td>
+          <td><code>false</code></td>
+      </tr>
+      <tr>
+          <td><code>VERTEX_AI_GOOGLE_SEARCH</code></td>
+          <td>Enable Google Search tool</td>
+          <td><code>false</code></td>
+      </tr>
+      <tr>
+          <td><code>VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL</code></td>
+          <td>Enable Google Search Retrieval tool</td>
+          <td><code>false</code></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="legacy-configuration">Legacy Configuration<a class="td-heading-self-link" href="#legacy-configuration" aria-label="Heading self-link"></a></h3>
 <table>
   <thead>
       <tr>
@@ -656,38 +938,13 @@ data: [DONE]
       </tr>
       <tr>
           <td><code>GOOGLE_CLOUD_PROJECT</code></td>
-          <td>Google Cloud project ID</td>
+          <td>Legacy alias for GCP_PROJECT</td>
           <td>-</td>
       </tr>
       <tr>
           <td><code>GOOGLE_CLOUD_LOCATION</code></td>
-          <td>Google Cloud region</td>
+          <td>Legacy alias for GCP_REGION</td>
           <td><code>us-central1</code></td>
-      </tr>
-      <tr>
-          <td><code>PORT</code></td>
-          <td>HTTP server port</td>
-          <td><code>8080</code></td>
-      </tr>
-      <tr>
-          <td><code>MCP_TOOLS_PATH</code></td>
-          <td>Path to MCP tools</td>
-          <td><code>./tools</code></td>
-      </tr>
-      <tr>
-          <td><code>DEFAULT_MODEL</code></td>
-          <td>Default model to use</td>
-          <td><code>gemini-pro</code></td>
-      </tr>
-      <tr>
-          <td><code>MAX_HISTORY_TOKENS</code></td>
-          <td>Maximum tokens to keep in history</td>
-          <td><code>4000</code></td>
-      </tr>
-      <tr>
-          <td><code>REQUEST_TIMEOUT</code></td>
-          <td>Request timeout in seconds</td>
-          <td><code>300</code></td>
       </tr>
   </tbody>
 </table>
@@ -746,17 +1003,31 @@ data: [DONE]
 </ul>
 <h2 id="examples">Examples<a class="td-heading-self-link" href="#examples" aria-label="Heading self-link"></a></h2>
 <h3 id="basic-usage">Basic Usage<a class="td-heading-self-link" href="#basic-usage" aria-label="Heading self-link"></a></h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GOOGLE_APPLICATION_CREDENTIALS</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;/path/to/credentials.json&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GOOGLE_CLOUD_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;your-project-id&#34;</span>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;your-project-id&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;us-central1&#34;</span>
 </span></span><span style="display:flex;"><span>./bin/openaiserver
-</span></span></code></pre></div><h3 id="with-custom-tools">With Custom Tools<a class="td-heading-self-link" href="#with-custom-tools" aria-label="Heading self-link"></a></h3>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">MCP_TOOLS_PATH</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;/path/to/tools&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Access AgentFlow UI at: http://localhost:8080/ui</span>
+</span></span></code></pre></div><h3 id="with-vertex-ai-tools">With Vertex AI Tools<a class="td-heading-self-link" href="#with-vertex-ai-tools" aria-label="Heading self-link"></a></h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;your-project-id&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_CODE_EXECUTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_GOOGLE_SEARCH</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
 </span></span><span style="display:flex;"><span>./bin/openaiserver
-</span></span></code></pre></div><h3 id="client-connection">Client Connection<a class="td-heading-self-link" href="#client-connection" aria-label="Heading self-link"></a></h3>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># AgentFlow UI with Vertex AI tools at: http://localhost:8080/ui</span>
+</span></span></code></pre></div><h3 id="development-ui-server-for-developers-only">Development UI Server (For Developers Only)<a class="td-heading-self-link" href="#development-ui-server-for-developers-only" aria-label="Heading self-link"></a></h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Terminal 1: Start API server</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;your-project-id&#34;</span>
+</span></span><span style="display:flex;"><span>./bin/openaiserver -port<span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">4000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Terminal 2: Start development UI server</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">cd</span> host/openaiserver/simpleui
+</span></span><span style="display:flex;"><span>go run . -ui-port<span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">8081</span> -api-url<span style="color:#ce5c00;font-weight:bold">=</span>http://localhost:4000
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Development UI at: http://localhost:8081</span>
+</span></span></code></pre></div><p><strong>Note</strong>: The standalone UI server is for development purposes only. Production users should use the embedded UI via <code>/ui</code>.</p>
+<h3 id="client-connection">Client Connection<a class="td-heading-self-link" href="#client-connection" aria-label="Heading self-link"></a></h3>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
-</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-pro&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: &#34;Hello, world!&#34;}]
 </span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
 </span></span></code></pre></div><h2 id="limitations">Limitations<a class="td-heading-self-link" href="#limitations" aria-label="Heading self-link"></a></h2>
@@ -792,17 +1063,18 @@ data: [DONE]
 
 <div class="td-content" style="page-break-before: always">
     
-	<h1 id="pg-2d55ee040b4d2da5feeb8c0dc85e1391">3 - cliGCP Reference</h1>
-    <div class="lead">Detailed reference of the cliGCP command-line interface</div>
+	<h1 id="pg-2d55ee040b4d2da5feeb8c0dc85e1391">3 - cliGCP Reference (Deprecated)</h1>
+    <div class="lead">Detailed reference of the cliGCP command-line interface (deprecated in favor of AgentFlow UI)</div>
 	
 
-<div class="pageinfo pageinfo-primary">
-<p>This reference guide provides detailed documentation of the cliGCP command structure, components, parameters, interaction patterns, and internal states.</p>
+<div class="pageinfo pageinfo-warning">
+<p><strong>⚠️ DEPRECATED</strong>: The cliGCP command-line interface is deprecated in favor of the modern <strong>AgentFlow web UI</strong>. New users should use the <a href="/gomcptest/docs/reference/openaiserver/#agentflow-web-ui">AgentFlow UI</a> instead. This documentation is maintained for legacy users.</p>
 
 </div>
 
 <h2 id="overview">Overview<a class="td-heading-self-link" href="#overview" aria-label="Heading self-link"></a></h2>
-<p>The cliGCP (Command Line Interface for Google Cloud Platform) is a command-line tool that provides a chat interface similar to tools like &ldquo;Claude Code&rdquo; or &ldquo;ChatGPT&rdquo;. It connects to an OpenAI-compatible server and allows users to interact with LLMs and MCP tools through a conversational interface.</p>
+<p>The cliGCP (Command Line Interface for Google Cloud Platform) is a legacy command-line tool that provides a chat interface similar to tools like &ldquo;Claude Code&rdquo; or &ldquo;ChatGPT&rdquo;. It connects to an OpenAI-compatible server and allows users to interact with LLMs and MCP tools through a conversational interface.</p>
+<p><strong>For new projects, we recommend using the <a href="/gomcptest/docs/reference/openaiserver/#agentflow-web-ui">AgentFlow web UI</a> which provides a modern, mobile-optimized interface with better features and user experience.</strong></p>
 <h2 id="command-structure">Command Structure<a class="td-heading-self-link" href="#command-structure" aria-label="Heading self-link"></a></h2>
 <h3 id="basic-usage">Basic Usage<a class="td-heading-self-link" href="#basic-usage" aria-label="Heading self-link"></a></h3>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./bin/cliGCP <span style="color:#ce5c00;font-weight:bold">[</span>flags<span style="color:#ce5c00;font-weight:bold">]</span>
@@ -1108,8 +1380,8 @@ data: [DONE]
 </footer>
 
     </div>
-    <script src="/gomcptest/js/main.js"></script>
-<script defer src="/gomcptest/js/click-to-copy.js" crossorigin="anonymous"></script>
+    <script src="/gomcptest/js/main.min.89aa145a2213e507c6ff43c902243d28aa02cb6ba1818926cb888252762ae53e.js" integrity="sha256-iaoUWiIT5QfG/0PJAiQ9KKoCy2uhgYkmy4iCUnYq5T4=" crossorigin="anonymous"></script>
+<script defer src="/gomcptest/js/click-to-copy.min.73478a7d4807698aed7e355eb23f9890ca18fea3158604c8471746d046702bad.js" integrity="sha256-c0eKfUgHaYrtfjVesj&#43;YkMoY/qMVhgTIRxdG0EZwK60=" crossorigin="anonymous"></script>
 <script src='/gomcptest/js/tabpane-persist.js'></script>
 
   </body>

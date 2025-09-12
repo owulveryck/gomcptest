@@ -1,16 +1,16 @@
 ---
-title: "AgentFlow: Understanding the Event-Driven Interface"
-linkTitle: "AgentFlow Event System"
-weight: 1
+title: "AgentFlow: Event-Driven Interface Implementation"
+linkTitle: "AgentFlow Implementation"
+weight: 4
 description: >-
-  A comprehensive explanation of AgentFlow's real-time event system, tool selection mechanisms, and the underlying architecture that enables seamless agentic interactions through the web interface.
+  Implementation details of AgentFlow's event-driven web interface, demonstrating how the general event system concepts are applied in practice through real-time tool interactions and streaming responses.
 ---
 
-This document explains the technical architecture and mechanisms behind AgentFlow, the embedded web interface for gomcptest's OpenAI-compatible server, following the [Divio Documentation Framework](https://docs.divio.com/documentation-system/) explanation pattern.
+This document explains how AgentFlow implements the general [event system architecture](../event-system/) in a web-based interface, providing a concrete example of the event-driven patterns described in the foundational concepts. AgentFlow is the embedded web interface for gomcptest's OpenAI-compatible server.
 
 ## What is AgentFlow?
 
-AgentFlow is a modern web-based chat interface that enables real-time interaction with agentic systems through the gomcptest OpenAI-compatible API. Unlike traditional chat interfaces, AgentFlow provides deep visibility into the agentic process by exposing tool calls, responses, and execution details in real-time through a sophisticated event system.
+AgentFlow is a specific implementation of the gomcptest [event system](../event-system/) in the form of a modern web-based chat interface. It demonstrates how the general event-driven architecture can be applied to create transparent, real-time agentic interactions through a browser-based UI.
 
 ## Core Architecture Overview
 

@@ -82,6 +82,7 @@ Access AgentFlow by running `./bin/openaiserver` and visiting `http://localhost:
 
 The `tools` directory contains various MCP-compatible tools:
 
+#### File System Operations
 - **Bash**: Executes bash commands in a persistent shell session
 - **Edit**: Modifies file content by replacing specified text
 - **GlobTool**: Finds files matching glob patterns
@@ -89,4 +90,14 @@ The `tools` directory contains various MCP-compatible tools:
 - **LS**: Lists files and directories
 - **Replace**: Completely replaces a file's contents
 - **View**: Reads file contents
-- **dispatch_agent**: Launches a new agent with access to specific tools
+
+#### Image and Diagram Tools
+- **imagen**: Generates images using Google's Imagen API
+- **imagen_edit**: Edits images using natural language instructions
+- **plantuml**: Generates PlantUML diagram URLs with syntax validation
+- **plantuml_check**: Validates PlantUML file syntax
+
+#### Data and Utility Tools
+- **duckdbserver**: Provides SQL-based data processing with DuckDB
+- **dispatch_agent**: Launches specialized sub-agents for specific tasks
+- **sleep**: Pauses execution for testing and demonstrations

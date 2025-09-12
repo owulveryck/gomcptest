@@ -6,39 +6,13 @@ description: >-
   Get gomcptest up and running quickly with this beginner's guide
 ---
 
-This tutorial will guide you through setting up the gomcptest system and configuring Google Cloud authentication for the project.
+This tutorial will take you through building and running your first AI agent system with gomcptest. By the end, you'll have a working agent that can help you manage files and execute commands on your system.
 
-## What is gomcptest?
+{{% pageinfo %}}
+**What you'll accomplish**: Set up gomcptest, build the tools, and have your first conversation with an AI agent that can actually help you with real tasks.
 
-gomcptest is a proof of concept (POC) implementation of the Model Context Protocol (MCP) with a custom-built host. It enables AI models like Google's Gemini to interact with their environment through a set of tools, creating powerful agentic systems.
-
-### Key Components
-
-The project consists of three main parts:
-
-1. **Host Components**:
-   - **cliGCP**: A command-line interface similar to Claude Code or ChatGPT, allowing direct interaction with AI models and tools
-   - **openaiserver**: A server that implements the OpenAI API interface, enabling compatibility with existing OpenAI clients while using Google's Vertex AI behind the scenes
-
-2. **MCP Tools**:
-   - **Bash**: Execute shell commands
-   - **Edit/Replace**: Modify file contents
-   - **GlobTool/GrepTool**: Find files and search content
-   - **LS/View**: Navigate and read the filesystem
-   - **dispatch_agent**: Create sub-agents with specific tasks
-   - **imagen**: Generate and manipulate images using Google Imagen
-   - **duckdbserver**: Process data using DuckDB
-
-3. **MCP Protocol**: The standardized communication layer that allows models to discover, invoke, and receive results from tools
-
-### Use Cases
-
-gomcptest enables a variety of agent-based applications:
-- Code assistance and pair programming
-- File system navigation and management
-- Data analysis and processing
-- Automated documentation
-- Custom domain-specific agents
+For background on what gomcptest is and how it works, see the [Architecture explanation](../../explanation/architecture/).
+{{% /pageinfo %}}
 
 ## Prerequisites
 
@@ -109,13 +83,80 @@ These credentials will be used by gomcptest when interacting with Google Cloud s
    make servers
    ```
 
-3. **Choose Interface**: 
-   - **Recommended**: Run the OpenAI-compatible server with AgentFlow UI: See the [OpenAI Server Tutorial](../openaiserver-tutorial/)
-   - Legacy CLI: See the [cliGCP Tutorial](../cligcp-tutorial/) (**⚠️ DEPRECATED** - Use AgentFlow UI instead)
+3. **Set up your environment**: Configure Google Cloud Project
+   ```bash
+   # Set your project ID (replace with your actual project ID)
+   export GCP_PROJECT="your-project-id"
+   export GCP_REGION="us-central1"
+   export GEMINI_MODELS="gemini-2.0-flash"
+   export PORT=8080
+   ```
 
-## What's Next
+## Step 4: Start Your First AI Agent
 
-After completing the basic setup:
-- Explore the different tools in the `tools` directory
-- Try creating agent tasks with gomcptest
-- Check out the how-to guides for specific use cases
+Now let's start the OpenAI-compatible server with the AgentFlow web interface:
+
+```bash
+cd host/openaiserver
+go run . -mcpservers "../../bin/LS;../../bin/View;../../bin/Bash;../../bin/GlobTool"
+```
+
+You should see output like:
+```
+2024/01/15 10:30:00 Starting OpenAI-compatible server on port 8080
+2024/01/15 10:30:00 Registered MCP tool: LS
+2024/01/15 10:30:00 Registered MCP tool: View  
+2024/01/15 10:30:00 Registered MCP tool: Bash
+2024/01/15 10:30:00 Registered MCP tool: GlobTool
+2024/01/15 10:30:00 AgentFlow UI available at: http://localhost:8080/ui
+```
+
+## Step 5: Have Your First Agent Conversation
+
+1. **Open the AgentFlow UI**: Navigate to `http://localhost:8080/ui` in your browser
+
+2. **Test basic interaction**: Type this message in the chat:
+   ```
+   Hello! Can you help me understand what files are in the current directory?
+   ```
+
+3. **Watch the magic happen**: You'll see:
+   - The AI agent decides to use the LS tool
+   - A blue notification appears showing "Calling tool: LS"
+   - The tool executes and shows your directory contents
+   - The AI explains what it found
+
+4. **Try a more advanced task**: Ask the agent:
+   ```
+   Find all .go files in this project and tell me about the project structure
+   ```
+
+   Watch as the agent:
+   - Uses GlobTool to find .go files
+   - Uses View to examine some files
+   - Gives you an analysis of the project structure
+
+## Congratulations! 🎉
+
+You've just built and run your first AI agent system! Your agent can now:
+- ✅ Navigate your file system
+- ✅ Read file contents  
+- ✅ Execute commands
+- ✅ Find files matching patterns
+- ✅ Provide intelligent analysis of what it discovers
+
+## What You've Learned
+
+Through this hands-on experience, you've:
+- Set up authentication with Google Cloud
+- Built MCP-compatible tools from source
+- Started an OpenAI-compatible server
+- Used the AgentFlow web interface
+- Watched an AI agent use tools to accomplish real tasks
+
+## Next Steps
+
+Now that your agent is working, explore what else it can do:
+- Try the [OpenAI Server Tutorial](../openaiserver-tutorial/) to learn about advanced features
+- Read about [Creating Custom Tools](../../how-to/create-custom-tool/) to extend your agent's capabilities
+- Learn about the [Event System](../../explanation/event-system/) to understand how the real-time notifications work

@@ -172,6 +172,67 @@ Provides data processing capabilities using DuckDB.
 
 Query results in JSON format.
 
+## imagen_edit
+
+Edits images using Google's Gemini 2.0 Flash model with natural language instructions.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `base64_image` | string | Yes | Base64 encoded image data (without data:image/... prefix) |
+| `mime_type` | string | Yes | MIME type of the image (e.g., "image/jpeg", "image/png") |
+| `edit_instruction` | string | Yes | Text describing the edit to perform |
+| `temperature` | number | No | Randomness in generation (0.0-2.0, default: 1.0) |
+| `top_p` | number | No | Nucleus sampling parameter (0.0-1.0, default: 0.95) |
+
+### Response
+
+Returns edited image information including file path and HTTP URL.
+
+## plantuml
+
+Generates PlantUML diagram URLs from plain text diagrams with syntax validation and error correction.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `plantuml_code` | string | Yes | PlantUML diagram code in plain text format |
+| `output_format` | string | No | Output format: "svg" (default) or "png" |
+
+### Response
+
+Returns URL pointing to PlantUML server for SVG/PNG rendering.
+
+## plantuml_check
+
+Validates PlantUML file syntax using the official PlantUML processor.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file_path` | string | Yes | Path to PlantUML file (.puml, .plantuml, .pu) |
+
+### Response
+
+Returns validation result with detailed error messages if syntax issues are found.
+
+## sleep
+
+Pauses execution for a specified number of seconds (useful for testing and demonstrations).
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `seconds` | number | Yes | Number of seconds to sleep |
+
+### Response
+
+Confirmation message after sleep completion.
+
 ## Tool Response Format
 
 Most tools return JSON responses with the following structure:

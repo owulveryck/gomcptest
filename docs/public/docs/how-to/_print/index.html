@@ -1,10 +1,10 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
-  <head><script src="/gomcptest/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=gomcptest/livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="canonical" type="text/html" href="http://localhost:1313/gomcptest/docs/how-to/">
-<link rel="alternate" type="application/rss&#43;xml" href="http://localhost:1313/gomcptest/docs/how-to/index.xml">
+<link rel="canonical" type="text/html" href="https://owulveryck.github.io/gomcptest/docs/how-to/">
+<link rel="alternate" type="application/rss&#43;xml" href="https://owulveryck.github.io/gomcptest/docs/how-to/index.xml">
 <meta name="robots" content="noindex, nofollow">
 
 
@@ -21,7 +21,7 @@
 
 <title>How-To Guides | GoMCPTest</title>
 <meta name="description" content="Practical guides for solving specific problems with gomcptest">
-<meta property="og:url" content="http://localhost:1313/gomcptest/docs/how-to/">
+<meta property="og:url" content="https://owulveryck.github.io/gomcptest/docs/how-to/">
   <meta property="og:site_name" content="GoMCPTest">
   <meta property="og:title" content="How-To Guides">
   <meta property="og:description" content="Practical guides for solving specific problems with gomcptest">
@@ -35,7 +35,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="How-To Guides">
   <meta name="twitter:description" content="Practical guides for solving specific problems with gomcptest">
-<link href="/gomcptest/scss/main.css" rel="stylesheet">
+<link rel="preload" href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" as="style" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
+<link href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" rel="stylesheet" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -281,8 +282,8 @@ This is the multi-page printable view of this section.
 <div class="td-content" style="page-break-before: always">
     
 	<h1 id="pg-698eac74d7be52f0ac1350e89ad0e597">2 - How to Configure the OpenAI-Compatible Server</h1>
-    <div class="lead">Customize the OpenAI-compatible server for different use cases</div>
-	<p>This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest for different use cases.</p>
+    <div class="lead">Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment</div>
+	<p>This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest with the AgentFlow web interface for different use cases.</p>
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
 <ul>
 <li>A working installation of gomcptest</li>
@@ -297,9 +298,6 @@ This is the multi-page printable view of this section.
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Log level: DEBUG, INFO, WARN, ERROR (default: INFO)</span>
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">LOG_LEVEL</span><span style="color:#ce5c00;font-weight:bold">=</span>INFO
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Directory to store images (required)</span>
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/path/to/image/directory
 </span></span></code></pre></div><h3 id="gcp-configuration">GCP Configuration<a class="td-heading-self-link" href="#gcp-configuration" aria-label="Heading self-link"></a></h3>
 <p>Configure the Google Cloud Platform integration:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Project ID (required)</span>
@@ -310,10 +308,62 @@ This is the multi-page printable view of this section.
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Gemini models (default: gemini-1.5-pro,gemini-2.0-flash)</span>
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-1.5-pro,gemini-2.0-flash
+</span></span></code></pre></div><p><strong>Note</strong>: <code>IMAGEN_MODELS</code> and <code>IMAGE_DIR</code> environment variables are no longer needed for the openaiserver. Image generation is now handled by the independent <code>tools/imagen</code> MCP server.</p>
+<h3 id="vertex-ai-tools-configuration">Vertex AI Tools Configuration<a class="td-heading-self-link" href="#vertex-ai-tools-configuration" aria-label="Heading self-link"></a></h3>
+<p>Enable additional Vertex AI built-in tools:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable code execution capabilities</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_CODE_EXECUTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Imagen models (optional)</span>
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
-</span></span></code></pre></div><h3 id="setting-up-a-production-environment">Setting Up a Production Environment<a class="td-heading-self-link" href="#setting-up-a-production-environment" aria-label="Heading self-link"></a></h3>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable Google Search integration</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_GOOGLE_SEARCH</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable Google Search with retrieval and grounding</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
+</span></span></code></pre></div><h2 id="agentflow-ui-configuration">AgentFlow UI Configuration<a class="td-heading-self-link" href="#agentflow-ui-configuration" aria-label="Heading self-link"></a></h2>
+<p>The AgentFlow web interface provides several configuration options for enhanced user experience.</p>
+<h3 id="accessing-agentflow">Accessing AgentFlow<a class="td-heading-self-link" href="#accessing-agentflow" aria-label="Heading self-link"></a></h3>
+<p>Once your server is running, access AgentFlow at:</p>
+<pre tabindex="0"><code>http://localhost:8080/ui
+</code></pre><h3 id="tool-selection-configuration">Tool Selection Configuration<a class="td-heading-self-link" href="#tool-selection-configuration" aria-label="Heading self-link"></a></h3>
+<p>AgentFlow allows granular control over tool availability:</p>
+<ol>
+<li><strong>Default Behavior</strong>: All tools are available by default</li>
+<li><strong>Tool Filtering</strong>: Use the tool selection dropdown to choose specific tools</li>
+<li><strong>Model String Format</strong>: Selected tools are encoded as <code>model|tool1|tool2|tool3</code></li>
+</ol>
+<p>Example tool selection scenarios:</p>
+<ul>
+<li><strong>Development</strong>: Enable only <code>Edit</code>, <code>View</code>, <code>GlobTool</code>, and <code>GrepTool</code> for code editing tasks</li>
+<li><strong>File Management</strong>: Enable only <code>LS</code>, <code>View</code>, <code>Bash</code> for system administration</li>
+<li><strong>Content Creation</strong>: Enable <code>View</code>, <code>Replace</code>, <code>Edit</code> for document editing</li>
+</ul>
+<h3 id="event-monitoring-configuration">Event Monitoring Configuration<a class="td-heading-self-link" href="#event-monitoring-configuration" aria-label="Heading self-link"></a></h3>
+<p>AgentFlow provides real-time tool event monitoring:</p>
+<ul>
+<li><strong>Tool Call Events</strong>: See when AI decides to use tools</li>
+<li><strong>Tool Response Events</strong>: Monitor tool execution results</li>
+<li><strong>Event Persistence</strong>: All events are saved in conversation history</li>
+<li><strong>Event Details</strong>: Click notifications for detailed argument/response information</li>
+</ul>
+<h3 id="mobile-and-pwa-configuration">Mobile and PWA Configuration<a class="td-heading-self-link" href="#mobile-and-pwa-configuration" aria-label="Heading self-link"></a></h3>
+<p>For mobile deployment, AgentFlow supports Progressive Web App features:</p>
+<ol>
+<li><strong>Apple Touch Icons</strong>: Pre-configured for iOS web app installation</li>
+<li><strong>Responsive Design</strong>: Optimized for mobile devices</li>
+<li><strong>Web App Manifest</strong>: Supports &ldquo;Add to Home Screen&rdquo; functionality</li>
+<li><strong>Offline Capability</strong>: Conversations persist offline</li>
+</ol>
+<h3 id="ui-customization">UI Customization<a class="td-heading-self-link" href="#ui-customization" aria-label="Heading self-link"></a></h3>
+<p>You can customize AgentFlow by modifying the template file:</p>
+<pre tabindex="0"><code>host/openaiserver/simpleui/chat-ui.html.tmpl
+</code></pre><p>Key customization areas:</p>
+<ul>
+<li><strong>Color Scheme</strong>: Modify CSS gradient backgrounds</li>
+<li><strong>Tool Notification Styling</strong>: Customize event notification appearance</li>
+<li><strong>Mobile Behavior</strong>: Adjust responsive breakpoints</li>
+<li><strong>Branding</strong>: Update titles, icons, and metadata</li>
+</ul>
+<h3 id="setting-up-a-production-environment">Setting Up a Production Environment<a class="td-heading-self-link" href="#setting-up-a-production-environment" aria-label="Heading self-link"></a></h3>
 <p>For a production environment, create a proper systemd service file:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo nano /etc/systemd/system/gomcptest-openai.service
 </span></span></code></pre></div><p>Add the following content:</p>
@@ -327,7 +377,6 @@ This is the multi-page printable view of this section.
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">ExecStart</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">/path/to/gomcptest/host/openaiserver/openaiserver -mcpservers &#34;/path/to/gomcptest/bin/GlobTool;/path/to/gomcptest/bin/GrepTool;/path/to/gomcptest/bin/LS;/path/to/gomcptest/bin/View;/path/to/gomcptest/bin/Bash;/path/to/gomcptest/bin/Replace&#34;</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">PORT=8080</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">LOG_LEVEL=INFO</span>
-</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">IMAGE_DIR=/path/to/image/directory</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_PROJECT=your-gcp-project-id</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_REGION=us-central1</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash</span>
@@ -859,8 +908,8 @@ OPENAI_API_ENABLE_CUSTOM_PROVIDER=true
 </footer>
 
     </div>
-    <script src="/gomcptest/js/main.js"></script>
-<script defer src="/gomcptest/js/click-to-copy.js" crossorigin="anonymous"></script>
+    <script src="/gomcptest/js/main.min.89aa145a2213e507c6ff43c902243d28aa02cb6ba1818926cb888252762ae53e.js" integrity="sha256-iaoUWiIT5QfG/0PJAiQ9KKoCy2uhgYkmy4iCUnYq5T4=" crossorigin="anonymous"></script>
+<script defer src="/gomcptest/js/click-to-copy.min.73478a7d4807698aed7e355eb23f9890ca18fea3158604c8471746d046702bad.js" integrity="sha256-c0eKfUgHaYrtfjVesj&#43;YkMoY/qMVhgTIRxdG0EZwK60=" crossorigin="anonymous"></script>
 <script src='/gomcptest/js/tabpane-persist.js'></script>
 
   </body>

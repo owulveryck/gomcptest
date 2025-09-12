@@ -2,31 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Explanation on GoMCPTest</title>
-    <link>http://localhost:1313/gomcptest/docs/explanation/</link>
+    <link>https://owulveryck.github.io/gomcptest/docs/explanation/</link>
     <description>Recent content in Explanation on GoMCPTest</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <atom:link href="http://localhost:1313/gomcptest/docs/explanation/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://owulveryck.github.io/gomcptest/docs/explanation/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>gomcptest Architecture</title>
-      <link>http://localhost:1313/gomcptest/docs/explanation/architecture/</link>
+      <link>https://owulveryck.github.io/gomcptest/docs/explanation/architecture/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/gomcptest/docs/explanation/architecture/</guid>
+      <guid>https://owulveryck.github.io/gomcptest/docs/explanation/architecture/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explains the architecture of gomcptest, the design decisions behind it, and how the various components interact to create a custom Model Context Protocol (MCP) host.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;the-big-picture&#34;&gt;The Big Picture&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#the-big-picture&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;The gomcptest project implements a custom host that provides a Model Context Protocol (MCP) implementation. It&amp;rsquo;s designed to enable testing and experimentation with agentic systems without requiring direct integration with commercial LLM platforms.&lt;/p&gt;&#xA;&lt;p&gt;The system is built with these key principles in mind:&lt;/p&gt;</description>
     </item>
     <item>
       <title>Understanding the Model Context Protocol (MCP)</title>
-      <link>http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/</link>
+      <link>https://owulveryck.github.io/gomcptest/docs/explanation/mcp-protocol/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/gomcptest/docs/explanation/mcp-protocol/</guid>
+      <guid>https://owulveryck.github.io/gomcptest/docs/explanation/mcp-protocol/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explores the Model Context Protocol (MCP), how it works, the design decisions behind it, and how it compares to alternative approaches for LLM tool integration.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-is-the-model-context-protocol&#34;&gt;What is the Model Context Protocol?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-is-the-model-context-protocol&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;The Model Context Protocol (MCP) is a standardized communication protocol that enables Large Language Models (LLMs) to interact with external tools and capabilities. It defines a structured way for models to request information or take actions in the real world, and for tools to provide responses back to the model.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Understanding the MCP Tools</title>
-      <link>http://localhost:1313/gomcptest/docs/explanation/tools-details/</link>
+      <title>Event System Architecture</title>
+      <link>https://owulveryck.github.io/gomcptest/docs/explanation/event-system/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/gomcptest/docs/explanation/tools-details/</guid>
+      <guid>https://owulveryck.github.io/gomcptest/docs/explanation/event-system/</guid>
+      <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explains the foundational event system architecture in gomcptest that enables real-time monitoring of tool interactions, streaming responses, and transparent agentic workflows. This system is implemented across different components and interfaces, with AgentFlow being one specific implementation.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-is-the-event-system&#34;&gt;What is the Event System?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-is-the-event-system&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;The event system in gomcptest is a foundational architecture that provides real-time visibility into the agentic process. It captures, streams, and presents events that occur during AI-tool interactions, enabling transparency and monitoring of how AI agents make decisions and execute tasks.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Understanding the MCP Tools</title>
+      <link>https://owulveryck.github.io/gomcptest/docs/explanation/tools-details/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://owulveryck.github.io/gomcptest/docs/explanation/tools-details/</guid>
       <description>&lt;div class=&#34;pageinfo pageinfo-primary&#34;&gt;&#xA;&lt;p&gt;This document explains the architecture and implementation of the MCP tools in gomcptest, how they work, and the design principles behind them.&lt;/p&gt;&#xA;&#xA;&lt;/div&gt;&#xA;&#xA;&lt;h2 id=&#34;what-are-mcp-tools&#34;&gt;What are MCP Tools?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-are-mcp-tools&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;MCP (Model Context Protocol) tools are standalone executables that provide specific functions that can be invoked by AI models. They allow the AI to interact with its environment - performing tasks like reading and writing files, executing commands, or searching for information.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AgentFlow: Event-Driven Interface Implementation</title>
+      <link>https://owulveryck.github.io/gomcptest/docs/explanation/agentflow/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://owulveryck.github.io/gomcptest/docs/explanation/agentflow/</guid>
+      <description>&lt;p&gt;This document explains how AgentFlow implements the general &lt;a href=&#34;../event-system/&#34;&gt;event system architecture&lt;/a&gt; in a web-based interface, providing a concrete example of the event-driven patterns described in the foundational concepts. AgentFlow is the embedded web interface for gomcptest&amp;rsquo;s OpenAI-compatible server.&lt;/p&gt;&#xA;&lt;h2 id=&#34;what-is-agentflow&#34;&gt;What is AgentFlow?&lt;a class=&#34;td-heading-self-link&#34; href=&#34;#what-is-agentflow&#34; aria-label=&#34;Heading self-link&#34;&gt;&lt;/a&gt;&lt;/h2&gt;&#xA;&lt;p&gt;AgentFlow is a specific implementation of the gomcptest &lt;a href=&#34;../event-system/&#34;&gt;event system&lt;/a&gt; in the form of a modern web-based chat interface. It demonstrates how the general event-driven architecture can be applied to create transparent, real-time agentic interactions through a browser-based UI.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

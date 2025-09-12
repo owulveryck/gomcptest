@@ -1,9 +1,9 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
-  <head><script src="/gomcptest/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=gomcptest/livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 
 
 <link rel="shortcut icon" href="/gomcptest/favicons/favicon.ico" >
@@ -19,23 +19,24 @@
 
 <title>Using the cliGCP Command Line Interface | GoMCPTest</title>
 <meta name="description" content="Set up and use the cliGCP command line interface to interact with LLMs and MCP tools">
-<meta property="og:url" content="http://localhost:1313/gomcptest/docs/tutorials/cligcp-tutorial/">
+<meta property="og:url" content="https://owulveryck.github.io/gomcptest/docs/tutorials/cligcp-tutorial/">
   <meta property="og:site_name" content="GoMCPTest">
   <meta property="og:title" content="Using the cliGCP Command Line Interface">
   <meta property="og:description" content="Set up and use the cliGCP command line interface to interact with LLMs and MCP tools">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="docs">
-    <meta property="article:modified_time" content="2025-03-18T11:22:00+01:00">
+    <meta property="article:modified_time" content="2025-08-18T16:19:08+02:00">
 
   <meta itemprop="name" content="Using the cliGCP Command Line Interface">
   <meta itemprop="description" content="Set up and use the cliGCP command line interface to interact with LLMs and MCP tools">
-  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
-  <meta itemprop="wordCount" content="524">
+  <meta itemprop="dateModified" content="2025-08-18T16:19:08+02:00">
+  <meta itemprop="wordCount" content="542">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Using the cliGCP Command Line Interface">
   <meta name="twitter:description" content="Set up and use the cliGCP command line interface to interact with LLMs and MCP tools">
-<link href="/gomcptest/scss/main.css" rel="stylesheet">
+<link rel="preload" href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" as="style" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
+<link href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" rel="stylesheet" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -122,7 +123,7 @@
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsreferenceopenaiserver-li">
   <a href="/gomcptest/docs/reference/openaiserver/" title="OpenAI-Compatible Server Reference" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferenceopenaiserver"><span class="">OpenAI Server</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsreferencecligcp-li">
-  <a href="/gomcptest/docs/reference/cligcp/" title="cliGCP Reference" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferencecligcp"><span class="">cliGCP</span></a>
+  <a href="/gomcptest/docs/reference/cligcp/" title="cliGCP Reference (Deprecated)" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferencecligcp"><span class="">cliGCP</span></a>
 </li>
   </ul>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section with-child" id="m-gomcptestdocsexplanation-li">
@@ -132,8 +133,12 @@
   <a href="/gomcptest/docs/explanation/architecture/" title="gomcptest Architecture" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationarchitecture"><span class="">Architecture</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationmcp-protocol-li">
   <a href="/gomcptest/docs/explanation/mcp-protocol/" title="Understanding the Model Context Protocol (MCP)" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationmcp-protocol"><span class="">MCP Protocol</span></a>
+</li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationevent-system-li">
+  <a href="/gomcptest/docs/explanation/event-system/" title="Event System Architecture" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationevent-system"><span class="">Event System</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationtools-details-li">
   <a href="/gomcptest/docs/explanation/tools-details/" title="Understanding the MCP Tools" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationtools-details"><span class="">MCP Tools</span></a>
+</li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationagentflow-li">
+  <a href="/gomcptest/docs/explanation/agentflow/" title="AgentFlow: Event-Driven Interface Implementation" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationagentflow"><span class="">AgentFlow Implementation</span></a>
 </li>
   </ul>
 </li>
@@ -221,9 +226,8 @@
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_PROJECT</span><span style="color:#ce5c00;font-weight:bold">=</span>your-gcp-project-id
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GCP_REGION</span><span style="color:#ce5c00;font-weight:bold">=</span>us-central1
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-2.0-flash
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/tmp/images
-</span></span></code></pre></div><p>Load the environment variables:</p>
+</span></span></code></pre></div><p><strong>Note</strong>: <code>IMAGEN_MODELS</code> and <code>IMAGE_DIR</code> are no longer needed for the cliGCP host. Image generation is available through the independent <code>tools/imagen</code> MCP server.</p>
+<p>Load the environment variables:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#204a87">source</span> .envrc
 </span></span></code></pre></div><h2 id="step-4-run-the-cligcp-tool">Step 4: Run the cliGCP Tool<a class="td-heading-self-link" href="#step-4-run-the-cligcp-tool" aria-label="Heading self-link"></a></h2>
 <p>Now you can run the cliGCP tool with MCP tools:</p>
@@ -327,7 +331,7 @@
 </script>
 <br />
 <div class="td-page-meta__lastmod">
-  Last modified March 18, 2025: <a href="https://github.com/owulveryck/gomcptest/commit/3f09032c72f7a7f731a22ec9fe435747a371b7b4">wip (3f09032)</a>
+  Last modified August 18, 2025: <a href="https://github.com/owulveryck/gomcptest/commit/4d004613f58a2f6a14f7069841b16a9a3388fe72">Update documentation to remove imagen environment variables (4d00461)</a>
 </div>
 
 </div>
@@ -371,8 +375,8 @@
 </footer>
 
     </div>
-    <script src="/gomcptest/js/main.js"></script>
-<script defer src="/gomcptest/js/click-to-copy.js" crossorigin="anonymous"></script>
+    <script src="/gomcptest/js/main.min.89aa145a2213e507c6ff43c902243d28aa02cb6ba1818926cb888252762ae53e.js" integrity="sha256-iaoUWiIT5QfG/0PJAiQ9KKoCy2uhgYkmy4iCUnYq5T4=" crossorigin="anonymous"></script>
+<script defer src="/gomcptest/js/click-to-copy.min.73478a7d4807698aed7e355eb23f9890ca18fea3158604c8471746d046702bad.js" integrity="sha256-c0eKfUgHaYrtfjVesj&#43;YkMoY/qMVhgTIRxdG0EZwK60=" crossorigin="anonymous"></script>
 <script src='/gomcptest/js/tabpane-persist.js'></script>
 
   </body>

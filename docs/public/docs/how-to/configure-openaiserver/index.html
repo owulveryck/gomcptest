@@ -1,9 +1,9 @@
 <!doctype html>
 <html itemscope itemtype="http://schema.org/WebPage" lang="en" class="no-js">
-  <head><script src="/gomcptest/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=gomcptest/livereload" data-no-instant defer></script>
+  <head>
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 
 
 <link rel="shortcut icon" href="/gomcptest/favicons/favicon.ico" >
@@ -18,24 +18,25 @@
 <link rel="icon" type="image/png" href="/gomcptest/favicons/android-192x192.png" sizes="192x192">
 
 <title>How to Configure the OpenAI-Compatible Server | GoMCPTest</title>
-<meta name="description" content="Customize the OpenAI-compatible server for different use cases">
-<meta property="og:url" content="http://localhost:1313/gomcptest/docs/how-to/configure-openaiserver/">
+<meta name="description" content="Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment">
+<meta property="og:url" content="https://owulveryck.github.io/gomcptest/docs/how-to/configure-openaiserver/">
   <meta property="og:site_name" content="GoMCPTest">
   <meta property="og:title" content="How to Configure the OpenAI-Compatible Server">
-  <meta property="og:description" content="Customize the OpenAI-compatible server for different use cases">
+  <meta property="og:description" content="Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment">
   <meta property="og:locale" content="en">
   <meta property="og:type" content="article">
     <meta property="article:section" content="docs">
-    <meta property="article:modified_time" content="2025-03-18T11:22:00+01:00">
+    <meta property="article:modified_time" content="2025-09-12T10:47:18+02:00">
 
   <meta itemprop="name" content="How to Configure the OpenAI-Compatible Server">
-  <meta itemprop="description" content="Customize the OpenAI-compatible server for different use cases">
-  <meta itemprop="dateModified" content="2025-03-18T11:22:00+01:00">
-  <meta itemprop="wordCount" content="642">
+  <meta itemprop="description" content="Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment">
+  <meta itemprop="dateModified" content="2025-09-12T10:47:18+02:00">
+  <meta itemprop="wordCount" content="910">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="How to Configure the OpenAI-Compatible Server">
-  <meta name="twitter:description" content="Customize the OpenAI-compatible server for different use cases">
-<link href="/gomcptest/scss/main.css" rel="stylesheet">
+  <meta name="twitter:description" content="Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment">
+<link rel="preload" href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" as="style" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
+<link href="/gomcptest/scss/main.min.48c25d0a5a23a1e8cae94d6c5e7622061e5345cf098171b1d6ee41d8e309e6c8.css" rel="stylesheet" integrity="sha256-SMJdClojoejK6U1sXnYiBh5TRc8JgXGx1u5B2OMJ5sg=" crossorigin="anonymous">
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
   integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
@@ -122,7 +123,7 @@
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsreferenceopenaiserver-li">
   <a href="/gomcptest/docs/reference/openaiserver/" title="OpenAI-Compatible Server Reference" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferenceopenaiserver"><span class="">OpenAI Server</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsreferencecligcp-li">
-  <a href="/gomcptest/docs/reference/cligcp/" title="cliGCP Reference" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferencecligcp"><span class="">cliGCP</span></a>
+  <a href="/gomcptest/docs/reference/cligcp/" title="cliGCP Reference (Deprecated)" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsreferencecligcp"><span class="">cliGCP</span></a>
 </li>
   </ul>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section with-child" id="m-gomcptestdocsexplanation-li">
@@ -132,8 +133,12 @@
   <a href="/gomcptest/docs/explanation/architecture/" title="gomcptest Architecture" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationarchitecture"><span class="">Architecture</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationmcp-protocol-li">
   <a href="/gomcptest/docs/explanation/mcp-protocol/" title="Understanding the Model Context Protocol (MCP)" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationmcp-protocol"><span class="">MCP Protocol</span></a>
+</li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationevent-system-li">
+  <a href="/gomcptest/docs/explanation/event-system/" title="Event System Architecture" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationevent-system"><span class="">Event System</span></a>
 </li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationtools-details-li">
   <a href="/gomcptest/docs/explanation/tools-details/" title="Understanding the MCP Tools" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationtools-details"><span class="">MCP Tools</span></a>
+</li><li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child" id="m-gomcptestdocsexplanationagentflow-li">
+  <a href="/gomcptest/docs/explanation/agentflow/" title="AgentFlow: Event-Driven Interface Implementation" class="align-left ps-0 td-sidebar-link td-sidebar-link__page" id="m-gomcptestdocsexplanationagentflow"><span class="">AgentFlow Implementation</span></a>
 </li>
   </ul>
 </li>
@@ -163,6 +168,16 @@
       <ul>
         <li><a href="#basic-server-configuration">Basic Server Configuration</a></li>
         <li><a href="#gcp-configuration">GCP Configuration</a></li>
+        <li><a href="#vertex-ai-tools-configuration">Vertex AI Tools Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#agentflow-ui-configuration">AgentFlow UI Configuration</a>
+      <ul>
+        <li><a href="#accessing-agentflow">Accessing AgentFlow</a></li>
+        <li><a href="#tool-selection-configuration">Tool Selection Configuration</a></li>
+        <li><a href="#event-monitoring-configuration">Event Monitoring Configuration</a></li>
+        <li><a href="#mobile-and-pwa-configuration">Mobile and PWA Configuration</a></li>
+        <li><a href="#ui-customization">UI Customization</a></li>
         <li><a href="#setting-up-a-production-environment">Setting Up a Production Environment</a></li>
       </ul>
     </li>
@@ -215,11 +230,11 @@
             
 <div class="td-content">
 	<h1>How to Configure the OpenAI-Compatible Server</h1>
-	<div class="lead">Customize the OpenAI-compatible server for different use cases</div>
+	<div class="lead">Customize the OpenAI-compatible server with AgentFlow UI for different use cases, including tool selection, event monitoring, and production deployment</div>
 	<header class="article-meta">
 		
   </header>
-	<p>This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest for different use cases.</p>
+	<p>This guide shows you how to configure and customize the OpenAI-compatible server in gomcptest with the AgentFlow web interface for different use cases.</p>
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
 <ul>
 <li>A working installation of gomcptest</li>
@@ -234,9 +249,6 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Log level: DEBUG, INFO, WARN, ERROR (default: INFO)</span>
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">LOG_LEVEL</span><span style="color:#ce5c00;font-weight:bold">=</span>INFO
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Directory to store images (required)</span>
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGE_DIR</span><span style="color:#ce5c00;font-weight:bold">=</span>/path/to/image/directory
 </span></span></code></pre></div><h3 id="gcp-configuration">GCP Configuration<a class="td-heading-self-link" href="#gcp-configuration" aria-label="Heading self-link"></a></h3>
 <p>Configure the Google Cloud Platform integration:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># GCP Project ID (required)</span>
@@ -247,10 +259,62 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Gemini models (default: gemini-1.5-pro,gemini-2.0-flash)</span>
 </span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">GEMINI_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>gemini-1.5-pro,gemini-2.0-flash
+</span></span></code></pre></div><p><strong>Note</strong>: <code>IMAGEN_MODELS</code> and <code>IMAGE_DIR</code> environment variables are no longer needed for the openaiserver. Image generation is now handled by the independent <code>tools/imagen</code> MCP server.</p>
+<h3 id="vertex-ai-tools-configuration">Vertex AI Tools Configuration<a class="td-heading-self-link" href="#vertex-ai-tools-configuration" aria-label="Heading self-link"></a></h3>
+<p>Enable additional Vertex AI built-in tools:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable code execution capabilities</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_CODE_EXECUTION</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Comma-separated list of Imagen models (optional)</span>
-</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">IMAGEN_MODELS</span><span style="color:#ce5c00;font-weight:bold">=</span>imagen-3.0-generate-002
-</span></span></code></pre></div><h3 id="setting-up-a-production-environment">Setting Up a Production Environment<a class="td-heading-self-link" href="#setting-up-a-production-environment" aria-label="Heading self-link"></a></h3>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable Google Search integration</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_GOOGLE_SEARCH</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Enable Google Search with retrieval and grounding</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87">export</span> <span style="color:#000">VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87">true</span>
+</span></span></code></pre></div><h2 id="agentflow-ui-configuration">AgentFlow UI Configuration<a class="td-heading-self-link" href="#agentflow-ui-configuration" aria-label="Heading self-link"></a></h2>
+<p>The AgentFlow web interface provides several configuration options for enhanced user experience.</p>
+<h3 id="accessing-agentflow">Accessing AgentFlow<a class="td-heading-self-link" href="#accessing-agentflow" aria-label="Heading self-link"></a></h3>
+<p>Once your server is running, access AgentFlow at:</p>
+<pre tabindex="0"><code>http://localhost:8080/ui
+</code></pre><h3 id="tool-selection-configuration">Tool Selection Configuration<a class="td-heading-self-link" href="#tool-selection-configuration" aria-label="Heading self-link"></a></h3>
+<p>AgentFlow allows granular control over tool availability:</p>
+<ol>
+<li><strong>Default Behavior</strong>: All tools are available by default</li>
+<li><strong>Tool Filtering</strong>: Use the tool selection dropdown to choose specific tools</li>
+<li><strong>Model String Format</strong>: Selected tools are encoded as <code>model|tool1|tool2|tool3</code></li>
+</ol>
+<p>Example tool selection scenarios:</p>
+<ul>
+<li><strong>Development</strong>: Enable only <code>Edit</code>, <code>View</code>, <code>GlobTool</code>, and <code>GrepTool</code> for code editing tasks</li>
+<li><strong>File Management</strong>: Enable only <code>LS</code>, <code>View</code>, <code>Bash</code> for system administration</li>
+<li><strong>Content Creation</strong>: Enable <code>View</code>, <code>Replace</code>, <code>Edit</code> for document editing</li>
+</ul>
+<h3 id="event-monitoring-configuration">Event Monitoring Configuration<a class="td-heading-self-link" href="#event-monitoring-configuration" aria-label="Heading self-link"></a></h3>
+<p>AgentFlow provides real-time tool event monitoring:</p>
+<ul>
+<li><strong>Tool Call Events</strong>: See when AI decides to use tools</li>
+<li><strong>Tool Response Events</strong>: Monitor tool execution results</li>
+<li><strong>Event Persistence</strong>: All events are saved in conversation history</li>
+<li><strong>Event Details</strong>: Click notifications for detailed argument/response information</li>
+</ul>
+<h3 id="mobile-and-pwa-configuration">Mobile and PWA Configuration<a class="td-heading-self-link" href="#mobile-and-pwa-configuration" aria-label="Heading self-link"></a></h3>
+<p>For mobile deployment, AgentFlow supports Progressive Web App features:</p>
+<ol>
+<li><strong>Apple Touch Icons</strong>: Pre-configured for iOS web app installation</li>
+<li><strong>Responsive Design</strong>: Optimized for mobile devices</li>
+<li><strong>Web App Manifest</strong>: Supports &ldquo;Add to Home Screen&rdquo; functionality</li>
+<li><strong>Offline Capability</strong>: Conversations persist offline</li>
+</ol>
+<h3 id="ui-customization">UI Customization<a class="td-heading-self-link" href="#ui-customization" aria-label="Heading self-link"></a></h3>
+<p>You can customize AgentFlow by modifying the template file:</p>
+<pre tabindex="0"><code>host/openaiserver/simpleui/chat-ui.html.tmpl
+</code></pre><p>Key customization areas:</p>
+<ul>
+<li><strong>Color Scheme</strong>: Modify CSS gradient backgrounds</li>
+<li><strong>Tool Notification Styling</strong>: Customize event notification appearance</li>
+<li><strong>Mobile Behavior</strong>: Adjust responsive breakpoints</li>
+<li><strong>Branding</strong>: Update titles, icons, and metadata</li>
+</ul>
+<h3 id="setting-up-a-production-environment">Setting Up a Production Environment<a class="td-heading-self-link" href="#setting-up-a-production-environment" aria-label="Heading self-link"></a></h3>
 <p>For a production environment, create a proper systemd service file:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo nano /etc/systemd/system/gomcptest-openai.service
 </span></span></code></pre></div><p>Add the following content:</p>
@@ -264,7 +328,6 @@
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">ExecStart</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">/path/to/gomcptest/host/openaiserver/openaiserver -mcpservers &#34;/path/to/gomcptest/bin/GlobTool;/path/to/gomcptest/bin/GrepTool;/path/to/gomcptest/bin/LS;/path/to/gomcptest/bin/View;/path/to/gomcptest/bin/Bash;/path/to/gomcptest/bin/Replace&#34;</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">PORT=8080</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">LOG_LEVEL=INFO</span>
-</span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">IMAGE_DIR=/path/to/image/directory</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_PROJECT=your-gcp-project-id</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GCP_REGION=us-central1</span>
 </span></span><span style="display:flex;"><span><span style="color:#c4a000">Environment</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash</span>
@@ -483,7 +546,7 @@ INFO server1 Registering command=../bin/GrepTool
 </script>
 <br />
 <div class="td-page-meta__lastmod">
-  Last modified March 18, 2025: <a href="https://github.com/owulveryck/gomcptest/commit/3f09032c72f7a7f731a22ec9fe435747a371b7b4">wip (3f09032)</a>
+  Last modified September 12, 2025: <a href="https://github.com/owulveryck/gomcptest/commit/646a2cb8c02e15e1a33b8ecda4e9753d9264cf8b">Add comprehensive AgentFlow explanation documentation following Divio framework (646a2cb)</a>
 </div>
 
 </div>
@@ -527,8 +590,8 @@ INFO server1 Registering command=../bin/GrepTool
 </footer>
 
     </div>
-    <script src="/gomcptest/js/main.js"></script>
-<script defer src="/gomcptest/js/click-to-copy.js" crossorigin="anonymous"></script>
+    <script src="/gomcptest/js/main.min.89aa145a2213e507c6ff43c902243d28aa02cb6ba1818926cb888252762ae53e.js" integrity="sha256-iaoUWiIT5QfG/0PJAiQ9KKoCy2uhgYkmy4iCUnYq5T4=" crossorigin="anonymous"></script>
+<script defer src="/gomcptest/js/click-to-copy.min.73478a7d4807698aed7e355eb23f9890ca18fea3158604c8471746d046702bad.js" integrity="sha256-c0eKfUgHaYrtfjVesj&#43;YkMoY/qMVhgTIRxdG0EZwK60=" crossorigin="anonymous"></script>
 <script src='/gomcptest/js/tabpane-persist.js'></script>
 
   </body>

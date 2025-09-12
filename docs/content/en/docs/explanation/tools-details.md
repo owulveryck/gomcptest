@@ -14,7 +14,7 @@ This document explains the architecture and implementation of the MCP tools in g
 
 MCP (Model Context Protocol) tools are standalone executables that provide specific functions that can be invoked by AI models. They allow the AI to interact with its environment - performing tasks like reading and writing files, executing commands, or searching for information.
 
-In gomcptest, tools are implemented as independent Go executables that follow a standard protocol for receiving requests and returning results through standard input/output streams.
+In gomcptest, tools are implemented as independent Go executables that follow a standard protocol for receiving requests and returning results through standard input/output streams. Tool interactions generate events that are captured by the [event system](../event-system/), enabling real-time monitoring and transparency.
 
 ## Tool Architecture
 
