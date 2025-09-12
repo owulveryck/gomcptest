@@ -36,8 +36,8 @@ Documentation Structure Our documentation follows the Divio Documentation Framew
   <meta itemprop="description" content="gomcptest is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host to play with agentic systems.
 gomcptest Documentation Welcome to the gomcptest documentation. This project is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host to play with agentic systems.
 Documentation Structure Our documentation follows the Divio Documentation Framework, which organizes content into four distinct types: tutorials, how-to guides, reference, and explanation. This approach ensures that different learning needs are addressed with the appropriate content format.">
-  <meta itemprop="dateModified" content="2025-09-12T10:47:18+02:00">
-  <meta itemprop="wordCount" content="695">
+  <meta itemprop="dateModified" content="2025-09-12T11:25:07+02:00">
+  <meta itemprop="wordCount" content="724">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Documentation">
   <meta name="twitter:description" content="gomcptest is a proof of concept (POC) demonstrating how to implement a Model Context Protocol (MCP) with a custom-built host to play with agentic systems.
@@ -196,7 +196,15 @@ This is the multi-page printable view of this section.
     
     
 	
-<li>2.4: <a href="#pg-ae5e1f7351270a62eef2bc0be0c0f670">How to Use the OpenAI Server with big-AGI</a></li>
+<li>2.4: <a href="#pg-fba9bd24bdb06a90e03dacd3fe8d1504">How to Query OpenAI Server with Tool Events</a></li>
+
+
+    
+  
+    
+    
+	
+<li>2.5: <a href="#pg-ae5e1f7351270a62eef2bc0be0c0f670">How to Use the OpenAI Server with big-AGI</a></li>
 
 
     
@@ -364,6 +372,10 @@ This is the multi-page printable view of this section.
       <tr>
           <td><a href="/gomcptest/docs/how-to/configure-openaiserver/">How to Configure the OpenAI-Compatible Server</a></td>
           <td>Solutions for configuring and customizing the OpenAI server with AgentFlow UI, including environment variables, Vertex AI tools, and production setup.</td>
+      </tr>
+      <tr>
+          <td><a href="/gomcptest/docs/how-to/query-openaiserver-with-tools/">How to Query OpenAI Server with Tool Events</a></td>
+          <td>Programmatically interact with the server using curl, Python, or shell commands to execute tools and monitor their execution events in real-time.</td>
       </tr>
       <tr>
           <td><a href="/gomcptest/docs/how-to/configure-cligcp/">How to Configure the cliGCP Command Line Interface</a></td>
@@ -917,6 +929,13 @@ GEMINI_MODELS=gemini-2.0-flash
 </div>
 
 <p>These guides will help you solve specific tasks and customize gomcptest for your needs.</p>
+<h2 id="available-how-to-guides">Available How-To Guides<a class="td-heading-self-link" href="#available-how-to-guides" aria-label="Heading self-link"></a></h2>
+<ul>
+<li><strong><a href="/gomcptest/docs/how-to/create-custom-tool/">Create Custom Tool</a></strong> - Build your own MCP-compatible tools</li>
+<li><strong><a href="/gomcptest/docs/how-to/configure-openaiserver/">Configure OpenAI Server</a></strong> - Set up and customize the server with AgentFlow UI</li>
+<li><strong><a href="/gomcptest/docs/how-to/query-openaiserver-with-tools/">Query OpenAI Server with Tool Events</a></strong> - Programmatically interact with tools and monitor execution events</li>
+<li><strong><a href="/gomcptest/docs/how-to/configure-cligcp/">Configure cliGCP</a></strong> - <strong>⚠️ DEPRECATED</strong> - Legacy CLI configuration</li>
+</ul>
 
 </div>
 
@@ -938,7 +957,7 @@ GEMINI_MODELS=gemini-2.0-flash
 	
     
 
-<div class="td-content" style="">
+<div class="td-content" style="page-break-before: always">
     
 	<h1 id="pg-1b0984aa513cab2c3fab92be432b3edd">2.1 - How to Create a Custom MCP Tool</h1>
     <div class="lead">Build your own Model Context Protocol (MCP) compatible tools</div>
@@ -1468,7 +1487,270 @@ INFO server1 Registering command=../bin/GrepTool
 
 <div class="td-content" style="page-break-before: always">
     
-	<h1 id="pg-ae5e1f7351270a62eef2bc0be0c0f670">2.4 - How to Use the OpenAI Server with big-AGI</h1>
+	<h1 id="pg-fba9bd24bdb06a90e03dacd3fe8d1504">2.4 - How to Query OpenAI Server with Tool Events</h1>
+    <div class="lead">Learn how to programmatically query the OpenAI-compatible server and monitor tool execution events using curl, Python, or shell commands</div>
+	<p>This guide shows you how to programmatically interact with the gomcptest OpenAI-compatible server to execute tools and monitor their execution events in real-time.</p>
+<h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>A running gomcptest OpenAI server with tools registered</li>
+<li>Basic familiarity with HTTP requests and Server-Sent Events</li>
+<li><code>curl</code> command-line tool or Python with <code>requests</code> library</li>
+</ul>
+<h2 id="understanding-tool-event-streaming">Understanding Tool Event Streaming<a class="td-heading-self-link" href="#understanding-tool-event-streaming" aria-label="Heading self-link"></a></h2>
+<p>The gomcptest server supports two streaming modes:</p>
+<ol>
+<li><strong>Standard Mode</strong> (default): Only chat completion chunks (OpenAI compatible)</li>
+<li><strong>Enhanced Mode</strong>: Includes tool execution events (<code>tool_call</code> and <code>tool_response</code>)</li>
+</ol>
+<p>Tool events are only visible when the server is configured with enhanced streaming or when using the AgentFlow web UI.</p>
+<h2 id="method-1-using-curl-with-streaming">Method 1: Using curl with Streaming<a class="td-heading-self-link" href="#method-1-using-curl-with-streaming" aria-label="Heading self-link"></a></h2>
+<h3 id="basic-tool-execution-request">Basic Tool Execution Request<a class="td-heading-self-link" href="#basic-tool-execution-request" aria-label="Heading self-link"></a></h3>
+<p>First, let&rsquo;s execute a simple tool like <code>sleep</code> with streaming enabled:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Accept: text/event-stream&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -N <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      {
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;role&#34;: &#34;user&#34;, 
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;content&#34;: &#34;Please use the sleep tool to pause for 2 seconds, then tell me you are done&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ],
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;stream&#34;: true
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span>
+</span></span></code></pre></div><h3 id="expected-output-standard-mode">Expected Output (Standard Mode)<a class="td-heading-self-link" href="#expected-output-standard-mode" aria-label="Heading self-link"></a></h3>
+<p>In standard mode, you&rsquo;ll see only chat completion chunks:</p>
+<pre tabindex="0"><code>data: {&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;chat.completion.chunk&#34;,&#34;created&#34;:1704067200,&#34;model&#34;:&#34;gemini-2.0-flash&#34;,&#34;choices&#34;:[{&#34;index&#34;:0,&#34;delta&#34;:{&#34;role&#34;:&#34;assistant&#34;,&#34;content&#34;:&#34;I&#39;ll&#34;},&#34;finish_reason&#34;:null}]}
+
+data: {&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;chat.completion.chunk&#34;,&#34;created&#34;:1704067200,&#34;model&#34;:&#34;gemini-2.0-flash&#34;,&#34;choices&#34;:[{&#34;index&#34;:0,&#34;delta&#34;:{&#34;content&#34;:&#34; use the sleep tool to pause for 2 seconds.&#34;},&#34;finish_reason&#34;:null}]}
+
+data: {&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;chat.completion.chunk&#34;,&#34;created&#34;:1704067200,&#34;model&#34;:&#34;gemini-2.0-flash&#34;,&#34;choices&#34;:[{&#34;index&#34;:0,&#34;delta&#34;:{&#34;content&#34;:&#34; Done! I have completed the 2-second pause.&#34;},&#34;finish_reason&#34;:&#34;stop&#34;}]}
+
+data: [DONE]
+</code></pre><h2 id="method-2-python-script-with-tool-event-monitoring">Method 2: Python Script with Tool Event Monitoring<a class="td-heading-self-link" href="#method-2-python-script-with-tool-event-monitoring" aria-label="Heading self-link"></a></h2>
+<p>Here&rsquo;s a Python script that demonstrates how to capture and parse tool events:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">json</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">import</span> <span style="color:#000">time</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">def</span> <span style="color:#000">stream_with_tool_monitoring</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">prompt</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">model</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;gemini-2.0-flash&#34;</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#4e9a06">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    Send a streaming request and monitor tool events
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">url</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;http://localhost:8080/v1/chat/completions&#34;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">payload</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;model&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">model</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;messages&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">[{</span><span style="color:#4e9a06">&#34;role&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;user&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#4e9a06">&#34;content&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">prompt</span><span style="color:#000;font-weight:bold">}],</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;stream&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#204a87;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#000">headers</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;Content-Type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;application/json&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;Accept&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;text/event-stream&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;🚀 Sending request: </span><span style="color:#4e9a06">{</span><span style="color:#000">prompt</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;=&#34;</span> <span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#0000cf;font-weight:bold">60</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">with</span> <span style="color:#000">requests</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">post</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">url</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">json</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#000">payload</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">headers</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#000">headers</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">stream</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87;font-weight:bold">True</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">as</span> <span style="color:#000">response</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">response</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">status_code</span> <span style="color:#ce5c00;font-weight:bold">!=</span> <span style="color:#0000cf;font-weight:bold">200</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;❌ Error: </span><span style="color:#4e9a06">{</span><span style="color:#000">response</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">status_code</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06"> - </span><span style="color:#4e9a06">{</span><span style="color:#000">response</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">text</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#000">content_buffer</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">tool_calls</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{}</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">line</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#000">response</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">iter_lines</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">decode_unicode</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87;font-weight:bold">True</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">line</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">startswith</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;data: &#34;</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#000">data</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">line</span><span style="color:#000;font-weight:bold">[</span><span style="color:#0000cf;font-weight:bold">6</span><span style="color:#000;font-weight:bold">:]</span>  <span style="color:#8f5902;font-style:italic"># Remove &#34;data: &#34; prefix</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">data</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;[DONE]&#34;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;</span><span style="color:#4e9a06">\n</span><span style="color:#4e9a06">✅ Stream completed&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                <span style="color:#204a87;font-weight:bold">try</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#000">event</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">json</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">loads</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">data</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#8f5902;font-style:italic"># Handle different event types</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">event</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;event_type&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;tool_call&#34;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_info</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">event</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;tool_call&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">{})</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_id</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_args</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;arguments&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">{})</span>
+</span></span><span style="display:flex;"><span>                        
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;🔧 Tool Call: </span><span style="color:#4e9a06">{</span><span style="color:#000">tool_name</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;   ID: </span><span style="color:#4e9a06">{</span><span style="color:#000">tool_id</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;   Arguments: </span><span style="color:#4e9a06">{</span><span style="color:#000">json</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">dumps</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">tool_args</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">indent</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#0000cf;font-weight:bold">2</span><span style="color:#000;font-weight:bold">)</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_calls</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">tool_id</span><span style="color:#000;font-weight:bold">]</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#4e9a06">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">tool_name</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#4e9a06">&#34;args&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">tool_args</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#4e9a06">&#34;start_time&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000">time</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">()</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>                        
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87;font-weight:bold">elif</span> <span style="color:#000">event</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;event_type&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;tool_response&#34;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_info</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">event</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;tool_response&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000;font-weight:bold">{})</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_id</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;id&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">tool_name</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;name&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">response_data</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;response&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">error</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">tool_info</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;error&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">tool_id</span> <span style="color:#204a87;font-weight:bold">in</span> <span style="color:#000">tool_calls</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#000">duration</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">time</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">time</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#ce5c00;font-weight:bold">-</span> <span style="color:#000">tool_calls</span><span style="color:#000;font-weight:bold">[</span><span style="color:#000">tool_id</span><span style="color:#000;font-weight:bold">][</span><span style="color:#4e9a06">&#34;start_time&#34;</span><span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;📥 Tool Response: </span><span style="color:#4e9a06">{</span><span style="color:#000">tool_name</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06"> (took </span><span style="color:#4e9a06">{</span><span style="color:#000">duration</span><span style="color:#4e9a06">:</span><span style="color:#4e9a06">.2f</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">s)&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87;font-weight:bold">else</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;📥 Tool Response: </span><span style="color:#4e9a06">{</span><span style="color:#000">tool_name</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                            
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;   ID: </span><span style="color:#4e9a06">{</span><span style="color:#000">tool_id</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">error</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;   ❌ Error: </span><span style="color:#4e9a06">{</span><span style="color:#000">error</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87;font-weight:bold">else</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;   ✅ Response: </span><span style="color:#4e9a06">{</span><span style="color:#000">response_data</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                        
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87;font-weight:bold">elif</span> <span style="color:#000">event</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;choices&#34;</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#204a87;font-weight:bold">and</span> <span style="color:#000">event</span><span style="color:#000;font-weight:bold">[</span><span style="color:#4e9a06">&#34;choices&#34;</span><span style="color:#000;font-weight:bold">][</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">]</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;delta&#34;</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#8f5902;font-style:italic"># Handle chat completion chunks</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#000">delta</span> <span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#000">event</span><span style="color:#000;font-weight:bold">[</span><span style="color:#4e9a06">&#34;choices&#34;</span><span style="color:#000;font-weight:bold">][</span><span style="color:#0000cf;font-weight:bold">0</span><span style="color:#000;font-weight:bold">][</span><span style="color:#4e9a06">&#34;delta&#34;</span><span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">delta</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">get</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;content&#34;</span><span style="color:#000;font-weight:bold">):</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#000">content_buffer</span> <span style="color:#ce5c00;font-weight:bold">+=</span> <span style="color:#000">delta</span><span style="color:#000;font-weight:bold">[</span><span style="color:#4e9a06">&#34;content&#34;</span><span style="color:#000;font-weight:bold">]</span>
+</span></span><span style="display:flex;"><span>                            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">delta</span><span style="color:#000;font-weight:bold">[</span><span style="color:#4e9a06">&#34;content&#34;</span><span style="color:#000;font-weight:bold">],</span> <span style="color:#000">end</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#4e9a06">&#34;&#34;</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">flush</span><span style="color:#ce5c00;font-weight:bold">=</span><span style="color:#204a87;font-weight:bold">True</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>                            
+</span></span><span style="display:flex;"><span>                <span style="color:#204a87;font-weight:bold">except</span> <span style="color:#000">json</span><span style="color:#ce5c00;font-weight:bold">.</span><span style="color:#000">JSONDecodeError</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#204a87;font-weight:bold">continue</span>
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">content_buffer</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">f</span><span style="color:#4e9a06">&#34;</span><span style="color:#4e9a06">\n</span><span style="color:#4e9a06">💬 Complete Response: </span><span style="color:#4e9a06">{</span><span style="color:#000">content_buffer</span><span style="color:#4e9a06">}</span><span style="color:#4e9a06">&#34;</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Example usage</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">__name__</span> <span style="color:#ce5c00;font-weight:bold">==</span> <span style="color:#4e9a06">&#34;__main__&#34;</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic"># Test with sleep tool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">stream_with_tool_monitoring</span><span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;Use the sleep tool to pause for 3 seconds, then tell me the current time&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87">print</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;</span><span style="color:#4e9a06">\n</span><span style="color:#4e9a06">&#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#4e9a06">&#34;=&#34;</span> <span style="color:#ce5c00;font-weight:bold">*</span> <span style="color:#0000cf;font-weight:bold">60</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic"># Test with file operations</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">stream_with_tool_monitoring</span><span style="color:#000;font-weight:bold">(</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#4e9a06">&#34;List the files in the current directory using the LS tool&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">)</span>
+</span></span></code></pre></div><h2 id="method-3-monitoring-specific-tool-execution">Method 3: Monitoring Specific Tool Execution<a class="td-heading-self-link" href="#method-3-monitoring-specific-tool-execution" aria-label="Heading self-link"></a></h2>
+<h3 id="testing-the-sleep-tool">Testing the Sleep Tool<a class="td-heading-self-link" href="#testing-the-sleep-tool" aria-label="Heading self-link"></a></h3>
+<p>The sleep tool is perfect for demonstrating tool events because it has a measurable duration:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Test sleep tool with timing</span>
+</span></span><span style="display:flex;"><span>curl -X POST http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -N <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      {
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;role&#34;: &#34;user&#34;, 
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        &#34;content&#34;: &#34;Please use the sleep tool to pause for exactly 5 seconds and confirm when complete&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">      }
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    ],
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;stream&#34;: true
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span> <span style="color:#000;font-weight:bold">|</span> <span style="color:#204a87;font-weight:bold">while</span> <span style="color:#000">IFS</span><span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#204a87">read</span> -r line<span style="color:#000;font-weight:bold">;</span> <span style="color:#204a87;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87">echo</span> <span style="color:#4e9a06">&#34;</span><span style="color:#204a87;font-weight:bold">$(</span>date <span style="color:#4e9a06">&#39;+%H:%M:%S&#39;</span><span style="color:#204a87;font-weight:bold">)</span><span style="color:#4e9a06"> - </span><span style="color:#000">$line</span><span style="color:#4e9a06">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">done</span>
+</span></span></code></pre></div><p>This will show timestamps for each event, helping you verify the tool execution timing.</p>
+<h2 id="method-4-advanced-event-filtering-with-jq">Method 4: Advanced Event Filtering with jq<a class="td-heading-self-link" href="#method-4-advanced-event-filtering-with-jq" aria-label="Heading self-link"></a></h2>
+<p>If you have <code>jq</code> installed, you can filter and format the events:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST http://localhost:8080/v1/chat/completions <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -H <span style="color:#4e9a06">&#34;Content-Type: application/json&#34;</span> <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -N <span style="color:#4e9a06">\
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06"></span>  -d <span style="color:#4e9a06">&#39;{
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;model&#34;: &#34;gemini-2.0-flash&#34;,
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;messages&#34;: [{&#34;role&#34;: &#34;user&#34;, &#34;content&#34;: &#34;Use the sleep tool for 3 seconds&#34;}],
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">    &#34;stream&#34;: true
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">  }&#39;</span> <span style="color:#000;font-weight:bold">|</span> grep <span style="color:#4e9a06">&#34;^data: &#34;</span> <span style="color:#000;font-weight:bold">|</span> sed <span style="color:#4e9a06">&#39;s/^data: //&#39;</span> <span style="color:#000;font-weight:bold">|</span> <span style="color:#204a87;font-weight:bold">while</span> <span style="color:#204a87">read</span> line<span style="color:#000;font-weight:bold">;</span> <span style="color:#204a87;font-weight:bold">do</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#ce5c00;font-weight:bold">[</span> <span style="color:#4e9a06">&#34;</span><span style="color:#000">$line</span><span style="color:#4e9a06">&#34;</span> !<span style="color:#ce5c00;font-weight:bold">=</span> <span style="color:#4e9a06">&#34;[DONE]&#34;</span> <span style="color:#ce5c00;font-weight:bold">]</span><span style="color:#000;font-weight:bold">;</span> <span style="color:#204a87;font-weight:bold">then</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#204a87">echo</span> <span style="color:#4e9a06">&#34;</span><span style="color:#000">$line</span><span style="color:#4e9a06">&#34;</span> <span style="color:#000;font-weight:bold">|</span> jq -r <span style="color:#4e9a06">&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        if .event_type == &#34;tool_call&#34; then
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">          &#34;🔧 TOOL CALL: &#34; + .tool_call.name + &#34; with args: &#34; + (.tool_call.arguments | tostring)
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        elif .event_type == &#34;tool_response&#34; then
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">          &#34;📥 TOOL RESPONSE: &#34; + .tool_response.name + &#34; -&gt; &#34; + (.tool_response.response | tostring)
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        elif .choices and .choices[0].delta.content then
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">          &#34;💬 CONTENT: &#34; + .choices[0].delta.content
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        else
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">          &#34;📊 OTHER: &#34; + (.object // &#34;unknown&#34;)
+</span></span></span><span style="display:flex;"><span><span style="color:#4e9a06">        end&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">fi</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">done</span>
+</span></span></code></pre></div><h2 id="expected-tool-event-flow">Expected Tool Event Flow<a class="td-heading-self-link" href="#expected-tool-event-flow" aria-label="Heading self-link"></a></h2>
+<p>When you execute a tool, you should see this event sequence:</p>
+<ol>
+<li>
+<p><strong>Tool Call Event</strong>: AI decides to use a tool</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;event_type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;tool_call&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;object&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;tool.call&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;tool_call&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;id&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;call_abc123&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;sleep&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;arguments&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span><span style="color:#204a87;font-weight:bold">&#34;seconds&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#0000cf;font-weight:bold">3</span><span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Tool Response Event</strong>: Tool execution completes</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;event_type&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;tool_response&#34;</span><span style="color:#000;font-weight:bold">,</span> 
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;object&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;tool.response&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;tool_response&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;id&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;call_abc123&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;name&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;sleep&#34;</span><span style="color:#000;font-weight:bold">,</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">&#34;response&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;Slept for 3 seconds&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Chat Completion Chunks</strong>: AI generates response based on tool result</p>
+</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting<a class="td-heading-self-link" href="#troubleshooting" aria-label="Heading self-link"></a></h2>
+<h3 id="no-tool-events-visible">No Tool Events Visible<a class="td-heading-self-link" href="#no-tool-events-visible" aria-label="Heading self-link"></a></h3>
+<p>If you&rsquo;re not seeing tool events in your stream:</p>
+<ol>
+<li><strong>Check Server Configuration</strong>: Tool events require the <code>withAllEvents</code> flag to be enabled</li>
+<li><strong>Verify Tool Registration</strong>: Ensure tools are properly registered with the server</li>
+<li><strong>Test with AgentFlow UI</strong>: The web UI at <code>http://localhost:8080/ui</code> always shows tool events</li>
+</ol>
+<h3 id="tool-not-being-called">Tool Not Being Called<a class="td-heading-self-link" href="#tool-not-being-called" aria-label="Heading self-link"></a></h3>
+<p>If the AI isn&rsquo;t using your requested tool:</p>
+<ol>
+<li><strong>Be Explicit</strong>: Clearly request the specific tool by name</li>
+<li><strong>Check Tool Availability</strong>: Use <code>/v1/tools</code> endpoint to verify tool registration</li>
+<li><strong>Use Simple Examples</strong>: Start with basic tools like <code>sleep</code> or <code>LS</code></li>
+</ol>
+<h3 id="verify-tool-registration">Verify Tool Registration<a class="td-heading-self-link" href="#verify-tool-registration" aria-label="Heading self-link"></a></h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"># Check which tools are registered</span>
+</span></span><span style="display:flex;"><span>curl http://localhost:8080/v1/tools <span style="color:#000;font-weight:bold">|</span> jq <span style="color:#4e9a06">&#39;.tools[] | .name&#39;</span>
+</span></span></code></pre></div><h2 id="next-steps">Next Steps<a class="td-heading-self-link" href="#next-steps" aria-label="Heading self-link"></a></h2>
+<ul>
+<li>Try the <a href="../../explanation/agentflow/">AgentFlow web interface</a> for visual tool monitoring</li>
+<li>Learn about <a href="../create-custom-tool/">creating custom tools</a> to extend functionality</li>
+<li>Read the <a href="../../explanation/event-system/">event system explanation</a> for deeper understanding</li>
+</ul>
+<p>This approach gives you programmatic access to the same tool execution visibility that the AgentFlow web interface provides, enabling automation, monitoring, and integration with other systems.</p>
+
+</div>
+
+
+
+    
+	
+  
+    
+    
+	
+    
+
+<div class="td-content" style="page-break-before: always">
+    
+	<h1 id="pg-ae5e1f7351270a62eef2bc0be0c0f670">2.5 - How to Use the OpenAI Server with big-AGI</h1>
     <div class="lead">Configure the gomcptest OpenAI-compatible server as a backend for big-AGI</div>
 	<p>This guide shows you how to set up and configure the gomcptest OpenAI-compatible server to work with <a href="https://github.com/enricoros/big-agi">big-AGI</a>, a popular open-source web client for AI assistants.</p>
 <h2 id="prerequisites">Prerequisites<a class="td-heading-self-link" href="#prerequisites" aria-label="Heading self-link"></a></h2>
@@ -3178,8 +3460,12 @@ data: [DONE]
 </div>
 
 <h2 id="what-is-the-event-system">What is the Event System?<a class="td-heading-self-link" href="#what-is-the-event-system" aria-label="Heading self-link"></a></h2>
-<p>The event system in gomcptest is a foundational architecture that provides real-time visibility into the agentic process. It captures, streams, and presents events that occur during AI-tool interactions, enabling transparency and monitoring of how AI agents make decisions and execute tasks.</p>
-<p>The event system is designed as a general-purpose mechanism that can be implemented by different interfaces and components, not tied to any specific UI or implementation.</p>
+<p>The event system in gomcptest provides real-time visibility into AI-tool interactions through a streaming event architecture. It captures and streams events that occur during tool execution, enabling transparency in how AI agents make decisions and use tools.</p>
+<p><strong>Important Implementation Detail</strong>: By default, the OpenAI-compatible server only streams standard chat completion responses to maintain API compatibility. Tool events (tool calls and responses) are only included in the stream when the <code>withAllEvents</code> flag is enabled in the server configuration. This design allows for:</p>
+<ul>
+<li><strong>Standard Mode</strong>: OpenAI API compatibility with only chat completion chunks</li>
+<li><strong>Enhanced Mode</strong>: Full event visibility including tool interactions when <code>withAllEvents</code> is true</li>
+</ul>
 <h2 id="core-event-concepts">Core Event Concepts<a class="td-heading-self-link" href="#core-event-concepts" aria-label="Heading self-link"></a></h2>
 <h3 id="event-driven-transparency">Event-Driven Transparency<a class="td-heading-self-link" href="#event-driven-transparency" aria-label="Heading self-link"></a></h3>
 <p>Traditional AI interactions are often &ldquo;black boxes&rdquo; where users see only the final result. The gomcptest event system provides transparency by exposing:</p>
@@ -3192,22 +3478,38 @@ data: [DONE]
 <h3 id="event-types">Event Types<a class="td-heading-self-link" href="#event-types" aria-label="Heading self-link"></a></h3>
 <p>The system defines several core event types:</p>
 <h4 id="tool-interaction-events">Tool Interaction Events<a class="td-heading-self-link" href="#tool-interaction-events" aria-label="Heading self-link"></a></h4>
+<p>Based on the actual implementation in <code>/host/openaiserver/chatengine/vertexai/gemini/tool_events.go</code>:</p>
 <ul>
-<li><strong>Tool Call Events</strong>: Capture when an AI decides to invoke a tool</li>
-<li><strong>Tool Response Events</strong>: Capture the results of tool execution</li>
-<li><strong>Tool Error Events</strong>: Capture failures and error conditions</li>
+<li>
+<p><strong>ToolCallEvent</strong>: Generated when the AI decides to invoke a tool</p>
+<ul>
+<li>Structure: <code>event_type: &quot;tool_call&quot;</code>, contains tool name, ID, and arguments</li>
+<li>Object type: <code>&quot;tool.call&quot;</code></li>
+<li>Generated by: <code>NewToolCallEvent()</code> function</li>
 </ul>
-<h4 id="system-events">System Events<a class="td-heading-self-link" href="#system-events" aria-label="Heading self-link"></a></h4>
+</li>
+<li>
+<p><strong>ToolResponseEvent</strong>: Generated when a tool execution completes</p>
 <ul>
-<li><strong>Stream Start/End Events</strong>: Mark the beginning and end of streaming responses</li>
-<li><strong>Processing Events</strong>: Internal state changes and milestones</li>
-<li><strong>Error Events</strong>: System-level errors and exceptions</li>
+<li>Structure: <code>event_type: &quot;tool_response&quot;</code>, contains response data or error</li>
+<li>Object type: <code>&quot;tool.response&quot;</code></li>
+<li>Generated by: <code>NewToolResponseEvent()</code> function</li>
 </ul>
-<h4 id="content-events">Content Events<a class="td-heading-self-link" href="#content-events" aria-label="Heading self-link"></a></h4>
+</li>
+</ul>
+<h4 id="chat-completion-events">Chat Completion Events<a class="td-heading-self-link" href="#chat-completion-events" aria-label="Heading self-link"></a></h4>
 <ul>
-<li><strong>Content Generation Events</strong>: Incremental content as it&rsquo;s generated</li>
-<li><strong>Content Completion Events</strong>: Final content delivery</li>
-<li><strong>Content Metadata Events</strong>: Information about content characteristics</li>
+<li><strong>ChatCompletionStreamResponse</strong>: Standard OpenAI-compatible streaming chunks
+<ul>
+<li>Always included in streams (default behavior)</li>
+<li>Contains incremental content as it&rsquo;s generated</li>
+</ul>
+</li>
+</ul>
+<h4 id="event-availability">Event Availability<a class="td-heading-self-link" href="#event-availability" aria-label="Heading self-link"></a></h4>
+<ul>
+<li><strong>Default Streaming</strong>: Only <code>ChatCompletionStreamResponse</code> events are sent</li>
+<li><strong>Enhanced Streaming</strong>: When <code>withAllEvents = true</code>, includes all tool events</li>
 </ul>
 <h2 id="event-architecture-patterns">Event Architecture Patterns<a class="td-heading-self-link" href="#event-architecture-patterns" aria-label="Heading self-link"></a></h2>
 <h3 id="producer-consumer-model">Producer-Consumer Model<a class="td-heading-self-link" href="#producer-consumer-model" aria-label="Heading self-link"></a></h3>
@@ -3267,17 +3569,35 @@ data: [DONE]
 <li><strong>Parent-Child Relationships</strong>: Hierarchical event relationships</li>
 </ul>
 <h2 id="implementation-patterns">Implementation Patterns<a class="td-heading-self-link" href="#implementation-patterns" aria-label="Heading self-link"></a></h2>
-<h3 id="server-sent-events-sse">Server-Sent Events (SSE)<a class="td-heading-self-link" href="#server-sent-events-sse" aria-label="Heading self-link"></a></h3>
-<p>For web interfaces, events are delivered via Server-Sent Events:</p>
-<pre tabindex="0"><code>event: tool_call
-data: {&#34;id&#34;: &#34;call_123&#34;, &#34;name&#34;: &#34;Edit&#34;, &#34;arguments&#34;: {...}}
+<h3 id="server-sent-events-sse-implementation">Server-Sent Events (SSE) Implementation<a class="td-heading-self-link" href="#server-sent-events-sse-implementation" aria-label="Heading self-link"></a></h3>
+<p>The actual implementation in <code>/host/openaiserver/chatengine/chat_completion_stream.go</code> delivers events via Server-Sent Events with specific formatting:</p>
+<p><strong>HTTP Headers Set</strong>:</p>
+<pre tabindex="0"><code>Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+Transfer-Encoding: chunked
+</code></pre><p><strong>Event Format</strong>:</p>
+<pre tabindex="0"><code>data: {&#34;event_type&#34;:&#34;tool_call&#34;,&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;tool.call&#34;,&#34;created&#34;:1704067200,&#34;tool_call&#34;:{&#34;id&#34;:&#34;call_xyz789&#34;,&#34;name&#34;:&#34;sleep&#34;,&#34;arguments&#34;:{&#34;seconds&#34;:3}}}
 
-event: tool_response  
-data: {&#34;id&#34;: &#34;call_123&#34;, &#34;result&#34;: &#34;File updated successfully&#34;}
+data: {&#34;event_type&#34;:&#34;tool_response&#34;,&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;tool.response&#34;,&#34;created&#34;:1704067201,&#34;tool_response&#34;:{&#34;id&#34;:&#34;call_xyz789&#34;,&#34;name&#34;:&#34;sleep&#34;,&#34;response&#34;:&#34;Slept for 3 seconds&#34;}}
 
-event: content_delta
-data: {&#34;delta&#34;: &#34;The file has been updated as requested.&#34;}
-</code></pre><h3 id="json-rpc-event-extensions">JSON-RPC Event Extensions<a class="td-heading-self-link" href="#json-rpc-event-extensions" aria-label="Heading self-link"></a></h3>
+data: {&#34;id&#34;:&#34;chatcmpl-abc123&#34;,&#34;object&#34;:&#34;chat.completion.chunk&#34;,&#34;created&#34;:1704067202,&#34;model&#34;:&#34;gemini-2.0-flash&#34;,&#34;choices&#34;:[{&#34;index&#34;:0,&#34;delta&#34;:{&#34;content&#34;:&#34;I have completed the 3-second pause.&#34;},&#34;finish_reason&#34;:&#34;stop&#34;}]}
+
+data: [DONE]
+</code></pre><p><strong>Event Filtering Logic</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">switch</span> <span style="color:#000">res</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">event</span><span style="color:#000;font-weight:bold">.(</span><span style="color:#204a87;font-weight:bold">type</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">case</span> <span style="color:#000">ChatCompletionStreamResponse</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// Always sent - OpenAI compatible
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    <span style="color:#000">jsonBytes</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">_</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Marshal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">res</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Write</span><span style="color:#000;font-weight:bold">([]</span><span style="color:#204a87">byte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;data: &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#204a87">string</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">jsonBytes</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#4e9a06">&#34;\n\n&#34;</span><span style="color:#000;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">default</span><span style="color:#000;font-weight:bold">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8f5902;font-style:italic">// Tool events only sent when withAllEvents = true
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>    <span style="color:#204a87;font-weight:bold">if</span> <span style="color:#000">o</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">withAllEvents</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">jsonBytes</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">_</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">json</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Marshal</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">event</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#000">w</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Write</span><span style="color:#000;font-weight:bold">([]</span><span style="color:#204a87">byte</span><span style="color:#000;font-weight:bold">(</span><span style="color:#4e9a06">&#34;data: &#34;</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#204a87">string</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">jsonBytes</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#ce5c00;font-weight:bold">+</span> <span style="color:#4e9a06">&#34;\n\n&#34;</span><span style="color:#000;font-weight:bold">))</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="json-rpc-event-extensions">JSON-RPC Event Extensions<a class="td-heading-self-link" href="#json-rpc-event-extensions" aria-label="Heading self-link"></a></h3>
 <p>For programmatic interfaces, events extend the JSON-RPC protocol:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">{</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#204a87;font-weight:bold">&#34;jsonrpc&#34;</span><span style="color:#000;font-weight:bold">:</span> <span style="color:#4e9a06">&#34;2.0&#34;</span><span style="color:#000;font-weight:bold">,</span>
@@ -3339,15 +3659,32 @@ data: {&#34;delta&#34;: &#34;The file has been updated as requested.&#34;}
 <li><strong>Integration Testing</strong>: Validate event handling across components</li>
 </ul>
 <h2 id="integration-points">Integration Points<a class="td-heading-self-link" href="#integration-points" aria-label="Heading self-link"></a></h2>
-<h3 id="chat-engines">Chat Engines<a class="td-heading-self-link" href="#chat-engines" aria-label="Heading self-link"></a></h3>
-<p>Chat engines integrate with the event system by:</p>
-<ul>
-<li>Generating tool call events when invoking tools</li>
-<li>Emitting content events during response generation</li>
-<li>Providing processing events for transparency</li>
-<li>Handling event delivery through streaming channels</li>
-</ul>
-<h3 id="tool-executors">Tool Executors<a class="td-heading-self-link" href="#tool-executors" aria-label="Heading self-link"></a></h3>
+<h3 id="chat-engines-integration">Chat Engines Integration<a class="td-heading-self-link" href="#chat-engines-integration" aria-label="Heading self-link"></a></h3>
+<p>The actual integration in <code>/host/openaiserver/chatengine/vertexai/gemini/</code> shows specific implementation patterns:</p>
+<p><strong>Tool Call Event Generation</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// When AI decides to use a tool
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">toolCallEvent</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">NewToolCallEvent</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">completionID</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">toolCallID</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">toolName</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">args</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">eventChannel</span> <span style="color:#ce5c00;font-weight:bold">&lt;-</span> <span style="color:#000">toolCallEvent</span>
+</span></span></code></pre></div><p><strong>Tool Response Event Generation</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic">// After tool execution completes
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span><span style="color:#000">toolResponseEvent</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#000">NewToolResponseEvent</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">completionID</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">toolCallID</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">toolName</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">response</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">err</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#000">eventChannel</span> <span style="color:#ce5c00;font-weight:bold">&lt;-</span> <span style="color:#000">toolResponseEvent</span>
+</span></span></code></pre></div><p><strong>Stream Channel Management</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#204a87;font-weight:bold">func</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#000">s</span> <span style="color:#ce5c00;font-weight:bold">*</span><span style="color:#000">ChatSession</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000">SendStreamingChatRequest</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">ctx</span> <span style="color:#000">context</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">Context</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#000">req</span> <span style="color:#000">chatengine</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">ChatCompletionRequest</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">(</span><span style="color:#ce5c00;font-weight:bold">&lt;-</span><span style="color:#204a87;font-weight:bold">chan</span> <span style="color:#000">chatengine</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">StreamEvent</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">error</span><span style="color:#000;font-weight:bold">)</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000">eventChannel</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#204a87">make</span><span style="color:#000;font-weight:bold">(</span><span style="color:#204a87;font-weight:bold">chan</span> <span style="color:#000">chatengine</span><span style="color:#000;font-weight:bold">.</span><span style="color:#000">StreamEvent</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#0000cf;font-weight:bold">100</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">go</span> <span style="color:#204a87;font-weight:bold">func</span><span style="color:#000;font-weight:bold">()</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#204a87;font-weight:bold">defer</span> <span style="color:#204a87">close</span><span style="color:#000;font-weight:bold">(</span><span style="color:#000">eventChannel</span><span style="color:#000;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8f5902;font-style:italic">// Process model responses and emit events
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#204a87;font-weight:bold">for</span> <span style="color:#000">chunk</span> <span style="color:#ce5c00;font-weight:bold">:=</span> <span style="color:#204a87;font-weight:bold">range</span> <span style="color:#000">modelStream</span> <span style="color:#000;font-weight:bold">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#8f5902;font-style:italic">// Emit tool events when detected
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>            <span style="color:#8f5902;font-style:italic">// Emit content events for streaming text
+</span></span></span><span style="display:flex;"><span><span style="color:#8f5902;font-style:italic"></span>        <span style="color:#000;font-weight:bold">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">}()</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#204a87;font-weight:bold">return</span> <span style="color:#000">eventChannel</span><span style="color:#000;font-weight:bold">,</span> <span style="color:#204a87;font-weight:bold">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">}</span>
+</span></span></code></pre></div><h3 id="tool-executors">Tool Executors<a class="td-heading-self-link" href="#tool-executors" aria-label="Heading self-link"></a></h3>
 <p>Tools integrate by:</p>
 <ul>
 <li>Emitting execution start events</li>

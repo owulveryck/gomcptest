@@ -29,7 +29,7 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/tutorials/getting-started/</loc>
-    <lastmod>2025-09-12T10:47:18+02:00</lastmod>
+    <lastmod>2025-09-12T11:04:46+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -42,7 +42,7 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/reference/tools/</loc>
-    <lastmod>2025-08-18T14:16:19+02:00</lastmod>
+    <lastmod>2025-09-12T11:04:46+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -81,7 +81,7 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/how-to/</loc>
-    <lastmod>2025-03-18T11:22:00+01:00</lastmod>
+    <lastmod>2025-09-12T11:25:07+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -172,9 +172,13 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/explanation/event-system/</loc>
+    <lastmod>2025-09-12T11:25:07+02:00</lastmod>
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/explanation/tools-details/</loc>
-    <lastmod>2025-08-18T14:16:19+02:00</lastmod>
+    <lastmod>2025-09-12T11:04:46+02:00</lastmod>
+  </url><url>
+    <loc>https://owulveryck.github.io/gomcptest/docs/how-to/query-openaiserver-with-tools/</loc>
+    <lastmod>2025-09-12T11:25:07+02:00</lastmod>
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/reference/</loc>
     <lastmod>2025-03-18T11:22:00+01:00</lastmod>
@@ -203,10 +207,10 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/explanation/agentflow/</loc>
-    <lastmod>2025-09-12T10:47:18+02:00</lastmod>
+    <lastmod>2025-09-12T11:04:46+02:00</lastmod>
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/explanation/</loc>
-    <lastmod>2025-03-18T11:22:00+01:00</lastmod>
+    <lastmod>2025-09-12T11:04:46+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
@@ -231,7 +235,7 @@
                 />
   </url><url>
     <loc>https://owulveryck.github.io/gomcptest/docs/</loc>
-    <lastmod>2025-09-12T10:47:18+02:00</lastmod>
+    <lastmod>2025-09-12T11:25:07+02:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="fr"
