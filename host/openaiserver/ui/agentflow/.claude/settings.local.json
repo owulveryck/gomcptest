@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p static/{css,js,images} templates)",
+      "Bash(node -e \"console.log(new RegExp(''<img([^>]*?)src=[\"\"\\'']([^\"\"\\'']*(?>:\\.svg|\\/plantuml\\/svg\\/)[^\"\"\\'']*)[\"\"\\'''']([^>]*?)>'', ''g''))\")",
+      "Bash(node -e \"console.log(''Testing regex''); try { new RegExp(''<img([^>]*?)src=[\"\"\\'']([^\"\"\\'']*(?>:\\.svg|\\/plantuml\\/svg\\/)[^\"\"\\'']*)[\"\"\\'''']([^>]*?)>'', ''g''); console.log(''Regex is valid''); } catch(e) { console.log(''Error:'', e.message); }\")",
+      "Bash(node -e \"const fs = require(''fs''); const content = fs.readFileSync(''/Users/olivier.wulveryck/github.com/owulveryck/gomcptest/ui/agentflow/static/js/chat.js'', ''utf8''); console.log(''File loaded successfully''); try { eval(content); console.log(''JavaScript is valid''); } catch(e) { console.log(''Error:'', e.message, ''at line'', e.stack.split(''\\n'')[1]); }\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

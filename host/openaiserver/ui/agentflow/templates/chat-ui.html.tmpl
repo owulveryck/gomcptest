@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AgentFlow">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>AgentFlow - Agentic System Chat</title>
+    <link rel="icon" type="image/png" href="{{.BaseURL}}/static/images/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{.BaseURL}}/static/images/favicon.svg" />
+    <link rel="shortcut icon" href="{{.BaseURL}}/static/images/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{.BaseURL}}/static/images/apple-touch-icon.png" />
+    <link rel="manifest" href="{{.BaseURL}}/static/site.webmanifest" />
+    <link rel="stylesheet" href="{{.BaseURL}}/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Inject baseURL as global JavaScript variable -->
+    <script>
+        window.AGENTFLOW_BASE_URL = '{{.APIURL}}';
+    </script>
+</head>
+<body>
+    <!-- Tool Event Popup Container -->
+    <div class="tool-popup-container" id="toolPopupContainer"></div>
+
+    <!-- Copy Selection Button -->
+    <button class="copy-selection-button" id="copySelectionButton">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy
+    </button>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h2>Conversations</h2>
+            <button class="new-chat-btn" id="newChatBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New chat
+            </button>
+        </div>
+        <div class="system-prompt-section">
+            <div class="system-prompt-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                    <path d="M2 17L12 22L22 17"></path>
+                    <path d="M2 12L12 17L22 12"></path>
+                </svg>
+                System Prompt
+            </div>
+            <textarea
+                id="systemPromptTextarea"
+                class="system-prompt-textarea"
+                placeholder="Enter system prompt (default: You are a helpful assistant with current time)"
+            >You are a helpful assistant.
+Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}`}}</textarea>
+            <div class="system-prompt-actions">
+                <button id="systemPromptSave" class="system-prompt-btn system-prompt-save">Save</button>
+                <button id="systemPromptReset" class="system-prompt-btn system-prompt-reset">Reset</button>
+                <button id="cleanupStorage" class="system-prompt-btn system-prompt-reset" title="Clear old conversations to free storage space">Cleanup</button>
+            </div>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be listed here -->
+        </div>
+    </div>
+
+    <!-- Menu Trigger Arrow -->
+    <div class="menu-trigger" id="menuTrigger">❯</div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="status-indicator"></div>
+                <h1>AgentFlow</h1>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="tool-selector">
+                    <button class="tool-button" id="toolButton">
+                        <span id="selectedToolsCount">Tools: All</span>
+                    </button>
+                    <div class="tool-dropdown" id="toolDropdown">
+                        <div class="tool-dropdown-header">
+                            <span>Select Tools</span>
+                            <div class="tool-controls">
+                                <button class="tool-toggle-all" id="toolToggleAll">All</button>
+                                <button class="tool-toggle-all" id="toolToggleNone" style="background: #ef4444;">None</button>
+                            </div>
+                        </div>
+                        <div id="toolsList">
+                            <div class="loading-tools">Loading available tools...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="model-selector">
+                    <button class="model-button" id="modelButton">
+                        <span id="selectedModelName">Loading models...</span>
+                    </button>
+                    <div class="model-dropdown" id="modelDropdown">
+                        <div class="model-dropdown-header">Select Model</div>
+                        <div id="modelsList">
+                            <div class="loading-models">Loading available models...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be added here -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <div class="input-section">
+                    <div class="file-preview-container" id="filePreviewContainer">
+                        <!-- File previews will be added here -->
+                    </div>
+                    <textarea
+                        id="chatInput"
+                        class="chat-input"
+                        placeholder="Type your message here... (Markdown supported)"
+                        rows="1"
+                    ></textarea>
+                </div>
+                <div class="input-controls">
+                    <button class="image-upload-btn" id="imageUploadBtn" title="Add image or PDF">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                    </button>
+                    <input type="file" id="imageUploadInput" class="image-upload-input" accept="image/*,application/pdf" multiple>
+                    <button class="audio-upload-btn" id="audioUploadBtn" title="Add audio file">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                    </button>
+                    <input type="file" id="audioUploadInput" class="audio-upload-input" accept="audio/*" multiple>
+                    <button id="sendButton" class="send-button">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{.BaseURL}}/static/js/chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,2603 @@
+/**
+ * AgentFlow - Agentic System Chat UI
+ * Main JavaScript module for the chat interface
+ */
+
+class ChatUI {
+    constructor() {
+        // Use baseURL from global variable injected by the template
+        this.baseUrl = window.AGENTFLOW_BASE_URL || '';
+        this.apiUrl = this.baseUrl + '/v1/chat/completions';
+
+        this.messages = [];
+        this.editingIndex = -1;
+        this.models = [];
+        this.selectedModel = null;
+        this.tools = [];
+        this.selectedTools = new Set();  // Store selected tool names
+        this.currentReader = null;  // Store the current stream reader
+        this.isStreaming = false;   // Track streaming state
+        this.toolPopups = new Map();  // Store active tool popups
+        this.popupAutoCloseTimers = new Map();  // Store auto-close timers
+        this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';  // Default system prompt
+        this.selectedFiles = [];  // Store selected files (images/PDFs) as base64 data URIs
+
+        // DOM elements (must be initialized first)
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatInput = document.getElementById('chatInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.typingIndicator = document.getElementById('typingIndicator');
+        this.modelButton = document.getElementById('modelButton');
+        this.modelDropdown = document.getElementById('modelDropdown');
+        this.modelsList = document.getElementById('modelsList');
+        this.selectedModelName = document.getElementById('selectedModelName');
+        this.toolButton = document.getElementById('toolButton');
+        this.toolDropdown = document.getElementById('toolDropdown');
+        this.toolsList = document.getElementById('toolsList');
+        this.selectedToolsCount = document.getElementById('selectedToolsCount');
+        this.toolToggleAll = document.getElementById('toolToggleAll');
+        this.toolToggleNone = document.getElementById('toolToggleNone');
+        this.sideMenu = document.getElementById('sideMenu');
+        this.conversationsList = document.getElementById('conversationsList');
+        this.newChatBtn = document.getElementById('newChatBtn');
+        this.menuTrigger = document.getElementById('menuTrigger');
+        this.systemPromptTextarea = document.getElementById('systemPromptTextarea');
+        this.systemPromptSave = document.getElementById('systemPromptSave');
+        this.systemPromptReset = document.getElementById('systemPromptReset');
+        this.copySelectionButton = document.getElementById('copySelectionButton');
+        this.imageUploadBtn = document.getElementById('imageUploadBtn');
+        this.imageUploadInput = document.getElementById('imageUploadInput');
+        this.audioUploadBtn = document.getElementById('audioUploadBtn');
+        this.audioUploadInput = document.getElementById('audioUploadInput');
+        this.filePreviewContainer = document.getElementById('filePreviewContainer');
+
+        // Conversation management (after DOM elements are initialized)
+        this.conversations = this.loadConversations();
+        this.currentConversationId = null;
+
+        this.init();
+
+        // Initialize conversation after init
+        this.initializeConversation();
+    }
+
+    init() {
+        this.sendButton.addEventListener('click', () => {
+            if (this.isStreaming) {
+                // Prevent multiple stop clicks
+                if (this.sendButton.disabled) return;
+
+                // Temporarily disable button to prevent spam clicking
+                this.sendButton.disabled = true;
+                this.sendButton.textContent = 'Stopping...';
+
+                this.stopStreaming().then(() => {
+                    // Re-enable after a short delay
+                    setTimeout(() => {
+                        this.sendButton.disabled = false;
+                    }, 500);
+                });
+            } else {
+                this.sendMessage();
+            }
+        });
+        this.chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!this.isStreaming) {
+                    this.sendMessage();
+                }
+            }
+        });
+
+        // Auto-resize textarea
+        this.chatInput.addEventListener('input', () => {
+            this.chatInput.style.height = 'auto';
+            this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 150) + 'px';
+        });
+
+        // Model selector events
+        this.modelButton.addEventListener('click', () => {
+            this.modelDropdown.classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.modelButton.contains(e.target) && !this.modelDropdown.contains(e.target)) {
+                this.modelDropdown.classList.remove('active');
+            }
+            if (!this.toolButton.contains(e.target) && !this.toolDropdown.contains(e.target)) {
+                this.toolDropdown.classList.remove('active');
+            }
+        });
+
+        // Tool selector events
+        this.toolButton.addEventListener('click', () => {
+            this.toolDropdown.classList.toggle('active');
+        });
+
+        this.toolToggleAll.addEventListener('click', () => {
+            this.selectAllTools();
+        });
+
+        this.toolToggleNone.addEventListener('click', () => {
+            this.selectNoTools();
+        });
+
+        // Load available models and tools
+        this.loadModels();
+        this.loadTools();
+
+        // Initialize conversation management
+        this.newChatBtn.addEventListener('click', () => this.createNewConversation());
+        this.renderConversationsList();
+
+        // System prompt event listeners
+        this.systemPromptSave.addEventListener('click', () => this.saveSystemPrompt());
+        this.systemPromptReset.addEventListener('click', () => this.resetSystemPrompt());
+        document.getElementById('cleanupStorage').addEventListener('click', () => this.manualCleanupStorage());
+
+        // Auto-save system prompt on change
+        this.systemPromptTextarea.addEventListener('change', () => {
+            this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
+        });
+
+        // Menu trigger handling
+        this.menuTrigger.addEventListener('click', () => {
+            this.sideMenu.classList.add('active');
+        });
+
+        // Click outside to close menu
+        document.addEventListener('click', (e) => {
+            if (!this.sideMenu.contains(e.target) &&
+                !this.menuTrigger.contains(e.target) &&
+                this.sideMenu.classList.contains('active')) {
+                this.sideMenu.classList.remove('active');
+            }
+        });
+
+        // Auto-save on message send
+        this.originalSendMessage = this.sendMessage.bind(this);
+
+        // Text selection handling for copy functionality
+        this.initTextSelectionHandling();
+
+        // File upload handling (images and PDFs)
+        this.initFileUploadHandling();
+    }
+
+    // Text selection and copy functionality
+    initTextSelectionHandling() {
+        // Track text selection in chat messages
+        document.addEventListener('selectionchange', () => {
+            this.handleSelectionChange();
+        });
+
+        // Copy button click handler
+        this.copySelectionButton.addEventListener('click', () => {
+            this.copySelectedMarkdown();
+        });
+
+        // Hide copy button when clicking elsewhere (but not immediately)
+        document.addEventListener('click', (e) => {
+            if (!this.copySelectionButton.contains(e.target)) {
+                // Use a small delay to allow selection change event to fire first
+                setTimeout(() => {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount === 0 || selection.isCollapsed) {
+                        this.hideCopyButton();
+                    }
+                }, 10);
+            }
+        });
+    }
+
+    handleSelectionChange() {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0 || selection.isCollapsed) {
+            this.hideCopyButton();
+            return;
+        }
+
+        // Check if selection is within chat messages
+        const range = selection.getRangeAt(0);
+        const chatMessagesContainer = this.chatMessages;
+
+        if (!chatMessagesContainer.contains(range.commonAncestorContainer)) {
+            this.hideCopyButton();
+            return;
+        }
+
+        // Show copy button near selection
+        this.showCopyButton(range);
+    }
+
+    showCopyButton(range) {
+        const button = this.copySelectionButton;
+
+        // Show button in fixed position (CSS handles positioning)
+        button.style.display = 'block';
+
+        // Reset button state
+        button.className = 'copy-selection-button';
+        button.innerHTML = `
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copy
+        `;
+    }
+
+    hideCopyButton() {
+        this.copySelectionButton.style.display = 'none';
+    }
+
+    async copySelectedMarkdown() {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0 || selection.isCollapsed) {
+            return;
+        }
+
+        try {
+            // Get the markdown source for the selected content
+            const markdownText = this.extractMarkdownFromSelection(selection);
+
+            // Copy to clipboard
+            await navigator.clipboard.writeText(markdownText);
+
+            // Show success feedback
+            const button = this.copySelectionButton;
+            button.className = 'copy-selection-button success';
+            button.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                    <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+                Copied!
+            `;
+
+            // Hide button after short delay
+            setTimeout(() => {
+                this.hideCopyButton();
+            }, 1500);
+
+        } catch (error) {
+            console.error('Failed to copy text:', error);
+
+            // Show error feedback
+            const button = this.copySelectionButton;
+            button.innerHTML = 'Failed to copy';
+            setTimeout(() => {
+                this.hideCopyButton();
+            }, 2000);
+        }
+    }
+
+    extractMarkdownFromSelection(selection) {
+        const range = selection.getRangeAt(0);
+
+        // Find which message(s) the selection spans
+        const selectedMessages = this.findMessagesInSelection(range);
+
+        if (selectedMessages.length === 0) {
+            // Fallback to plain text if we can't find the source
+            return selection.toString();
+        }
+
+        // If selection spans multiple messages, combine their markdown
+        if (selectedMessages.length > 1) {
+            return selectedMessages.map(msg => msg.content).join('\n\n');
+        }
+
+        // Single message - try to extract the relevant portion
+        const message = selectedMessages[0];
+        const selectedText = selection.toString().trim();
+
+        // Check if user actually selected the entire message content area
+        // (not just text that happens to match most of the message)
+        if (this.isActuallyEntireMessageSelected(range, message, selectedText)) {
+            return message.content;
+        }
+
+        // Try to map the selected HTML back to markdown portions
+        return this.mapSelectionToMarkdown(message.content, selectedText);
+    }
+
+    findMessagesInSelection(range) {
+        const selectedMessages = [];
+
+        // Get all message groups in the chat (excludes tool notifications)
+        const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
+
+        // Create a mapping between DOM elements and message indices
+        let messageIndex = 0;
+
+        messageGroups.forEach((messageGroup) => {
+            const messageContent = messageGroup.querySelector('.message-content');
+            if (messageContent && this.doesSelectionIntersectElement(range, messageContent)) {
+                // Find the corresponding message in our array (skip tool notifications)
+                while (messageIndex < this.messages.length) {
+                    const message = this.messages[messageIndex];
+                    if (message && (message.role === 'user' || message.role === 'assistant')) {
+                        if (!selectedMessages.includes(message)) {
+                            selectedMessages.push(message);
+                        }
+                        messageIndex++;
+                        break;
+                    }
+                    messageIndex++;
+                }
+            } else {
+                // Skip this message group, advance index to next user/assistant message
+                while (messageIndex < this.messages.length) {
+                    const message = this.messages[messageIndex];
+                    if (message && (message.role === 'user' || message.role === 'assistant')) {
+                        messageIndex++;
+                        break;
+                    }
+                    messageIndex++;
+                }
+            }
+        });
+
+        return selectedMessages;
+    }
+
+    doesSelectionIntersectElement(range, element) {
+        try {
+            // Create a range that spans the entire element
+            const elementRange = document.createRange();
+            elementRange.selectNodeContents(element);
+
+            // Check if the selection range intersects with the element range
+            return range.compareBoundaryPoints(Range.END_TO_START, elementRange) <= 0 &&
+                   range.compareBoundaryPoints(Range.START_TO_END, elementRange) >= 0;
+        } catch (e) {
+            // Fallback: check if element contains any part of the selection
+            return element.contains(range.startContainer) || element.contains(range.endContainer);
+        }
+    }
+
+    isActuallyEntireMessageSelected(range, message, selectedText) {
+        // Find the message content element for this message
+        const messageGroups = Array.from(this.chatMessages.querySelectorAll('.message-group'));
+
+        // Find the correct DOM element for this message by matching content
+        let targetMessageGroup = null;
+        let domMessageIndex = 0;
+
+        for (let i = 0; i < this.messages.length; i++) {
+            const msg = this.messages[i];
+            if (msg.role === 'user' || msg.role === 'assistant') {
+                if (msg === message) {
+                    targetMessageGroup = messageGroups[domMessageIndex];
+                    break;
+                }
+                domMessageIndex++;
+            }
+        }
+
+        if (!targetMessageGroup) {
+            return false;
+        }
+
+        const messageContent = targetMessageGroup.querySelector('.message-content');
+
+        if (!messageContent) {
+            return false;
+        }
+
+        try {
+            // Create a range that spans the entire message content
+            const fullMessageRange = document.createRange();
+            fullMessageRange.selectNodeContents(messageContent);
+
+            // Check if the user's selection covers most of the message content area
+            const selectionCoversStart = range.compareBoundaryPoints(Range.START_TO_START, fullMessageRange) <= 0;
+            const selectionCoversEnd = range.compareBoundaryPoints(Range.END_TO_END, fullMessageRange) >= 0;
+
+            // Also check if the selection includes action buttons (indicating full selection)
+            const includesActionButtons = selectedText.includes('Edit') && selectedText.includes('Replay from here');
+
+            return (selectionCoversStart && selectionCoversEnd) || includesActionButtons;
+        } catch (e) {
+            // Fallback to text-based heuristic if range comparison fails
+            return this.isEntireMessageSelectedFallback(message, selectedText);
+        }
+    }
+
+    isEntireMessageSelectedFallback(message, selectedText) {
+        // Clean up the selection text by removing action buttons and extra whitespace
+        const cleanSelection = selectedText
+            .replace(/\s*Edit\s*Replay from here\s*/g, '') // Remove action buttons
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        // Clean up the message content for comparison
+        const messageText = message.content
+            .replace(/[#*`_\[\]()]/g, '') // Remove markdown formatting
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        // Only consider it "entire" if the cleaned selection is very close to the full message
+        const similarityRatio = cleanSelection.length / messageText.length;
+
+        // Be more strict - only return true if selection is 90%+ of the message
+        return similarityRatio > 0.9;
+    }
+
+    mapSelectionToMarkdown(markdownContent, selectedText) {
+        // Clean up the selected text for comparison
+        const cleanSelection = selectedText.replace(/\s+/g, ' ').trim();
+
+        // If the selection is very small or empty, return as is
+        if (cleanSelection.length < 3) {
+            return selectedText;
+        }
+
+        // Remove action buttons from selection if present
+        const cleanSelectionNoButtons = cleanSelection
+            .replace(/\s*Edit\s*Replay from here\s*/g, '')
+            .replace(/\s*Edit\s*/g, '')
+            .replace(/\s*Replay from here\s*/g, '')
+            .trim();
+
+        // Try exact substring match first (for simple cases)
+        if (markdownContent.includes(cleanSelectionNoButtons)) {
+            const startIndex = markdownContent.indexOf(cleanSelectionNoButtons);
+            const endIndex = startIndex + cleanSelectionNoButtons.length;
+            return markdownContent.substring(startIndex, endIndex);
+        }
+
+        // Try direct match with cleaned selection
+        if (markdownContent.includes(cleanSelection)) {
+            const startIndex = markdownContent.indexOf(cleanSelection);
+            const endIndex = startIndex + cleanSelection.length;
+            return markdownContent.substring(startIndex, endIndex);
+        }
+
+        // Split into words and look for word sequences
+        const selectionWords = cleanSelectionNoButtons.split(/\s+/).filter(w => w.length > 0);
+
+        if (selectionWords.length >= 2) {
+            // Look for the first few and last few words to find boundaries
+            const numWordsToMatch = Math.min(3, Math.floor(selectionWords.length / 2));
+            const firstWords = selectionWords.slice(0, numWordsToMatch).join(' ');
+            const lastWords = selectionWords.slice(-numWordsToMatch).join(' ');
+
+            const startPos = markdownContent.indexOf(firstWords);
+            const endPos = markdownContent.lastIndexOf(lastWords);
+
+            if (startPos >= 0 && endPos >= 0 && endPos >= startPos) {
+                return markdownContent.substring(startPos, endPos + lastWords.length).trim();
+            }
+        }
+
+        // Fallback: try to find any substantial portion of the text
+        if (selectionWords.length >= 5) {
+            const middleWords = selectionWords.slice(1, -1).join(' ');
+            const middlePos = markdownContent.indexOf(middleWords);
+            if (middlePos >= 0) {
+                // Expand around the middle match
+                let start = middlePos;
+                let end = middlePos + middleWords.length;
+
+                // Try to expand backwards
+                const wordBefore = selectionWords[0];
+                const expandedStart = markdownContent.lastIndexOf(wordBefore, start);
+                if (expandedStart >= 0 && start - expandedStart < 50) {
+                    start = expandedStart;
+                }
+
+                // Try to expand forwards
+                const wordAfter = selectionWords[selectionWords.length - 1];
+                const expandedEnd = markdownContent.indexOf(wordAfter, end);
+                if (expandedEnd >= 0 && expandedEnd - end < 50) {
+                    end = expandedEnd + wordAfter.length;
+                }
+
+                return markdownContent.substring(start, end).trim();
+            }
+        }
+
+        // If all else fails, return the original selection
+        return selectedText;
+    }
+
+
+    // File upload functionality (images, PDFs, and audio)
+    initFileUploadHandling() {
+        // File upload button click handlers
+        this.imageUploadBtn.addEventListener('click', () => {
+            this.imageUploadInput.click();
+        });
+
+        this.audioUploadBtn.addEventListener('click', () => {
+            this.audioUploadInput.click();
+        });
+
+        // File input change handlers
+        this.imageUploadInput.addEventListener('change', (e) => {
+            this.handleFileSelection(e.target.files);
+        });
+
+        this.audioUploadInput.addEventListener('change', (e) => {
+            this.handleFileSelection(e.target.files);
+        });
+
+        // Drag and drop support
+        this.chatInput.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        this.chatInput.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const files = Array.from(e.dataTransfer.files).filter(file =>
+                file.type.startsWith('image/') ||
+                file.type === 'application/pdf' ||
+                file.type.startsWith('audio/')
+            );
+
+            if (files.length > 0) {
+                this.handleFileSelection(files);
+            }
+        });
+    }
+
+    async handleFileSelection(files) {
+        for (const file of files) {
+            if (file.type.startsWith('image/') ||
+                file.type === 'application/pdf' ||
+                file.type.startsWith('audio/')) {
+                try {
+                    const dataURL = await this.fileToDataURL(file);
+                    this.addFilePreview(dataURL, file.name, file.type);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    this.showError(`Failed to process file: ${file.name}`);
+                }
+            }
+        }
+
+        // Clear the file inputs so the same file can be selected again
+        this.imageUploadInput.value = '';
+        this.audioUploadInput.value = '';
+    }
+
+    // Keep backward compatibility
+    async handleImageSelection(files) {
+        return this.handleFileSelection(files);
+    }
+
+    fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    addFilePreview(dataURL, fileName, fileType) {
+        // Store the file data
+        const fileData = {
+            dataURL: dataURL,
+            fileName: fileName,
+            fileType: fileType,
+            id: Date.now() + Math.random() // Simple unique ID
+        };
+
+        this.selectedFiles.push(fileData);
+
+        // Create preview element
+        const preview = document.createElement('div');
+        preview.className = 'file-preview';
+        preview.dataset.fileId = fileData.id;
+
+        if (fileType.startsWith('image/')) {
+            // Image preview
+            preview.innerHTML = `
+                <img src="${dataURL}" alt="${fileName}" title="${fileName}">
+                <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+            `;
+        } else if (fileType === 'application/pdf') {
+            // PDF preview
+            preview.innerHTML = `
+                <div class="pdf-icon" title="${fileName}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                </div>
+                <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+            `;
+        } else if (fileType.startsWith('audio/')) {
+            // Audio preview
+            preview.innerHTML = `
+                <div class="audio-icon" title="${fileName}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                        <circle cx="12" cy="4" r="2"/>
+                    </svg>
+                    <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                </div>
+                <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+            `;
+        }
+
+        this.filePreviewContainer.appendChild(preview);
+        this.updateFilePreviewVisibility();
+    }
+
+    // Keep backward compatibility
+    addImagePreview(dataURL, fileName) {
+        return this.addFilePreview(dataURL, fileName, 'image/jpeg');
+    }
+
+    removeFilePreview(fileId) {
+        // Remove from selectedFiles array
+        this.selectedFiles = this.selectedFiles.filter(file => file.id != fileId);
+
+        // Remove preview element
+        const preview = this.filePreviewContainer.querySelector(`[data-file-id="${fileId}"]`);
+        if (preview) {
+            preview.remove();
+        }
+
+        this.updateFilePreviewVisibility();
+    }
+
+    // Keep backward compatibility
+    removeImagePreview(imageId) {
+        return this.removeFilePreview(imageId);
+    }
+
+    updateFilePreviewVisibility() {
+        if (this.selectedFiles.length > 0) {
+            this.filePreviewContainer.style.display = 'flex';
+        } else {
+            this.filePreviewContainer.style.display = 'none';
+        }
+    }
+
+    // Keep backward compatibility
+    updateImagePreviewVisibility() {
+        return this.updateFilePreviewVisibility();
+    }
+
+    clearFilePreviews() {
+        this.selectedFiles = [];
+        this.filePreviewContainer.innerHTML = '';
+        this.updateFilePreviewVisibility();
+    }
+
+    // Keep backward compatibility
+    clearImagePreviews() {
+        return this.clearFilePreviews();
+    }
+
+    // Conversation Management Methods
+    loadConversations() {
+        const saved = localStorage.getItem('chat_conversations');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    saveConversations() {
+        try {
+            localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+        } catch (error) {
+            if (error.name === 'QuotaExceededError') {
+                // Try to free up space by removing oldest conversations
+                this.cleanupOldConversations();
+                // Try saving again
+                try {
+                    localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+                } catch (retryError) {
+                    console.error('Failed to save even after cleanup:', retryError);
+                    throw retryError;
+                }
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    cleanupOldConversations() {
+        const conversationIds = Object.keys(this.conversations);
+
+        // If we have more than 10 conversations, remove the oldest ones
+        if (conversationIds.length > 10) {
+            const sortedIds = conversationIds.sort((a, b) =>
+                this.conversations[a].lastModified - this.conversations[b].lastModified
+            );
+
+            // Remove oldest conversations (keep only 10 most recent)
+            const toRemove = sortedIds.slice(0, conversationIds.length - 10);
+            toRemove.forEach(id => {
+                delete this.conversations[id];
+            });
+
+            console.log(`Cleaned up ${toRemove.length} old conversations to free storage space`);
+        }
+
+        // Also clean up any conversations with large file data that wasn't properly sanitized
+        Object.keys(this.conversations).forEach(id => {
+            const conv = this.conversations[id];
+            if (conv.messages) {
+                conv.messages = conv.messages.map(msg => {
+                    if (Array.isArray(msg.content)) {
+                        msg.content = msg.content.map(item => {
+                            if (item.type === 'file' && item.file && item.file.file_data) {
+                                return {
+                                    type: 'file',
+                                    file: {
+                                        filename: item.file.filename,
+                                        metadata: '[File data removed to save space]'
+                                    }
+                                };
+                            } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                                const url = item.image_url.url;
+                                if (url.startsWith('data:') && url.length > 100000) {
+                                    return {
+                                        type: 'image_url',
+                                        image_url: {
+                                            url: '[Large image data removed to save space]'
+                                        }
+                                    };
+                                }
+                            }
+                            return item;
+                        });
+                    }
+                    return msg;
+                });
+            }
+        });
+    }
+
+    initializeConversation() {
+        // Check if there are existing conversations
+        const conversationIds = Object.keys(this.conversations);
+        if (conversationIds.length > 0) {
+            // Load the most recent conversation
+            const sortedIds = conversationIds.sort((a, b) =>
+                this.conversations[b].lastModified - this.conversations[a].lastModified
+            );
+            this.loadConversation(sortedIds[0]);
+        } else {
+            // Create a new conversation
+            this.createNewConversation();
+        }
+    }
+
+    createNewConversation() {
+        const id = 'conv_' + Date.now();
+        const title = 'New Conversation';
+
+        this.conversations[id] = {
+            id: id,
+            title: title,
+            messages: [],
+            systemPrompt: this.systemPrompt,  // Save current system prompt
+            createdAt: Date.now(),
+            lastModified: Date.now()
+        };
+
+        this.currentConversationId = id;
+        this.messages = [];
+        this.renderMessages();
+        this.saveConversations();
+        this.renderConversationsList();
+    }
+
+    loadConversation(id) {
+        if (this.conversations[id]) {
+            this.currentConversationId = id;
+            this.messages = [...this.conversations[id].messages];
+            // Load system prompt from conversation
+            this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
+            this.systemPromptTextarea.value = this.systemPrompt;
+            this.renderMessages();
+            this.renderConversationsList();
+        }
+    }
+
+    saveCurrentConversation() {
+        if (this.currentConversationId && this.conversations[this.currentConversationId]) {
+            // Create a copy of messages for storage, excluding large file data
+            const messagesToSave = this.messages.map(msg => {
+                if (Array.isArray(msg.content)) {
+                    // For multimodal content, replace large file data with metadata
+                    const sanitizedContent = msg.content.map(item => {
+                        if (item.type === 'file' && item.file && item.file.file_data) {
+                            // Store only metadata for files, not the actual data
+                            return {
+                                type: 'file',
+                                file: {
+                                    filename: item.file.filename,
+                                    metadata: '[File data not stored in localStorage]'
+                                }
+                            };
+                        } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                            // Check if image URL is a large data URI
+                            const url = item.image_url.url;
+                            if (url.startsWith('data:') && url.length > 100000) { // > 100KB
+                                return {
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: '[Large image data not stored in localStorage]'
+                                    }
+                                };
+                            }
+                        } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                            // Check if audio data is large
+                            const audioData = item.audio.data;
+                            if (audioData.startsWith('data:') && audioData.length > 100000) { // > 100KB
+                                return {
+                                    type: 'audio',
+                                    audio: {
+                                        data: '[Large audio data not stored in localStorage]'
+                                    }
+                                };
+                            }
+                        }
+                        return item;
+                    });
+                    return { ...msg, content: sanitizedContent };
+                }
+                return msg;
+            });
+
+            this.conversations[this.currentConversationId].messages = messagesToSave;
+            this.conversations[this.currentConversationId].systemPrompt = this.systemPrompt;  // Save system prompt
+            this.conversations[this.currentConversationId].lastModified = Date.now();
+
+            // Auto-generate title from first message if still default
+            if (this.conversations[this.currentConversationId].title === 'New Conversation' &&
+                this.messages.length > 0) {
+                const firstUserMessage = this.messages.find(m => m.role === 'user');
+                if (firstUserMessage) {
+                    let titleContent = '';
+
+                    // Handle both string and multimodal content
+                    if (typeof firstUserMessage.content === 'string') {
+                        titleContent = firstUserMessage.content;
+                    } else if (Array.isArray(firstUserMessage.content)) {
+                        // Extract text content from multimodal array
+                        const textParts = firstUserMessage.content
+                            .filter(item => item.type === 'text')
+                            .map(item => item.text);
+                        titleContent = textParts.join(' ');
+
+                        // If no text content, use a generic title based on file types
+                        if (!titleContent.trim()) {
+                            const fileTypes = firstUserMessage.content
+                                .filter(item => item.type === 'image_url' || item.type === 'file' || item.type === 'audio')
+                                .map(item => {
+                                    if (item.type === 'file') return 'PDF';
+                                    if (item.type === 'audio') return 'Audio';
+                                    return 'Image';
+                                });
+                            titleContent = fileTypes.length > 0 ? `Uploaded ${fileTypes.join(', ')}` : 'Multimodal message';
+                        }
+                    } else {
+                        titleContent = String(firstUserMessage.content);
+                    }
+
+                    let title = titleContent.substring(0, 50);
+                    if (titleContent.length > 50) title += '...';
+                    this.conversations[this.currentConversationId].title = title;
+                }
+            }
+
+            // Try to save conversations, handle quota exceeded error
+            try {
+                this.saveConversations();
+                this.renderConversationsList();
+            } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                    console.warn('localStorage quota exceeded, unable to save conversation');
+                    // Show user-friendly error message
+                    this.showError('Unable to save conversation: storage quota exceeded. Consider clearing old conversations.');
+                } else {
+                    console.error('Error saving conversation:', error);
+                    this.showError('Error saving conversation: ' + error.message);
+                }
+            }
+        }
+    }
+
+    deleteConversation(id) {
+        if (confirm('Are you sure you want to delete this conversation?')) {
+            delete this.conversations[id];
+            this.saveConversations();
+
+            if (id === this.currentConversationId) {
+                this.initializeConversation();
+            }
+
+            this.renderConversationsList();
+        }
+    }
+
+    renameConversation(id) {
+        const conversation = this.conversations[id];
+        if (conversation) {
+            const newTitle = prompt('Enter new title:', conversation.title);
+            if (newTitle && newTitle.trim()) {
+                conversation.title = newTitle.trim();
+                conversation.lastModified = Date.now();
+                this.saveConversations();
+                this.renderConversationsList();
+            }
+        }
+    }
+
+    duplicateConversation(id) {
+        const conversation = this.conversations[id];
+        if (conversation) {
+            // Generate a new unique ID
+            const newId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+            // Create a deep copy of the conversation
+            const duplicatedConversation = {
+                id: newId,
+                title: `${conversation.title} (Copy)`,
+                messages: JSON.parse(JSON.stringify(conversation.messages)), // Deep copy messages
+                systemPrompt: conversation.systemPrompt,
+                createdAt: Date.now(),
+                lastModified: Date.now()
+            };
+
+            // Add the duplicated conversation to the conversations object
+            this.conversations[newId] = duplicatedConversation;
+
+            // Save conversations and update UI
+            this.saveConversations();
+            this.renderConversationsList();
+
+            // Optional: Switch to the new duplicated conversation
+            this.saveCurrentConversation(); // Save current before switching
+            this.loadConversation(newId);
+
+            console.log(`📋 Conversation duplicated: "${conversation.title}" -> "${duplicatedConversation.title}"`);
+        }
+    }
+
+    renderConversationsList() {
+        this.conversationsList.innerHTML = '';
+
+        const sortedIds = Object.keys(this.conversations).sort((a, b) =>
+            this.conversations[b].lastModified - this.conversations[a].lastModified
+        );
+
+        sortedIds.forEach(id => {
+            const conv = this.conversations[id];
+            const item = document.createElement('div');
+            item.className = 'conversation-item';
+            if (id === this.currentConversationId) {
+                item.classList.add('active');
+            }
+
+            const title = document.createElement('span');
+            title.className = 'conversation-title';
+            title.textContent = conv.title;
+
+            const actions = document.createElement('div');
+            actions.className = 'conversation-actions';
+
+            const duplicateBtn = document.createElement('button');
+            duplicateBtn.className = 'duplicate-btn';
+            duplicateBtn.innerHTML = '📋';
+            duplicateBtn.title = 'Duplicate conversation';
+            duplicateBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.duplicateConversation(id);
+            };
+
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'rename-btn';
+            renameBtn.innerHTML = '✏️';
+            renameBtn.title = 'Rename';
+            renameBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.renameConversation(id);
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'Delete';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.deleteConversation(id);
+            };
+
+            actions.appendChild(duplicateBtn);
+            actions.appendChild(renameBtn);
+            actions.appendChild(deleteBtn);
+
+            item.appendChild(title);
+            item.appendChild(actions);
+
+            item.onclick = () => {
+                if (id !== this.currentConversationId) {
+                    // Save current conversation before switching
+                    this.saveCurrentConversation();
+                    this.loadConversation(id);
+                }
+            };
+
+            this.conversationsList.appendChild(item);
+        });
+    }
+
+    async loadModels() {
+        try {
+            const response = await fetch(this.baseUrl + '/v1/models');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.models = data.data || [];
+
+            if (this.models.length > 0) {
+                // Select the first model by default
+                this.selectedModel = this.models[0].id;
+                this.selectedModelName.textContent = this.selectedModel;
+                this.renderModelsList();
+            } else {
+                this.selectedModelName.textContent = 'No models available';
+            }
+        } catch (error) {
+            console.error('Error loading models:', error);
+            this.selectedModelName.textContent = 'Error loading models';
+        }
+    }
+
+    renderModelsList() {
+        this.modelsList.innerHTML = '';
+
+        this.models.forEach(model => {
+            const option = document.createElement('div');
+            option.className = 'model-option';
+            if (model.id === this.selectedModel) {
+                option.classList.add('selected');
+            }
+
+            option.innerHTML = `
+                <span class="model-name">${model.id}</span>
+                <span class="model-owner">${model.owned_by || 'Unknown'}</span>
+            `;
+
+            option.addEventListener('click', () => {
+                this.selectModel(model.id);
+            });
+
+            this.modelsList.appendChild(option);
+        });
+    }
+
+    selectModel(modelId) {
+        this.selectedModel = modelId;
+        this.selectedModelName.textContent = modelId;
+        this.renderModelsList();
+        this.modelDropdown.classList.remove('active');
+    }
+
+    async loadTools() {
+        try {
+            const response = await fetch(this.baseUrl + '/v1/tools');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.tools = data || [];
+
+            // Initially select all tools
+            this.tools.forEach(tool => {
+                this.selectedTools.add(tool.Name);
+            });
+
+            this.renderToolsList();
+            this.updateToolsCountDisplay();
+        } catch (error) {
+            console.error('Error loading tools:', error);
+            this.selectedToolsCount.textContent = 'Tools: Error';
+        }
+    }
+
+    renderToolsList() {
+        this.toolsList.innerHTML = '';
+
+        if (this.tools.length === 0) {
+            this.toolsList.innerHTML = '<div class="loading-tools">No tools available</div>';
+            return;
+        }
+
+        this.tools.forEach(tool => {
+            const option = document.createElement('div');
+            option.className = 'tool-option';
+            if (this.selectedTools.has(tool.Name)) {
+                option.classList.add('selected');
+            }
+
+            option.innerHTML = `
+                <div class="tool-info">
+                    <div class="tool-name">${tool.Name}</div>
+                    <div class="tool-description">${tool.Description || 'No description available'}</div>
+                </div>
+                <div class="tool-checkbox ${this.selectedTools.has(tool.Name) ? 'checked' : ''}"></div>
+            `;
+
+            option.addEventListener('click', () => {
+                this.toggleTool(tool.Name);
+            });
+
+            this.toolsList.appendChild(option);
+        });
+    }
+
+    toggleTool(toolName) {
+        if (this.selectedTools.has(toolName)) {
+            this.selectedTools.delete(toolName);
+        } else {
+            this.selectedTools.add(toolName);
+        }
+        this.renderToolsList();
+        this.updateToolsCountDisplay();
+    }
+
+    selectAllTools() {
+        this.tools.forEach(tool => {
+            this.selectedTools.add(tool.Name);
+        });
+        this.renderToolsList();
+        this.updateToolsCountDisplay();
+    }
+
+    selectNoTools() {
+        this.selectedTools.clear();
+        this.renderToolsList();
+        this.updateToolsCountDisplay();
+    }
+
+    updateToolsCountDisplay() {
+        const selectedCount = this.selectedTools.size;
+        const totalCount = this.tools.length;
+
+        if (selectedCount === totalCount) {
+            this.selectedToolsCount.textContent = 'Tools: All';
+        } else if (selectedCount === 0) {
+            this.selectedToolsCount.textContent = 'Tools: None';
+        } else {
+            this.selectedToolsCount.textContent = `Tools: ${selectedCount}/${totalCount}`;
+        }
+    }
+
+    buildModelWithTools() {
+        let modelString = this.selectedModel;
+
+        if (this.selectedTools.size > 0 && this.selectedTools.size < this.tools.length) {
+            // Only add tools if not all are selected (all selected means use all tools)
+            const toolNames = Array.from(this.selectedTools);
+            modelString += '|' + toolNames.join('|');
+        }
+
+        return modelString;
+    }
+
+    renderMarkdown(text) {
+        // Configure marked to allow HTML (including SVG)
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            sanitize: false,  // Allow HTML/SVG
+            renderer: this.getCustomRenderer()
+        });
+
+        let html = marked.parse(text || '');
+
+        // Handle SVG URLs - convert them to object tags for better compatibility (including PlantUML)
+        html = html.replace(/<img([^>]*?)src=["']([^"']*(?:\.svg|\/plantuml\/svg\/)[^"']*?)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
+            // Use object tag for SVG files to ensure they display properly
+            return `<object type="image/svg+xml" data="${src}">
+                <img src="${src}" alt="SVG Image">
+            </object>`;
+        });
+
+        // Also handle SVG URLs that might be in markdown link format (including PlantUML)
+        html = html.replace(/!\[([^\]]*)\]\(([^)]*(?:\.svg|\/plantuml\/svg\/)[^)]*)\)/g, (match, alt, src) => {
+            return `<object type="image/svg+xml" data="${src}">
+                <img src="${src}" alt="${alt}">
+            </object>`;
+        });
+
+        return html;
+    }
+
+    // Rewrite PlantUML URLs to use the proxy when needed
+    rewritePlantUMLUrls(html) {
+        if (!this.baseUrl) {
+            // If baseUrl is empty, we're served from the main server, no rewriting needed
+            return html;
+        }
+
+        // Rewrite PlantUML URLs in object tags
+        html = html.replace(/data="http:\/\/localhost:9999\/plantuml\//g, `data="${this.baseUrl}/plantuml/`);
+
+        // Rewrite PlantUML URLs in img tags
+        html = html.replace(/src="http:\/\/localhost:9999\/plantuml\//g, `src="${this.baseUrl}/plantuml/`);
+
+        return html;
+    }
+
+    getCustomRenderer() {
+        const renderer = new marked.Renderer();
+
+        // Custom image renderer to handle SVG URLs properly
+        renderer.image = function(href, title, text) {
+            // The href parameter might be an object, extract the actual href
+            let url = '';
+            if (typeof href === 'object' && href !== null && href.href) {
+                url = String(href.href);
+            } else if (typeof href === 'string') {
+                url = href;
+            } else {
+                url = String(href || '');
+            }
+
+            const altText = String(text || '');
+            const titleText = String(title || '');
+
+            // Check if it's an SVG URL (including PlantUML SVG URLs)
+            if (url && (url.includes('.svg') || url.endsWith('.svg') || url.includes('/plantuml/svg/'))) {
+                // Use object tag for better SVG compatibility - CSS handles styling
+                return `<object type="image/svg+xml" data="${url}" title="${titleText}">
+                    <img src="${url}" alt="${altText}" title="${titleText}">
+                </object>`;
+            }
+
+            // Check if it's another type of image generation URL (also likely SVG)
+            if (url && (url.includes('wardley_map') ||
+                        url.includes('localhost:8585') ||
+                        url.includes('image/svg') ||
+                        url.includes('/plantuml/png/'))) {
+                return `<img src="${url}" alt="${altText}" title="${titleText}">`;
+            }
+
+            // Default image rendering
+            return `<img src="${url}" alt="${altText}" title="${titleText}">`;
+        };
+
+        return renderer;
+    }
+
+    renderMessageContent(content) {
+        if (typeof content === 'string') {
+            // Simple text content
+            let html = this.renderMarkdown(content);
+            return this.rewritePlantUMLUrls(html);
+        } else if (Array.isArray(content)) {
+            // Multimodal content with text and images
+            let html = '';
+            for (const item of content) {
+                if (item.type === 'text') {
+                    html += this.renderMarkdown(item.text);
+                } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                    html += `<div class="message-image"><img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; margin: 8px 0; border: 1px solid #e5e7eb;"></div>`;
+                } else if (item.type === 'file' && item.file && item.file.filename) {
+                    // Display file attachment
+                    const filename = item.file.filename;
+                    html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <span style="font-size: 14px; color: #374151;">${filename}</span>
+                    </div>`;
+                } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                    // Display audio attachment with playback controls
+                    html += `<div class="message-audio" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                        <span style="font-size: 14px; color: #374151;">Audio file</span>
+                        <audio controls style="height: 30px;">
+                            <source src="${item.audio.data}" type="audio/mpeg">
+                            <source src="${item.audio.data}" type="audio/wav">
+                            <source src="${item.audio.data}" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>`;
+                }
+            }
+            return this.rewritePlantUMLUrls(html);
+        } else {
+            // Fallback for other content types
+            let html = this.renderMarkdown(String(content));
+            return this.rewritePlantUMLUrls(html);
+        }
+    }
+
+    addMessage(role, content, index = null) {
+        const messageData = { role, content };
+
+        if (index !== null) {
+            this.messages[index] = messageData;
+        } else {
+            this.messages.push(messageData);
+            index = this.messages.length - 1;
+        }
+
+        this.renderMessages();
+        this.saveCurrentConversation(); // Auto-save after adding message
+    }
+
+    // Helper function to map message index to DOM index (accounting for tool notifications)
+    getMessageDomIndex(messageIndex) {
+        let domIndex = 0;
+        for (let i = 0; i < messageIndex; i++) {
+            if (this.messages[i].role === 'user' || this.messages[i].role === 'assistant') {
+                domIndex++;
+            }
+        }
+        return domIndex;
+    }
+
+    renderMessages() {
+        this.chatMessages.innerHTML = '';
+
+        this.messages.forEach((msg, index) => {
+            // Handle tool notifications differently
+            if (msg.role === 'tool') {
+                const toolNotification = document.createElement('div');
+                toolNotification.className = 'tool-notification';
+                toolNotification.style.animation = 'fadeIn 0.3s ease-in';
+                toolNotification.innerHTML = `
+                    <svg class="tool-notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    <span>${msg.content}</span>
+                    <span style="margin-left: auto; font-size: 11px; opacity: 0.7;">Click to view details</span>
+                `;
+
+                // Add click handler to show tool details popup
+                toolNotification.addEventListener('click', () => {
+                    this.showToolDetailsPopup(msg);
+                });
+
+                this.chatMessages.appendChild(toolNotification);
+                return;
+            }
+
+            const messageGroup = document.createElement('div');
+            messageGroup.className = 'message-group';
+
+            const message = document.createElement('div');
+            message.className = `message ${msg.role === 'user' ? 'user-message' : 'assistant-message'}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${msg.role === 'user' ? 'user-avatar' : 'assistant-avatar'}`;
+
+            // Add accessibility attributes
+            avatar.setAttribute('role', 'img');
+            avatar.setAttribute('aria-label', msg.role === 'user' ? 'User message' : 'Assistant message');
+            avatar.setAttribute('tabindex', '0');
+
+            // Use professional icons instead of letters
+            if (msg.role === 'user') {
+                avatar.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                `;
+            } else {
+                avatar.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                        <path d="M2 17L12 22L22 17"/>
+                        <path d="M2 12L12 17L22 12"/>
+                    </svg>
+                `;
+            }
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+
+            // Add accessibility attributes for message content
+            messageContent.setAttribute('role', 'article');
+            messageContent.setAttribute('aria-labelledby', `message-${index}-label`);
+
+            // Add hidden label for screen readers
+            const messageLabel = document.createElement('span');
+            messageLabel.id = `message-${index}-label`;
+            messageLabel.className = 'sr-only';
+            messageLabel.textContent = `${msg.role === 'user' ? 'User' : 'Assistant'} message ${index + 1}`;
+            messageContent.appendChild(messageLabel);
+
+            // Show typing indicator if message is being typed
+            if (msg.isTyping && !msg.content) {
+                const typingContent = document.createElement('div');
+                typingContent.innerHTML = `
+                    <div class="typing-dots" style="display: flex; gap: 4px; padding: 10px 0;">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+                messageContent.appendChild(typingContent);
+            } else {
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = this.renderMessageContent(msg.content);
+                messageContent.appendChild(contentDiv);
+            }
+
+            const actions = document.createElement('div');
+            actions.className = 'message-actions';
+
+            const editButton = document.createElement('button');
+            editButton.className = 'action-button';
+            editButton.textContent = 'Edit';
+            editButton.onclick = () => this.startEdit(index);
+
+            const replayButton = document.createElement('button');
+            replayButton.className = 'action-button';
+            replayButton.textContent = 'Replay from here';
+            replayButton.onclick = () => this.replayFrom(index);
+
+            actions.appendChild(editButton);
+            if (msg.role === 'user') {
+                actions.appendChild(replayButton);
+            }
+
+            messageContent.appendChild(actions);
+            message.appendChild(avatar);
+            message.appendChild(messageContent);
+            messageGroup.appendChild(message);
+
+            this.chatMessages.appendChild(messageGroup);
+        });
+
+        this.scrollToBottom();
+    }
+
+    startEdit(index) {
+        // Extract text content and attachments from message
+        const message = this.messages[index];
+        let textContent = '';
+        let attachments = [];
+
+        if (typeof message.content === 'string') {
+            textContent = message.content;
+        } else if (Array.isArray(message.content)) {
+            // Separate text content from attachments
+            message.content.forEach(item => {
+                if (item.type === 'text') {
+                    textContent += item.text;
+                } else if (item.type === 'image_url' || item.type === 'file' || item.type === 'audio') {
+                    attachments.push(item);
+                }
+            });
+        }
+
+        // Use the helper method to render the edit interface
+        this.renderEditInterface(index, textContent, attachments);
+    }
+
+    saveEdit(index, newContent) {
+        this.messages[index].content = newContent;
+        this.renderMessages();
+    }
+
+    renderEditInterface(index, currentTextContent, currentAttachments) {
+        const domIndex = this.getMessageDomIndex(index);
+        const messageGroups = this.chatMessages.querySelectorAll('.message-group');
+        const messageContent = messageGroups[domIndex].querySelector('.message-content');
+
+        messageContent.classList.add('editing');
+        messageContent.innerHTML = '';
+
+        // Create edit container
+        const editContainer = document.createElement('div');
+        editContainer.className = 'edit-container';
+
+        // Create attachments preview section if there are attachments
+        if (currentAttachments.length > 0) {
+            const attachmentsSection = document.createElement('div');
+            attachmentsSection.className = 'edit-attachments';
+            attachmentsSection.innerHTML = '<div style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #374151;">Attachments:</div>';
+
+            currentAttachments.forEach((attachment, attachIndex) => {
+                const attachmentItem = document.createElement('div');
+                attachmentItem.className = 'edit-attachment-item';
+                attachmentItem.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 12px;
+                    background: #f3f4f6;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    margin-bottom: 8px;
+                `;
+
+                if (attachment.type === 'image_url') {
+                    attachmentItem.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                        <span style="flex: 1; font-size: 14px; color: #374151;">Image attachment</span>
+                        <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                            background: #ef4444;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            width: 20px;
+                            height: 20px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 12px;
+                        ">×</button>
+                    `;
+                } else if (attachment.type === 'file') {
+                    const filename = attachment.file?.filename || 'Unknown file';
+                    attachmentItem.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <span style="flex: 1; font-size: 14px; color: #374151;">${filename}</span>
+                        <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                            background: #ef4444;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            width: 20px;
+                            height: 20px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 12px;
+                        ">×</button>
+                    `;
+                } else if (attachment.type === 'audio') {
+                    attachmentItem.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                        <span style="flex: 1; font-size: 14px; color: #374151;">Audio file</span>
+                        <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                            background: #ef4444;
+                            color: white;
+                            border: none;
+                            border-radius: 4px;
+                            width: 20px;
+                            height: 20px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 12px;
+                        ">×</button>
+                    `;
+                }
+
+                attachmentsSection.appendChild(attachmentItem);
+            });
+
+            editContainer.appendChild(attachmentsSection);
+        }
+
+        // Create textarea for text content
+        const textarea = document.createElement('textarea');
+        textarea.className = 'edit-textarea';
+        textarea.value = currentTextContent;
+        textarea.style.marginTop = currentAttachments.length > 0 ? '8px' : '0';
+
+        // Create edit buttons
+        const editButtons = document.createElement('div');
+        editButtons.className = 'edit-buttons';
+
+        const saveButton = document.createElement('button');
+        saveButton.className = 'save-button';
+        saveButton.textContent = 'Save';
+        saveButton.onclick = () => this.saveEditWithAttachments(index, textarea.value, currentAttachments);
+
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'cancel-button';
+        cancelButton.textContent = 'Cancel';
+        cancelButton.onclick = () => this.cancelEdit();
+
+        editButtons.appendChild(saveButton);
+        editButtons.appendChild(cancelButton);
+
+        editContainer.appendChild(textarea);
+        editContainer.appendChild(editButtons);
+        messageContent.appendChild(editContainer);
+
+        // Add event listeners for attachment removal
+        editContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-attachment')) {
+                const attachIndex = parseInt(e.target.dataset.attachIndex);
+                currentAttachments.splice(attachIndex, 1);
+                // Re-render the edit interface with updated attachments
+                this.renderEditInterface(index, textarea.value, currentAttachments);
+            }
+        });
+
+        textarea.focus();
+    }
+
+    saveEditWithAttachments(index, textContent, attachments) {
+        // Reconstruct the message content with text and remaining attachments
+        if (attachments.length === 0 && textContent.trim() === '') {
+            // If no attachments and no text, just set empty string
+            this.messages[index].content = '';
+        } else if (attachments.length === 0) {
+            // Only text content
+            this.messages[index].content = textContent;
+        } else {
+            // Multimodal content with text and attachments
+            const newContent = [];
+
+            // Add text content if present
+            if (textContent.trim()) {
+                newContent.push({
+                    type: 'text',
+                    text: textContent
+                });
+            }
+
+            // Add remaining attachments
+            newContent.push(...attachments);
+
+            this.messages[index].content = newContent;
+        }
+
+        this.renderMessages();
+        this.saveCurrentConversation(); // Save the updated message
+    }
+
+    cancelEdit() {
+        this.renderMessages();
+    }
+
+    replayFrom(index) {
+        // Remove all messages after this index
+        this.messages = this.messages.slice(0, index + 1);
+        this.renderMessages();
+
+        // Regenerate assistant response
+        this.getAssistantResponse();
+    }
+
+    async sendMessage() {
+        const textContent = this.chatInput.value.trim();
+        if (!textContent && this.selectedFiles.length === 0) return;
+
+        // Create message content based on whether we have files
+        let messageContent;
+        if (this.selectedFiles.length > 0) {
+            // Multimodal message with files
+            messageContent = [];
+
+            // Add text content if present
+            if (textContent) {
+                messageContent.push({
+                    type: "text",
+                    text: textContent
+                });
+            }
+
+            // Add files
+            for (const file of this.selectedFiles) {
+                if (file.fileType.startsWith('image/')) {
+                    // Handle images with the existing image_url format
+                    messageContent.push({
+                        type: "image_url",
+                        image_url: {
+                            url: file.dataURL
+                        }
+                    });
+                } else if (file.fileType === 'application/pdf') {
+                    // Handle PDFs with the file format
+                    messageContent.push({
+                        type: "file",
+                        file: {
+                            file_data: file.dataURL,
+                            filename: file.fileName
+                        }
+                    });
+                } else if (file.fileType.startsWith('audio/')) {
+                    // Handle audio files with the audio format
+                    messageContent.push({
+                        type: "audio",
+                        audio: {
+                            data: file.dataURL
+                        }
+                    });
+                }
+            }
+        } else {
+            // Text-only message
+            messageContent = textContent;
+        }
+
+        // Clear inputs
+        this.chatInput.value = '';
+        this.chatInput.style.height = 'auto';
+        this.clearFilePreviews();
+
+        this.addMessage('user', messageContent);
+        await this.getAssistantResponse();
+    }
+
+    saveSystemPrompt() {
+        this.systemPrompt = this.systemPromptTextarea.value.trim() || 'You are a helpful assistant.\\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
+        this.saveCurrentConversation();
+        // Flash the save button to indicate success
+        this.systemPromptSave.style.background = 'rgba(34, 197, 94, 0.5)';
+        setTimeout(() => {
+            this.systemPromptSave.style.background = '';
+        }, 300);
+    }
+
+    resetSystemPrompt() {
+        this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
+        this.systemPromptTextarea.value = this.systemPrompt;
+        this.saveCurrentConversation();
+        // Flash the reset button to indicate success
+        this.systemPromptReset.style.background = 'rgba(239, 68, 68, 0.5)';
+        setTimeout(() => {
+            this.systemPromptReset.style.background = '';
+        }, 300);
+    }
+
+    manualCleanupStorage() {
+        const conversationCount = Object.keys(this.conversations).length;
+        if (confirm(`This will remove old conversations to free up storage space. You have ${conversationCount} conversations. Continue?`)) {
+            this.cleanupOldConversations();
+            this.saveConversations();
+            this.renderConversationsList();
+
+            // Flash the cleanup button to indicate success
+            const cleanupBtn = document.getElementById('cleanupStorage');
+            cleanupBtn.style.background = 'rgba(34, 197, 94, 0.5)';
+            cleanupBtn.textContent = 'Done!';
+            setTimeout(() => {
+                cleanupBtn.style.background = '';
+                cleanupBtn.textContent = 'Cleanup';
+            }, 1500);
+        }
+    }
+
+    async getAssistantResponse() {
+        this.typingIndicator.classList.add('active');
+        this.sendButton.disabled = true;
+        this.isStreaming = true;
+        this.updateSendButton();  // Update button to show "Stop"
+
+        // Prepare messages with system prompt
+        const messagesWithSystem = [
+            { role: 'system', content: this.systemPrompt },
+            ...this.messages
+        ];
+
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: this.buildModelWithTools() || 'gemini-2.0-flash',
+                    messages: messagesWithSystem,
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                    stream: true  // Enable streaming
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Check if response is streaming
+            const contentType = response.headers.get('content-type');
+            console.log('Response content-type:', contentType);
+
+            if (contentType && contentType.includes('text/event-stream')) {
+                console.log('Handling streaming response...');
+                // Handle streaming response
+                await this.handleStreamingResponse(response);
+            } else {
+                console.log('Handling regular JSON response...');
+                // Handle non-streaming response
+                const data = await response.json();
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    this.addMessage('assistant', data.choices[0].message.content);
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showError(`Failed to get response: ${error.message}`);
+        } finally {
+            this.typingIndicator.classList.remove('active');
+            this.sendButton.disabled = false;
+            this.isStreaming = false;
+            this.currentReader = null;
+            this.updateSendButton();  // Reset button to "Send"
+            // Close any remaining tool popups when stream ends
+            this.closeAllToolPopups();
+        }
+    }
+
+    // Add permanent tool notification to conversation
+    addToolNotification(toolName, toolCallData) {
+        // Add tool notification as a special message type
+        const toolMessage = {
+            role: 'tool',
+            content: `Calling tool: ${toolName}`,
+            toolName: toolName,
+            toolCallData: toolCallData,  // Store the complete tool call data
+            toolResponse: null  // Will be populated when response arrives
+        };
+
+        this.messages.push(toolMessage);
+
+        // Force re-render to show the tool notification immediately
+        this.renderMessages();
+        this.saveCurrentConversation(); // Save tool notification
+        this.scrollToBottom();
+
+        return this.messages.length - 1; // Return the index of the tool message
+    }
+
+    // Tool popup management methods
+    showToolCallPopup(event) {
+        if (!event || !event.tool_call || !event.tool_call.id) {
+            console.error('Invalid tool call event for popup:', event);
+            return;
+        }
+
+        const popupId = event.tool_call.id;
+
+        // Check if popup already exists
+        if (this.toolPopups.has(popupId)) {
+            console.log('Popup already exists for:', popupId);
+            return;
+        }
+
+        console.log('Creating tool call popup for:', popupId, event.tool_call.name);
+
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'tool-popup tool-call';
+        popup.id = `popup-${popupId}`;
+
+        // Create popup HTML
+        popup.innerHTML = `
+            <div class="tool-popup-header">
+                <div class="tool-popup-title">
+                    <div class="tool-popup-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </div>
+                    Tool Executing: ${event.tool_call.name}
+                </div>
+                <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+            </div>
+            <div class="tool-popup-content">
+                <div>
+                    <strong style="color: #333; font-size: 13px;">Arguments:</strong>
+                    <div class="tool-popup-args">${JSON.stringify(event.tool_call.arguments, null, 2)}</div>
+                </div>
+                <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                    <div class="tool-popup-spinner"></div>
+                    <span style="font-size: 14px; color: #666;">Waiting for response...</span>
+                </div>
+            </div>
+        `;
+
+        // Add to container
+        const container = document.getElementById('toolPopupContainer');
+        container.appendChild(popup);
+
+        // Store reference
+        this.toolPopups.set(popupId, popup);
+
+        // Set a longer timeout (30 seconds) for tools that take a while
+        // This will only trigger if no response is received
+        const timer = setTimeout(() => {
+            // Update popup to show timeout before closing
+            const popup = this.toolPopups.get(popupId);
+            if (popup) {
+                const content = popup.querySelector('.tool-popup-content');
+                if (content) {
+                    content.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12" y2="16"></line>
+                            </svg>
+                            <span style="font-size: 14px; color: #FFA500; font-weight: 500;">
+                                Tool execution timeout - no response received
+                            </span>
+                        </div>
+                    `;
+                }
+                // Close after showing timeout message
+                setTimeout(() => {
+                    this.closeToolPopup(popupId);
+                }, 2000);
+            }
+        }, 30000);
+        this.popupAutoCloseTimers.set(popupId, timer)
+    }
+
+    updateToolResponsePopup(event) {
+        const popupId = event.tool_response.id;
+        console.log('Updating tool response popup for:', popupId, event.tool_response.name);
+
+        const popup = this.toolPopups.get(popupId);
+
+        if (!popup) {
+            // If no existing popup, create one for the response
+            console.log('No matching tool call popup found for response, creating new one:', popupId);
+            this.showToolResponseOnlyPopup(event);
+            return;
+        }
+
+        // Clear any existing auto-close timer
+        const timer = this.popupAutoCloseTimers.get(popupId);
+        if (timer) {
+            clearTimeout(timer);
+            this.popupAutoCloseTimers.delete(popupId);
+        }
+
+        // Update the popup to show the response
+        const hasError = event.tool_response.error;
+        popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+
+        // Update the icon in the header
+        const iconElement = popup.querySelector('.tool-popup-icon');
+        if (iconElement) {
+            if (hasError) {
+                iconElement.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                `;
+            } else {
+                iconElement.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9 12l2 2 4-4"></path>
+                    </svg>
+                `;
+            }
+        }
+
+        // Update title to show status
+        const titleElement = popup.querySelector('.tool-popup-title');
+        if (titleElement) {
+            // Keep the icon and update the text
+            const iconHTML = iconElement ? iconElement.outerHTML : '';
+            titleElement.innerHTML = iconHTML + (hasError ? ` Tool Failed: ${event.tool_response.name}` : ` Tool Completed: ${event.tool_response.name}`);
+        }
+
+        // Get existing content div
+        const content = popup.querySelector('.tool-popup-content');
+
+        // Keep the arguments that were already displayed and add the response
+        const existingArgs = popup.querySelector('.tool-popup-args');
+        let argsHTML = '';
+        if (existingArgs) {
+            argsHTML = existingArgs.outerHTML;
+        }
+
+        // Build the complete content with both arguments and response
+        let responseHTML = '';
+        if (hasError) {
+            responseHTML = `
+                <div class="tool-popup-error">
+                    <strong>Error:</strong> ${event.tool_response.error}
+                </div>
+            `;
+        } else {
+            // Format the response
+            if (typeof event.tool_response.response === 'string') {
+                responseHTML = `
+                    <div style="margin-top: 12px;">
+                        <strong style="color: #333; font-size: 13px;">Response:</strong>
+                        <div class="tool-popup-response">${event.tool_response.response}</div>
+                    </div>
+                `;
+            } else if (typeof event.tool_response.response === 'object' && event.tool_response.response !== null) {
+                responseHTML = `
+                    <div style="margin-top: 12px;">
+                        <strong style="color: #333; font-size: 13px;">Response:</strong>
+                        <div class="tool-popup-response"><pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre></div>
+                    </div>
+                `;
+            } else {
+                responseHTML = `
+                    <div style="margin-top: 12px;">
+                        <strong style="color: #333; font-size: 13px;">Response:</strong>
+                        <div class="tool-popup-response">Tool executed successfully</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Update content with both arguments and response
+        content.innerHTML = argsHTML + responseHTML;
+
+        // Auto-close after 5.5 seconds to give user time to see the result
+        setTimeout(() => {
+            this.closeToolPopup(popupId);
+        }, 5500);
+    }
+
+    showToolResponseOnlyPopup(event) {
+        const popupId = event.tool_response.id;
+        const hasError = event.tool_response.error;
+
+        console.log('Creating response-only popup for:', popupId, event.tool_response.name);
+
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = `tool-popup ${hasError ? 'tool-error' : 'tool-response'}`;
+        popup.id = `popup-${popupId}`;
+
+        const iconHtml = hasError ? `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        ` : `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 12l2 2 4-4"></path>
+            </svg>
+        `;
+
+        // Create popup HTML
+        popup.innerHTML = `
+            <div class="tool-popup-header">
+                <div class="tool-popup-title">
+                    <div class="tool-popup-icon">${iconHtml}</div>
+                    ${hasError ? 'Tool Failed' : 'Tool Completed'}: ${event.tool_response.name}
+                </div>
+                <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')">×</button>
+            </div>
+            <div class="tool-popup-content">
+                ${hasError
+                    ? `<div class="tool-popup-error"><strong>Error:</strong> ${event.tool_response.error}</div>`
+                    : `<div>
+                        <strong style="color: #333; font-size: 13px;">Response:</strong>
+                        <div class="tool-popup-response">
+                            ${typeof event.tool_response.response === 'string'
+                                ? event.tool_response.response
+                                : `<pre>${JSON.stringify(event.tool_response.response, null, 2)}</pre>`}
+                        </div>
+                       </div>`
+                }
+            </div>
+        `;
+
+        // Add to container
+        const container = document.getElementById('toolPopupContainer');
+        container.appendChild(popup);
+
+        // Store reference
+        this.toolPopups.set(popupId, popup);
+
+        // Auto-close after 5.5 seconds
+        const timer = setTimeout(() => {
+            this.closeToolPopup(popupId);
+        }, 5500);
+        this.popupAutoCloseTimers.set(popupId, timer);
+    }
+
+    closeToolPopup(popupId) {
+        const popup = this.toolPopups.get(popupId);
+        if (popup) {
+            // Clear timer if exists
+            const timer = this.popupAutoCloseTimers.get(popupId);
+            if (timer) {
+                clearTimeout(timer);
+                this.popupAutoCloseTimers.delete(popupId);
+            }
+
+            // Add fade-out animation
+            popup.classList.add('fade-out');
+
+            // Remove after animation
+            setTimeout(() => {
+                popup.remove();
+                this.toolPopups.delete(popupId);
+            }, 300);
+        }
+    }
+
+    closeAllToolPopups() {
+        for (const popupId of this.toolPopups.keys()) {
+            this.closeToolPopup(popupId);
+        }
+    }
+
+    // Store tool response in the corresponding tool message
+    storeToolResponse(toolResponseEvent) {
+        const responseId = toolResponseEvent.tool_response?.id;
+        if (!responseId) return;
+
+        // Find the corresponding tool message by matching the tool call ID
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            const msg = this.messages[i];
+            if (msg.role === 'tool' &&
+                msg.toolCallData &&
+                msg.toolCallData.tool_call &&
+                msg.toolCallData.tool_call.id === responseId) {
+
+                // Store the response data
+                msg.toolResponse = toolResponseEvent.tool_response;
+
+                // Save the conversation with the updated tool data
+                this.saveCurrentConversation();
+                break;
+            }
+        }
+    }
+
+    // Method to show tool details popup when notification is clicked
+    showToolDetailsPopup(toolMessage) {
+        const popupId = `details-${Date.now()}`;
+
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'tool-popup tool-response';
+        popup.id = `popup-${popupId}`;
+
+        // Build the content
+        let argumentsHTML = '';
+        if (toolMessage.toolCallData && toolMessage.toolCallData.tool_call && toolMessage.toolCallData.tool_call.arguments) {
+            argumentsHTML = `
+                <div style="margin-bottom: 16px;">
+                    <strong style="color: #333; font-size: 13px;">Arguments:</strong>
+                    <div class="tool-popup-args">${JSON.stringify(toolMessage.toolCallData.tool_call.arguments, null, 2)}</div>
+                </div>
+            `;
+        }
+
+        let responseHTML = '';
+        if (toolMessage.toolResponse) {
+            if (toolMessage.toolResponse.error) {
+                responseHTML = `
+                    <div class="tool-popup-error">
+                        <strong>Error:</strong> ${toolMessage.toolResponse.error}
+                    </div>
+                `;
+            } else {
+                const responseContent = typeof toolMessage.toolResponse.response === 'string'
+                    ? toolMessage.toolResponse.response
+                    : `<pre>${JSON.stringify(toolMessage.toolResponse.response, null, 2)}</pre>`;
+                responseHTML = `
+                    <div>
+                        <strong style="color: #333; font-size: 13px;">Response:</strong>
+                        <div class="tool-popup-response">${responseContent}</div>
+                    </div>
+                `;
+            }
+        } else {
+            responseHTML = `
+                <div style="color: #666; font-style: italic;">
+                    Response data not available (tool may still be executing)
+                </div>
+            `;
+        }
+
+        // Create popup HTML
+        popup.innerHTML = `
+            <div class="tool-popup-header">
+                <div class="tool-popup-title">
+                    <div class="tool-popup-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                        </svg>
+                    </div>
+                    Tool Details: ${toolMessage.toolName}
+                </div>
+                <button class="tool-popup-close" onclick="chatUI.closeToolPopup('${popupId}')" style="z-index: 1001;">×</button>
+            </div>
+            <div class="tool-popup-content">
+                ${argumentsHTML}
+                ${responseHTML}
+            </div>
+        `;
+
+        // Add to container
+        const container = document.getElementById('toolPopupContainer');
+        container.appendChild(popup);
+
+        // Store reference
+        this.toolPopups.set(popupId, popup);
+
+        // Auto-close after 10 seconds
+        const timer = setTimeout(() => {
+            this.closeToolPopup(popupId);
+        }, 10000);
+        this.popupAutoCloseTimers.set(popupId, timer);
+    }
+
+    async handleStreamingResponse(response) {
+        const reader = response.body.getReader();
+        this.currentReader = reader;  // Store the reader so we can cancel it
+        const decoder = new TextDecoder();
+        let assistantMessage = '';
+        let messageIndex = null;
+
+        // Don't add assistant message yet - wait for tool calls to complete first
+        // We'll add it when we get the first content or when no tools are called
+
+        try {
+            let isStreaming = true;
+            while (true) {
+                // Check if streaming was stopped by user before each read
+                if (!this.isStreaming) {
+                    console.log('🛑 Streaming stopped by user - breaking from loop');
+                    break;
+                }
+
+                const { value, done } = await reader.read();
+
+                // Check again after read in case user stopped while waiting
+                if (!this.isStreaming) {
+                    console.log('🛑 Streaming stopped by user after read - breaking from loop');
+                    break;
+                }
+
+                if (done) {
+                    isStreaming = false;
+                    this.isStreaming = false;
+                    this.currentReader = null;
+                    this.updateSendButton();
+
+                    // Handle case where no content was received but streaming is done
+                    if (messageIndex === null) {
+                        this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                        messageIndex = this.messages.length - 1;
+                    } else {
+                        this.messages[messageIndex].isTyping = false;
+                    }
+
+                    this.updateMessageContent(messageIndex, assistantMessage, false);
+                    this.saveCurrentConversation(); // Save when streaming completes
+                    break;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    // Check if streaming was stopped during chunk processing
+                    if (!this.isStreaming) {
+                        console.log('🛑 Streaming stopped by user during chunk processing');
+                        return; // Exit immediately
+                    }
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') {
+                            isStreaming = false;
+                            this.isStreaming = false;
+                            this.currentReader = null;
+                            this.updateSendButton();
+
+                            // Handle case where no content was received but streaming is done
+                            if (messageIndex === null) {
+                                this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                                messageIndex = this.messages.length - 1;
+                            } else {
+                                this.messages[messageIndex].isTyping = false;
+                            }
+
+                            this.updateMessageContent(messageIndex, assistantMessage, false);
+                            this.saveCurrentConversation(); // Save when streaming completes
+                            return;
+                        }
+
+                        try {
+                            const parsed = JSON.parse(data);
+
+                            // Enhanced debugging with more details
+                            if (parsed.event_type) {
+                                console.log('🔧 Tool event received:', {
+                                    type: parsed.event_type,
+                                    object: parsed.object,
+                                    data: parsed
+                                });
+                            }
+
+                            // Check for tool events with comprehensive validation
+                            if (parsed.event_type === 'tool_call') {
+                                console.log('🚀 Tool call event detected:', parsed);
+                                if (parsed.tool_call && parsed.tool_call.name && parsed.tool_call.id) {
+                                    console.log('✅ Valid tool call, adding notification and popup');
+                                    this.addToolNotification(parsed.tool_call.name, parsed);
+                                    this.showToolCallPopup(parsed);
+                                } else {
+                                    console.warn('❌ Invalid tool call event structure:', {
+                                        hasToolCall: !!parsed.tool_call,
+                                        hasName: !!(parsed.tool_call && parsed.tool_call.name),
+                                        hasId: !!(parsed.tool_call && parsed.tool_call.id),
+                                        fullData: parsed
+                                    });
+                                }
+                            } else if (parsed.event_type === 'tool_response') {
+                                console.log('📥 Tool response event detected:', parsed);
+                                if (parsed.tool_response && parsed.tool_response.id) {
+                                    console.log('✅ Valid tool response, updating popup');
+                                    this.updateToolResponsePopup(parsed);
+                                    this.storeToolResponse(parsed);
+                                } else {
+                                    console.warn('❌ Invalid tool response event structure:', {
+                                        hasToolResponse: !!parsed.tool_response,
+                                        hasId: !!(parsed.tool_response && parsed.tool_response.id),
+                                        fullData: parsed
+                                    });
+                                }
+                            } else if (parsed.choices && parsed.choices[0]) {
+                                // Handle regular chat completion chunks
+                                const delta = parsed.choices[0].delta;
+                                if (delta && delta.content) {
+                                    // If we don't have a message index yet (no tool calls), create assistant message now
+                                    if (messageIndex === null) {
+                                        this.messages.push({ role: 'assistant', content: '', isTyping: true });
+                                        messageIndex = this.messages.length - 1;
+                                        this.renderMessages();
+                                    }
+
+                                    // Remove typing indicator on first content
+                                    if (this.messages[messageIndex].isTyping) {
+                                        this.messages[messageIndex].isTyping = false;
+                                    }
+                                    assistantMessage += delta.content;
+                                    // Update the message in real-time with streaming indicator
+                                    this.messages[messageIndex].content = assistantMessage;
+                                    this.updateMessageContent(messageIndex, assistantMessage, true);
+                                }
+
+                                // Check for finish reason to close popups
+                                if (parsed.choices[0].finish_reason) {
+                                    // If we don't have a message index yet (no content received), create assistant message now
+                                    if (messageIndex === null) {
+                                        this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
+                                        messageIndex = this.messages.length - 1;
+                                    } else {
+                                        // Update final message content and save
+                                        this.messages[messageIndex].content = assistantMessage;
+                                        this.messages[messageIndex].isTyping = false;
+                                    }
+                                    this.renderMessages();
+                                    this.saveCurrentConversation();
+                                    setTimeout(() => {
+                                        this.closeAllToolPopups();
+                                    }, 1000);
+                                }
+                            }
+                        } catch (e) {
+                            // Log JSON parse errors for debugging, but continue processing
+                            if (data.trim() && !data.includes('[DONE]')) {
+                                console.debug('JSON parse error for chunk:', data, 'Error:', e.message);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            // Check if this is a user-initiated stop (cancelled stream)
+            if (error.name === 'AbortError' || error.message.includes('abort') || !this.isStreaming) {
+                console.log('🛑 Stream cancelled by user');
+                // Don't treat user cancellation as an error
+            } else {
+                console.error('Streaming error:', error);
+            }
+
+            // Always finalize the message, whether it's an error or user stop
+            if (messageIndex !== null) {
+                this.updateMessageContent(messageIndex, assistantMessage, false);
+            }
+            this.saveCurrentConversation(); // Save even on error/stop
+
+            // Close any remaining tool popups
+            this.closeAllToolPopups();
+
+            // Only re-throw if it's not a user-initiated stop
+            if (error.name !== 'AbortError' && !error.message.includes('abort') && this.isStreaming) {
+                throw error;
+            }
+        } finally {
+            // Ensure all tool popups are closed when streaming completes
+            setTimeout(() => {
+                this.closeAllToolPopups();
+            }, 2000);
+        }
+    }
+
+    updateMessageContent(index, content, isStreaming = false) {
+        const domIndex = this.getMessageDomIndex(index);
+        const messageGroups = this.chatMessages.querySelectorAll('.message-group');
+        if (messageGroups[domIndex]) {
+            const messageContent = messageGroups[domIndex].querySelector('.message-content');
+            // Preserve the actions div
+            const actions = messageContent.querySelector('.message-actions');
+
+            // Add or remove streaming class
+            if (isStreaming) {
+                messageContent.classList.add('streaming');
+            } else {
+                messageContent.classList.remove('streaming');
+            }
+
+            // Render content with optional cursor
+            let html = this.renderMarkdown(content);
+            html = this.rewritePlantUMLUrls(html);
+            if (isStreaming) {
+                html += '<span class="streaming-cursor"></span>';
+            }
+
+            messageContent.innerHTML = html;
+            if (actions) {
+                messageContent.appendChild(actions);
+            }
+            this.scrollToBottom();
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+
+        const lastMessage = this.chatMessages.lastElementChild;
+        if (lastMessage) {
+            lastMessage.appendChild(errorDiv);
+        }
+    }
+
+    scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+
+    updateSendButton() {
+        if (this.isStreaming) {
+            this.sendButton.textContent = 'Stop';
+            this.sendButton.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+            this.sendButton.disabled = false;  // Enable the button so user can click to stop
+        } else {
+            this.sendButton.textContent = 'Send';
+            this.sendButton.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        }
+    }
+
+    async stopStreaming() {
+        console.log('🛑 Stop streaming requested');
+
+        // Immediately set streaming state to false to prevent further processing
+        this.isStreaming = false;
+
+        // Update UI immediately
+        this.typingIndicator.classList.remove('active');
+        this.sendButton.disabled = false;
+        this.updateSendButton();
+
+        // Cancel the stream reader if it exists
+        if (this.currentReader) {
+            try {
+                console.log('🛑 Cancelling stream reader');
+                await this.currentReader.cancel();
+            } catch (error) {
+                console.log('Stream cancellation error (expected):', error);
+            }
+            this.currentReader = null;
+        }
+
+        // Flush any partial message content and finalize the current message
+        this.flushPartialMessage();
+
+        // Close any open tool popups immediately
+        this.closeAllToolPopups();
+
+        // Save the conversation state
+        this.saveCurrentConversation();
+
+        console.log('🛑 Streaming stopped successfully');
+    }
+
+    flushPartialMessage() {
+        // Find the last message that might be incomplete
+        const lastMessageIndex = this.messages.length - 1;
+        if (lastMessageIndex >= 0) {
+            const lastMessage = this.messages[lastMessageIndex];
+
+            // If the last message is an assistant message that was being streamed
+            if (lastMessage && lastMessage.role === 'assistant') {
+                // Remove streaming state and finalize the message
+                lastMessage.isTyping = false;
+
+                // If the message is empty or just whitespace, add a stopped indicator
+                if (!lastMessage.content || lastMessage.content.trim() === '') {
+                    lastMessage.content = '*Response stopped by user*';
+                } else {
+                    // Add a clear indication that the response was stopped
+                    if (!lastMessage.content.endsWith('...') && !lastMessage.content.endsWith('*stopped*')) {
+                        lastMessage.content += ' *[stopped]*';
+                    }
+                }
+
+                // Update the message display immediately
+                this.updateMessageContent(lastMessageIndex, lastMessage.content, false);
+
+                console.log('🛑 Flushed partial message:', lastMessage.content.substring(0, 50) + '...');
+            }
+        }
+
+        // Ensure the UI is re-rendered to show the final state
+        this.renderMessages();
+    }
+}
+
+// Initialize the chat UI when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the chat UI
+    window.chatUI = new ChatUI();
+
+    // Debug function for testing tool popups (only available in development)
+    window.testToolPopup = function() {
+        const testEvent = {
+            event_type: 'tool_call',
+            tool_call: {
+                id: 'test_call_123',
+                name: 'TestTool',
+                arguments: { test: 'argument' }
+            }
+        };
+        console.log('🧪 Testing tool popup with:', testEvent);
+        chatUI.addToolNotification(testEvent.tool_call.name, testEvent);
+        chatUI.showToolCallPopup(testEvent);
+
+        // Simulate response after 2 seconds
+        setTimeout(() => {
+            const responseEvent = {
+                event_type: 'tool_response',
+                tool_response: {
+                    id: 'test_call_123',
+                    name: 'TestTool',
+                    response: 'Test response successful'
+                }
+            };
+            console.log('🧪 Testing tool response with:', responseEvent);
+            chatUI.updateToolResponsePopup(responseEvent);
+        }, 2000);
+    };
+});
