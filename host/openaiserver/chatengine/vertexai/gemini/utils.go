@@ -31,7 +31,18 @@ func toGenaiPart(c *chatengine.ChatCompletionMessage) ([]*genai.Part, error) {
 						returnedParts = append(returnedParts, genai.NewPartFromBytes(data, mime))
 					}
 				}
-				// Handle file content type
+				// Handle audio content type (inline audio data)
+				if audio, ok := m["audio"].(map[string]interface{}); ok {
+					if audioData, ok := audio["data"].(string); ok {
+						mime, data, err := chatengine.ExtractFileData(audioData)
+						if err != nil {
+							return nil, fmt.Errorf("failed to extract audio data: %w", err)
+						}
+						slog.Debug("Processing audio", "mime_type", mime, "size", len(data))
+						returnedParts = append(returnedParts, genai.NewPartFromBytes(data, mime))
+					}
+				}
+				// Handle file content type (general file including audio)
 				if file, ok := m["file"].(map[string]interface{}); ok {
 					if fileData, ok := file["file_data"].(string); ok {
 						mime, data, err := chatengine.ExtractFileData(fileData)

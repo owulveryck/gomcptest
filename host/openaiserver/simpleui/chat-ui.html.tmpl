@@ -654,6 +654,28 @@
             height: 32px;
             margin-bottom: 4px;
         }
+
+        .file-preview .audio-icon {
+            width: 100px;
+            height: 100px;
+            background: #059669;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .file-preview .audio-icon svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 4px;
+        }
         
         .file-preview .remove-file, .image-preview .remove-image {
             position: absolute;
@@ -740,6 +762,35 @@
         }
         
         .image-upload-input {
+            display: none;
+        }
+
+        .audio-upload-btn {
+            padding: 8px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+        }
+
+        .audio-upload-btn:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .audio-upload-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+        }
+
+        .audio-upload-input {
             display: none;
         }
 
@@ -1618,7 +1669,7 @@
                 padding: 11px 16px;
             }
             
-            .image-upload-btn, .file-upload-btn {
+            .image-upload-btn, .file-upload-btn, .audio-upload-btn {
                 min-height: 44px; /* Minimum touch target size */
                 min-width: 44px;
             }
@@ -1829,6 +1880,13 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         </svg>
                     </button>
                     <input type="file" id="imageUploadInput" class="image-upload-input" accept="image/*,application/pdf" multiple>
+                    <button class="audio-upload-btn" id="audioUploadBtn" title="Add audio file">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                    </button>
+                    <input type="file" id="audioUploadInput" class="audio-upload-input" accept="audio/*" multiple>
                     <button id="sendButton" class="send-button">Send</button>
                 </div>
             </div>
@@ -1880,6 +1938,8 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 this.copySelectionButton = document.getElementById('copySelectionButton');
                 this.imageUploadBtn = document.getElementById('imageUploadBtn');
                 this.imageUploadInput = document.getElementById('imageUploadInput');
+                this.audioUploadBtn = document.getElementById('audioUploadBtn');
+                this.audioUploadInput = document.getElementById('audioUploadInput');
                 this.filePreviewContainer = document.getElementById('filePreviewContainer');
                 
                 // Conversation management (after DOM elements are initialized)
@@ -2336,15 +2396,23 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             }
             
             
-            // File upload functionality (images and PDFs)
+            // File upload functionality (images, PDFs, and audio)
             initFileUploadHandling() {
-                // File upload button click handler
+                // File upload button click handlers
                 this.imageUploadBtn.addEventListener('click', () => {
                     this.imageUploadInput.click();
                 });
-                
-                // File input change handler
+
+                this.audioUploadBtn.addEventListener('click', () => {
+                    this.audioUploadInput.click();
+                });
+
+                // File input change handlers
                 this.imageUploadInput.addEventListener('change', (e) => {
+                    this.handleFileSelection(e.target.files);
+                });
+
+                this.audioUploadInput.addEventListener('change', (e) => {
                     this.handleFileSelection(e.target.files);
                 });
                 
@@ -2358,8 +2426,10 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    const files = Array.from(e.dataTransfer.files).filter(file => 
-                        file.type.startsWith('image/') || file.type === 'application/pdf'
+                    const files = Array.from(e.dataTransfer.files).filter(file =>
+                        file.type.startsWith('image/') ||
+                        file.type === 'application/pdf' ||
+                        file.type.startsWith('audio/')
                     );
                     
                     if (files.length > 0) {
@@ -2370,7 +2440,9 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
             
             async handleFileSelection(files) {
                 for (const file of files) {
-                    if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    if (file.type.startsWith('image/') ||
+                        file.type === 'application/pdf' ||
+                        file.type.startsWith('audio/')) {
                         try {
                             const dataURL = await this.fileToDataURL(file);
                             this.addFilePreview(dataURL, file.name, file.type);
@@ -2380,9 +2452,10 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         }
                     }
                 }
-                
-                // Clear the file input so the same file can be selected again
+
+                // Clear the file inputs so the same file can be selected again
                 this.imageUploadInput.value = '';
+                this.audioUploadInput.value = '';
             }
             
             // Keep backward compatibility
@@ -2427,6 +2500,18 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                         <div class="pdf-icon" title="${fileName}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                        </div>
+                        <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
+                    `;
+                } else if (fileType.startsWith('audio/')) {
+                    // Audio preview
+                    preview.innerHTML = `
+                        <div class="audio-icon" title="${fileName}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                <circle cx="12" cy="4" r="2"/>
                             </svg>
                             <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
                         </div>
@@ -2638,6 +2723,17 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                                             }
                                         };
                                     }
+                                } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                                    // Check if audio data is large
+                                    const audioData = item.audio.data;
+                                    if (audioData.startsWith('data:') && audioData.length > 100000) { // > 100KB
+                                        return {
+                                            type: 'audio',
+                                            audio: {
+                                                data: '[Large audio data not stored in localStorage]'
+                                            }
+                                        };
+                                    }
                                 }
                                 return item;
                             });
@@ -2670,9 +2766,10 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                                 // If no text content, use a generic title based on file types
                                 if (!titleContent.trim()) {
                                     const fileTypes = firstUserMessage.content
-                                        .filter(item => item.type === 'image_url' || item.type === 'file')
+                                        .filter(item => item.type === 'image_url' || item.type === 'file' || item.type === 'audio')
                                         .map(item => {
                                             if (item.type === 'file') return 'PDF';
+                                            if (item.type === 'audio') return 'Audio';
                                             return 'Image';
                                         });
                                     titleContent = fileTypes.length > 0 ? `Uploaded ${fileTypes.join(', ')}` : 'Multimodal message';
@@ -3094,6 +3191,21 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                                 </svg>
                                 <span style="font-size: 14px; color: #374151;">${filename}</span>
                             </div>`;
+                        } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                            // Display audio attachment with playback controls
+                            html += `<div class="message-audio" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                    <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                    <circle cx="12" cy="4" r="2"/>
+                                </svg>
+                                <span style="font-size: 14px; color: #374151;">Audio file</span>
+                                <audio controls style="height: 30px;">
+                                    <source src="${item.audio.data}" type="audio/mpeg">
+                                    <source src="${item.audio.data}" type="audio/wav">
+                                    <source src="${item.audio.data}" type="audio/mp3">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>`;
                         }
                     }
                     return this.rewritePlantUMLUrls(html);
@@ -3260,7 +3372,7 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     message.content.forEach(item => {
                         if (item.type === 'text') {
                             textContent += item.text;
-                        } else if (item.type === 'image_url' || item.type === 'file') {
+                        } else if (item.type === 'image_url' || item.type === 'file' || item.type === 'audio') {
                             attachments.push(item);
                         }
                     });
@@ -3336,6 +3448,27 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                                     <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                                 </svg>
                                 <span style="flex: 1; font-size: 14px; color: #374151;">${filename}</span>
+                                <button class="remove-attachment" data-attach-index="${attachIndex}" style="
+                                    background: #ef4444;
+                                    color: white;
+                                    border: none;
+                                    border-radius: 4px;
+                                    width: 20px;
+                                    height: 20px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 12px;
+                                ">×</button>
+                            `;
+                        } else if (attachment.type === 'audio') {
+                            attachmentItem.innerHTML = `
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                    <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                    <circle cx="12" cy="4" r="2"/>
+                                </svg>
+                                <span style="flex: 1; font-size: 14px; color: #374151;">Audio file</span>
                                 <button class="remove-attachment" data-attach-index="${attachIndex}" style="
                                     background: #ef4444;
                                     color: white;
@@ -3476,6 +3609,14 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                                 file: {
                                     file_data: file.dataURL,
                                     filename: file.fileName
+                                }
+                            });
+                        } else if (file.fileType.startsWith('audio/')) {
+                            // Handle audio files with the audio format
+                            messageContent.push({
+                                type: "audio",
+                                audio: {
+                                    data: file.dataURL
                                 }
                             });
                         }
