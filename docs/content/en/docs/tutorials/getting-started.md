@@ -98,8 +98,10 @@ Now let's start the OpenAI-compatible server with the AgentFlow web interface:
 
 ```bash
 cd host/openaiserver
-go run . -mcpservers "../../bin/LS;../../bin/View;../../bin/Bash;../../bin/GlobTool"
+go run . -withAllEvents -mcpservers "../../bin/LS;../../bin/View;../../bin/Bash;../../bin/GlobTool"
 ```
+
+⚠️ **Note**: We're using the `-withAllEvents` flag to enable full tool event streaming, which is essential for seeing the real-time tool execution notifications in the AgentFlow UI.
 
 You should see output like:
 ```

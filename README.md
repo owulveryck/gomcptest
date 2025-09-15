@@ -172,6 +172,12 @@ This guide will help you quickly run the `openaiserver` located in the `host/ope
     go run main.go
     ```
 
+    For testing with full event streaming (recommended for development):
+
+    ```bash
+    go run . -withAllEvents
+    ```
+
 The server will start and listen on the configured port (default: 8080).
 
 ## Configuration
@@ -200,6 +206,15 @@ The `openaiserver` application is configured using environment variables. The fo
 | `VERTEX_AI_CODE_EXECUTION` | Enable Vertex AI Code Execution tool | `false` | No |
 | `VERTEX_AI_GOOGLE_SEARCH` | Enable Vertex AI Google Search tool | `false` | No |
 | `VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL` | Enable Vertex AI Google Search Retrieval tool | `false` | No |
+
+### OpenAI Server Command-Line Options
+
+| Flag       | Description                                  | Default                   | Required |
+| ---------- | -------------------------------------------- | ------------------------- | -------- |
+| `-mcpservers` | Input string of MCP servers | | No |
+| `-withAllEvents` | Include all events (tool calls, tool responses) in stream output, not just content chunks | `false` | No |
+
+⚠️ **Important for Testing**: The `-withAllEvents` flag is **mandatory** for testing tool event flows in development. It enables streaming of all tool execution events including tool calls and responses, which is essential for debugging and development. Without this flag, only standard chat completion responses are streamed.
 
 **Note**: `IMAGEN_MODELS` and `IMAGE_DIR` environment variables are no longer needed for the hosts. Image generation is now handled by the independent `tools/imagen` MCP server.
 

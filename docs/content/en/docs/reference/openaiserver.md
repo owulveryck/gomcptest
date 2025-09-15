@@ -191,6 +191,19 @@ Handles streaming responses to clients in SSE format, ensuring low latency and p
 
 ## Configuration
 
+The server can be configured using environment variables and command-line flags:
+
+### Command-Line Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-mcpservers` | Input string of MCP servers | - |
+| `-withAllEvents` | Include all events (tool calls, tool responses) in stream output, not just content chunks | `false` |
+
+⚠️ **Important for Testing**: The `-withAllEvents` flag is **mandatory** for testing tool event flows in development. It enables streaming of all tool execution events including tool calls and responses, which is essential for debugging and development. Without this flag, only standard chat completion responses are streamed.
+
+### Environment Variables
+
 The server can be configured using environment variables:
 
 ### Core Configuration
@@ -263,6 +276,15 @@ export GCP_PROJECT="your-project-id"
 export GCP_REGION="us-central1"
 ./bin/openaiserver
 # Access AgentFlow UI at: http://localhost:8080/ui
+```
+
+### Development with Full Event Streaming
+
+```bash
+export GCP_PROJECT="your-project-id"
+export GCP_REGION="us-central1"
+./bin/openaiserver -withAllEvents
+# Access AgentFlow UI with full tool events at: http://localhost:8080/ui
 ```
 
 ### With Vertex AI Tools

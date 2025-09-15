@@ -52,8 +52,10 @@ Now you can start the OpenAI-compatible server with the embedded AgentFlow inter
 
 ```bash
 cd host/openaiserver
-go run . -mcpservers "../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../bin/Bash;../bin/Replace"
+go run . -withAllEvents -mcpservers "../bin/GlobTool;../bin/GrepTool;../bin/LS;../bin/View;../bin/Bash;../bin/Replace"
 ```
+
+⚠️ **Important**: We're using the `-withAllEvents` flag to enable streaming of all tool execution events. This is essential for the real-time tool monitoring features in AgentFlow.
 
 You should see output indicating that the server has started and registered the MCP tools.
 
