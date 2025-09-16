@@ -82,7 +82,7 @@ The project includes a modern web-based chat interface called **AgentFlow** for 
    ./bin/openaiserver -port=4000
    
    # In another terminal, start the UI server
-   cd host/openaiserver/simpleui
+   cd host/openaiserver/ui
    go run . -ui-port=8081 -api-url=http://localhost:4000
    # Access UI at: http://localhost:8081
    ```

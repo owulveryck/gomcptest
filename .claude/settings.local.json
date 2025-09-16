@@ -1,11 +1,25 @@
 {
   "permissions": {
     "allow": [
-      "Read(//Users/olivier.wulveryck/github.com/**)",
-      "Bash(goimports -w **)",
-      "Bash(git add **)",
-      "Bash(git commit **)",
-      "WebFetch(domain:ai.google.dev)"
+      "Bash(go run /tmp/test_mime.go)",
+      "Bash(git add ui/)",
+      "Bash(git add -u .)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nRefactor UI to use embedded AgentFlow with improved serving\n\n- Move UI from simpleui/ to ui/agentflow/ directory structure\n- Update main.go to use consolidated ServeStaticAssets handler\n- Refactor ui.go to use embed.FS for efficient static file serving\n- Fix template BaseURL to properly reference /ui/static/ paths\n- Replace log.Printf with structured slog.Debug for proper debug logging\n- Remove caching headers for development (no-cache, no-store)\n- Ensure correct MIME types for JS, CSS, and webmanifest files\n- Maintain backward compatibility with existing /ui endpoints\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(find /Users/olivier.wulveryck/github.com/owulveryck/gomcptest -name \"*.go\" -exec goimports -w {} ;)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_evaluate",
+      "Bash(make servers)",
+      "Bash(go build -o ../../bin/openaiserver .)",
+      "Bash(make all)",
+      "Bash(make help)",
+      "Bash(go build -o openaiserver .)",
+      "Bash(killall openaiserver)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_wait_for",
+      "Bash(git commit -m \"$(cat <<''EOF''\nEnhance AgentFlow UI with advanced code blocks and file attachment features\n\n- Fix attachment persistence bug: preserve all file data with size display instead of removal\n- Add comprehensive file size calculation utilities for data URLs and base64 encoding\n- Implement graceful localStorage quota error handling with user notifications and fallback saving\n- Enhance code blocks with professional syntax highlighting using Prism.js integration\n- Add copy buttons inside code blocks with complete content copying functionality\n- Apply modern dark theme styling for improved code readability\n- Remove markdown code fences from display and show language labels instead\n- Fix copy button functionality to prioritize textContent over truncated HTML attributes\n- Support modern marked.js API compatibility for both object and string parameters\n- Add comprehensive Prism.js token customizations for better syntax highlighting\n- Implement automatic syntax highlighting after message rendering and streaming completion\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

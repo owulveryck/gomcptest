@@ -26,3 +26,4 @@ sandbox/
 .DS_Store
 host/.claude/settings.local.json
 .playwright-mcp/
+host/openaiserver/ui/serve_ui
