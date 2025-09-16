@@ -1722,6 +1722,199 @@ body {
     }
 }
 
+/* Code block styles - Override Prism defaults */
+.code-block-container {
+    margin: 12px 0;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #2d3748;
+    font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace;
+}
+
+/* Override Prism Tomorrow theme for better integration */
+.code-block-container pre[class*="language-"] {
+    margin: 0;
+    padding: 0;
+    background: #2d3748;
+    border-radius: 0;
+}
+
+.code-block-container code[class*="language-"] {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+.code-block-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: #374151;
+    border-bottom: 1px solid #4b5563;
+}
+
+.code-language {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-block-wrapper {
+    position: relative;
+}
+
+.code-copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    background: rgba(55, 65, 81, 0.8);
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    z-index: 10;
+}
+
+.code-copy-btn:hover {
+    background: rgba(75, 85, 99, 0.9);
+    border-color: #6b7280;
+    color: #d1d5db;
+}
+
+.code-copy-btn.copied {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.code-block {
+    margin: 0;
+    padding: 0;
+}
+
+.code-block code {
+    display: block;
+    padding: 16px;
+    padding-right: 80px; /* Space for copy button */
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e5e7eb;
+    background: #1f2937;
+    border: none;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+}
+
+/* Prism.js customizations for better readability */
+.code-block-container .token.comment,
+.code-block-container .token.prolog,
+.code-block-container .token.doctype,
+.code-block-container .token.cdata {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.code-block-container .token.punctuation {
+    color: #9ca3af;
+}
+
+.code-block-container .token.property,
+.code-block-container .token.tag,
+.code-block-container .token.boolean,
+.code-block-container .token.number,
+.code-block-container .token.constant,
+.code-block-container .token.symbol,
+.code-block-container .token.deleted {
+    color: #f472b6;
+}
+
+.code-block-container .token.selector,
+.code-block-container .token.attr-name,
+.code-block-container .token.string,
+.code-block-container .token.char,
+.code-block-container .token.builtin,
+.code-block-container .token.inserted {
+    color: #34d399;
+}
+
+.code-block-container .token.operator,
+.code-block-container .token.entity,
+.code-block-container .token.url,
+.code-block-container .language-css .token.string,
+.code-block-container .style .token.string {
+    color: #60a5fa;
+}
+
+.code-block-container .token.atrule,
+.code-block-container .token.attr-value,
+.code-block-container .token.keyword {
+    color: #a78bfa;
+    font-weight: 600;
+}
+
+.code-block-container .token.function,
+.code-block-container .token.class-name {
+    color: #fbbf24;
+}
+
+.code-block-container .token.regex,
+.code-block-container .token.important,
+.code-block-container .token.variable {
+    color: #fb7185;
+}
+
+/* Scrollbar for code blocks */
+.code-block code::-webkit-scrollbar {
+    height: 6px;
+}
+
+.code-block code::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+.code-block code::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    border-radius: 3px;
+}
+
+.code-block code::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Notification animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
 /* Handle safe areas for iPhone notch */
 @supports (padding-top: env(safe-area-inset-top)) {
     .chat-header {

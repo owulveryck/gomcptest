@@ -592,6 +592,10 @@ class ChatUI {
 
         this.selectedFiles.push(fileData);
 
+        // Calculate file size
+        const fileSize = this.calculateDataURLSize(dataURL);
+        const formattedSize = this.formatFileSize(fileSize);
+
         // Create preview element
         const preview = document.createElement('div');
         preview.className = 'file-preview';
@@ -601,6 +605,9 @@ class ChatUI {
             // Image preview
             preview.innerHTML = `
                 <img src="${dataURL}" alt="${fileName}" title="${fileName}">
+                <div class="file-size-badge" style="position: absolute; top: 2px; right: 20px; background: rgba(0,0,0,0.7); color: white; padding: 1px 4px; border-radius: 3px; font-size: 9px; font-weight: 500;">
+                    ${formattedSize}
+                </div>
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
         } else if (fileType === 'application/pdf') {
@@ -611,6 +618,7 @@ class ChatUI {
                         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                     </svg>
                     <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                    <div style="font-size: 8px; color: #666; margin-top: 2px;">${formattedSize}</div>
                 </div>
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
@@ -623,6 +631,7 @@ class ChatUI {
                         <circle cx="12" cy="4" r="2"/>
                     </svg>
                     <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
+                    <div style="font-size: 8px; color: #666; margin-top: 2px;">${formattedSize}</div>
                 </div>
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
@@ -679,6 +688,60 @@ class ChatUI {
         return this.clearFilePreviews();
     }
 
+    // Utility functions for file size calculation and formatting
+    calculateDataURLSize(dataURL) {
+        if (!dataURL || typeof dataURL !== 'string') return 0;
+
+        // For data URLs, calculate the actual byte size
+        if (dataURL.startsWith('data:')) {
+            // Find the base64 data part after the comma
+            const commaIndex = dataURL.indexOf(',');
+            if (commaIndex === -1) return 0;
+
+            const base64Data = dataURL.substring(commaIndex + 1);
+            // Base64 encoding adds ~33% overhead, so actual size is roughly 3/4 of base64 length
+            return Math.round((base64Data.length * 3) / 4);
+        }
+
+        // For regular URLs, estimate based on string length
+        return dataURL.length * 2; // UTF-16 encoding
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+        const size = bytes / Math.pow(k, i);
+        const formatted = i === 0 ? size.toString() : size.toFixed(1);
+
+        return `${formatted} ${sizes[i]}`;
+    }
+
+    getAttachmentSizeInfo(item) {
+        let size = 0;
+        let type = '';
+
+        if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+            size = this.calculateDataURLSize(item.image_url.url);
+            type = 'Image';
+        } else if (item.type === 'file' && item.file && item.file.file_data) {
+            size = this.calculateDataURLSize(item.file.file_data);
+            type = 'File';
+        } else if (item.type === 'audio' && item.audio && item.audio.data) {
+            size = this.calculateDataURLSize(item.audio.data);
+            type = 'Audio';
+        }
+
+        return {
+            size: size,
+            formattedSize: this.formatFileSize(size),
+            type: type
+        };
+    }
+
     // Conversation Management Methods
     loadConversations() {
         const saved = localStorage.getItem('chat_conversations');
@@ -697,6 +760,7 @@ class ChatUI {
                     localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
                 } catch (retryError) {
                     console.error('Failed to save even after cleanup:', retryError);
+                    // Re-throw the QuotaExceededError so it can be caught by the calling method
                     throw retryError;
                 }
             } else {
@@ -723,39 +787,7 @@ class ChatUI {
             console.log(`Cleaned up ${toRemove.length} old conversations to free storage space`);
         }
 
-        // Also clean up any conversations with large file data that wasn't properly sanitized
-        Object.keys(this.conversations).forEach(id => {
-            const conv = this.conversations[id];
-            if (conv.messages) {
-                conv.messages = conv.messages.map(msg => {
-                    if (Array.isArray(msg.content)) {
-                        msg.content = msg.content.map(item => {
-                            if (item.type === 'file' && item.file && item.file.file_data) {
-                                return {
-                                    type: 'file',
-                                    file: {
-                                        filename: item.file.filename,
-                                        metadata: '[File data removed to save space]'
-                                    }
-                                };
-                            } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
-                                const url = item.image_url.url;
-                                if (url.startsWith('data:') && url.length > 100000) {
-                                    return {
-                                        type: 'image_url',
-                                        image_url: {
-                                            url: '[Large image data removed to save space]'
-                                        }
-                                    };
-                                }
-                            }
-                            return item;
-                        });
-                    }
-                    return msg;
-                });
-            }
-        });
+        // Keep all attachment data - no cleanup needed
     }
 
     initializeConversation() {
@@ -800,58 +832,60 @@ class ChatUI {
             // Load system prompt from conversation
             this.systemPrompt = this.conversations[id].systemPrompt || 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';
             this.systemPromptTextarea.value = this.systemPrompt;
+            // Clear any currently selected files when switching conversations
+            this.clearFilePreviews();
             this.renderMessages();
             this.renderConversationsList();
         }
     }
 
-    saveCurrentConversation() {
-        if (this.currentConversationId && this.conversations[this.currentConversationId]) {
-            // Create a copy of messages for storage, excluding large file data
-            const messagesToSave = this.messages.map(msg => {
-                if (Array.isArray(msg.content)) {
-                    // For multimodal content, replace large file data with metadata
-                    const sanitizedContent = msg.content.map(item => {
-                        if (item.type === 'file' && item.file && item.file.file_data) {
-                            // Store only metadata for files, not the actual data
+    // Helper method to create conversation data without attachments
+    createMessagesWithoutAttachments() {
+        return this.messages.map(msg => {
+            if (Array.isArray(msg.content)) {
+                // For multimodal content, remove attachment data but keep metadata
+                const sanitizedContent = msg.content.map(item => {
+                    if (item.type === 'file' && item.file && item.file.file_data) {
+                        return {
+                            type: 'file',
+                            file: {
+                                filename: item.file.filename,
+                                metadata: '[File data removed to save storage space]'
+                            }
+                        };
+                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                        const url = item.image_url.url;
+                        if (url.startsWith('data:')) {
                             return {
-                                type: 'file',
-                                file: {
-                                    filename: item.file.filename,
-                                    metadata: '[File data not stored in localStorage]'
+                                type: 'image_url',
+                                image_url: {
+                                    url: '[Large image data removed to save storage space]'
                                 }
                             };
-                        } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
-                            // Check if image URL is a large data URI
-                            const url = item.image_url.url;
-                            if (url.startsWith('data:') && url.length > 100000) { // > 100KB
-                                return {
-                                    type: 'image_url',
-                                    image_url: {
-                                        url: '[Large image data not stored in localStorage]'
-                                    }
-                                };
-                            }
-                        } else if (item.type === 'audio' && item.audio && item.audio.data) {
-                            // Check if audio data is large
-                            const audioData = item.audio.data;
-                            if (audioData.startsWith('data:') && audioData.length > 100000) { // > 100KB
-                                return {
-                                    type: 'audio',
-                                    audio: {
-                                        data: '[Large audio data not stored in localStorage]'
-                                    }
-                                };
-                            }
                         }
-                        return item;
-                    });
-                    return { ...msg, content: sanitizedContent };
-                }
-                return msg;
-            });
+                    } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                        const audioData = item.audio.data;
+                        if (audioData.startsWith('data:')) {
+                            return {
+                                type: 'audio',
+                                audio: {
+                                    data: '[Large audio data removed to save storage space]'
+                                }
+                            };
+                        }
+                    }
+                    return item;
+                });
+                return { ...msg, content: sanitizedContent };
+            }
+            return msg;
+        });
+    }
 
-            this.conversations[this.currentConversationId].messages = messagesToSave;
+    saveCurrentConversation() {
+        if (this.currentConversationId && this.conversations[this.currentConversationId]) {
+            // Store all messages with their full content including attachments
+            this.conversations[this.currentConversationId].messages = this.messages;
             this.conversations[this.currentConversationId].systemPrompt = this.systemPrompt;  // Save system prompt
             this.conversations[this.currentConversationId].lastModified = Date.now();
 
@@ -899,12 +933,33 @@ class ChatUI {
                 this.renderConversationsList();
             } catch (error) {
                 if (error.name === 'QuotaExceededError') {
-                    console.warn('localStorage quota exceeded, unable to save conversation');
-                    // Show user-friendly error message
-                    this.showError('Unable to save conversation: storage quota exceeded. Consider clearing old conversations.');
+                    console.warn('localStorage quota exceeded, trying to save without attachments');
+                    // Try to save without attachments as fallback
+                    try {
+                        // Temporarily replace messages with sanitized version
+                        const originalMessages = this.conversations[this.currentConversationId].messages;
+                        this.conversations[this.currentConversationId].messages = this.createMessagesWithoutAttachments();
+
+                        this.saveConversations();
+                        this.renderConversationsList();
+
+                        // Show user notification about attachment removal
+                        this.showNotification(
+                            'Storage quota exceeded. Conversation saved but attachments were removed to save space. Consider clearing old conversations.',
+                            'warning'
+                        );
+
+                        console.log('Successfully saved conversation without attachments');
+                    } catch (fallbackError) {
+                        console.error('Failed to save even without attachments:', fallbackError);
+                        this.showNotification(
+                            'Unable to save conversation: storage quota exceeded even after removing attachments. Please clear old conversations.',
+                            'error'
+                        );
+                    }
                 } else {
                     console.error('Error saving conversation:', error);
-                    this.showError('Error saving conversation: ' + error.message);
+                    this.showNotification('Error saving conversation: ' + error.message, 'error');
                 }
             }
         }
@@ -1193,15 +1248,34 @@ class ChatUI {
     }
 
     renderMarkdown(text) {
-        // Configure marked to allow HTML (including SVG)
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            sanitize: false,  // Allow HTML/SVG
-            renderer: this.getCustomRenderer()
-        });
+        console.log('🔍 renderMarkdown called with:', text?.substring(0, 200) + '...');
 
-        let html = marked.parse(text || '');
+        // Configure marked to allow HTML (including SVG)
+        const customRenderer = this.getCustomRenderer();
+        console.log('🎨 Custom renderer created:', !!customRenderer.code);
+
+        // Try new marked.js API first, then fall back to old API
+        let html;
+        try {
+            // New API (marked v4+)
+            html = marked.parse(text || '', {
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                renderer: customRenderer
+            });
+        } catch (error) {
+            console.log('New API failed, trying old API:', error);
+            // Old API (marked v3 and below)
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: false,
+                renderer: customRenderer
+            });
+            html = marked.parse ? marked.parse(text || '') : marked(text || '');
+        }
+        console.log('📝 Marked output:', html?.substring(0, 300) + '...');
 
         // Handle SVG URLs - convert them to object tags for better compatibility (including PlantUML)
         html = html.replace(/<img([^>]*?)src=["']([^"']*(?:\.svg|\/plantuml\/svg\/)[^"']*?)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
@@ -1237,8 +1311,113 @@ class ChatUI {
         return html;
     }
 
+    // Map common language aliases to Prism.js language identifiers
+    mapLanguageToPrism(language) {
+        const langMap = {
+            'js': 'javascript',
+            'ts': 'typescript',
+            'jsx': 'jsx',
+            'tsx': 'tsx',
+            'py': 'python',
+            'rb': 'ruby',
+            'sh': 'bash',
+            'shell': 'bash',
+            'yml': 'yaml',
+            'md': 'markdown',
+            'dockerfile': 'docker',
+            'text': 'none',
+            'txt': 'none'
+        };
+
+        const lang = language.toLowerCase();
+        return langMap[lang] || lang;
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     getCustomRenderer() {
         const renderer = new marked.Renderer();
+        const chatUI = this; // Capture reference to this instance
+
+        // Custom code block renderer with copy button and syntax highlighting
+        // Support both old and new marked.js API signatures
+        renderer.code = function(code, infoString, escaped) {
+            console.log('🔧 Code renderer called with:', {
+                code: typeof code === 'string' ? code.substring(0, 100) + '...' : code,
+                infoString,
+                escaped,
+                codeType: typeof code,
+                arguments: Array.from(arguments)
+            });
+
+            // Handle the case where code might be an object (modern marked.js)
+            let codeText;
+            let language;
+
+            if (typeof code === 'object' && code !== null) {
+                // Modern marked.js passes a token object
+                codeText = code.text || code.raw || String(code);
+                language = code.lang || infoString;
+                console.log('🔧 Modern API detected - code object:', {
+                    text: code.text,
+                    lang: code.lang,
+                    raw: code.raw
+                });
+            } else if (typeof code === 'string') {
+                // Legacy API or simple string
+                codeText = code;
+                language = infoString; // In newer versions, language is passed as infoString
+            } else {
+                codeText = String(code || '');
+                language = infoString;
+            }
+
+            // Extract language from infoString (format: "python" or "python highlight")
+            let validLang = 'text';
+            if (language && typeof language === 'string' && language.trim()) {
+                validLang = language.trim().split(/\s+/)[0].toLowerCase(); // Take first word
+            } else if (infoString && typeof infoString === 'string' && infoString.trim()) {
+                validLang = infoString.trim().split(/\s+/)[0].toLowerCase(); // Take first word
+            }
+
+            const prismLang = chatUI.mapLanguageToPrism(validLang);
+            const codeId = 'code_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+            // Ensure we have valid code text
+            if (!codeText || codeText === '[object Object]') {
+                codeText = 'Code content not available';
+            }
+
+            console.log('🎯 Final processing:', {
+                validLang,
+                prismLang,
+                codeLength: codeText.length,
+                rawLanguage: language,
+                rawInfoString: infoString
+            });
+
+            // Escape HTML to prevent XSS
+            const escapedCode = chatUI.escapeHtml(codeText);
+
+            return `<div class="code-block-container">
+                <div class="code-block-header">
+                    <span class="code-language">${validLang.toUpperCase()}</span>
+                </div>
+                <div class="code-block-wrapper">
+                    <pre class="code-block"><code id="${codeId}" class="language-${prismLang}" data-original-code="${escapedCode}">${escapedCode}</code></pre>
+                    <button class="code-copy-btn" onclick="chatUI.copyCodeBlock('${codeId}', this)" title="Copy code">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>`;
+        };
 
         // Custom image renderer to handle SVG URLs properly
         renderer.image = function(href, title, text) {
@@ -1278,6 +1457,63 @@ class ChatUI {
         return renderer;
     }
 
+    // Method to copy code block content
+    async copyCodeBlock(codeId, buttonElement) {
+        try {
+            const codeElement = document.getElementById(codeId);
+            if (!codeElement) return;
+
+            // Prioritize textContent/innerText as they contain the complete, rendered code
+            // The data-original-code attribute may be truncated due to HTML escaping issues
+            let codeText = codeElement.textContent || codeElement.innerText;
+
+            // Only use data-original-code as a fallback if textContent is not available
+            if (!codeText || codeText.trim() === '') {
+                codeText = codeElement.getAttribute('data-original-code') || '';
+            }
+
+            // For HTML entities, decode if the text appears to contain them
+            let finalText = codeText;
+            if (codeText.includes('&lt;') || codeText.includes('&gt;') || codeText.includes('&amp;')) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = codeText;
+                finalText = tempDiv.textContent || tempDiv.innerText || codeText;
+            }
+
+            await navigator.clipboard.writeText(finalText);
+
+            // Visual feedback
+            const originalContent = buttonElement.innerHTML;
+            buttonElement.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+                Copied!
+            `;
+            buttonElement.classList.add('copied');
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                buttonElement.innerHTML = originalContent;
+                buttonElement.classList.remove('copied');
+            }, 2000);
+
+        } catch (error) {
+            console.error('Failed to copy code:', error);
+            // Show error feedback
+            buttonElement.innerHTML = 'Failed';
+            setTimeout(() => {
+                buttonElement.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                `;
+            }, 2000);
+        }
+    }
+
     renderMessageContent(content) {
         if (typeof content === 'string') {
             // Simple text content
@@ -1290,31 +1526,80 @@ class ChatUI {
                 if (item.type === 'text') {
                     html += this.renderMarkdown(item.text);
                 } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
-                    html += `<div class="message-image"><img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; margin: 8px 0; border: 1px solid #e5e7eb;"></div>`;
+                    // Check if image data was stripped from localStorage
+                    if (item.image_url.url === '[Large image data removed to save storage space]') {
+                        html += `<div class="message-image-placeholder" style="display: inline-flex; align-items: center; padding: 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 8px 0; gap: 8px; color: #6b7280;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                            <span style="font-size: 14px; font-style: italic;">Image not available (removed to save storage space)</span>
+                        </div>`;
+                    } else {
+                        const sizeInfo = this.getAttachmentSizeInfo(item);
+                        html += `<div class="message-image" style="position: relative; display: inline-block; margin: 8px 0;">
+                            <img src="${item.image_url.url}" alt="Uploaded image" style="max-width: 300px; max-height: 300px; border-radius: 8px; border: 1px solid #e5e7eb; display: block;">
+                            <div style="position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;">
+                                ${sizeInfo.formattedSize}
+                            </div>
+                        </div>`;
+                    }
                 } else if (item.type === 'file' && item.file && item.file.filename) {
                     // Display file attachment
                     const filename = item.file.filename;
-                    html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                        </svg>
-                        <span style="font-size: 14px; color: #374151;">${filename}</span>
-                    </div>`;
+                    // Check if file data was stripped from localStorage
+                    const isPlaceholder = item.file.metadata === '[File data removed to save storage space]';
+
+                    if (isPlaceholder) {
+                        html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <span style="font-size: 14px; color: #6b7280; font-style: italic;">${filename} (removed to save storage space)</span>
+                        </div>`;
+                    } else {
+                        const sizeInfo = this.getAttachmentSizeInfo(item);
+                        html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <span style="font-size: 14px; color: #374151; flex: 1;">${filename}</span>
+                            <span style="font-size: 11px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
+                                ${sizeInfo.formattedSize}
+                            </span>
+                        </div>`;
+                    }
                 } else if (item.type === 'audio' && item.audio && item.audio.data) {
-                    // Display audio attachment with playback controls
-                    html += `<div class="message-audio" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
-                            <circle cx="12" cy="4" r="2"/>
-                        </svg>
-                        <span style="font-size: 14px; color: #374151;">Audio file</span>
-                        <audio controls style="height: 30px;">
-                            <source src="${item.audio.data}" type="audio/mpeg">
-                            <source src="${item.audio.data}" type="audio/wav">
-                            <source src="${item.audio.data}" type="audio/mp3">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>`;
+                    // Check if audio data was stripped from localStorage
+                    if (item.audio.data === '[Large audio data removed to save storage space]') {
+                        html += `<div class="message-audio-placeholder" style="display: inline-flex; align-items: center; padding: 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px; color: #6b7280;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                                <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                <circle cx="12" cy="4" r="2"/>
+                            </svg>
+                            <span style="font-size: 14px; font-style: italic;">Audio file not available (removed to save storage space)</span>
+                        </div>`;
+                    } else {
+                        // Display audio attachment with playback controls and size info
+                        const sizeInfo = this.getAttachmentSizeInfo(item);
+                        html += `<div class="message-audio" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                <circle cx="12" cy="4" r="2"/>
+                            </svg>
+                            <span style="font-size: 14px; color: #374151;">Audio file</span>
+                            <span style="font-size: 11px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500; margin-left: auto;">
+                                ${sizeInfo.formattedSize}
+                            </span>
+                            <audio controls style="height: 30px;">
+                                <source src="${item.audio.data}" type="audio/mpeg">
+                                <source src="${item.audio.data}" type="audio/wav">
+                                <source src="${item.audio.data}" type="audio/mp3">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>`;
+                    }
                 }
             }
             return this.rewritePlantUMLUrls(html);
@@ -1466,6 +1751,11 @@ class ChatUI {
         });
 
         this.scrollToBottom();
+
+        // Apply syntax highlighting to any code blocks (with small delay for DOM updates)
+        setTimeout(() => {
+            this.highlightCodeBlocks();
+        }, 100);
     }
 
     startEdit(index) {
@@ -1482,7 +1772,14 @@ class ChatUI {
                 if (item.type === 'text') {
                     textContent += item.text;
                 } else if (item.type === 'image_url' || item.type === 'file' || item.type === 'audio') {
-                    attachments.push(item);
+                    // Skip attachments that have been stripped from localStorage
+                    const isStrippedImage = item.type === 'image_url' && item.image_url && item.image_url.url === '[Large image data removed to save storage space]';
+                    const isStrippedFile = item.type === 'file' && item.file && item.file.metadata === '[File data removed to save storage space]';
+                    const isStrippedAudio = item.type === 'audio' && item.audio && item.audio.data === '[Large audio data removed to save storage space]';
+
+                    if (!isStrippedImage && !isStrippedFile && !isStrippedAudio) {
+                        attachments.push(item);
+                    }
                 }
             });
         }
@@ -1494,6 +1791,7 @@ class ChatUI {
     saveEdit(index, newContent) {
         this.messages[index].content = newContent;
         this.renderMessages();
+        this.highlightCodeBlocks();
     }
 
     renderEditInterface(index, currentTextContent, currentAttachments) {
@@ -1528,6 +1826,8 @@ class ChatUI {
                     margin-bottom: 8px;
                 `;
 
+                const sizeInfo = this.getAttachmentSizeInfo(attachment);
+
                 if (attachment.type === 'image_url') {
                     attachmentItem.innerHTML = `
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
@@ -1536,6 +1836,9 @@ class ChatUI {
                             <polyline points="21,15 16,10 5,21"/>
                         </svg>
                         <span style="flex: 1; font-size: 14px; color: #374151;">Image attachment</span>
+                        <span style="font-size: 11px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
+                            ${sizeInfo.formattedSize}
+                        </span>
                         <button class="remove-attachment" data-attach-index="${attachIndex}" style="
                             background: #ef4444;
                             color: white;
@@ -1548,6 +1851,7 @@ class ChatUI {
                             align-items: center;
                             justify-content: center;
                             font-size: 12px;
+                            margin-left: 8px;
                         ">×</button>
                     `;
                 } else if (attachment.type === 'file') {
@@ -1557,6 +1861,9 @@ class ChatUI {
                             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                         </svg>
                         <span style="flex: 1; font-size: 14px; color: #374151;">${filename}</span>
+                        <span style="font-size: 11px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
+                            ${sizeInfo.formattedSize}
+                        </span>
                         <button class="remove-attachment" data-attach-index="${attachIndex}" style="
                             background: #ef4444;
                             color: white;
@@ -1569,6 +1876,7 @@ class ChatUI {
                             align-items: center;
                             justify-content: center;
                             font-size: 12px;
+                            margin-left: 8px;
                         ">×</button>
                     `;
                 } else if (attachment.type === 'audio') {
@@ -1578,6 +1886,9 @@ class ChatUI {
                             <circle cx="12" cy="4" r="2"/>
                         </svg>
                         <span style="flex: 1; font-size: 14px; color: #374151;">Audio file</span>
+                        <span style="font-size: 11px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
+                            ${sizeInfo.formattedSize}
+                        </span>
                         <button class="remove-attachment" data-attach-index="${attachIndex}" style="
                             background: #ef4444;
                             color: white;
@@ -1590,6 +1901,7 @@ class ChatUI {
                             align-items: center;
                             justify-content: center;
                             font-size: 12px;
+                            margin-left: 8px;
                         ">×</button>
                     `;
                 }
@@ -2400,9 +2712,11 @@ class ChatUI {
                                     }
                                     this.renderMessages();
                                     this.saveCurrentConversation();
+                                    // Ensure syntax highlighting is applied after streaming completes
                                     setTimeout(() => {
+                                        this.highlightCodeBlocks();
                                         this.closeAllToolPopups();
-                                    }, 1000);
+                                    }, 200);
                                 }
                             }
                         } catch (e) {
@@ -2471,6 +2785,13 @@ class ChatUI {
                 messageContent.appendChild(actions);
             }
             this.scrollToBottom();
+
+            // Apply syntax highlighting to code blocks when not streaming
+            if (!isStreaming) {
+                setTimeout(() => {
+                    this.highlightCodeBlocks();
+                }, 100);
+            }
         }
     }
 
@@ -2485,8 +2806,119 @@ class ChatUI {
         }
     }
 
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 10000;
+            max-width: 400px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: slideInRight 0.3s ease-out;
+        `;
+
+        // Set background color based on type
+        switch (type) {
+            case 'error':
+                notification.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                break;
+            case 'warning':
+                notification.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                break;
+            case 'success':
+                notification.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                break;
+            default: // info
+                notification.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+        }
+
+        notification.textContent = message;
+
+        // Add to document
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 5000);
+
+        // Add click to dismiss
+        notification.addEventListener('click', () => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        });
+    }
+
     scrollToBottom() {
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+
+    // Apply Prism.js highlighting to code blocks
+    highlightCodeBlocks() {
+        this.waitForPrism().then(() => {
+            console.log('Prism.js ready, applying highlighting...');
+
+            // Find all code blocks that need highlighting
+            const codeBlocks = document.querySelectorAll('.code-block-container code[class*="language-"]');
+            console.log('Found', codeBlocks.length, 'code blocks to highlight');
+
+            // Clear any existing highlighting classes
+            codeBlocks.forEach(block => {
+                block.removeAttribute('data-highlighted');
+                block.classList.remove('highlighted');
+            });
+
+            // Highlight each block individually for better control
+            codeBlocks.forEach((block, index) => {
+                console.log(`Highlighting block ${index}:`, block.className, 'Language:', block.classList.toString().match(/language-(\w+)/)?.[1]);
+                try {
+                    Prism.highlightElement(block);
+                    block.classList.add('highlighted');
+                } catch (error) {
+                    console.error('Error highlighting block:', error);
+                }
+            });
+        }).catch(error => {
+            console.error('Prism.js failed to load:', error);
+        });
+    }
+
+    // Wait for Prism.js to be fully loaded
+    waitForPrism() {
+        return new Promise((resolve, reject) => {
+            let attempts = 0;
+            const maxAttempts = 50;
+
+            const checkPrism = () => {
+                attempts++;
+                if (typeof Prism !== 'undefined' && Prism.highlightElement) {
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    reject(new Error('Prism.js failed to load after 5 seconds'));
+                } else {
+                    setTimeout(checkPrism, 100);
+                }
+            };
+
+            checkPrism();
+        });
     }
 
     updateSendButton() {
@@ -2564,13 +2996,45 @@ class ChatUI {
 
         // Ensure the UI is re-rendered to show the final state
         this.renderMessages();
+        this.highlightCodeBlocks();
     }
 }
 
 // Initialize the chat UI when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Configure Prism.js autoloader if available
+    if (typeof Prism !== 'undefined' && Prism.plugins && Prism.plugins.autoloader) {
+        Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+        console.log('Prism.js autoloader configured');
+    }
+
+    // Debug: Show what we have available
+    console.log('Prism availability:', {
+        Prism: typeof Prism,
+        highlightElement: typeof Prism?.highlightElement,
+        highlightAll: typeof Prism?.highlightAll,
+        languages: Object.keys(Prism?.languages || {})
+    });
+
     // Initialize the chat UI
     window.chatUI = new ChatUI();
+
+    // Debug function to test code rendering
+    window.testCodeRender = function() {
+        const testMarkdown = '```python\nprint("Hello, World!")\nimport pandas as pd\n```';
+        console.log('Testing code render with:', testMarkdown);
+        const result = window.chatUI.renderMarkdown(testMarkdown);
+        console.log('Render result:', result);
+
+        // Add to page for visual inspection
+        const testDiv = document.createElement('div');
+        testDiv.innerHTML = result;
+        testDiv.style.cssText = 'margin: 20px; padding: 20px; border: 2px solid red;';
+        document.body.appendChild(testDiv);
+
+        // Apply highlighting
+        window.chatUI.highlightCodeBlocks();
+    };
 
     // Debug function for testing tool popups (only available in development)
     window.testToolPopup = function() {
