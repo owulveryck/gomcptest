@@ -1621,6 +1621,7 @@ class ChatUI {
                                 ${sizeInfo.formattedSize}
                             </span>
                             <audio controls style="height: 30px;">
+                                <source src="${item.audio.data}" type="audio/webm">
                                 <source src="${item.audio.data}" type="audio/mpeg">
                                 <source src="${item.audio.data}" type="audio/wav">
                                 <source src="${item.audio.data}" type="audio/mp3">
