@@ -545,6 +545,34 @@ class ChatUI {
                 this.handleFileSelection(files);
             }
         });
+
+        // Clipboard paste support for images
+        this.chatInput.addEventListener('paste', (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+
+                // Check if it's an image
+                if (item.type.startsWith('image/')) {
+                    e.preventDefault(); // Prevent the default paste behavior for images
+
+                    const file = item.getAsFile();
+                    if (file) {
+                        // Generate a meaningful filename based on timestamp
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const extension = file.type.split('/')[1] || 'png';
+                        const fileName = `pasted-image-${timestamp}.${extension}`;
+
+                        // Create a new File object with a proper name
+                        const namedFile = new File([file], fileName, { type: file.type });
+
+                        this.handleFileSelection([namedFile]);
+                    }
+                }
+            }
+        });
     }
 
     async handleFileSelection(files) {
