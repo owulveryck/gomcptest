@@ -1806,7 +1806,7 @@ body {
     display: block;
     padding: 16px;
     padding-right: 80px; /* Space for copy button */
-    font-size: 10px !important;
+    font-size: 12px !important;
     line-height: 1.5;
     color: #e5e7eb;
     background: #1f2937;
@@ -1818,7 +1818,7 @@ body {
 
 /* More specific rule to override message-content code styling */
 .message-content .code-block-container .code-block code {
-    font-size: 10px !important;
+    font-size: 12px !important;
 }
 
 /* Prism.js customizations for better readability */
