@@ -1806,14 +1806,19 @@ body {
     display: block;
     padding: 16px;
     padding-right: 80px; /* Space for copy button */
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 10px !important;
+    line-height: 1.5;
     color: #e5e7eb;
     background: #1f2937;
     border: none;
     overflow-x: auto;
     white-space: pre;
     tab-size: 4;
+}
+
+/* More specific rule to override message-content code styling */
+.message-content .code-block-container .code-block code {
+    font-size: 10px !important;
 }
 
 /* Prism.js customizations for better readability */
