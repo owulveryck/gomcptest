@@ -1226,20 +1226,53 @@ class ChatUI {
         });
     }
 
+    isGoogleSearchTool(toolName) {
+        return toolName && toolName.toLowerCase().includes('google');
+    }
+
     toggleTool(toolName) {
+        const isTogglingGoogleSearch = this.isGoogleSearchTool(toolName);
+        const hasGoogleSearchSelected = Array.from(this.selectedTools).some(tool => this.isGoogleSearchTool(tool));
+
         if (this.selectedTools.has(toolName)) {
             this.selectedTools.delete(toolName);
         } else {
-            this.selectedTools.add(toolName);
+            // If selecting a Google search tool, deselect all other tools
+            if (isTogglingGoogleSearch) {
+                this.selectedTools.clear();
+                this.selectedTools.add(toolName);
+            }
+            // If selecting a non-Google tool while Google is selected, deselect Google first
+            else if (hasGoogleSearchSelected) {
+                this.selectedTools.clear();
+                this.selectedTools.add(toolName);
+            }
+            // Normal selection
+            else {
+                this.selectedTools.add(toolName);
+            }
         }
         this.renderToolsList();
         this.updateToolsCountDisplay();
     }
 
     selectAllTools() {
-        this.tools.forEach(tool => {
-            this.selectedTools.add(tool.Name);
-        });
+        // Check if any Google search tools exist
+        const hasGoogleSearchTools = this.tools.some(tool => this.isGoogleSearchTool(tool.Name));
+
+        if (hasGoogleSearchTools) {
+            // If Google search tools exist, only select non-Google tools when selecting "all"
+            this.tools.forEach(tool => {
+                if (!this.isGoogleSearchTool(tool.Name)) {
+                    this.selectedTools.add(tool.Name);
+                }
+            });
+        } else {
+            // No Google search tools, select all tools normally
+            this.tools.forEach(tool => {
+                this.selectedTools.add(tool.Name);
+            });
+        }
         this.renderToolsList();
         this.updateToolsCountDisplay();
     }
