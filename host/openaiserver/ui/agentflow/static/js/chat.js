@@ -2884,6 +2884,18 @@ class ChatUI {
                                         fullData: parsed
                                     });
                                 }
+                            } else if (parsed.event_type === 'error') {
+                                console.log('🚨 Error event detected:', parsed);
+                                if (parsed.error && parsed.error.message) {
+                                    console.log('✅ Valid error event, displaying error');
+                                    this.showErrorNotification(parsed);
+                                } else {
+                                    console.warn('❌ Invalid error event structure:', {
+                                        hasError: !!parsed.error,
+                                        hasMessage: !!(parsed.error && parsed.error.message),
+                                        fullData: parsed
+                                    });
+                                }
                             } else if (parsed.choices && parsed.choices[0]) {
                                 // Handle regular chat completion chunks
                                 const delta = parsed.choices[0].delta;
@@ -3170,6 +3182,37 @@ class ChatUI {
         this.saveCurrentConversation();
 
         console.log('🛑 Streaming stopped successfully');
+    }
+
+    showErrorNotification(errorEvent) {
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'error-notification';
+        errorContainer.innerHTML = `
+            <div class="error-header">
+                <span class="error-icon">⚠️</span>
+                <span class="error-title">System Error</span>
+                <span class="error-severity">[${errorEvent.error.severity || 'error'}]</span>
+            </div>
+            <div class="error-message">${errorEvent.error.message}</div>
+            <div class="error-details">
+                <div class="error-source">Source: ${errorEvent.error.source || 'unknown'}</div>
+                <div class="error-context">${errorEvent.error.context || ''}</div>
+            </div>
+        `;
+
+        // Add to chat messages area
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.appendChild(errorContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            if (errorContainer.parentNode) {
+                errorContainer.remove();
+            }
+        }, 10000);
     }
 
     flushPartialMessage() {

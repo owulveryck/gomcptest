@@ -25,15 +25,17 @@ type streamProcessor struct {
 	completionID  string          // Unique ID for this completion
 	modelName     string          // Model being used
 	filteredTools []*genai.Tool   // Filtered tools to use consistently throughout the stream
+	withAllEvents bool            // Whether to send all events (including errors)
 }
 
-func newStreamProcessor(c chan<- chatengine.StreamEvent, chatsession *ChatSession, modelName string, filteredTools []*genai.Tool) *streamProcessor {
+func newStreamProcessor(c chan<- chatengine.StreamEvent, chatsession *ChatSession, modelName string, filteredTools []*genai.Tool, withAllEvents bool) *streamProcessor {
 	return &streamProcessor{
 		c:             c,
 		chatsession:   chatsession,
 		completionID:  uuid.New().String(), // generate one ID here
 		modelName:     modelName,
 		filteredTools: filteredTools,
+		withAllEvents: withAllEvents,
 	}
 }
 
@@ -450,6 +452,16 @@ func (s *streamProcessor) sendToolCallEvent(ctx context.Context, event ToolCallE
 
 // sendToolResponseEvent sends a tool response event to the stream
 func (s *streamProcessor) sendToolResponseEvent(ctx context.Context, event ToolResponseEvent) error {
+	select {
+	case s.c <- event:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// sendErrorEvent sends an error event to the stream
+func (s *streamProcessor) sendErrorEvent(ctx context.Context, event ErrorEvent) error {
 	select {
 	case s.c <- event:
 		return nil

@@ -75,6 +75,38 @@ func NewToolResponseEvent(completionID string, toolCallID string, toolName strin
 	return event
 }
 
+// ErrorEvent represents an error event that occurred during processing
+type ErrorEvent struct {
+	ID        string       `json:"id"`
+	Object    string       `json:"object"`
+	Created   int64        `json:"created"`
+	EventType string       `json:"event_type"`
+	Error     ErrorDetails `json:"error"`
+}
+
+type ErrorDetails struct {
+	Source   string `json:"source"`   // e.g., "stream_processor", "model_api", "mcp_server"
+	Message  string `json:"message"`  // Human-readable error message
+	Severity string `json:"severity"` // "error", "warning", "critical"
+	Context  string `json:"context"`  // Additional context about what was being done when error occurred
+}
+
+// NewErrorEvent creates a new error event
+func NewErrorEvent(completionID string, source string, message string, severity string, context string) ErrorEvent {
+	return ErrorEvent{
+		ID:        completionID,
+		Object:    "error",
+		Created:   time.Now().Unix(),
+		EventType: "error",
+		Error: ErrorDetails{
+			Source:   source,
+			Message:  message,
+			Severity: severity,
+			Context:  context,
+		},
+	}
+}
+
 // generateToolCallID generates a unique ID for a tool call using UUID
 func generateToolCallID() string {
 	return "call_" + uuid.New().String()
@@ -90,6 +122,11 @@ func (e ToolResponseEvent) ToJSON() ([]byte, error) {
 	return json.Marshal(e)
 }
 
+// ToJSON converts the event to JSON bytes
+func (e ErrorEvent) ToJSON() ([]byte, error) {
+	return json.Marshal(e)
+}
+
 // Implement StreamEvent interface for ToolCallEvent
 func (ToolCallEvent) IsStreamEvent() bool {
 	return true
@@ -100,6 +137,12 @@ func (ToolResponseEvent) IsStreamEvent() bool {
 	return true
 }
 
+// Implement StreamEvent interface for ErrorEvent
+func (ErrorEvent) IsStreamEvent() bool {
+	return true
+}
+
 // Ensure our events implement the interface
 var _ chatengine.StreamEvent = (*ToolCallEvent)(nil)
 var _ chatengine.StreamEvent = (*ToolResponseEvent)(nil)
+var _ chatengine.StreamEvent = (*ErrorEvent)(nil)

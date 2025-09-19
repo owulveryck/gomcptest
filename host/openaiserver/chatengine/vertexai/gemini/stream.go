@@ -70,8 +70,11 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 	// Add tools if available, filtering based on requested tools
 	filteredTools := chatsession.FilterTools(requestedToolNames)
 
+	// Extract withAllEvents flag from context (defaults to false if not set)
+	withAllEvents, _ := ctx.Value("withAllEvents").(bool)
+
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, chatsession, modelName, filteredTools)
+	sp := newStreamProcessor(c, chatsession, modelName, filteredTools, withAllEvents)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {
@@ -126,6 +129,28 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			}
 
 			slog.Error("Error from stream processing", "error", err)
+
+			// Send error event if withAllEvents is enabled
+			slog.Debug("Checking withAllEvents flag", "withAllEvents", sp.withAllEvents, "completionID", sp.completionID)
+			if sp.withAllEvents {
+				slog.Debug("Creating error event for error", "error", err.Error())
+				errorEvent := NewErrorEvent(
+					sp.completionID,
+					"stream_processor",
+					err.Error(),
+					"error",
+					"Error occurred during stream processing",
+				)
+				// Send error event synchronously to ensure it's sent before stream closes
+				slog.Debug("Attempting to send error event", "eventID", errorEvent.ID)
+				if eventErr := sp.sendErrorEvent(streamCtx, errorEvent); eventErr != nil {
+					slog.Debug("Failed to send error event", "error", eventErr)
+				} else {
+					slog.Debug("Successfully sent error event", "eventID", errorEvent.ID)
+				}
+			} else {
+				slog.Debug("withAllEvents is false, not sending error event")
+			}
 		}
 	}()
 

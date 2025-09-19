@@ -1010,6 +1010,53 @@ body {
     margin-top: 10px;
 }
 
+/* Error notification styles */
+.error-notification {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border: 2px solid #ef4444;
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 12px;
+    color: #dc2626;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
+}
+
+.error-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.error-icon {
+    font-size: 18px;
+}
+
+.error-severity {
+    background: #dc2626;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.error-notification .error-message {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.error-details {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.error-source {
+    font-style: italic;
+}
+
 /* Tool notification styles */
 .tool-notification {
     background: #f0f9ff;

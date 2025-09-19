@@ -1,6 +1,7 @@
 package chatengine
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -26,6 +27,8 @@ func (o *OpenAIV1WithToolHandler) streamResponse(w http.ResponseWriter, r *http.
 	}
 
 	ctx := r.Context()
+	// Add withAllEvents flag to context for use in error event emission
+	ctx = context.WithValue(ctx, "withAllEvents", o.withAllEvents)
 	stream, err := o.c.SendStreamingChatRequest(ctx, req)
 	if err != nil {
 		// Send error as a streaming response chunk
