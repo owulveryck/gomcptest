@@ -21,8 +21,10 @@ import (
 
 // Config holds the configuration parameters.
 type Config struct {
-	Port     int    `envconfig:"PORT" default:"8080"`
-	LogLevel string `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
+	Port          int    `envconfig:"PORT" default:"8080"`
+	LogLevel      string `envconfig:"LOG_LEVEL" default:"INFO"` // Valid values: DEBUG, INFO, WARN, ERROR
+	ArtifactPath  string `envconfig:"ARTIFACT_PATH" default:"~/openaiserver/artifacts"`
+	MaxUploadSize int64  `envconfig:"MAX_UPLOAD_SIZE" default:"52428800"` // 50MB in bytes
 }
 
 // loadGCPConfig loads and validates the GCP configuration from environment variables.
@@ -133,6 +135,13 @@ func main() {
 	}
 	slog.SetDefault(logger)
 
+	// Initialize artifact storage
+	err = InitializeArtifactStorage(cfg.ArtifactPath, cfg.MaxUploadSize)
+	if err != nil {
+		slog.Error("Failed to initialize artifact storage", "error", err)
+		os.Exit(1)
+	}
+
 	slog.Info("Starting web server", "port", cfg.Port)
 
 	// Set up routing
@@ -147,6 +156,7 @@ func main() {
 	mux.HandleFunc("/site.webmanifest", ServeStaticAssets)
 	mux.HandleFunc("/web-app-manifest-192x192.png", ServeStaticAssets)
 	mux.HandleFunc("/web-app-manifest-512x512.png", ServeStaticAssets)
+	mux.HandleFunc("/artifact/", ArtifactHandler)
 	mux.Handle("/", openAIHandler)
 
 	// Wrap the entire mux with CORS middleware

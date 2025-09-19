@@ -32,6 +32,7 @@ The host has several key responsibilities:
 3. **Model Integration**: Connecting to Vertex AI's Gemini models
 4. **Function Calling**: Orchestrating function/tool calls based on model outputs
 5. **Response Streaming**: Supporting streaming responses to the client
+6. **Artifact Storage**: Managing file uploads and downloads through RESTful endpoints
 
 Unlike commercial implementations, this host is designed for local development and testing, emphasizing flexibility and observability over production-ready features like authentication or rate limiting.
 
@@ -51,11 +52,35 @@ This approach allows tools to be:
 - Used in different host environments
 - Chained together in complex workflows
 
+### Artifact Storage
+
+The artifact storage system provides a RESTful API for managing generic file uploads and downloads. This component is integrated directly into the OpenAI server host and offers several key features:
+
+**Core Capabilities:**
+- **Universal File Support**: Accepts any file type (text, binary, images, documents)
+- **UUID-based Identification**: Each uploaded file receives a unique UUID identifier
+- **Metadata Management**: Automatically tracks original filename, content type, size, and upload timestamp
+- **Configurable Storage**: Supports custom storage directories and file size limits
+
+**Storage Architecture:**
+- Files are stored using UUID-based naming to prevent conflicts and ensure uniqueness
+- Metadata is stored in companion `.meta.json` files for efficient retrieval
+- The storage directory structure is flat but organized with clear separation between data and metadata
+
+**Integration Points:**
+- Exposed through RESTful endpoints (`POST /artifact/` and `GET /artifact/{id}`)
+- Supports CORS for web-based integrations
+- Uses the same middleware stack as the main API (CORS, logging, error handling)
+
+This system enables AI agents and users to persistently store and share files across conversations and sessions, making it particularly useful for workflows involving document processing, image analysis, or data manipulation.
+
 ### CLI
 
 The CLI provides a user interface similar to tools like "Claude Code" or "OpenAI ChatGPT". It connects to the OpenAI-compatible server and provides a way to interact with the LLM and tools through a conversational interface.
 
 ## Data Flow
+
+### Chat Conversation Flow
 
 1. The user sends a request to the CLI
 2. The CLI forwards this request to the OpenAI-compatible server
@@ -64,6 +89,24 @@ The CLI provides a user interface similar to tools like "Claude Code" or "OpenAI
 5. The server executes these function calls by invoking the appropriate MCP tools
 6. The results are provided back to the model to continue its response
 7. The final response is streamed back to the CLI and presented to the user
+
+### Artifact Storage Flow
+
+**Upload Flow:**
+1. Client sends a POST request to `/artifact/` with file data and headers
+2. Server validates required headers (`Content-Type`, `X-Original-Filename`)
+3. Server generates a UUID for the artifact
+4. File data is streamed to disk using the UUID as filename
+5. Metadata is saved in a companion `.meta.json` file
+6. Server responds with the artifact ID
+
+**Retrieval Flow:**
+1. Client sends a GET request to `/artifact/{id}`
+2. Server validates the UUID format
+3. Server reads the metadata file to get original file information
+4. Server streams the file back with appropriate headers (Content-Type, Content-Disposition, etc.)
+
+This dual-flow architecture allows the system to handle both conversational AI interactions and persistent file storage independently, enabling richer workflows that combine real-time AI processing with persistent data management.
 
 ## Design Decisions Explained
 
@@ -86,6 +129,27 @@ By implementing tools as standalone executables rather than library functions, w
 ### Why MCP?
 
 The Model Context Protocol provides a standardized way for LLMs to interact with external tools. By adopting this protocol, gomcptest ensures compatibility with tools developed for other MCP-compatible hosts.
+
+### Why Built-in Artifact Storage?
+
+The artifact storage system is integrated directly into the host rather than implemented as a separate MCP tool for several strategic reasons:
+
+**Performance and Simplicity:**
+- Direct HTTP endpoints avoid the overhead of MCP protocol wrapping for file operations
+- Streaming file uploads and downloads are more efficient without JSON-RPC encapsulation
+- Reduces complexity for web-based clients that need direct file access
+
+**Integration Benefits:**
+- Shares the same middleware stack (CORS, logging, error handling) as the main API
+- Uses consistent configuration patterns with other host components
+- Simplifies deployment by reducing the number of separate services
+
+**API Design:**
+- RESTful endpoints align with standard web practices for file operations
+- HTTP semantics (Content-Type, Content-Disposition) map naturally to file storage needs
+- Range request support for large files comes naturally with `http.ServeFile`
+
+This approach provides a clean separation between the conversational AI capabilities (handled via MCP tools) and persistent storage capabilities (handled via integrated HTTP endpoints).
 
 ## Limitations and Future Directions
 

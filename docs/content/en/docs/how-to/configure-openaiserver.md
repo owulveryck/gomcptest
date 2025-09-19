@@ -26,6 +26,12 @@ export PORT=8080
 
 # Log level: DEBUG, INFO, WARN, ERROR (default: INFO)
 export LOG_LEVEL=INFO
+
+# Artifact storage path (default: ~/openaiserver/artifacts)
+export ARTIFACT_PATH=~/openaiserver/artifacts
+
+# Maximum upload size in bytes (default: 52428800 = 50MB)
+export MAX_UPLOAD_SIZE=52428800
 ```
 
 ### GCP Configuration
@@ -58,6 +64,80 @@ export VERTEX_AI_GOOGLE_SEARCH=true
 
 # Enable Google Search with retrieval and grounding
 export VERTEX_AI_GOOGLE_SEARCH_RETRIEVAL=true
+```
+
+## Artifact Storage Configuration
+
+The OpenAI server includes a built-in artifact storage API for managing file uploads and downloads.
+
+### Artifact Storage Features
+
+- **Generic File Support**: Store any type of file (text, binary, images, documents)
+- **UUID-based Storage**: Each uploaded file gets a unique UUID identifier
+- **Metadata Tracking**: Automatically tracks original filename, content type, size, and upload timestamp
+- **Configurable Storage**: Set custom storage directory and size limits
+- **RESTful API**: Simple HTTP endpoints for upload and retrieval
+
+### Artifact API Endpoints
+
+**Upload Artifact:**
+```
+POST /artifact/
+```
+
+Headers required:
+- `Content-Type`: The MIME type of the file
+- `X-Original-Filename`: The original name of the file
+
+Response:
+```json
+{
+  "artifactId": "7f33ee3d-b589-4b3c-b8c8-a9a3ee04eacf"
+}
+```
+
+**Retrieve Artifact:**
+```
+GET /artifact/{artifactId}
+```
+
+Returns the file with appropriate headers:
+- `Content-Type`: Original MIME type
+- `Content-Disposition`: Original filename
+- `Content-Length`: File size
+
+### Example Usage
+
+Upload a file:
+```bash
+curl -X POST http://localhost:8080/artifact/ \
+  -H "Content-Type: text/plain" \
+  -H "X-Original-Filename: example.txt" \
+  --data-binary @example.txt
+```
+
+Download a file:
+```bash
+curl http://localhost:8080/artifact/7f33ee3d-b589-4b3c-b8c8-a9a3ee04eacf
+```
+
+### Storage Directory Structure
+
+Files are stored using the following structure:
+```
+~/openaiserver/artifacts/
+├── 7f33ee3d-b589-4b3c-b8c8-a9a3ee04eacf           # The actual file
+└── 7f33ee3d-b589-4b3c-b8c8-a9a3ee04eacf.meta.json # Metadata file
+```
+
+The metadata file contains:
+```json
+{
+  "originalFilename": "example.txt",
+  "contentType": "text/plain",
+  "size": 49,
+  "uploadTimestamp": "2025-09-19T12:01:11.277651Z"
+}
 ```
 
 ## AgentFlow UI Configuration
@@ -139,6 +219,8 @@ Environment=LOG_LEVEL=INFO
 Environment=GCP_PROJECT=your-gcp-project-id
 Environment=GCP_REGION=us-central1
 Environment=GEMINI_MODELS=gemini-1.5-pro,gemini-2.0-flash
+Environment=ARTIFACT_PATH=/var/lib/gomcptest/artifacts
+Environment=MAX_UPLOAD_SIZE=52428800
 Restart=on-failure
 
 [Install]
