@@ -995,6 +995,9 @@ class ChatUI {
         this.renderMessages();
         this.saveConversations();
         this.renderConversationsList();
+
+        // Reload tools to refresh available tools and uncheck all by default
+        this.loadTools();
     }
 
     loadConversation(id) {
@@ -1326,10 +1329,8 @@ class ChatUI {
             const data = await response.json();
             this.tools = data || [];
 
-            // Initially select all tools
-            this.tools.forEach(tool => {
-                this.selectedTools.add(tool.Name);
-            });
+            // Clear all selected tools by default
+            this.selectedTools.clear();
 
             this.renderToolsList();
             this.updateToolsCountDisplay();
