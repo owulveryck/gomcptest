@@ -66,8 +66,12 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 
 	// Create the channel for streaming responses
 	c := make(chan chatengine.StreamEvent)
+
+	// Add tools if available, filtering based on requested tools
+	filteredTools := chatsession.FilterTools(requestedToolNames)
+
 	// Initialize the stream processor
-	sp := newStreamProcessor(c, chatsession, modelName)
+	sp := newStreamProcessor(c, chatsession, modelName, filteredTools)
 
 	// Launch a goroutine to handle the streaming response with proper context cancellation
 	go func() {
@@ -97,8 +101,7 @@ func (chatsession *ChatSession) SendStreamingChatRequest(ctx context.Context, re
 			config.SystemInstruction = systemInstruction
 		}
 
-		// Add tools if available, filtering based on requested tools
-		filteredTools := chatsession.FilterTools(requestedToolNames)
+		// Add tools if available, using the filtered tools from the stream processor
 		if len(filteredTools) > 0 {
 			config.Tools = filteredTools
 			config.ToolConfig = &genai.ToolConfig{

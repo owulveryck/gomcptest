@@ -24,14 +24,16 @@ type streamProcessor struct {
 	stringBuilder strings.Builder // Reuse the string builder
 	completionID  string          // Unique ID for this completion
 	modelName     string          // Model being used
+	filteredTools []*genai.Tool   // Filtered tools to use consistently throughout the stream
 }
 
-func newStreamProcessor(c chan<- chatengine.StreamEvent, chatsession *ChatSession, modelName string) *streamProcessor {
+func newStreamProcessor(c chan<- chatengine.StreamEvent, chatsession *ChatSession, modelName string, filteredTools []*genai.Tool) *streamProcessor {
 	return &streamProcessor{
-		c:            c,
-		chatsession:  chatsession,
-		completionID: uuid.New().String(), // generate one ID here
-		modelName:    modelName,
+		c:             c,
+		chatsession:   chatsession,
+		completionID:  uuid.New().String(), // generate one ID here
+		modelName:     modelName,
+		filteredTools: filteredTools,
 	}
 }
 
@@ -541,9 +543,9 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
 
-		// Add tools if available
-		if len(s.chatsession.tools) > 0 {
-			config.Tools = s.chatsession.tools
+		// Add tools if available, using the same filtered tools from the original request
+		if len(s.filteredTools) > 0 {
+			config.Tools = s.filteredTools
 			config.ToolConfig = &genai.ToolConfig{
 				FunctionCallingConfig: &genai.FunctionCallingConfig{
 					Mode: genai.FunctionCallingConfigModeValidated,
@@ -573,9 +575,9 @@ func (s *streamProcessor) processIterator(ctx context.Context, responseSeq iter.
 		// Configure generation settings
 		config := &genai.GenerateContentConfig{}
 
-		// Add tools if available
-		if len(s.chatsession.tools) > 0 {
-			config.Tools = s.chatsession.tools
+		// Add tools if available, using the same filtered tools from the original request
+		if len(s.filteredTools) > 0 {
+			config.Tools = s.filteredTools
 			config.ToolConfig = &genai.ToolConfig{
 				FunctionCallingConfig: &genai.FunctionCallingConfig{
 					Mode: genai.FunctionCallingConfigModeValidated,
