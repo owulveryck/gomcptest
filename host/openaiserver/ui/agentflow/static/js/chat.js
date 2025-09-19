@@ -300,7 +300,7 @@ class ChatUI {
         }
 
         // Try to map the selected HTML back to markdown portions
-        return this.mapSelectionToMarkdown(message.content, selectedText);
+        return this.mapSelectionToMarkdown(message.content, selectedText, range);
     }
 
     findMessagesInSelection(range) {
@@ -426,7 +426,14 @@ class ChatUI {
         return similarityRatio > 0.9;
     }
 
-    mapSelectionToMarkdown(markdownContent, selectedText) {
+    mapSelectionToMarkdown(markdownContent, selectedText, range) {
+        // First, try to reconstruct markdown from the actual selected DOM elements
+        const reconstructedMarkdown = this.reconstructMarkdownFromRange(range);
+        if (reconstructedMarkdown) {
+            return reconstructedMarkdown;
+        }
+
+        // Fallback to the original text-based approach
         // Clean up the selected text for comparison
         const cleanSelection = selectedText.replace(/\s+/g, ' ').trim();
 
@@ -502,6 +509,143 @@ class ChatUI {
 
         // If all else fails, return the original selection
         return selectedText;
+    }
+
+    reconstructMarkdownFromRange(range) {
+        try {
+            const fragment = range.cloneContents();
+            return this.convertDOMToMarkdown(fragment);
+        } catch (error) {
+            console.warn('Failed to reconstruct markdown from range:', error);
+            return null;
+        }
+    }
+
+    convertDOMToMarkdown(node) {
+        let markdown = '';
+
+        // Handle different node types
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent;
+        }
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            const tagName = node.tagName.toLowerCase();
+            const children = Array.from(node.childNodes);
+
+            switch (tagName) {
+                case 'strong':
+                case 'b':
+                    markdown += '**' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '**';
+                    break;
+
+                case 'em':
+                case 'i':
+                    markdown += '*' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '*';
+                    break;
+
+                case 'code':
+                    // Check if this is inline code (not in a pre block)
+                    if (!node.closest('pre')) {
+                        markdown += '`' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '`';
+                    } else {
+                        // This is a code block, preserve as is
+                        markdown += children.map(child => this.convertDOMToMarkdown(child)).join('');
+                    }
+                    break;
+
+                case 'pre':
+                    // Code block
+                    const codeElement = node.querySelector('code');
+                    if (codeElement) {
+                        const language = this.extractLanguageFromCodeElement(codeElement);
+                        const codeContent = codeElement.textContent || codeElement.innerText || '';
+                        markdown += '```' + (language || '') + '\n' + codeContent + '\n```';
+                    } else {
+                        markdown += '```\n' + node.textContent + '\n```';
+                    }
+                    break;
+
+                case 'h1':
+                    markdown += '# ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'h2':
+                    markdown += '## ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'h3':
+                    markdown += '### ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'h4':
+                    markdown += '#### ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'h5':
+                    markdown += '##### ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'h6':
+                    markdown += '###### ' + children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n';
+                    break;
+
+                case 'a':
+                    const href = node.getAttribute('href');
+                    const linkText = children.map(child => this.convertDOMToMarkdown(child)).join('');
+                    if (href) {
+                        markdown += '[' + linkText + '](' + href + ')';
+                    } else {
+                        markdown += linkText;
+                    }
+                    break;
+
+                case 'ul':
+                case 'ol':
+                    // Process list items
+                    children.forEach(child => {
+                        if (child.tagName && child.tagName.toLowerCase() === 'li') {
+                            const listItemContent = this.convertDOMToMarkdown(child);
+                            markdown += (tagName === 'ul' ? '- ' : '1. ') + listItemContent + '\n';
+                        }
+                    });
+                    break;
+
+                case 'li':
+                    // List item content (without the bullet/number, that's handled by ul/ol)
+                    markdown += children.map(child => this.convertDOMToMarkdown(child)).join('');
+                    break;
+
+                case 'p':
+                    markdown += children.map(child => this.convertDOMToMarkdown(child)).join('') + '\n\n';
+                    break;
+
+                case 'br':
+                    markdown += '\n';
+                    break;
+
+                default:
+                    // For unknown elements, just process children
+                    markdown += children.map(child => this.convertDOMToMarkdown(child)).join('');
+                    break;
+            }
+        } else if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            // Document fragment, process all children
+            markdown += Array.from(node.childNodes).map(child => this.convertDOMToMarkdown(child)).join('');
+        }
+
+        return markdown;
+    }
+
+    extractLanguageFromCodeElement(codeElement) {
+        // Try to extract language from class names like "language-python"
+        const classList = Array.from(codeElement.classList);
+        for (const className of classList) {
+            if (className.startsWith('language-')) {
+                return className.substring(9); // Remove "language-" prefix
+            }
+        }
+        return '';
     }
 
 
