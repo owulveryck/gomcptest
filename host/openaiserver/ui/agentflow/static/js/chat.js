@@ -50,6 +50,9 @@ class ChatUI {
         this.audioUploadBtn = document.getElementById('audioUploadBtn');
         this.audioUploadInput = document.getElementById('audioUploadInput');
         this.filePreviewContainer = document.getElementById('filePreviewContainer');
+        this.exportConversationBtn = document.getElementById('exportConversation');
+        this.importConversationBtn = document.getElementById('importConversation');
+        this.importFileInput = document.getElementById('importFileInput');
 
         // Conversation management (after DOM elements are initialized)
         this.conversations = this.loadConversations();
@@ -164,6 +167,9 @@ class ChatUI {
 
         // File upload handling (images and PDFs)
         this.initFileUploadHandling();
+
+        // Export/Import functionality
+        this.initExportImportHandling();
     }
 
     // Text selection and copy functionality
@@ -858,6 +864,340 @@ class ChatUI {
     // Keep backward compatibility
     clearImagePreviews() {
         return this.clearFilePreviews();
+    }
+
+    // Export/Import functionality
+    initExportImportHandling() {
+        // Export button click handler
+        this.exportConversationBtn.addEventListener('click', () => {
+            this.exportConversationAsMarkdown();
+        });
+
+        // Import button click handler
+        this.importConversationBtn.addEventListener('click', () => {
+            this.importFileInput.click();
+        });
+
+        // File input change handler for import
+        this.importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.importConversationFromMarkdown(file);
+                // Reset the input so the same file can be selected again
+                e.target.value = '';
+            }
+        });
+    }
+
+    exportConversationAsMarkdown() {
+        if (!this.currentConversationId || !this.conversations[this.currentConversationId]) {
+            this.showNotification('No conversation to export', 'warning');
+            return;
+        }
+
+        const conversation = this.conversations[this.currentConversationId];
+        let imageCounter = 0;
+        let markdownContent = '';
+        let imageReferences = '';
+
+        // Add conversation title and metadata
+        markdownContent += `# ${conversation.title}\n\n`;
+        markdownContent += `*Exported from AgentFlow on ${new Date().toLocaleString()}*\n\n`;
+        markdownContent += `**System Prompt:** ${conversation.systemPrompt || 'Default'}\n\n---\n\n`;
+
+        // Process each message
+        for (const message of conversation.messages) {
+            // Skip tool notifications for export
+            if (message.role === 'tool') {
+                continue;
+            }
+
+            // Add role header with emoji and model name for assistant
+            if (message.role === 'user') {
+                markdownContent += `## 👤 User\n\n`;
+            } else if (message.role === 'assistant') {
+                const modelName = this.selectedModel || 'Assistant';
+                markdownContent += `## 🧠 Assistant (${modelName})\n\n`;
+            }
+
+            // Process message content
+            if (typeof message.content === 'string') {
+                // Simple text content
+                markdownContent += message.content + '\n\n';
+            } else if (Array.isArray(message.content)) {
+                // Multimodal content
+                for (const item of message.content) {
+                    if (item.type === 'text') {
+                        markdownContent += item.text + '\n\n';
+                    } else if (item.type === 'image_url' && item.image_url && item.image_url.url) {
+                        // Handle images
+                        if (item.image_url.url !== '[Large image data removed to save storage space]') {
+                            imageCounter++;
+                            const imageId = `image${imageCounter}`;
+                            markdownContent += `![][${imageId}]\n\n`;
+                            imageReferences += `[${imageId}]: ${item.image_url.url}\n`;
+                        } else {
+                            markdownContent += `*[Image not available - removed to save storage space]*\n\n`;
+                        }
+                    } else if (item.type === 'file' && item.file && item.file.filename) {
+                        // Handle files
+                        if (item.file.metadata !== '[File data removed to save storage space]') {
+                            if (item.file.file_data) {
+                                imageCounter++;
+                                const fileId = `file${imageCounter}`;
+                                markdownContent += `**File:** ${item.file.filename}\n\n![][${fileId}]\n\n`;
+                                imageReferences += `[${fileId}]: ${item.file.file_data}\n`;
+                            } else {
+                                markdownContent += `**File:** ${item.file.filename}\n\n`;
+                            }
+                        } else {
+                            markdownContent += `**File:** ${item.file.filename} *[File not available - removed to save storage space]*\n\n`;
+                        }
+                    } else if (item.type === 'audio' && item.audio && item.audio.data) {
+                        // Handle audio files
+                        if (item.audio.data !== '[Large audio data removed to save storage space]') {
+                            imageCounter++;
+                            const audioId = `audio${imageCounter}`;
+                            markdownContent += `**Audio file**\n\n![][${audioId}]\n\n`;
+                            imageReferences += `[${audioId}]: ${item.audio.data}\n`;
+                        } else {
+                            markdownContent += `**Audio file** *[Audio not available - removed to save storage space]*\n\n`;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Add image references at the end
+        if (imageReferences) {
+            markdownContent += '\n---\n\n' + imageReferences;
+        }
+
+        // Create and download the file
+        const blob = new Blob([markdownContent], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${conversation.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.showNotification('Conversation exported successfully!', 'success');
+    }
+
+    async importConversationFromMarkdown(file) {
+        try {
+            const text = await this.readFileAsText(file);
+            const parsedConversation = this.parseMarkdownConversation(text);
+
+            if (parsedConversation.messages.length === 0) {
+                this.showNotification('No messages found in the markdown file', 'warning');
+                return;
+            }
+
+            // Create new conversation with imported data
+            const id = 'conv_' + Date.now();
+            const title = parsedConversation.title || file.name.replace(/\.[^/.]+$/, "");
+
+            this.conversations[id] = {
+                id: id,
+                title: title,
+                messages: parsedConversation.messages,
+                systemPrompt: parsedConversation.systemPrompt || this.systemPrompt,
+                createdAt: Date.now(),
+                lastModified: Date.now()
+            };
+
+            // Switch to the imported conversation
+            this.saveConversations();
+            this.loadConversation(id);
+            this.renderConversationsList();
+
+            this.showNotification(`Conversation "${title}" imported successfully!`, 'success');
+        } catch (error) {
+            console.error('Import error:', error);
+            this.showNotification(`Failed to import conversation: ${error.message}`, 'error');
+        }
+    }
+
+    readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(new Error('Failed to read file'));
+            reader.readAsText(file);
+        });
+    }
+
+    parseMarkdownConversation(markdownText) {
+        const lines = markdownText.split('\n');
+        const messages = [];
+        let currentMessage = null;
+        let currentContent = [];
+        let systemPrompt = '';
+        let title = '';
+        let inCodeBlock = false;
+
+        // Extract image references at the end
+        const imageReferences = {};
+        const imageRefRegex = /^\[([^\]]+)\]:\s*(.+)$/;
+
+        // First pass: collect image references
+        for (const line of lines) {
+            const match = line.match(imageRefRegex);
+            if (match) {
+                imageReferences[match[1]] = match[2];
+            }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+
+            // Track code blocks to avoid parsing headers inside them
+            if (line.startsWith('```')) {
+                inCodeBlock = !inCodeBlock;
+            }
+
+            if (inCodeBlock) {
+                if (currentMessage) {
+                    currentContent.push(line);
+                }
+                continue;
+            }
+
+            // Extract title
+            if (line.startsWith('# ') && !title) {
+                title = line.substring(2).trim();
+                continue;
+            }
+
+            // Extract system prompt
+            if (line.includes('**System Prompt:**')) {
+                const promptMatch = line.match(/\*\*System Prompt:\*\*\s*(.+)/);
+                if (promptMatch) {
+                    systemPrompt = promptMatch[1].trim();
+                }
+                continue;
+            }
+
+            // Check for message headers
+            if (line.startsWith('## 👤 User') || line.startsWith('## 🧠 Assistant')) {
+                // Save previous message if exists
+                if (currentMessage) {
+                    currentMessage.content = this.processMessageContent(currentContent.join('\n').trim(), imageReferences);
+                    messages.push(currentMessage);
+                }
+
+                // Start new message
+                if (line.startsWith('## 👤 User')) {
+                    currentMessage = { role: 'user', content: '' };
+                } else {
+                    currentMessage = { role: 'assistant', content: '' };
+                }
+                currentContent = [];
+                continue;
+            }
+
+            // Skip metadata and separator lines
+            if (line.startsWith('*Exported from') || line.startsWith('---') || line.match(imageRefRegex)) {
+                continue;
+            }
+
+            // Add content to current message
+            if (currentMessage) {
+                currentContent.push(line);
+            }
+        }
+
+        // Save last message if exists
+        if (currentMessage) {
+            currentMessage.content = this.processMessageContent(currentContent.join('\n').trim(), imageReferences);
+            messages.push(currentMessage);
+        }
+
+        return {
+            title: title,
+            systemPrompt: systemPrompt,
+            messages: messages
+        };
+    }
+
+    processMessageContent(content, imageReferences) {
+        if (!content) return '';
+
+        // Check for images and files in the content
+        const imageRegex = /!\[\]\[([^\]]+)\]/g;
+        const fileRegex = /\*\*File:\*\*\s*([^\n]+)/g;
+        const audioRegex = /\*\*Audio file\*\*/g;
+
+        const hasImages = imageRegex.test(content);
+        const hasFiles = fileRegex.test(content);
+        const hasAudio = audioRegex.test(content);
+
+        // Reset regex lastIndex
+        imageRegex.lastIndex = 0;
+        fileRegex.lastIndex = 0;
+        audioRegex.lastIndex = 0;
+
+        if (!hasImages && !hasFiles && !hasAudio) {
+            // Pure text content
+            return content;
+        }
+
+        // Multimodal content
+        const contentArray = [];
+        let textParts = [];
+        let lastIndex = 0;
+
+        // Extract text content, excluding image/file references
+        let textContent = content.replace(/!\[\]\[([^\]]+)\]/g, '').replace(/\*\*File:\*\*\s*[^\n]+/g, '').replace(/\*\*Audio file\*\*/g, '').trim();
+
+        if (textContent) {
+            contentArray.push({
+                type: 'text',
+                text: textContent
+            });
+        }
+
+        // Add images
+        let match;
+        while ((match = imageRegex.exec(content)) !== null) {
+            const imageId = match[1];
+            const imageUrl = imageReferences[imageId];
+            if (imageUrl) {
+                if (imageId.startsWith('file')) {
+                    // Extract filename from preceding text
+                    const fileMatch = content.match(new RegExp(`\\*\\*File:\\*\\*\\s*([^\\n]+)\\s*[\\s\\S]*?!\\[\\]\\[${imageId}\\]`));
+                    const filename = fileMatch ? fileMatch[1].trim() : 'unknown_file';
+                    contentArray.push({
+                        type: 'file',
+                        file: {
+                            file_data: imageUrl,
+                            filename: filename
+                        }
+                    });
+                } else if (imageId.startsWith('audio')) {
+                    contentArray.push({
+                        type: 'audio',
+                        audio: {
+                            data: imageUrl
+                        }
+                    });
+                } else {
+                    contentArray.push({
+                        type: 'image_url',
+                        image_url: {
+                            url: imageUrl
+                        }
+                    });
+                }
+            }
+        }
+
+        return contentArray.length > 0 ? contentArray : content;
     }
 
     // Utility functions for file size calculation and formatting

@@ -1981,3 +1981,25 @@ body {
         padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
 }
+
+/* Export/Import Section Styles */
+.export-import-section {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.export-import-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.export-import-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
