@@ -771,12 +771,16 @@ class ChatUI {
         });
     }
 
-    addFilePreview(dataURL, fileName, fileType) {
+    addFilePreview(dataURL, fileName, fileType, metadata = {}) {
         // Store the file data
         const fileData = {
             dataURL: dataURL,
             fileName: fileName,
             fileType: fileType,
+            isArtifact: metadata.isArtifact || false,
+            artifactId: metadata.artifactId,
+            size: metadata.size,
+            duration: metadata.duration,
             id: Date.now() + Math.random() // Simple unique ID
         };
 
@@ -813,14 +817,18 @@ class ChatUI {
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
         } else if (fileType.startsWith('audio/')) {
-            // Audio preview
+            // Audio preview - show artifact indicator if stored on server
+            const artifactBadge = fileData.isArtifact ?
+                `<div class="artifact-badge" style="position: absolute; top: -2px; right: 18px; background: #059669; color: white; padding: 1px 3px; border-radius: 2px; font-size: 7px; font-weight: bold;">SERVER</div>` : '';
+
             preview.innerHTML = `
-                <div class="audio-icon" title="${fileName}">
+                <div class="audio-icon ${fileData.isArtifact ? 'artifact' : ''}" title="${fileName}${fileData.isArtifact ? ' (Server Storage)' : ''}">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
                     </svg>
                     <div style="word-wrap: break-word; font-size: 8px;">${fileName.length > 8 ? fileName.substring(0, 8) + '...' : fileName}</div>
                     <div style="font-size: 7px; color: #ccc; margin-top: 1px;">${formattedSize}</div>
+                    ${artifactBadge}
                 </div>
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
@@ -1401,11 +1409,42 @@ class ChatUI {
             const extension = this.getFileExtension(blob.type);
             const filename = `recording-${timestamp}.${extension}`;
 
-            // Convert to data URL for attachment
-            const dataURL = await this.blobToDataURL(blob);
+            // Calculate recording duration
+            const recordingDuration = this.recordingStartTime ? Date.now() - this.recordingStartTime : 0;
 
-            // Add to file previews (same as regular file upload)
-            this.addFilePreview(dataURL, filename, blob.type);
+            // Thresholds for artifact storage: 2MB or 2 minutes (120 seconds)
+            const SIZE_THRESHOLD = 2 * 1024 * 1024; // 2MB
+            const DURATION_THRESHOLD = 120 * 1000; // 2 minutes in milliseconds
+
+            console.log(`Recording stats: size=${blob.size}, duration=${recordingDuration}ms`);
+
+            if (blob.size > SIZE_THRESHOLD || recordingDuration > DURATION_THRESHOLD) {
+                // Use artifact storage for large/long recordings
+                console.log('Using artifact storage for large recording');
+                try {
+                    const artifactId = await this.uploadToArtifactStorage(blob, filename);
+
+                    // Add to file previews with artifact reference
+                    this.addFilePreview(`artifact:${artifactId}`, filename, blob.type, {
+                        isArtifact: true,
+                        artifactId: artifactId,
+                        size: blob.size,
+                        duration: recordingDuration
+                    });
+
+                    console.log('Recording uploaded to artifact storage:', artifactId);
+                } catch (uploadError) {
+                    console.warn('Artifact upload failed, falling back to base64:', uploadError);
+                    // Fallback to base64 if artifact upload fails
+                    const dataURL = await this.blobToDataURL(blob);
+                    this.addFilePreview(dataURL, filename, blob.type);
+                }
+            } else {
+                // Use base64 for small recordings (current behavior)
+                console.log('Using base64 storage for small recording');
+                const dataURL = await this.blobToDataURL(blob);
+                this.addFilePreview(dataURL, filename, blob.type);
+            }
 
             // Hide processing indicator
             this.hideProcessingIndicator();
@@ -1455,6 +1494,47 @@ class ChatUI {
             reader.onerror = (e) => reject(e);
             reader.readAsDataURL(blob);
         });
+    }
+
+    // Upload blob to artifact storage and return artifact ID
+    async uploadToArtifactStorage(blob, filename) {
+        try {
+            const response = await fetch(`${this.baseUrl}/artifact`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': blob.type,
+                    'X-Original-Filename': filename
+                },
+                body: blob
+            });
+
+            if (!response.ok) {
+                throw new Error(`Artifact upload failed: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Artifact uploaded successfully:', result.artifactId);
+            return result.artifactId;
+        } catch (error) {
+            console.error('Failed to upload to artifact storage:', error);
+            throw error;
+        }
+    }
+
+    // Fetch artifact data as base64 data URL
+    async fetchArtifactAsDataURL(artifactId) {
+        try {
+            const response = await fetch(`${this.baseUrl}/artifact/${artifactId}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch artifact ${artifactId}: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            return await this.blobToDataURL(blob);
+        } catch (error) {
+            console.error('Failed to fetch artifact:', error);
+            throw error;
+        }
     }
 
     updateRecordingUI(isRecording) {
@@ -1723,6 +1803,9 @@ class ChatUI {
                                 }
                             };
                         }
+                    } else if (item.type === 'audio_artifact' && item.audio_artifact) {
+                        // Keep artifact references as they don't consume localStorage space
+                        return item;
                     }
                     return item;
                 });
@@ -2480,6 +2563,30 @@ class ChatUI {
                             </audio>
                         </div>`;
                     }
+                } else if (item.type === 'audio_artifact' && item.audio_artifact) {
+                    // Handle artifact-stored audio - show with server indicator
+                    const artifactId = item.audio_artifact.artifactId;
+                    const filename = item.audio_artifact.filename || 'recording.webm';
+                    const formattedSize = item.audio_artifact.formattedSize || 'Unknown size';
+                    const artifactUrl = `${this.baseUrl}/artifact/${artifactId}`;
+
+                    html += `<div class="message-audio artifact" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #059669; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; max-height: 7vh; box-sizing: border-box;">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#059669" stroke-width="1.5">
+                            <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
+                        </svg>
+                        <span style="font-size: 13px; color: #374151; font-weight: 500;">Audio file</span>
+                        <span style="font-size: 10px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
+                            ${formattedSize}
+                        </span>
+                        <span style="font-size: 9px; color: white; background: #059669; padding: 1px 4px; border-radius: 2px; font-weight: bold;">SERVER</span>
+                        <audio controls style="height: 40px; flex: 1; min-width: 250px; margin-left: auto;">
+                            <source src="${artifactUrl}" type="audio/webm">
+                            <source src="${artifactUrl}" type="audio/mpeg">
+                            <source src="${artifactUrl}" type="audio/wav">
+                            <source src="${artifactUrl}" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>`;
                 }
             }
             return this.rewritePlantUMLUrls(html);
@@ -2491,7 +2598,9 @@ class ChatUI {
     }
 
     addMessage(role, content, index = null) {
-        const messageData = { role, content };
+        // Convert artifact references to storage-friendly format for localStorage
+        const processedContent = this.processContentForStorage(content);
+        const messageData = { role, content: processedContent };
 
         if (index !== null) {
             this.messages[index] = messageData;
@@ -2502,6 +2611,27 @@ class ChatUI {
 
         this.renderMessages();
         this.saveCurrentConversation(); // Auto-save after adding message
+    }
+
+    // Process message content to store artifact references efficiently
+    processContentForStorage(content) {
+        if (Array.isArray(content)) {
+            return content.map(item => {
+                // For large audio files that are stored as artifacts, store reference instead of data
+                if (item.type === 'audio' && item.audio && item.audio.data) {
+                    const audioData = item.audio.data;
+
+                    // Check if this is a large base64 audio (>1MB when base64 decoded)
+                    if (audioData.startsWith('data:') && this.calculateDataURLSize(audioData) > 1024 * 1024) {
+                        // This is a large audio file - it should have been stored as an artifact
+                        // But if we receive it here as base64, we need to handle it gracefully
+                        console.warn('Large audio data in message content - consider using artifact storage');
+                    }
+                }
+                return item;
+            });
+        }
+        return content;
     }
 
     // Helper function to map message index to DOM index (accounting for tool notifications)
@@ -2893,14 +3023,29 @@ class ChatUI {
                 });
             }
 
-            // Add files
+            // Add files - resolve artifacts before sending
             for (const file of this.selectedFiles) {
+                let dataURL = file.dataURL;
+
+                // If this is an artifact reference, fetch the actual data
+                if (file.dataURL.startsWith('artifact:')) {
+                    try {
+                        const artifactId = file.dataURL.replace('artifact:', '');
+                        console.log('Resolving artifact for sending:', artifactId);
+                        dataURL = await this.fetchArtifactAsDataURL(artifactId);
+                    } catch (error) {
+                        console.error('Failed to resolve artifact for sending:', error);
+                        this.showError(`Failed to load audio file: ${error.message}`);
+                        return; // Don't send message if we can't resolve the artifact
+                    }
+                }
+
                 if (file.fileType.startsWith('image/')) {
                     // Handle images with the existing image_url format
                     messageContent.push({
                         type: "image_url",
                         image_url: {
-                            url: file.dataURL
+                            url: dataURL
                         }
                     });
                 } else if (file.fileType === 'application/pdf') {
@@ -2908,7 +3053,7 @@ class ChatUI {
                     messageContent.push({
                         type: "file",
                         file: {
-                            file_data: file.dataURL,
+                            file_data: dataURL,
                             filename: file.fileName
                         }
                     });
@@ -2917,7 +3062,7 @@ class ChatUI {
                     messageContent.push({
                         type: "audio",
                         audio: {
-                            data: file.dataURL
+                            data: dataURL
                         }
                     });
                 }
