@@ -22,6 +22,11 @@ class ChatUI {
         this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';  // Default system prompt
         this.selectedFiles = [];  // Store selected files (images/PDFs) as base64 data URIs
 
+        // Storage management flags
+        this.artifactServerUnavailable = false;  // Track if artifact server is unavailable
+        this.storageQuotaExceeded = false;       // Track if localStorage quota is exceeded
+        this.lastCleanupAttempt = null;          // Track last cleanup attempt time
+
         // Audio recording state
         this.currentAudioSource = 'microphone';
         this.isRecording = false;
@@ -78,8 +83,37 @@ class ChatUI {
 
         this.init();
 
+        // Check artifact server availability at startup
+        this.checkArtifactServerAvailability();
+
         // Initialize conversation after init
         this.initializeConversation();
+    }
+
+    // Check if artifact storage server is available at startup
+    async checkArtifactServerAvailability() {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+            const response = await fetch(`${this.baseUrl}/artifact`, {
+                method: 'GET',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+                console.log('Artifact storage server is available');
+                this.artifactServerUnavailable = false;
+            } else {
+                console.warn('Artifact storage server returned error:', response.status);
+                this.artifactServerUnavailable = true;
+            }
+        } catch (error) {
+            console.warn('Artifact storage server not available at startup');
+            this.artifactServerUnavailable = true;
+        }
     }
 
     init() {
@@ -739,13 +773,35 @@ class ChatUI {
     }
 
     async handleFileSelection(files) {
+        const SIZE_THRESHOLD = 500 * 1024; // 500KB threshold for artifact storage
+
         for (const file of files) {
             if (file.type.startsWith('image/') ||
                 file.type === 'application/pdf' ||
                 file.type.startsWith('audio/')) {
                 try {
-                    const dataURL = await this.fileToDataURL(file);
-                    this.addFilePreview(dataURL, file.name, file.type);
+                    // Check file size and use artifact storage for large files
+                    if (file.size > SIZE_THRESHOLD && !this.artifactServerUnavailable) {
+                        console.log(`Large file detected (${file.size} bytes), using artifact storage:`, file.name);
+                        try {
+                            const artifactId = await this.uploadToArtifactStorage(file, file.name);
+                            this.addFilePreview(`artifact:${artifactId}`, file.name, file.type, {
+                                isArtifact: true,
+                                artifactId: artifactId,
+                                size: file.size
+                            });
+                            console.log('File uploaded to artifact storage:', artifactId);
+                        } catch (uploadError) {
+                            console.warn('Artifact upload failed, falling back to base64:', uploadError);
+                            // Fallback to base64 if artifact upload fails
+                            const dataURL = await this.fileToDataURL(file);
+                            this.addFilePreview(dataURL, file.name, file.type);
+                        }
+                    } else {
+                        // Use base64 for small files or when artifact server unavailable
+                        const dataURL = await this.fileToDataURL(file);
+                        this.addFilePreview(dataURL, file.name, file.type);
+                    }
                 } catch (error) {
                     console.error('Error processing file:', error);
                     this.showError(`Failed to process file: ${file.name}`);
@@ -1423,9 +1479,9 @@ class ChatUI {
             // Calculate recording duration
             const recordingDuration = this.recordingStartTime ? Date.now() - this.recordingStartTime : 0;
 
-            // Thresholds for artifact storage: 2MB or 2 minutes (120 seconds)
-            const SIZE_THRESHOLD = 2 * 1024 * 1024; // 2MB
-            const DURATION_THRESHOLD = 120 * 1000; // 2 minutes in milliseconds
+            // Thresholds for artifact storage: 500KB or 30 seconds (to prevent localStorage quota issues)
+            const SIZE_THRESHOLD = 500 * 1024; // 500KB
+            const DURATION_THRESHOLD = 30 * 1000; // 30 seconds in milliseconds
 
             console.log(`Recording stats: size=${blob.size}, duration=${recordingDuration}ms`);
 
@@ -1510,24 +1566,57 @@ class ChatUI {
     // Upload blob to artifact storage and return artifact ID
     async uploadToArtifactStorage(blob, filename) {
         try {
-            const response = await fetch(`${this.baseUrl}/artifact`, {
+            // Add timeout to prevent hanging requests
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            const uploadUrl = `${this.baseUrl}/artifact`;
+            console.log('Uploading to:', uploadUrl);
+            console.log('Upload blob type:', blob.type, 'size:', blob.size);
+            console.log('Upload filename:', filename);
+            console.log('Request method: POST');
+
+            const response = await fetch(uploadUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': blob.type,
                     'X-Original-Filename': filename
                 },
-                body: blob
+                body: blob,
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
+
+            console.log('Upload response status:', response.status, response.statusText);
+            console.log('Upload response headers:', [...response.headers.entries()]);
+
             if (!response.ok) {
-                throw new Error(`Artifact upload failed: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('Error response body:', errorText);
+                throw new Error(`Artifact upload failed: ${response.status} ${response.statusText} - ${errorText}`);
             }
 
             const result = await response.json();
+            console.log('Artifact upload response:', result);
+
+            if (!result.artifactId) {
+                console.error('Server response structure:', JSON.stringify(result, null, 2));
+                throw new Error('Server response missing artifactId field');
+            }
+
             console.log('Artifact uploaded successfully:', result.artifactId);
             return result.artifactId;
         } catch (error) {
-            console.error('Failed to upload to artifact storage:', error);
+            if (error.name === 'AbortError') {
+                console.warn('Artifact upload timed out - server may not be running');
+                this.artifactServerUnavailable = true;
+            } else if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_CONNECTION_RESET') || error.message?.includes('404 Not Found')) {
+                console.warn('Artifact storage server not available - skipping upload');
+                this.artifactServerUnavailable = true;
+            } else {
+                console.error('Failed to upload to artifact storage:', error);
+            }
             throw error;
         }
     }
@@ -1686,21 +1775,40 @@ class ChatUI {
         return saved ? JSON.parse(saved) : {};
     }
 
-    saveConversations() {
+    async saveConversations() {
+        // If storage quota is exceeded, skip saves entirely to prevent errors
+        if (this.storageQuotaExceeded) {
+            console.log('Storage quota exceeded - skipping save to prevent errors');
+            return;
+        }
+
+        // Prevent repeated cleanup attempts within short time window
+        const now = Date.now();
+        if (this.lastCleanupAttempt && (now - this.lastCleanupAttempt) < 30000) { // 30 seconds
+            console.warn('Skipping save attempt - recent cleanup failed, storage quota exceeded');
+            return;
+        }
+
         try {
             localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+            // Reset cleanup tracking on successful save
+            this.lastCleanupAttempt = null;
+            this.storageQuotaExceeded = false;
         } catch (error) {
             if (error.name === 'QuotaExceededError') {
-                // Try to free up space by removing oldest conversations
-                this.cleanupOldConversations();
-                // Try saving again
-                try {
-                    localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
-                } catch (retryError) {
-                    console.error('Failed to save even after cleanup:', retryError);
-                    // Re-throw the QuotaExceededError so it can be caught by the calling method
-                    throw retryError;
+                this.lastCleanupAttempt = now;
+                this.storageQuotaExceeded = true;
+
+                console.warn('localStorage quota exceeded - cleanup attempts disabled due to artifact server unavailability');
+
+                // DISABLED: All automatic cleanup removed per user request
+                console.error('Storage quota exceeded - saving disabled, all conversations preserved');
+                if (this.artifactServerUnavailable) {
+                    this.showNotification('Storage quota exceeded: conversations preserved but saving disabled. Start the artifact storage server to enable large file storage.', 'warning');
+                } else {
+                    this.showNotification('Storage quota exceeded: conversations preserved but saving disabled. Large files should use artifact storage automatically.', 'warning');
                 }
+                throw error;
             } else {
                 throw error;
             }
@@ -1710,22 +1818,135 @@ class ChatUI {
     cleanupOldConversations() {
         const conversationIds = Object.keys(this.conversations);
 
-        // If we have more than 10 conversations, remove the oldest ones
-        if (conversationIds.length > 10) {
-            const sortedIds = conversationIds.sort((a, b) =>
-                this.conversations[a].lastModified - this.conversations[b].lastModified
-            );
+        // Calculate total storage usage
+        let totalSize = 0;
+        const conversationSizes = {};
 
-            // Remove oldest conversations (keep only 10 most recent)
-            const toRemove = sortedIds.slice(0, conversationIds.length - 10);
-            toRemove.forEach(id => {
-                delete this.conversations[id];
-            });
+        conversationIds.forEach(id => {
+            const size = this.calculateConversationSize(this.conversations[id]);
+            conversationSizes[id] = size;
+            totalSize += size;
+        });
 
-            console.log(`Cleaned up ${toRemove.length} old conversations to free storage space`);
+        // Target: Keep under 4MB total (localStorage typically has 5-10MB limit)
+        const TARGET_SIZE = 4 * 1024 * 1024; // 4MB
+
+        // DISABLED: All cleanup disabled per user request
+        // Conversations and all data are preserved regardless of size or count
+        if (totalSize > TARGET_SIZE || conversationIds.length > 15) {
+            console.log(`Storage usage: ${(totalSize / 1024 / 1024).toFixed(2)}MB, ${conversationIds.length} conversations - all cleanup disabled`);
         }
 
-        // Keep all attachment data - no cleanup needed
+        // DISABLED: All cleanup disabled per user request
+        // this.cleanupLargeAttachmentsInConversations();
+    }
+
+    calculateConversationSize(conversation) {
+        try {
+            return JSON.stringify(conversation).length * 2; // Approximate UTF-16 byte size
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    async cleanupLargeAttachmentsInConversations() {
+        // Skip artifact cleanup if server is known to be unavailable
+        if (this.artifactServerUnavailable) {
+            console.log('Skipping artifact cleanup - server unavailable');
+            return;
+        }
+
+        const conversationIds = Object.keys(this.conversations);
+        let cleanedAny = false;
+
+        for (const id of conversationIds) {
+            const conversation = this.conversations[id];
+            if (!conversation.messages) continue;
+
+            for (const message of conversation.messages) {
+                if (Array.isArray(message.content)) {
+                    for (const item of message.content) {
+                        // Check for large base64 audio/image data
+                        if ((item.type === 'audio' && item.audio?.data?.startsWith('data:')) ||
+                            (item.type === 'image' && item.image?.data?.startsWith('data:'))) {
+
+                            const dataURL = item.type === 'audio' ? item.audio.data : item.image.data;
+                            const size = this.calculateDataURLSize(dataURL);
+
+                            // If larger than 500KB, try to move to artifact storage
+                            if (size > 500 * 1024) {
+                                try {
+                                    // Convert dataURL to blob and upload to artifact storage
+                                    const blob = this.dataURLToBlob(dataURL);
+                                    const filename = item.type === 'audio' ? 'audio.webm' : 'image.png';
+                                    const artifactId = await this.uploadToArtifactStorage(blob, filename);
+
+                                    // Replace the data with artifact reference
+                                    if (item.type === 'audio') {
+                                        item.audio.data = `artifact:${artifactId}`;
+                                    } else {
+                                        item.image.data = `artifact:${artifactId}`;
+                                    }
+                                    cleanedAny = true;
+                                } catch (error) {
+                                    // Check if this is a connection error
+                                    const isConnectionError = error.message?.includes('Failed to fetch') ||
+                                                             error.message?.includes('ERR_CONNECTION_RESET') ||
+                                                             error.message?.includes('404 Not Found') ||
+                                                             error.name === 'AbortError';
+
+                                    // Only log connection issues once to avoid spam
+                                    if (!this.artifactServerUnavailable && isConnectionError) {
+                                        console.warn('Artifact storage server not available - stopping cleanup attempts');
+                                        this.artifactServerUnavailable = true;
+                                    } else if (!isConnectionError) {
+                                        console.warn('Failed to move large attachment to artifact storage:', error);
+                                    }
+
+                                    // For connection errors, keep the data and stop trying
+                                    if (isConnectionError) {
+                                        // Keep data but add warning marker
+                                        if (item.type === 'audio') {
+                                            item.audio.storageWarning = 'Large file - artifact server unavailable';
+                                        } else {
+                                            item.image.storageWarning = 'Large file - artifact server unavailable';
+                                        }
+                                        // Stop processing more items since server is unavailable
+                                        return;
+                                    } else {
+                                        // For other errors, remove the large data to prevent quota issues
+                                        if (item.type === 'audio') {
+                                            item.audio.data = '[Large audio data removed due to storage constraints]';
+                                        } else {
+                                            item.image.data = '[Large image data removed due to storage constraints]';
+                                        }
+                                        cleanedAny = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (cleanedAny) {
+            console.log('Cleaned up large attachments in conversations');
+        }
+    }
+
+    dataURLToBlob(dataURL) {
+        const parts = dataURL.split(',');
+        const header = parts[0];
+        const data = parts[1];
+        const mimeType = header.match(/:(.*?);/)[1];
+        const byteCharacters = atob(data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: mimeType });
     }
 
     initializeConversation() {
@@ -1871,41 +2092,12 @@ class ChatUI {
                 }
             }
 
-            // Try to save conversations, handle quota exceeded error
-            try {
-                this.saveConversations();
-                this.renderConversationsList();
-            } catch (error) {
-                if (error.name === 'QuotaExceededError') {
-                    console.warn('localStorage quota exceeded, trying to save without attachments');
-                    // Try to save without attachments as fallback
-                    try {
-                        // Temporarily replace messages with sanitized version
-                        const originalMessages = this.conversations[this.currentConversationId].messages;
-                        this.conversations[this.currentConversationId].messages = this.createMessagesWithoutAttachments();
-
-                        this.saveConversations();
-                        this.renderConversationsList();
-
-                        // Show user notification about attachment removal
-                        this.showNotification(
-                            'Storage quota exceeded. Conversation saved but attachments were removed to save space. Consider clearing old conversations.',
-                            'warning'
-                        );
-
-                        console.log('Successfully saved conversation without attachments');
-                    } catch (fallbackError) {
-                        console.error('Failed to save even without attachments:', fallbackError);
-                        this.showNotification(
-                            'Unable to save conversation: storage quota exceeded even after removing attachments. Please clear old conversations.',
-                            'error'
-                        );
-                    }
-                } else {
-                    console.error('Error saving conversation:', error);
-                    this.showNotification('Error saving conversation: ' + error.message, 'error');
-                }
-            }
+            // Save conversations with improved quota handling
+            this.saveConversations().catch(error => {
+                console.error('Error saving conversation:', error);
+                // Error notifications are handled in saveConversations()
+            });
+            this.renderConversationsList();
         }
     }
 
@@ -2632,12 +2824,8 @@ class ChatUI {
                 if (item.type === 'audio' && item.audio && item.audio.data) {
                     const audioData = item.audio.data;
 
-                    // Check if this is a large base64 audio (>1MB when base64 decoded)
-                    if (audioData.startsWith('data:') && this.calculateDataURLSize(audioData) > 1024 * 1024) {
-                        // This is a large audio file - it should have been stored as an artifact
-                        // But if we receive it here as base64, we need to handle it gracefully
-                        console.warn('Large audio data in message content - consider using artifact storage');
-                    }
+                    // DISABLED: Large audio warnings removed since cleanup is disabled
+                    // All data is preserved regardless of size
                 }
                 return item;
             });
@@ -3113,22 +3301,9 @@ class ChatUI {
         }, 300);
     }
 
-    manualCleanupStorage() {
-        const conversationCount = Object.keys(this.conversations).length;
-        if (confirm(`This will remove old conversations to free up storage space. You have ${conversationCount} conversations. Continue?`)) {
-            this.cleanupOldConversations();
-            this.saveConversations();
-            this.renderConversationsList();
-
-            // Flash the cleanup button to indicate success
-            const cleanupBtn = document.getElementById('cleanupStorage');
-            cleanupBtn.style.background = 'rgba(34, 197, 94, 0.5)';
-            cleanupBtn.textContent = 'Done!';
-            setTimeout(() => {
-                cleanupBtn.style.background = '';
-                cleanupBtn.textContent = 'Cleanup';
-            }, 1500);
-        }
+    async manualCleanupStorage() {
+        // DISABLED: All cleanup mechanisms removed per user request
+        alert('Cleanup functionality has been disabled. Use individual delete buttons to remove specific conversations, or clear browser storage manually if needed.');
     }
 
     async getAssistantResponse() {

@@ -57,13 +57,55 @@ func InitializeArtifactStorage(storagePath string, maxUploadSize int64) error {
 
 // ArtifactHandler routes artifact requests based on method and path
 func ArtifactHandler(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("Artifact request received", "method", r.Method, "path", r.URL.Path, "contentType", r.Header.Get("Content-Type"))
+
 	// Clean up the path to handle trailing slashes
 	path := strings.Trim(r.URL.Path, "/")
 	parts := strings.Split(path, "/")
 
+	// Filter out empty parts to handle trailing slashes
+	filteredParts := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if part != "" {
+			filteredParts = append(filteredParts, part)
+		}
+	}
+	parts = filteredParts
+
+	slog.Debug("Artifact routing", "method", r.Method, "parts", parts, "partsLen", len(parts))
+
 	// Route: POST /artifact
 	if r.Method == http.MethodPost && len(parts) == 1 && parts[0] == "artifact" {
+		slog.Debug("Routing to upload handler")
 		handleUploadArtifact(w, r)
+		return
+	}
+
+	// Route: GET /artifact (status/health check)
+	if r.Method == http.MethodGet && len(parts) == 1 && parts[0] == "artifact" {
+		slog.Debug("Routing to status handler")
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Original-Filename")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.WriteHeader(http.StatusOK)
+		response := map[string]string{
+			"status":  "available",
+			"service": "artifact-storage",
+		}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Route: OPTIONS /artifact (CORS preflight)
+	if r.Method == http.MethodOptions && len(parts) == 1 && parts[0] == "artifact" {
+		slog.Debug("Routing to OPTIONS handler")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Original-Filename")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -75,6 +117,7 @@ func ArtifactHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If no route matches, return 404
+	slog.Debug("No route matched", "method", r.Method, "parts", parts)
 	http.NotFound(w, r)
 }
 
@@ -138,6 +181,10 @@ func handleUploadArtifact(w http.ResponseWriter, r *http.Request) {
 	// 7. Respond with success
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Location", fmt.Sprintf("/artifact/%s", artifactID))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Original-Filename")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.WriteHeader(http.StatusCreated)
 
 	response := map[string]string{"artifactId": artifactID}

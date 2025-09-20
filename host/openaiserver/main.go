@@ -156,6 +156,7 @@ func main() {
 	mux.HandleFunc("/site.webmanifest", ServeStaticAssets)
 	mux.HandleFunc("/web-app-manifest-192x192.png", ServeStaticAssets)
 	mux.HandleFunc("/web-app-manifest-512x512.png", ServeStaticAssets)
+	mux.HandleFunc("/artifact", ArtifactHandler)
 	mux.HandleFunc("/artifact/", ArtifactHandler)
 	mux.Handle("/", openAIHandler)
 
