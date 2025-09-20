@@ -45,12 +45,12 @@ func NewChatSession(ctx context.Context, config vertexai.Configuration) *ChatSes
 }
 
 // FilterTools returns a new tools slice containing only the tools with the specified names.
-// If requestedToolNames is empty, it returns all tools.
+// If requestedToolNames is empty, it returns no tools (empty slice).
 // If a requested tool name is not found, it logs a warning and skips it.
 func (chatsession *ChatSession) FilterTools(requestedToolNames []string) []*genai.Tool {
-	// If no specific tools requested, return all tools
+	// If no specific tools requested, return empty tools list
 	if len(requestedToolNames) == 0 {
-		return chatsession.tools
+		return []*genai.Tool{}
 	}
 
 	// Create a map for quick lookup of requested tool names
