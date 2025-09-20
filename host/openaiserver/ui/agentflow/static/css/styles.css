@@ -779,6 +779,36 @@ body {
     display: none;
 }
 
+/* Unified attachment button styles */
+.attachment-btn {
+    padding: 8px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    width: 40px;
+    height: 40px;
+}
+
+.attachment-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.attachment-btn svg {
+    width: 20px;
+    height: 20px;
+    color: #6b7280;
+}
+
+.attachment-input {
+    display: none;
+}
+
 .chat-input {
     flex: 1;
     min-height: 44px;
@@ -1701,7 +1731,7 @@ body {
         padding: 11px 16px;
     }
 
-    .image-upload-btn, .file-upload-btn, .audio-upload-btn {
+    .image-upload-btn, .file-upload-btn, .audio-upload-btn, .attachment-btn {
         min-height: 44px; /* Minimum touch target size */
         min-width: 44px;
     }

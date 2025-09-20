@@ -45,10 +45,8 @@ class ChatUI {
         this.systemPromptSave = document.getElementById('systemPromptSave');
         this.systemPromptReset = document.getElementById('systemPromptReset');
         this.copySelectionButton = document.getElementById('copySelectionButton');
-        this.imageUploadBtn = document.getElementById('imageUploadBtn');
-        this.imageUploadInput = document.getElementById('imageUploadInput');
-        this.audioUploadBtn = document.getElementById('audioUploadBtn');
-        this.audioUploadInput = document.getElementById('audioUploadInput');
+        this.attachmentBtn = document.getElementById('attachmentBtn');
+        this.attachmentInput = document.getElementById('attachmentInput');
         this.filePreviewContainer = document.getElementById('filePreviewContainer');
         this.exportConversationBtn = document.getElementById('exportConversation');
         this.importConversationBtn = document.getElementById('importConversation');
@@ -657,21 +655,13 @@ class ChatUI {
 
     // File upload functionality (images, PDFs, and audio)
     initFileUploadHandling() {
-        // File upload button click handlers
-        this.imageUploadBtn.addEventListener('click', () => {
-            this.imageUploadInput.click();
+        // Unified attachment button click handler
+        this.attachmentBtn.addEventListener('click', () => {
+            this.attachmentInput.click();
         });
 
-        this.audioUploadBtn.addEventListener('click', () => {
-            this.audioUploadInput.click();
-        });
-
-        // File input change handlers
-        this.imageUploadInput.addEventListener('change', (e) => {
-            this.handleFileSelection(e.target.files);
-        });
-
-        this.audioUploadInput.addEventListener('change', (e) => {
+        // File input change handler
+        this.attachmentInput.addEventListener('change', (e) => {
             this.handleFileSelection(e.target.files);
         });
 
@@ -740,9 +730,8 @@ class ChatUI {
             }
         }
 
-        // Clear the file inputs so the same file can be selected again
-        this.imageUploadInput.value = '';
-        this.audioUploadInput.value = '';
+        // Clear the file input so the same file can be selected again
+        this.attachmentInput.value = '';
     }
 
     // Keep backward compatibility
