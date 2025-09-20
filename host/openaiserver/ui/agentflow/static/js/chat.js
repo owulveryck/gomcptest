@@ -816,8 +816,8 @@ class ChatUI {
             // Audio preview
             preview.innerHTML = `
                 <div class="audio-icon" title="${fileName}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
                     </svg>
                     <div style="word-wrap: break-word; font-size: 8px;">${fileName.length > 8 ? fileName.substring(0, 8) + '...' : fileName}</div>
                     <div style="font-size: 7px; color: #ccc; margin-top: 1px;">${formattedSize}</div>
@@ -2455,17 +2455,17 @@ class ChatUI {
                     // Check if audio data was stripped from localStorage
                     if (item.audio.data === '[Large audio data removed to save storage space]') {
                         html += `<div class="message-audio-placeholder" style="display: flex; align-items: center; padding: 8px 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px; color: #6b7280; width: 100%; max-width: 100%;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
-                                <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9ca3af" stroke-width="1.5">
+                                <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
                             </svg>
                             <span style="font-size: 13px; font-style: italic;">Audio file not available (removed to save storage space)</span>
                         </div>`;
                     } else {
                         // Display audio attachment with playback controls and size info
                         const sizeInfo = this.getAttachmentSizeInfo(item);
-                        html += `<div class="message-audio" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                                <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
+                        html += `<div class="message-audio" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; max-height: 7vh; box-sizing: border-box;">
+                            <svg width="16" height="2" viewBox="0 0 16 16" fill="none" stroke="#059669" stroke-width="1.5">
+                                <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
                             </svg>
                             <span style="font-size: 13px; color: #374151; font-weight: 500;">Audio file</span>
                             <span style="font-size: 10px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
