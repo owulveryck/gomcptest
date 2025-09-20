@@ -817,9 +817,7 @@ class ChatUI {
             preview.innerHTML = `
                 <div class="audio-icon" title="${fileName}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15.5 8.5C15.5 10.433 13.933 12 12 12s-3.5-1.567-3.5-3.5S10.067 5 12 5s3.5 1.567 3.5 3.5z"/>
-                        <path d="M12 12v7"/>
-                        <path d="M8 19h8"/>
+                        <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
                     </svg>
                     <div style="word-wrap: break-word; font-size: 8px;">${fileName.length > 8 ? fileName.substring(0, 8) + '...' : fileName}</div>
                     <div style="font-size: 7px; color: #ccc; margin-top: 1px;">${formattedSize}</div>
@@ -2456,28 +2454,24 @@ class ChatUI {
                 } else if (item.type === 'audio' && item.audio && item.audio.data) {
                     // Check if audio data was stripped from localStorage
                     if (item.audio.data === '[Large audio data removed to save storage space]') {
-                        html += `<div class="message-audio-placeholder" style="display: inline-flex; align-items: center; padding: 4px 6px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 6px; margin: 2px 0; gap: 6px; color: #6b7280;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
-                                <path d="M15.5 8.5C15.5 10.433 13.933 12 12 12s-3.5-1.567-3.5-3.5S10.067 5 12 5s3.5 1.567 3.5 3.5z"/>
-                                <path d="M12 12v7"/>
-                                <path d="M8 19h8"/>
+                        html += `<div class="message-audio-placeholder" style="display: flex; align-items: center; padding: 8px 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px; color: #6b7280; width: 100%; max-width: 100%;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                                <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
                             </svg>
-                            <span style="font-size: 11px; font-style: italic;">Audio file not available (removed to save storage space)</span>
+                            <span style="font-size: 13px; font-style: italic;">Audio file not available (removed to save storage space)</span>
                         </div>`;
                     } else {
                         // Display audio attachment with playback controls and size info
                         const sizeInfo = this.getAttachmentSizeInfo(item);
-                        html += `<div class="message-audio" style="display: inline-flex; align-items: center; padding: 3px 6px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 6px; margin: 2px 0; gap: 4px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                                <path d="M15.5 8.5C15.5 10.433 13.933 12 12 12s-3.5-1.567-3.5-3.5S10.067 5 12 5s3.5 1.567 3.5 3.5z"/>
-                                <path d="M12 12v7"/>
-                                <path d="M8 19h8"/>
+                        html += `<div class="message-audio" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                                <path d="M2 12h2l2-4 4 8 4-8 4 4h2"/>
                             </svg>
-                            <span style="font-size: 11px; color: #374151;">Audio file</span>
-                            <span style="font-size: 9px; color: #059669; background: #dcfce7; padding: 1px 3px; border-radius: 2px; font-weight: 500; margin-left: auto;">
+                            <span style="font-size: 13px; color: #374151; font-weight: 500;">Audio file</span>
+                            <span style="font-size: 10px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                                 ${sizeInfo.formattedSize}
                             </span>
-                            <audio controls style="height: 20px; width: 120px;">
+                            <audio controls style="height: 40px; flex: 1; min-width: 250px; margin-left: auto;">
                                 <source src="${item.audio.data}" type="audio/webm">
                                 <source src="${item.audio.data}" type="audio/mpeg">
                                 <source src="${item.audio.data}" type="audio/wav">
