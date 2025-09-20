@@ -204,8 +204,10 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 <div class="input-controls">
                     <button class="record-btn" id="recordBtn" title="Start recording">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
-                            <circle cx="12" cy="4" r="2"/>
+                            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
                         </svg>
                     </button>
                     <button class="stop-btn" id="stopBtn" title="Stop recording" style="display: none;">
@@ -213,13 +215,21 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                             <rect x="6" y="6" width="12" height="12" rx="2"/>
                         </svg>
                     </button>
-                    <button class="lap-btn" id="lapBtn" title="Create lap" style="display: none;">
+                    <button class="segment-btn" id="segmentBtn" title="Create audio segment" style="display: none;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="3,11 22,2 13,21 11,13 3,11"/>
+                            <path d="M6 6l6 6 6-6"/>
+                            <path d="M6 18l6-6 6 6"/>
+                            <line x1="12" y1="2" x2="12" y2="22"/>
                         </svg>
                     </button>
                     <div class="recording-indicator" id="recordingIndicator" style="display: none;">
-                        <div class="recording-dot"></div>
+                        <div class="recording-wave">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
                         <span class="recording-timer" id="recordingTimer">00:00</span>
                     </div>
                     <button class="attachment-btn" id="attachmentBtn" title="Add attachment (image, PDF, audio)">
