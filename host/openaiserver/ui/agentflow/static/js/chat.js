@@ -1342,8 +1342,19 @@ class ChatUI {
 
             case 'system':
                 constraints.audio = true;
-                constraints.video = false;
-                return await navigator.mediaDevices.getDisplayMedia(constraints);
+                constraints.video = true; // Video is required for system audio capture
+                const displayStream = await navigator.mediaDevices.getDisplayMedia(constraints);
+                // Extract only audio tracks for recording
+                const audioTracks = displayStream.getAudioTracks();
+                if (audioTracks.length === 0) {
+                    displayStream.getTracks().forEach(track => track.stop());
+                    throw new Error('No system audio available');
+                }
+                // Create a new MediaStream with only audio tracks
+                const audioOnlyStream = new MediaStream(audioTracks);
+                // Stop video tracks to save resources
+                displayStream.getVideoTracks().forEach(track => track.stop());
+                return audioOnlyStream;
 
             case 'both':
                 // For "both", we'll need to mix streams (simplified approach)
