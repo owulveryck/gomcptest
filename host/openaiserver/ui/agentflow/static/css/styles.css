@@ -641,8 +641,8 @@ body {
 }
 
 .file-preview .audio-icon {
-    width: 100px;
-    height: 100px;
+    width: 50px;
+    height: 50px;
     background: #059669;
     border-radius: 6px;
     border: 1px solid #d1d5db;
@@ -651,15 +651,15 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 12px;
+    font-size: 8px;
     text-align: center;
-    padding: 8px;
+    padding: 4px;
 }
 
 .file-preview .audio-icon svg {
-    width: 32px;
-    height: 32px;
-    margin-bottom: 4px;
+    width: 20px;
+    height: 20px;
+    margin-bottom: 2px;
 }
 
 .file-preview .remove-file, .image-preview .remove-image {
@@ -2120,7 +2120,7 @@ body {
 }
 
 /* Recording Control Buttons */
-.record-btn, .stop-btn, .lap-btn {
+.record-btn, .stop-btn, .segment-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2152,13 +2152,13 @@ body {
     border-color: rgba(239, 68, 68, 0.3);
 }
 
-.lap-btn {
-    color: #f59e0b;
+.segment-btn {
+    color: #8b5cf6;
 }
 
-.lap-btn:hover {
-    background: rgba(245, 158, 11, 0.1);
-    border-color: rgba(245, 158, 11, 0.3);
+.segment-btn:hover {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
 }
 
 /* Recording Indicator */
@@ -2175,22 +2175,49 @@ body {
     font-weight: 500;
 }
 
-.recording-dot {
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    animation: recordingPulse 1s infinite;
+.recording-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 12px;
 }
 
-@keyframes recordingPulse {
+.wave-bar {
+    width: 2px;
+    background: #ef4444;
+    border-radius: 1px;
+    animation: waveAnimation 1s infinite ease-in-out;
+}
+
+.wave-bar:nth-child(1) {
+    height: 4px;
+    animation-delay: 0s;
+}
+.wave-bar:nth-child(2) {
+    height: 8px;
+    animation-delay: 0.1s;
+}
+.wave-bar:nth-child(3) {
+    height: 12px;
+    animation-delay: 0.2s;
+}
+.wave-bar:nth-child(4) {
+    height: 8px;
+    animation-delay: 0.3s;
+}
+.wave-bar:nth-child(5) {
+    height: 6px;
+    animation-delay: 0.4s;
+}
+
+@keyframes waveAnimation {
     0%, 100% {
-        opacity: 1;
-        transform: scale(1);
+        transform: scaleY(0.5);
+        opacity: 0.7;
     }
     50% {
-        opacity: 0.6;
-        transform: scale(1.2);
+        transform: scaleY(1.2);
+        opacity: 1;
     }
 }
 
