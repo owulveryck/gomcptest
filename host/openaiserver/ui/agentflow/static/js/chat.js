@@ -22,6 +22,16 @@ class ChatUI {
         this.systemPrompt = 'You are a helpful assistant.\nCurrent time is {{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04"}}';  // Default system prompt
         this.selectedFiles = [];  // Store selected files (images/PDFs) as base64 data URIs
 
+        // Audio recording state
+        this.currentAudioSource = 'microphone';
+        this.isRecording = false;
+        this.isCreatingLap = false;
+        this.mediaRecorder = null;
+        this.audioStream = null;
+        this.recordingStartTime = null;
+        this.recordingTimerInterval = null;
+        this.audioChunks = [];
+
         // DOM elements (must be initialized first)
         this.chatMessages = document.getElementById('chatMessages');
         this.chatInput = document.getElementById('chatInput');
@@ -51,6 +61,16 @@ class ChatUI {
         this.exportConversationBtn = document.getElementById('exportConversation');
         this.importConversationBtn = document.getElementById('importConversation');
         this.importFileInput = document.getElementById('importFileInput');
+
+        // Audio recording elements
+        this.audioSourceButton = document.getElementById('audioSourceButton');
+        this.audioSourceDropdown = document.getElementById('audioSourceDropdown');
+        this.selectedAudioSource = document.getElementById('selectedAudioSource');
+        this.recordBtn = document.getElementById('recordBtn');
+        this.stopBtn = document.getElementById('stopBtn');
+        this.lapBtn = document.getElementById('lapBtn');
+        this.recordingIndicator = document.getElementById('recordingIndicator');
+        this.recordingTimer = document.getElementById('recordingTimer');
 
         // Conversation management (after DOM elements are initialized)
         this.conversations = this.loadConversations();
@@ -168,6 +188,9 @@ class ChatUI {
 
         // Export/Import functionality
         this.initExportImportHandling();
+
+        // Audio recording functionality
+        this.initAudioRecording();
     }
 
     // Text selection and copy functionality
@@ -1187,6 +1210,324 @@ class ChatUI {
         }
 
         return contentArray.length > 0 ? contentArray : content;
+    }
+
+    // Audio Recording functionality
+    initAudioRecording() {
+        // Audio source selector events
+        this.audioSourceButton.addEventListener('click', () => {
+            this.audioSourceDropdown.classList.toggle('active');
+        });
+
+        // Close audio source dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.audioSourceButton.contains(e.target) && !this.audioSourceDropdown.contains(e.target)) {
+                this.audioSourceDropdown.classList.remove('active');
+            }
+        });
+
+        // Audio source option selection
+        document.getElementById('audioSourceList').addEventListener('click', (e) => {
+            const option = e.target.closest('.audio-source-option');
+            if (option) {
+                this.selectAudioSource(option.dataset.source);
+            }
+        });
+
+        // Recording control buttons
+        this.recordBtn.addEventListener('click', () => this.startRecording());
+        this.stopBtn.addEventListener('click', () => this.stopRecording());
+        this.lapBtn.addEventListener('click', () => this.createLap());
+
+        // Load user's preferred audio source
+        const preferredSource = localStorage.getItem('preferredAudioSource') || 'microphone';
+        this.selectAudioSource(preferredSource);
+    }
+
+    selectAudioSource(source) {
+        // Update the UI
+        document.querySelectorAll('.audio-source-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector(`[data-source="${source}"]`).classList.add('selected');
+
+        // Update the button text and current source
+        this.currentAudioSource = source;
+        const sourceNames = {
+            'microphone': 'Microphone',
+            'system': 'System Audio',
+            'both': 'Microphone + System Audio'
+        };
+        this.selectedAudioSource.textContent = sourceNames[source];
+
+        // Close dropdown
+        this.audioSourceDropdown.classList.remove('active');
+
+        // Store user preference
+        localStorage.setItem('preferredAudioSource', source);
+    }
+
+    async startRecording() {
+        try {
+            // Request permissions and get audio stream based on selected source
+            const stream = await this.getAudioStream();
+
+            // Set up MediaRecorder with Opus codec (preferred format)
+            const options = {
+                mimeType: 'audio/webm; codecs=opus',
+                audioBitsPerSecond: 128000
+            };
+
+            // Fallback to other formats if Opus is not supported
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                if (MediaRecorder.isTypeSupported('audio/webm')) {
+                    options.mimeType = 'audio/webm';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    options.mimeType = 'audio/mp4';
+                } else {
+                    options.mimeType = 'audio/wav';
+                }
+            }
+
+            this.mediaRecorder = new MediaRecorder(stream, options);
+            this.audioStream = stream;
+            this.audioChunks = [];
+
+            // Set up event handlers
+            this.mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    this.audioChunks.push(event.data);
+                }
+            };
+
+            this.mediaRecorder.onstop = () => {
+                this.processRecording();
+            };
+
+            // Start recording
+            this.mediaRecorder.start(1000); // Collect data every second for streaming
+            this.isRecording = true;
+            this.recordingStartTime = Date.now();
+
+            // Update UI
+            this.updateRecordingUI(true);
+            this.startRecordingTimer();
+
+            console.log('Recording started with format:', options.mimeType);
+
+        } catch (error) {
+            console.error('Failed to start recording:', error);
+            this.showRecordingError('Failed to start recording: ' + error.message);
+        }
+    }
+
+    async getAudioStream() {
+        const constraints = {};
+
+        switch (this.currentAudioSource) {
+            case 'microphone':
+                constraints.audio = {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                };
+                return await navigator.mediaDevices.getUserMedia(constraints);
+
+            case 'system':
+                constraints.audio = true;
+                constraints.video = false;
+                return await navigator.mediaDevices.getDisplayMedia(constraints);
+
+            case 'both':
+                // For "both", we'll need to mix streams (simplified approach)
+                const micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                // Note: Mixing microphone and system audio requires more complex implementation
+                // For now, we'll just use microphone as the primary source
+                // Full implementation would require Web Audio API for mixing
+                return micStream;
+
+            default:
+                throw new Error('Invalid audio source selected');
+        }
+    }
+
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            // Ensure this is not treated as a lap
+            this.isCreatingLap = false;
+
+            this.mediaRecorder.stop();
+            this.isRecording = false;
+            this.stopRecordingTimer();
+
+            // Stop all tracks in the stream
+            if (this.audioStream) {
+                this.audioStream.getTracks().forEach(track => track.stop());
+            }
+
+            // Update UI
+            this.updateRecordingUI(false);
+            this.showProcessingIndicator();
+        }
+    }
+
+    async createLap() {
+        if (this.mediaRecorder && this.isRecording) {
+            // Set a flag to indicate this is a lap, not a final stop
+            this.isCreatingLap = true;
+
+            // Stop current recording to create a lap
+            this.mediaRecorder.stop();
+            // Note: processRecording() will be called automatically by the onstop event
+
+            // The onstop event handler will start a new recording automatically if isCreatingLap is true
+        }
+    }
+
+    async processRecording() {
+        try {
+            // Create blob from chunks
+            const blob = new Blob(this.audioChunks, {
+                type: this.mediaRecorder.mimeType || 'audio/webm; codecs=opus'
+            });
+
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const extension = this.getFileExtension(blob.type);
+            const filename = `recording-${timestamp}.${extension}`;
+
+            // Convert to data URL for attachment
+            const dataURL = await this.blobToDataURL(blob);
+
+            // Add to file previews (same as regular file upload)
+            this.addFilePreview(dataURL, filename, blob.type);
+
+            // Hide processing indicator
+            this.hideProcessingIndicator();
+
+            console.log('Recording processed successfully:', filename);
+
+            // If this was a lap, start a new recording immediately
+            if (this.isCreatingLap) {
+                this.isCreatingLap = false;
+                setTimeout(() => {
+                    this.startRecording();
+                }, 100);
+            }
+
+        } catch (error) {
+            console.error('Failed to process recording:', error);
+            this.showRecordingError('Failed to process recording: ' + error.message);
+            this.hideProcessingIndicator();
+
+            // Reset lap flag on error
+            this.isCreatingLap = false;
+        }
+    }
+
+    getFileExtension(mimeType) {
+        const extensions = {
+            'audio/webm': 'webm',
+            'audio/mp4': 'm4a',
+            'audio/wav': 'wav',
+            'audio/mpeg': 'mp3'
+        };
+
+        // Handle codec specifications
+        for (const [type, ext] of Object.entries(extensions)) {
+            if (mimeType.includes(type)) {
+                return ext;
+            }
+        }
+
+        return 'webm'; // Default fallback
+    }
+
+    blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    updateRecordingUI(isRecording) {
+        if (isRecording) {
+            this.recordBtn.style.display = 'none';
+            this.stopBtn.style.display = 'flex';
+            this.lapBtn.style.display = 'flex';
+            this.recordingIndicator.style.display = 'flex';
+        } else {
+            this.recordBtn.style.display = 'flex';
+            this.stopBtn.style.display = 'none';
+            this.lapBtn.style.display = 'none';
+            this.recordingIndicator.style.display = 'none';
+        }
+    }
+
+    startRecordingTimer() {
+        this.recordingTimerInterval = setInterval(() => {
+            if (this.recordingStartTime) {
+                const elapsed = Date.now() - this.recordingStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                this.recordingTimer.textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }, 1000);
+    }
+
+    stopRecordingTimer() {
+        if (this.recordingTimerInterval) {
+            clearInterval(this.recordingTimerInterval);
+            this.recordingTimerInterval = null;
+        }
+        this.recordingTimer.textContent = '00:00';
+    }
+
+    showProcessingIndicator() {
+        // Replace the recording indicator with a processing indicator
+        this.recordingIndicator.className = 'recording-processing';
+        this.recordingIndicator.innerHTML = `
+            <div class="processing-spinner"></div>
+            <span>Processing...</span>
+        `;
+        this.recordingIndicator.style.display = 'flex';
+    }
+
+    hideProcessingIndicator() {
+        this.recordingIndicator.style.display = 'none';
+        this.recordingIndicator.className = 'recording-indicator';
+        this.recordingIndicator.innerHTML = `
+            <div class="recording-dot"></div>
+            <span class="recording-timer" id="recordingTimer">00:00</span>
+        `;
+        // Re-get the timer element reference since we recreated it
+        this.recordingTimer = document.getElementById('recordingTimer');
+    }
+
+    showRecordingError(message) {
+        this.showNotification(message, 'error');
+
+        // Reset recording state
+        this.isRecording = false;
+        this.isCreatingLap = false;
+        this.updateRecordingUI(false);
+        this.stopRecordingTimer();
+        this.hideProcessingIndicator();
+
+        // Clean up streams
+        if (this.audioStream) {
+            this.audioStream.getTracks().forEach(track => track.stop());
+            this.audioStream = null;
+        }
     }
 
     // Utility functions for file size calculation and formatting

@@ -109,6 +109,42 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                 <h1>AgentFlow</h1>
             </div>
             <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="audio-source-selector">
+                    <button class="audio-source-button" id="audioSourceButton">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                        <span id="selectedAudioSource">Microphone</span>
+                    </button>
+                    <div class="audio-source-dropdown" id="audioSourceDropdown">
+                        <div class="audio-source-dropdown-header">Audio Source</div>
+                        <div id="audioSourceList">
+                            <div class="audio-source-option selected" data-source="microphone">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                                    <circle cx="12" cy="4" r="2"/>
+                                </svg>
+                                Microphone
+                            </div>
+                            <div class="audio-source-option" data-source="system">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                    <line x1="8" y1="21" x2="16" y2="21"/>
+                                    <line x1="12" y1="17" x2="12" y2="21"/>
+                                </svg>
+                                System Audio
+                            </div>
+                            <div class="audio-source-option" data-source="both">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v6m0 0v6m0-6h6m-6 0H6"/>
+                                    <circle cx="12" cy="12" r="10"/>
+                                </svg>
+                                Microphone + System Audio
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="tool-selector">
                     <button class="tool-button" id="toolButton">
                         <span id="selectedToolsCount">Tools: All</span>
@@ -166,6 +202,26 @@ Current time is {{`{{now | formatTimeInLocation "Europe/Paris" "2006-01-02 15:04
                     ></textarea>
                 </div>
                 <div class="input-controls">
+                    <button class="record-btn" id="recordBtn" title="Start recording">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
+                            <circle cx="12" cy="4" r="2"/>
+                        </svg>
+                    </button>
+                    <button class="stop-btn" id="stopBtn" title="Stop recording" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="6" y="6" width="12" height="12" rx="2"/>
+                        </svg>
+                    </button>
+                    <button class="lap-btn" id="lapBtn" title="Create lap" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="3,11 22,2 13,21 11,13 3,11"/>
+                        </svg>
+                    </button>
+                    <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+                        <div class="recording-dot"></div>
+                        <span class="recording-timer" id="recordingTimer">00:00</span>
+                    </div>
                     <button class="attachment-btn" id="attachmentBtn" title="Add attachment (image, PDF, audio)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>

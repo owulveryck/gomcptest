@@ -2033,3 +2033,197 @@ body {
     gap: 8px;
     margin-top: 10px;
 }
+
+/* Audio Source Selector Styles */
+.audio-source-selector {
+    position: relative;
+    display: inline-block;
+}
+
+.audio-source-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.audio-source-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.audio-source-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.audio-source-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    min-width: 220px;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 1001;
+    display: none;
+    padding: 8px 0;
+}
+
+.audio-source-dropdown.active {
+    display: block;
+}
+
+.audio-source-dropdown-header {
+    padding: 8px 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+}
+
+.audio-source-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.audio-source-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.audio-source-option.selected {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.audio-source-option svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Recording Control Buttons */
+.record-btn, .stop-btn, .lap-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.record-btn {
+    color: #10b981;
+}
+
+.record-btn:hover {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stop-btn {
+    color: #ef4444;
+}
+
+.stop-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.lap-btn {
+    color: #f59e0b;
+}
+
+.lap-btn:hover {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Recording Indicator */
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 20px;
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.recording-dot {
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    animation: recordingPulse 1s infinite;
+}
+
+@keyframes recordingPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+}
+
+.recording-timer {
+    font-family: monospace;
+    font-size: 11px;
+    color: #ef4444;
+}
+
+/* Audio Recording Processing State */
+.recording-processing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 20px;
+    color: #f59e0b;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.processing-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid transparent;
+    border-top: 2px solid #f59e0b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
