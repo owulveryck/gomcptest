@@ -372,3 +372,4 @@ Avoid the temptation to use reference material to instruct in how to achieve thi
 ### **Be accurate**
 
 These descriptions must be accurate and kept up-to-date. Any discrepancy between the machinery and your description of it will inevitably lead a user astray.
+- remember that to test the ui, you need to use "go run" even on the openaiserver or the ui serve_ui

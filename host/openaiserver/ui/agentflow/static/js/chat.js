@@ -1332,8 +1332,11 @@ class ChatUI {
 
     async startRecording() {
         try {
-            // Request permissions and get audio stream based on selected source
-            const stream = await this.getAudioStream();
+            // Only request new stream if we don't have one or if it's not active
+            if (!this.audioStream || this.audioStream.getTracks().some(track => track.readyState === 'ended')) {
+                // Request permissions and get audio stream based on selected source
+                this.audioStream = await this.getAudioStream();
+            }
 
             // Set up MediaRecorder with Opus codec (preferred format)
             const options = {
@@ -1352,8 +1355,7 @@ class ChatUI {
                 }
             }
 
-            this.mediaRecorder = new MediaRecorder(stream, options);
-            this.audioStream = stream;
+            this.mediaRecorder = new MediaRecorder(this.audioStream, options);
             this.audioChunks = [];
 
             // Set up event handlers
@@ -1440,9 +1442,10 @@ class ChatUI {
             this.isRecording = false;
             this.stopRecordingTimer();
 
-            // Stop all tracks in the stream
+            // Only stop all tracks in the stream when fully stopping (not segmenting)
             if (this.audioStream) {
                 this.audioStream.getTracks().forEach(track => track.stop());
+                this.audioStream = null; // Clear the stream reference
             }
 
             // Update UI
@@ -1518,9 +1521,10 @@ class ChatUI {
 
             console.log('Recording processed successfully:', filename);
 
-            // If this was a lap, start a new recording immediately
+            // If this was a lap, start a new recording immediately using the existing stream
             if (this.isCreatingLap) {
                 this.isCreatingLap = false;
+                // Small delay to ensure the current MediaRecorder is properly cleaned up
                 setTimeout(() => {
                     this.startRecording();
                 }, 100);
@@ -1708,7 +1712,7 @@ class ChatUI {
         this.stopRecordingTimer();
         this.hideProcessingIndicator();
 
-        // Clean up streams
+        // Clean up streams - always stop tracks on error
         if (this.audioStream) {
             this.audioStream.getTracks().forEach(track => track.stop());
             this.audioStream = null;

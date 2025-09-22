@@ -27,3 +27,4 @@ sandbox/
 host/.claude/settings.local.json
 .playwright-mcp/
 host/openaiserver/ui/serve_ui
+sample
