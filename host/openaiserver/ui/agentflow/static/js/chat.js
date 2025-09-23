@@ -77,23 +77,129 @@ class ChatUI {
         this.recordingIndicator = document.getElementById('recordingIndicator');
         this.recordingTimer = document.getElementById('recordingTimer');
 
+        // Initialize WorkerManager for heavy operations
+        // For embedded UI mode, always use '/ui' prefix for worker paths
+        const workerBaseUrl = '/ui';
+        this.workerManager = new WorkerManager(workerBaseUrl);
+        this.workerReady = false;
+
         // Conversation management (after DOM elements are initialized)
-        this.conversations = this.loadConversations();
+        this.conversations = {};
         this.currentConversationId = null;
 
         this.init();
 
+        // Initialize workers and load conversations
+        this.initializeWorkers();
+
         // Check artifact server availability at startup
         this.checkArtifactServerAvailability();
-
-        // Initialize conversation after init
-        this.initializeConversation();
-
-        // CRITICAL: Set up periodic auto-save to prevent data loss
-        this.setupAutoSave();
     }
 
-    // Set up periodic auto-save mechanism
+    // Initialize web workers for heavy operations
+    async initializeWorkers() {
+        try {
+            console.log('Initializing web workers...');
+            const result = await this.workerManager.init();
+
+            if (result.success) {
+                this.workerReady = true;
+                console.log('Workers initialized successfully');
+
+                // Now load conversations using workers
+                await this.loadConversationsFromWorker();
+
+                // Initialize conversation after loading
+                this.initializeConversation();
+
+                // Set up auto-save using workers
+                this.setupAutoSaveWithWorkers();
+            } else {
+                console.error('Worker initialization failed:', result.error);
+                // Fallback to synchronous mode
+                this.workerReady = false;
+                this.conversations = this.loadConversationsFallback();
+                this.initializeConversation();
+                this.setupAutoSave();
+            }
+        } catch (error) {
+            console.error('Error initializing workers:', error);
+            // Fallback to synchronous mode
+            this.workerReady = false;
+            this.conversations = this.loadConversationsFallback();
+            this.initializeConversation();
+            this.setupAutoSave();
+        }
+    }
+
+    // Load conversations using storage worker
+    async loadConversationsFromWorker() {
+        if (!this.workerReady) {
+            this.conversations = this.loadConversationsFallback();
+            return;
+        }
+
+        try {
+            const result = await this.workerManager.loadConversations();
+
+            if (result.success) {
+                this.conversations = result.data || {};
+                console.log(`Loaded ${Object.keys(this.conversations).length} conversations from worker`);
+
+                if (result.warnings && result.warnings.length > 0) {
+                    console.warn('Storage warnings:', result.warnings);
+                }
+            } else {
+                console.error('Failed to load conversations from worker:', result.error);
+                this.conversations = this.loadConversationsFallback();
+            }
+        } catch (error) {
+            console.error('Error loading conversations from worker:', error);
+            this.conversations = this.loadConversationsFallback();
+        }
+    }
+
+    // Fallback conversation loading (synchronous)
+    loadConversationsFallback() {
+        try {
+            const stored = localStorage.getItem('chat_conversations');
+            return stored ? JSON.parse(stored) : {};
+        } catch (error) {
+            console.error('Fallback conversation loading failed:', error);
+            return {};
+        }
+    }
+
+    // Set up auto-save using workers
+    setupAutoSaveWithWorkers() {
+        // Save every 30 seconds using workers
+        this.autoSaveInterval = setInterval(async () => {
+            if (this.messages && this.messages.length > 0 && this.workerReady) {
+                try {
+                    await this.saveConversationsViaWorker();
+                } catch (error) {
+                    console.error('Auto-save via worker failed:', error);
+                    // Fallback to synchronous save
+                    this.saveConversationsFallback();
+                }
+            }
+        }, 30000);
+
+        // Save on page unload
+        window.addEventListener('beforeunload', async () => {
+            if (this.workerReady) {
+                try {
+                    await this.saveConversationsViaWorker();
+                } catch (error) {
+                    this.saveConversationsFallback();
+                }
+            } else {
+                this.saveConversationsFallback();
+            }
+        });
+    }
+
+    // Set up periodic auto-save mechanism (fallback)
     setupAutoSave() {
         // Save every 30 seconds as a safety net
         this.autoSaveInterval = setInterval(() => {
@@ -1883,6 +1989,58 @@ class ChatUI {
         }
     }
 
+    // New worker-based save method
+    async saveConversationsViaWorker() {
+        if (!this.workerReady) {
+            return this.saveConversationsFallback();
+        }
+
+        try {
+            // Update current conversation
+            this.updateCurrentConversation();
+
+            const result = await this.workerManager.saveConversations(this.conversations);
+
+            if (result.success) {
+                console.log(`Conversations saved via worker (${result.method})`);
+
+                if (result.fallbacksUsed && result.fallbacksUsed.length > 0) {
+                    console.warn('Some fallbacks were used:', result.fallbacksUsed);
+                }
+
+                // Reset error tracking on successful save
+                this.storageQuotaExceeded = false;
+                this.consecutiveSaveFailures = 0;
+            } else {
+                console.error('Worker save failed:', result.error);
+                // Try synchronous fallback
+                return this.saveConversationsFallback();
+            }
+        } catch (error) {
+            console.error('Error saving via worker:', error);
+            // Try synchronous fallback
+            return this.saveConversationsFallback();
+        }
+    }
+
+    // Fallback save method (synchronous)
+    saveConversationsFallback() {
+        try {
+            this.updateCurrentConversation();
+            localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
+            console.log('Conversations saved via fallback method');
+        } catch (error) {
+            console.error('Fallback save failed:', error);
+            // Try session storage as last resort
+            try {
+                sessionStorage.setItem('chat_conversations_emergency', JSON.stringify(this.conversations));
+                console.log('Conversations saved to emergency session storage');
+            } catch (sessionError) {
+                console.error('Emergency save failed:', sessionError);
+            }
+        }
+    }
+
     createReducedConversationsForSave() {
         // Create a copy with large attachments stripped for localStorage saving
         const reduced = JSON.parse(JSON.stringify(this.conversations));
@@ -3079,10 +3237,18 @@ class ChatUI {
             this.messages.push(messageData);
             index = this.messages.length - 1;
 
-            // CRITICAL: Save immediately after adding message
-            this.saveConversations().catch(error => {
-                console.error('Failed to save after adding message:', error);
-            });
+            // CRITICAL: Save immediately after adding message using workers
+            if (this.workerReady) {
+                this.saveConversationsViaWorker().catch(error => {
+                    console.error('Failed to save after adding message (worker):', error);
+                    // Fallback to synchronous save
+                    this.saveConversationsFallback();
+                });
+            } else {
+                this.saveConversations().catch(error => {
+                    console.error('Failed to save after adding message:', error);
+                });
+            }
         }
 
         this.renderMessages();
@@ -3818,11 +3984,64 @@ class ChatUI {
         this.isStreaming = true;
         this.updateSendButton();  // Update button to show "Stop"
 
-        // Prepare messages with system prompt
-        const messagesWithSystem = [
-            { role: 'system', content: this.systemPrompt },
-            ...this.messages
-        ];
+        // Prepare API request data using workers for heavy conversation processing
+        let apiRequestData;
+        try {
+            if (this.workerReady) {
+                // Use worker to prepare API request (non-blocking)
+                const currentConversation = { messages: this.messages };
+                const selectedTools = Array.from(this.selectedTools);
+
+                const result = await this.workerManager.prepareConversationForAPI(
+                    currentConversation,
+                    this.systemPrompt,
+                    selectedTools
+                );
+
+                if (result.success) {
+                    console.log(`API request prepared by worker (${result.data.messageCount} messages)`);
+                    apiRequestData = {
+                        model: this.buildModelWithTools() || 'gemini-2.0-flash',
+                        messages: result.data.messages,
+                        temperature: 0.7,
+                        max_tokens: 2000,
+                        stream: true,
+                        ...(result.data.tools && { tools: result.data.tools })
+                    };
+                } else {
+                    throw new Error(`Worker preparation failed: ${result.error}`);
+                }
+            } else {
+                // Fallback to synchronous preparation
+                const messagesWithSystem = [
+                    { role: 'system', content: this.systemPrompt },
+                    ...this.messages
+                ];
+
+                apiRequestData = {
+                    model: this.buildModelWithTools() || 'gemini-2.0-flash',
+                    messages: messagesWithSystem,
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                    stream: true
+                };
+            }
+        } catch (workerError) {
+            console.warn('Worker API preparation failed, using fallback:', workerError);
+            // Fallback to synchronous preparation
+            const messagesWithSystem = [
+                { role: 'system', content: this.systemPrompt },
+                ...this.messages
+            ];
+
+            apiRequestData = {
+                model: this.buildModelWithTools() || 'gemini-2.0-flash',
+                messages: messagesWithSystem,
+                temperature: 0.7,
+                max_tokens: 2000,
+                stream: true
+            };
+        }
 
         try {
             const response = await fetch(this.apiUrl, {
@@ -3830,13 +4049,7 @@ class ChatUI {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    model: this.buildModelWithTools() || 'gemini-2.0-flash',
-                    messages: messagesWithSystem,
-                    temperature: 0.7,
-                    max_tokens: 2000,
-                    stream: true  // Enable streaming
-                })
+                body: JSON.stringify(apiRequestData)
             });
 
             if (!response.ok) {
