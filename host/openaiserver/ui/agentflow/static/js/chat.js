@@ -134,29 +134,11 @@ class ChatUI {
 
     // Load conversations using storage worker
     async loadConversationsFromWorker() {
-        if (!this.workerReady) {
-            this.conversations = this.loadConversationsFallback();
-            return;
-        }
-
-        try {
-            const result = await this.workerManager.loadConversations();
-
-            if (result.success) {
-                this.conversations = result.data || {};
-                console.log(`Loaded ${Object.keys(this.conversations).length} conversations from worker`);
-
-                if (result.warnings && result.warnings.length > 0) {
-                    console.warn('Storage warnings:', result.warnings);
-                }
-            } else {
-                console.error('Failed to load conversations from worker:', result.error);
-                this.conversations = this.loadConversationsFallback();
-            }
-        } catch (error) {
-            console.error('Error loading conversations from worker:', error);
-            this.conversations = this.loadConversationsFallback();
-        }
+        // CRITICAL FIX: Always use fallback for loading since workers don't handle storage
+        // Workers are only for data processing, not actual storage operations
+        this.conversations = this.loadConversationsFallback();
+        console.log(`Loaded ${Object.keys(this.conversations).length} conversations from localStorage fallback`);
+        return;
     }
 
     // Fallback conversation loading (synchronous)

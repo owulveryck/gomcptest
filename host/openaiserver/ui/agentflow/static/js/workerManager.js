@@ -243,18 +243,22 @@ class WorkerManager {
     }
 
     /**
-     * Storage worker methods
+     * Storage worker methods (data processing only - not actual storage)
      */
-    async saveConversations(conversations) {
-        return this.sendToWorker('storage', 'saveConversations', conversations);
+    async processConversationsForStorage(conversations) {
+        return this.sendToWorker('storage', 'processConversationsForStorage', conversations);
     }
 
-    async loadConversations() {
-        return this.sendToWorker('storage', 'loadConversations', {});
+    async createReducedConversations(conversations) {
+        return this.sendToWorker('storage', 'createReducedConversations', conversations);
     }
 
-    async cleanupOldConversations(conversations, maxCount, maxAge) {
-        return this.sendToWorker('storage', 'cleanupOldConversations', {
+    async createEmergencyData(conversations) {
+        return this.sendToWorker('storage', 'createEmergencyData', conversations);
+    }
+
+    async suggestCleanup(conversations, maxCount, maxAge) {
+        return this.sendToWorker('storage', 'suggestCleanup', {
             conversations,
             maxCount,
             maxAge
