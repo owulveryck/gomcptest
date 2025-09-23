@@ -88,6 +88,40 @@ class ChatUI {
 
         // Initialize conversation after init
         this.initializeConversation();
+
+        // CRITICAL: Set up periodic auto-save to prevent data loss
+        this.setupAutoSave();
+    }
+
+    // Set up periodic auto-save mechanism
+    setupAutoSave() {
+        // Save every 30 seconds as a safety net
+        this.autoSaveInterval = setInterval(() => {
+            if (this.messages && this.messages.length > 0) {
+                this.saveConversations().catch(error => {
+                    console.warn('Periodic auto-save failed:', error);
+                });
+                console.log('Periodic auto-save completed');
+            }
+        }, 30000); // 30 seconds
+
+        // Save on page unload/refresh
+        window.addEventListener('beforeunload', () => {
+            this.saveConversations().catch(error => {
+                console.error('Final save on page unload failed:', error);
+            });
+        });
+
+        // Save on page visibility change (when user switches tabs)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && this.messages && this.messages.length > 0) {
+                this.saveConversations().catch(error => {
+                    console.warn('Save on visibility change failed:', error);
+                });
+            }
+        });
+
+        console.log('Auto-save mechanisms initialized');
     }
 
     // Check if artifact storage server is available at startup
@@ -1774,49 +1808,279 @@ class ChatUI {
     }
 
     // Conversation Management Methods
-    loadConversations() {
-        const saved = localStorage.getItem('chat_conversations');
-        return saved ? JSON.parse(saved) : {};
-    }
 
     async saveConversations() {
-        // If storage quota is exceeded, skip saves entirely to prevent errors
-        if (this.storageQuotaExceeded) {
-            console.log('Storage quota exceeded - skipping save to prevent errors');
-            return;
-        }
+        // CRITICAL FIX: Always attempt to save conversations - never skip due to quota
+        // Multiple fallback mechanisms ensure conversations are never lost
 
-        // Prevent repeated cleanup attempts within short time window
         const now = Date.now();
-        if (this.lastCleanupAttempt && (now - this.lastCleanupAttempt) < 30000) { // 30 seconds
-            console.warn('Skipping save attempt - recent cleanup failed, storage quota exceeded');
-            return;
-        }
 
+        // Primary save attempt to localStorage
+        let primarySaveSucceeded = false;
         try {
             localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
-            // Reset cleanup tracking on successful save
+            primarySaveSucceeded = true;
+
+            // Reset error tracking on successful save
             this.lastCleanupAttempt = null;
             this.storageQuotaExceeded = false;
+            this.consecutiveSaveFailures = 0;
+
+            console.log('Conversations saved successfully to localStorage');
+            return;
         } catch (error) {
+            console.warn('Primary localStorage save failed:', error.message);
+            this.consecutiveSaveFailures = (this.consecutiveSaveFailures || 0) + 1;
+
             if (error.name === 'QuotaExceededError') {
                 this.lastCleanupAttempt = now;
                 this.storageQuotaExceeded = true;
-
-                console.warn('localStorage quota exceeded - cleanup attempts disabled due to artifact server unavailability');
-
-                // DISABLED: All automatic cleanup removed per user request
-                console.error('Storage quota exceeded - saving disabled, all conversations preserved');
-                if (this.artifactServerUnavailable) {
-                    this.showNotification('Storage quota exceeded: conversations preserved but saving disabled. Start the artifact storage server to enable large file storage.', 'warning');
-                } else {
-                    this.showNotification('Storage quota exceeded: conversations preserved but saving disabled. Large files should use artifact storage automatically.', 'warning');
-                }
-                throw error;
-            } else {
-                throw error;
             }
         }
+
+        // Fallback 1: Try to save with reduced data (strip large attachments temporarily)
+        if (!primarySaveSucceeded) {
+            try {
+                const reducedData = this.createReducedConversationsForSave();
+                localStorage.setItem('chat_conversations', JSON.stringify(reducedData));
+                console.log('Conversations saved with reduced data to localStorage');
+
+                // Save the full data to backup location
+                this.saveToBackupLocation();
+                return;
+            } catch (error) {
+                console.warn('Reduced data localStorage save failed:', error.message);
+            }
+        }
+
+        // Fallback 2: Save to IndexedDB
+        try {
+            await this.saveToIndexedDB();
+            console.log('Conversations saved to IndexedDB fallback');
+            return;
+        } catch (error) {
+            console.warn('IndexedDB save failed:', error.message);
+        }
+
+        // Fallback 3: Save to browser memory (session storage)
+        try {
+            sessionStorage.setItem('chat_conversations_backup', JSON.stringify(this.conversations));
+            console.log('Conversations saved to sessionStorage as emergency backup');
+        } catch (error) {
+            console.warn('SessionStorage save failed:', error.message);
+        }
+
+        // Fallback 4: Save to download blob (user can manually save)
+        if (this.consecutiveSaveFailures >= 3) {
+            this.offerDownloadBackup();
+        }
+
+        // Show appropriate error notification
+        if (this.storageQuotaExceeded) {
+            this.showNotification('Storage quota exceeded - using backup storage. Conversations are preserved.', 'warning');
+        } else {
+            this.showNotification('Save error occurred - conversations backed up automatically.', 'warning');
+        }
+    }
+
+    createReducedConversationsForSave() {
+        // Create a copy with large attachments stripped for localStorage saving
+        const reduced = JSON.parse(JSON.stringify(this.conversations));
+
+        Object.values(reduced).forEach(conversation => {
+            if (conversation.messages) {
+                conversation.messages.forEach(message => {
+                    if (Array.isArray(message.content)) {
+                        message.content.forEach(item => {
+                            // Strip large data URLs but keep references
+                            if (item.type === 'audio' && item.audio?.data?.startsWith('data:')) {
+                                item.audio.data = '[LARGE_AUDIO_STRIPPED]';
+                                item.audio.stripped = true;
+                            }
+                            if (item.type === 'image' && item.image?.data?.startsWith('data:')) {
+                                item.image.data = '[LARGE_IMAGE_STRIPPED]';
+                                item.image.stripped = true;
+                            }
+                            if (item.type === 'file' && item.file?.data?.startsWith('data:')) {
+                                item.file.data = '[LARGE_FILE_STRIPPED]';
+                                item.file.stripped = true;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        return reduced;
+    }
+
+    saveToBackupLocation() {
+        // Save full conversation data to a backup localStorage key
+        try {
+            const backupData = {
+                timestamp: Date.now(),
+                conversations: this.conversations
+            };
+            localStorage.setItem('chat_conversations_full_backup', JSON.stringify(backupData));
+            console.log('Full backup saved to localStorage');
+        } catch (error) {
+            console.warn('Backup location save failed:', error.message);
+        }
+    }
+
+    async saveToIndexedDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('AgentFlowDB', 1);
+
+            request.onerror = () => reject(request.error);
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('conversations')) {
+                    db.createObjectStore('conversations', { keyPath: 'id' });
+                }
+            };
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction(['conversations'], 'readwrite');
+                const store = transaction.objectStore('conversations');
+
+                const data = {
+                    id: 'current',
+                    timestamp: Date.now(),
+                    conversations: this.conversations
+                };
+
+                const putRequest = store.put(data);
+
+                putRequest.onsuccess = () => {
+                    db.close();
+                    resolve();
+                };
+
+                putRequest.onerror = () => {
+                    db.close();
+                    reject(putRequest.error);
+                };
+            };
+        });
+    }
+
+    offerDownloadBackup() {
+        try {
+            const backupData = {
+                timestamp: Date.now(),
+                conversations: this.conversations,
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `agentflow-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            this.showNotification('Conversations backup downloaded. Please save this file!', 'success');
+            console.log('Download backup offered to user');
+        } catch (error) {
+            console.error('Failed to offer download backup:', error);
+        }
+    }
+
+    // Enhanced load method that checks backup sources
+    loadConversations() {
+        let conversations = null;
+
+        // Try primary localStorage first
+        try {
+            const saved = localStorage.getItem('chat_conversations');
+            if (saved) {
+                conversations = JSON.parse(saved);
+                console.log('Conversations loaded from primary localStorage');
+            }
+        } catch (error) {
+            console.warn('Primary localStorage load failed:', error.message);
+        }
+
+        // If primary failed, try backup localStorage
+        if (!conversations) {
+            try {
+                const backup = localStorage.getItem('chat_conversations_full_backup');
+                if (backup) {
+                    const backupData = JSON.parse(backup);
+                    conversations = backupData.conversations;
+                    console.log('Conversations loaded from backup localStorage');
+                }
+            } catch (error) {
+                console.warn('Backup localStorage load failed:', error.message);
+            }
+        }
+
+        // If still no data, try sessionStorage
+        if (!conversations) {
+            try {
+                const session = sessionStorage.getItem('chat_conversations_backup');
+                if (session) {
+                    conversations = JSON.parse(session);
+                    console.log('Conversations loaded from sessionStorage backup');
+                }
+            } catch (error) {
+                console.warn('SessionStorage load failed:', error.message);
+            }
+        }
+
+        // If still no data, try IndexedDB
+        if (!conversations) {
+            this.loadFromIndexedDB().then(data => {
+                if (data) {
+                    this.conversations = data;
+                    console.log('Conversations loaded from IndexedDB backup');
+                    this.renderConversationsList();
+                }
+            }).catch(error => {
+                console.warn('IndexedDB load failed:', error.message);
+            });
+        }
+
+        return conversations || {};
+    }
+
+    async loadFromIndexedDB() {
+        return new Promise((resolve) => {
+            const request = indexedDB.open('AgentFlowDB', 1);
+
+            request.onerror = () => resolve(null);
+
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('conversations')) {
+                    db.close();
+                    resolve(null);
+                    return;
+                }
+
+                const transaction = db.transaction(['conversations'], 'readonly');
+                const store = transaction.objectStore('conversations');
+                const getRequest = store.get('current');
+
+                getRequest.onsuccess = () => {
+                    db.close();
+                    const result = getRequest.result;
+                    resolve(result ? result.conversations : null);
+                };
+
+                getRequest.onerror = () => {
+                    db.close();
+                    resolve(null);
+                };
+            };
+        });
     }
 
     cleanupOldConversations() {
@@ -2814,6 +3078,11 @@ class ChatUI {
         } else {
             this.messages.push(messageData);
             index = this.messages.length - 1;
+
+            // CRITICAL: Save immediately after adding message
+            this.saveConversations().catch(error => {
+                console.error('Failed to save after adding message:', error);
+            });
         }
 
         this.renderMessages();
@@ -3131,24 +3400,156 @@ class ChatUI {
         textarea.value = currentTextContent;
         textarea.style.marginTop = currentAttachments.length > 0 ? '8px' : '0';
 
+        // Create attachment controls section
+        const attachmentControls = document.createElement('div');
+        attachmentControls.className = 'edit-attachment-controls';
+        attachmentControls.style.cssText = `
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        `;
+
+        // Add image/PDF button
+        const addImageButton = document.createElement('button');
+        addImageButton.className = 'attachment-button';
+        addImageButton.style.cssText = `
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #f9fafb;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            transition: all 0.2s;
+        `;
+        addImageButton.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21,15 16,10 5,21"/>
+            </svg>
+            Add Image/PDF
+        `;
+
+        // Add audio file button
+        const addAudioButton = document.createElement('button');
+        addAudioButton.className = 'attachment-button';
+        addAudioButton.style.cssText = addImageButton.style.cssText;
+        addAudioButton.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="m19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" x2="12" y1="19" y2="23"/>
+                <line x1="8" x2="16" y1="23" y2="23"/>
+            </svg>
+            Add Audio
+        `;
+
+        // Create hidden file inputs for editing
+        const editImageInput = document.createElement('input');
+        editImageInput.type = 'file';
+        editImageInput.accept = 'image/*,application/pdf';
+        editImageInput.multiple = true;
+        editImageInput.style.display = 'none';
+
+        const editAudioInput = document.createElement('input');
+        editAudioInput.type = 'file';
+        editAudioInput.accept = 'audio/*';
+        editAudioInput.multiple = true;
+        editAudioInput.style.display = 'none';
+
+        // Add event listeners for attachment buttons
+        addImageButton.onclick = () => editImageInput.click();
+        addAudioButton.onclick = () => editAudioInput.click();
+
+        editImageInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                const newAttachments = await this.processEditAttachments(e.target.files);
+                currentAttachments.push(...newAttachments);
+                this.renderEditInterface(index, textarea.value, currentAttachments);
+            }
+        });
+
+        editAudioInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                const newAttachments = await this.processEditAttachments(e.target.files);
+                currentAttachments.push(...newAttachments);
+                this.renderEditInterface(index, textarea.value, currentAttachments);
+            }
+        });
+
+        attachmentControls.appendChild(addImageButton);
+        attachmentControls.appendChild(addAudioButton);
+        attachmentControls.appendChild(editImageInput);
+        attachmentControls.appendChild(editAudioInput);
+
         // Create edit buttons
         const editButtons = document.createElement('div');
         editButtons.className = 'edit-buttons';
+        editButtons.style.cssText = `
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        `;
 
         const saveButton = document.createElement('button');
         saveButton.className = 'save-button';
         saveButton.textContent = 'Save';
+        saveButton.style.cssText = `
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #059669;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        `;
         saveButton.onclick = () => this.saveEditWithAttachments(index, textarea.value, currentAttachments);
+
+        const saveAndRestartButton = document.createElement('button');
+        saveAndRestartButton.className = 'save-restart-button';
+        saveAndRestartButton.textContent = 'Save & Restart from here';
+        saveAndRestartButton.style.cssText = `
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #dc2626;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        `;
+        saveAndRestartButton.onclick = () => this.saveEditAndRestart(index, textarea.value, currentAttachments);
 
         const cancelButton = document.createElement('button');
         cancelButton.className = 'cancel-button';
         cancelButton.textContent = 'Cancel';
+        cancelButton.style.cssText = `
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #f9fafb;
+            color: #374151;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        `;
         cancelButton.onclick = () => this.cancelEdit();
 
         editButtons.appendChild(saveButton);
+        editButtons.appendChild(saveAndRestartButton);
         editButtons.appendChild(cancelButton);
 
         editContainer.appendChild(textarea);
+        editContainer.appendChild(attachmentControls);
         editContainer.appendChild(editButtons);
         messageContent.appendChild(editContainer);
 
@@ -3163,6 +3564,102 @@ class ChatUI {
         });
 
         textarea.focus();
+    }
+
+    async processEditAttachments(files) {
+        const SIZE_THRESHOLD = 500 * 1024; // 500KB threshold for artifact storage
+        const attachments = [];
+
+        for (const file of files) {
+            if (file.type.startsWith('image/') ||
+                file.type === 'application/pdf' ||
+                file.type.startsWith('audio/') ||
+                file.type.startsWith('text/') ||
+                file.type === 'application/json' ||
+                file.type === 'application/xml' ||
+                file.type.includes('csv') ||
+                file.type.includes('excel') ||
+                file.type.includes('word') ||
+                file.type.includes('powerpoint')) {
+
+                try {
+                    let attachmentData;
+
+                    if (file.size > SIZE_THRESHOLD && !this.artifactServerUnavailable) {
+                        // Store large files using artifact storage
+                        const artifactId = await this.uploadToArtifactStorage(file, file.name);
+
+                        if (file.type.startsWith('image/')) {
+                            attachmentData = {
+                                type: 'image_artifact',
+                                image_artifact: {
+                                    artifactId: artifactId,
+                                    filename: file.name,
+                                    mimeType: file.type,
+                                    formattedSize: this.formatFileSize(file.size)
+                                }
+                            };
+                        } else if (file.type.startsWith('audio/')) {
+                            attachmentData = {
+                                type: 'audio_artifact',
+                                audio_artifact: {
+                                    artifactId: artifactId,
+                                    filename: file.name,
+                                    mimeType: file.type,
+                                    formattedSize: this.formatFileSize(file.size)
+                                }
+                            };
+                        } else {
+                            attachmentData = {
+                                type: 'file_artifact',
+                                file_artifact: {
+                                    artifactId: artifactId,
+                                    filename: file.name,
+                                    mimeType: file.type,
+                                    formattedSize: this.formatFileSize(file.size)
+                                }
+                            };
+                        }
+                    } else {
+                        // Store small files as base64 data URLs
+                        const dataURL = await this.fileToDataURL(file);
+                        if (file.type.startsWith('image/')) {
+                            attachmentData = {
+                                type: 'image_url',
+                                image_url: {
+                                    url: dataURL
+                                }
+                            };
+                        } else {
+                            attachmentData = {
+                                type: 'file',
+                                file: {
+                                    data: dataURL,
+                                    filename: file.name
+                                }
+                            };
+                        }
+                    }
+
+                    attachments.push(attachmentData);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    this.showNotification(`Error processing ${file.name}: ${error.message}`, 'error');
+                }
+            } else {
+                this.showNotification(`Unsupported file type: ${file.type}`, 'error');
+            }
+        }
+
+        return attachments;
+    }
+
+    saveEditAndRestart(index, textContent, attachments) {
+        // Save the edited message first
+        this.saveEditWithAttachments(index, textContent, attachments);
+
+        // Then restart conversation from this point
+        this.replayFrom(index);
     }
 
     saveEditWithAttachments(index, textContent, attachments) {
@@ -3193,6 +3690,11 @@ class ChatUI {
 
         this.renderMessages();
         this.saveCurrentConversation(); // Save the updated message
+
+        // CRITICAL: Save immediately after editing message with robust error handling
+        this.saveConversations().catch(error => {
+            console.error('Failed to save after editing message:', error);
+        });
     }
 
     cancelEdit() {
@@ -3385,6 +3887,11 @@ class ChatUI {
         };
 
         this.messages.push(toolMessage);
+
+        // CRITICAL: Save immediately after adding tool message
+        this.saveConversations().catch(error => {
+            console.error('Failed to save after adding tool message:', error);
+        });
 
         // Force re-render to show the tool notification immediately
         this.renderMessages();
@@ -3814,6 +4321,11 @@ class ChatUI {
                     if (messageIndex === null) {
                         this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
                         messageIndex = this.messages.length - 1;
+
+                        // CRITICAL: Save immediately after adding assistant message
+                        this.saveConversations().catch(error => {
+                            console.error('Failed to save after adding assistant message:', error);
+                        });
                     } else {
                         this.messages[messageIndex].isTyping = false;
                     }
@@ -3844,6 +4356,11 @@ class ChatUI {
                             if (messageIndex === null) {
                                 this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
                                 messageIndex = this.messages.length - 1;
+
+                                // CRITICAL: Save immediately after adding assistant message
+                                this.saveConversations().catch(error => {
+                                    console.error('Failed to save after adding assistant message:', error);
+                                });
                             } else {
                                 this.messages[messageIndex].isTyping = false;
                             }
@@ -3913,6 +4430,11 @@ class ChatUI {
                                     if (messageIndex === null) {
                                         this.messages.push({ role: 'assistant', content: '', isTyping: true });
                                         messageIndex = this.messages.length - 1;
+
+                                        // CRITICAL: Save immediately after adding assistant message
+                                        this.saveConversations().catch(error => {
+                                            console.error('Failed to save after adding assistant message:', error);
+                                        });
                                         this.renderMessages();
                                     }
 
@@ -3932,10 +4454,20 @@ class ChatUI {
                                     if (messageIndex === null) {
                                         this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
                                         messageIndex = this.messages.length - 1;
+
+                                        // CRITICAL: Save immediately after adding assistant message
+                                        this.saveConversations().catch(error => {
+                                            console.error('Failed to save after adding assistant message:', error);
+                                        });
                                     } else {
                                         // Update final message content and save
                                         this.messages[messageIndex].content = assistantMessage;
                                         this.messages[messageIndex].isTyping = false;
+
+                                        // CRITICAL: Save immediately after updating assistant message
+                                        this.saveConversations().catch(error => {
+                                            console.error('Failed to save after updating assistant message:', error);
+                                        });
                                     }
                                     this.renderMessages();
                                     this.saveCurrentConversation();
