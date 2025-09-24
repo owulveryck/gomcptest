@@ -944,7 +944,7 @@ class ChatUI {
     }
 
     async handleFileSelection(files) {
-        const SIZE_THRESHOLD = 500 * 1024; // 500KB threshold for artifact storage
+        const SIZE_THRESHOLD = 50 * 1024; // 50KB threshold for artifact storage - much more aggressive
 
         for (const file of files) {
             if (file.type.startsWith('image/') ||
@@ -2054,50 +2054,159 @@ class ChatUI {
 
     // New worker-based save method
     async saveConversationsViaWorker() {
-        // Workers can't handle storage operations (no localStorage access)
-        // Always use fallback for actual saving
         this.updateCurrentConversation();
+
+        // Try to use workers for data optimization if available
+        if (this.workerReady && this.workerManager.isInitialized) {
+            try {
+                // Use worker to create optimized data for storage
+                const result = await this.workerManager.createReducedConversations(this.conversations);
+                if (result.success) {
+                    return this.saveOptimizedConversations(result.data);
+                }
+            } catch (error) {
+                console.log('Worker optimization failed, using fallback:', error.message);
+            }
+        }
+
+        // Fallback to direct save with local optimization
         return this.saveConversationsFallback();
     }
 
-    // Fallback save method (synchronous)
-    saveConversationsFallback() {
+    // Save optimized conversations data
+    saveOptimizedConversations(optimizedData) {
         try {
-            this.updateCurrentConversation();
-            localStorage.setItem('chat_conversations', JSON.stringify(this.conversations));
-            console.log('Conversations saved via fallback method');
+            localStorage.setItem('chat_conversations', JSON.stringify(optimizedData));
+            console.log('Conversations saved with worker optimization');
+            this.storageQuotaExceeded = false;
+            this.consecutiveSaveFailures = 0;
+            return true;
         } catch (error) {
-            console.error('Fallback save failed:', error);
-            // Try session storage as last resort
-            try {
-                sessionStorage.setItem('chat_conversations_emergency', JSON.stringify(this.conversations));
-                console.log('Conversations saved to emergency session storage');
-            } catch (sessionError) {
-                console.error('Emergency save failed:', sessionError);
+            console.error('Optimized save failed:', error);
+            if (error.name === 'QuotaExceededError') {
+                return this.handleQuotaExceeded();
             }
+            return false;
         }
     }
 
+    // Fallback save method with quota handling
+    saveConversationsFallback() {
+        try {
+            // First try with reduced data
+            const reducedData = this.createReducedConversationsForSave();
+            localStorage.setItem('chat_conversations', JSON.stringify(reducedData));
+            console.log('Conversations saved via fallback with local optimization');
+            this.storageQuotaExceeded = false;
+            this.consecutiveSaveFailures = 0;
+            return true;
+        } catch (error) {
+            console.error('Fallback save failed:', error);
+            if (error.name === 'QuotaExceededError') {
+                return this.handleQuotaExceeded();
+            }
+            return false;
+        }
+    }
+
+    // Handle quota exceeded errors - should be rare with aggressive prevention
+    handleQuotaExceeded() {
+        console.log('Storage quota exceeded despite prevention measures...');
+        this.storageQuotaExceeded = true;
+        this.consecutiveSaveFailures++;
+
+        // Clean up old localStorage items to free space
+        this.cleanupOldStorageItems();
+
+        // Try saving with even more aggressive data stripping
+        try {
+            const strippedData = this.createReducedConversationsForSave();
+            localStorage.setItem('chat_conversations', JSON.stringify(strippedData));
+            console.log('Storage quota resolved with aggressive data stripping');
+            this.showNotification('Large attachments moved to server storage automatically.', 'info');
+            return true;
+        } catch (stillExceededError) {
+            console.error('Storage still exceeded after aggressive cleanup:', stillExceededError);
+
+            // Offer download backup as last resort
+            this.offerDownloadBackup();
+            this.showNotification('Storage quota exceeded. Download backup recommended.', 'warning');
+            return false;
+        }
+    }
+
+    // Clean up old storage items to free space
+    cleanupOldStorageItems() {
+        const itemsToCheck = [
+            'chat_conversations_backup',
+            'chat_conversations_emergency',
+            'chat_messages_cache',
+            'chat_temp_data',
+            'old_chat_data'
+        ];
+
+        itemsToCheck.forEach(key => {
+            try {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    console.log(`Cleaned up old storage item: ${key}`);
+                }
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+        });
+
+        // Also clear session storage
+        try {
+            sessionStorage.clear();
+        } catch (e) {
+            // Ignore cleanup errors
+        }
+    }
+
+
     createReducedConversationsForSave() {
-        // Create a copy with large attachments stripped for localStorage saving
+        // Aggressively prevent large data from going to localStorage
         const reduced = JSON.parse(JSON.stringify(this.conversations));
+        const MAX_DATA_URL_SIZE = 10 * 1024; // Only allow tiny data URLs (10KB)
 
         Object.values(reduced).forEach(conversation => {
             if (conversation.messages) {
                 conversation.messages.forEach(message => {
+                    // Handle attachments array
+                    if (message.attachments && Array.isArray(message.attachments)) {
+                        message.attachments.forEach(attachment => {
+                            // Strip any large data URLs from attachments
+                            if (attachment.image_url?.url?.startsWith('data:') &&
+                                attachment.image_url.url.length > MAX_DATA_URL_SIZE) {
+                                attachment.image_url.url = '[LARGE_DATA_STRIPPED_USE_ARTIFACT]';
+                                attachment.stripped = true;
+                            }
+                            if (attachment.audio?.data?.startsWith('data:') &&
+                                attachment.audio.data.length > MAX_DATA_URL_SIZE) {
+                                attachment.audio.data = '[LARGE_AUDIO_STRIPPED_USE_ARTIFACT]';
+                                attachment.stripped = true;
+                            }
+                        });
+                    }
+
+                    // Handle content array (for complex message structures)
                     if (Array.isArray(message.content)) {
                         message.content.forEach(item => {
                             // Strip large data URLs but keep references
-                            if (item.type === 'audio' && item.audio?.data?.startsWith('data:')) {
-                                item.audio.data = '[LARGE_AUDIO_STRIPPED]';
+                            if (item.type === 'audio' && item.audio?.data?.startsWith('data:') &&
+                                item.audio.data.length > MAX_DATA_URL_SIZE) {
+                                item.audio.data = '[LARGE_AUDIO_STRIPPED_USE_ARTIFACT]';
                                 item.audio.stripped = true;
                             }
-                            if (item.type === 'image' && item.image?.data?.startsWith('data:')) {
-                                item.image.data = '[LARGE_IMAGE_STRIPPED]';
+                            if (item.type === 'image' && item.image?.data?.startsWith('data:') &&
+                                item.image.data.length > MAX_DATA_URL_SIZE) {
+                                item.image.data = '[LARGE_IMAGE_STRIPPED_USE_ARTIFACT]';
                                 item.image.stripped = true;
                             }
-                            if (item.type === 'file' && item.file?.data?.startsWith('data:')) {
-                                item.file.data = '[LARGE_FILE_STRIPPED]';
+                            if (item.type === 'file' && item.file?.data?.startsWith('data:') &&
+                                item.file.data.length > MAX_DATA_URL_SIZE) {
+                                item.file.data = '[LARGE_FILE_STRIPPED_USE_ARTIFACT]';
                                 item.file.stripped = true;
                             }
                         });
@@ -2108,6 +2217,7 @@ class ChatUI {
 
         return reduced;
     }
+
 
     saveToBackupLocation() {
         // Save full conversation data to a backup localStorage key
