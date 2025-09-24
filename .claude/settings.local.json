@@ -59,7 +59,8 @@
       "Bash(PORT=5000 ./host/openaiserver/openaiserver)",
       "mcp__playwright__browser_press_key",
       "Bash(node:*)",
-      "mcp__playwright__browser_tabs"
+      "mcp__playwright__browser_tabs",
+      "Bash(PORT=7000 go run .)"
     ],
     "deny": [],
     "ask": []
