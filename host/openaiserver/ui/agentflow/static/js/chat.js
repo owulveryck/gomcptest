@@ -1013,8 +1013,8 @@ class ChatUI {
 
         this.selectedFiles.push(fileData);
 
-        // Calculate file size
-        const fileSize = this.calculateDataURLSize(dataURL);
+        // Calculate file size - use metadata size for artifacts, calculate for data URLs
+        const fileSize = metadata.size || this.calculateDataURLSize(dataURL);
         const formattedSize = this.formatFileSize(fileSize);
 
         // Create preview element
@@ -1023,16 +1023,23 @@ class ChatUI {
         preview.dataset.fileId = fileData.id;
 
         if (fileType.startsWith('image/')) {
-            // Image preview
+            // Image preview - handle artifact URLs
+            const imageUrl = dataURL.startsWith('artifact:') ?
+                `/artifact/${dataURL.substring(9)}` : dataURL;
+            const artifactBadge = fileData.isArtifact ?
+                `<div class="artifact-badge" style="position: absolute; top: -2px; left: 2px; background: #059669; color: white; padding: 1px 3px; border-radius: 2px; font-size: 7px; font-weight: bold;">SERVER</div>` : '';
             preview.innerHTML = `
-                <img src="${dataURL}" alt="${fileName}" title="${fileName}">
+                <img src="${imageUrl}" alt="${fileName}" title="${fileName}">
+                ${artifactBadge}
                 <div class="file-size-badge" style="position: absolute; top: 2px; right: 20px; background: rgba(0,0,0,0.7); color: white; padding: 1px 4px; border-radius: 3px; font-size: 9px; font-weight: 500;">
                     ${formattedSize}
                 </div>
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
         } else if (fileType === 'application/pdf') {
-            // PDF preview
+            // PDF preview - show artifact indicator if stored on server
+            const artifactBadge = fileData.isArtifact ?
+                `<div class="artifact-badge" style="position: absolute; top: -2px; left: 2px; background: #dc2626; color: white; padding: 1px 3px; border-radius: 2px; font-size: 7px; font-weight: bold;">SERVER</div>` : '';
             preview.innerHTML = `
                 <div class="pdf-icon" title="${fileName}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1041,6 +1048,7 @@ class ChatUI {
                     <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
                     <div style="font-size: 8px; color: #666; margin-top: 2px;">${formattedSize}</div>
                 </div>
+                ${artifactBadge}
                 <button class="remove-file" onclick="chatUI.removeFilePreview('${fileData.id}')">×</button>
             `;
         } else if (fileType.startsWith('audio/')) {
@@ -2046,36 +2054,10 @@ class ChatUI {
 
     // New worker-based save method
     async saveConversationsViaWorker() {
-        if (!this.workerReady) {
-            return this.saveConversationsFallback();
-        }
-
-        try {
-            // Update current conversation
-            this.updateCurrentConversation();
-
-            const result = await this.workerManager.saveConversations(this.conversations);
-
-            if (result.success) {
-                console.log(`Conversations saved via worker (${result.method})`);
-
-                if (result.fallbacksUsed && result.fallbacksUsed.length > 0) {
-                    console.warn('Some fallbacks were used:', result.fallbacksUsed);
-                }
-
-                // Reset error tracking on successful save
-                this.storageQuotaExceeded = false;
-                this.consecutiveSaveFailures = 0;
-            } else {
-                console.error('Worker save failed:', result.error);
-                // Try synchronous fallback
-                return this.saveConversationsFallback();
-            }
-        } catch (error) {
-            console.error('Error saving via worker:', error);
-            // Try synchronous fallback
-            return this.saveConversationsFallback();
-        }
+        // Workers can't handle storage operations (no localStorage access)
+        // Always use fallback for actual saving
+        this.updateCurrentConversation();
+        return this.saveConversationsFallback();
     }
 
     // Fallback save method (synchronous)

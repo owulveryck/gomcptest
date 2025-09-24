@@ -53,7 +53,13 @@
       "Bash(git merge:*)",
       "Bash(git branch:*)",
       "Bash(git push:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(PORT=9000 go run host/openaiserver/main.go)",
+      "Bash(PORT=9000 ./host/openaiserver/openaiserver)",
+      "Bash(PORT=5000 ./host/openaiserver/openaiserver)",
+      "mcp__playwright__browser_press_key",
+      "Bash(node:*)",
+      "mcp__playwright__browser_tabs"
     ],
     "deny": [],
     "ask": []
