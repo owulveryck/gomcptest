@@ -36,6 +36,8 @@ class ChatUI {
         this.recordingStartTime = null;
         this.recordingTimerInterval = null;
         this.audioChunks = [];
+        this.audioContext = null;  // Web Audio API context for mixing
+        this.originalStreams = null;  // Store original streams for "both" mode cleanup
 
         // DOM elements (must be initialized first)
         this.chatMessages = document.getElementById('chatMessages');
@@ -1605,18 +1607,76 @@ class ChatUI {
                 return audioOnlyStream;
 
             case 'both':
-                // For "both", we'll need to mix streams (simplified approach)
-                const micStream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
+                try {
+                    // Get microphone stream
+                    const micStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+
+                    // Get system audio stream
+                    const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                        audio: true,
+                        video: true
+                    });
+
+                    const systemAudioTracks = displayStream.getAudioTracks();
+
+                    // If no system audio is available, fall back to microphone only
+                    if (systemAudioTracks.length === 0) {
+                        console.warn('No system audio available, using microphone only');
+                        displayStream.getTracks().forEach(track => track.stop());
+                        return micStream;
                     }
-                });
-                // Note: Mixing microphone and system audio requires more complex implementation
-                // For now, we'll just use microphone as the primary source
-                // Full implementation would require Web Audio API for mixing
-                return micStream;
+
+                    // Create Web Audio API context for mixing
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // Create audio sources
+                    const micSource = audioContext.createMediaStreamSource(micStream);
+                    const systemSource = audioContext.createMediaStreamSource(new MediaStream(systemAudioTracks));
+
+                    // Create a gain node for volume control (optional)
+                    const micGain = audioContext.createGain();
+                    const systemGain = audioContext.createGain();
+
+                    // Set volumes (can be adjusted as needed)
+                    micGain.gain.value = 0.7; // Slightly reduce mic volume
+                    systemGain.gain.value = 0.8; // Slightly reduce system volume
+
+                    // Create destination for mixed audio
+                    const destination = audioContext.createMediaStreamDestination();
+
+                    // Connect the audio graph
+                    micSource.connect(micGain);
+                    systemSource.connect(systemGain);
+                    micGain.connect(destination);
+                    systemGain.connect(destination);
+
+                    // Clean up the display stream video tracks
+                    displayStream.getVideoTracks().forEach(track => track.stop());
+
+                    // Store audio context for cleanup later
+                    this.audioContext = audioContext;
+                    this.originalStreams = [micStream, displayStream];
+
+                    return destination.stream;
+
+                } catch (error) {
+                    console.error('Error setting up mixed audio recording:', error);
+                    // Fallback to microphone only
+                    console.warn('Falling back to microphone only due to error');
+                    return await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                }
 
             default:
                 throw new Error('Invalid audio source selected');
@@ -1636,6 +1696,26 @@ class ChatUI {
             if (this.audioStream) {
                 this.audioStream.getTracks().forEach(track => track.stop());
                 this.audioStream = null; // Clear the stream reference
+            }
+
+            // Clean up Web Audio API resources used for "both" recording mode
+            if (this.audioContext) {
+                try {
+                    this.audioContext.close();
+                } catch (e) {
+                    console.warn('Error closing audio context:', e);
+                }
+                this.audioContext = null;
+            }
+
+            // Clean up original streams used for "both" recording mode
+            if (this.originalStreams) {
+                this.originalStreams.forEach(stream => {
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
+                });
+                this.originalStreams = null;
             }
 
             // Update UI
