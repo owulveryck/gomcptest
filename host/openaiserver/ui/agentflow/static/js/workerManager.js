@@ -59,6 +59,7 @@ class WorkerManager {
     async initWorker(type, scriptUrl) {
         return new Promise((resolve) => {
             try {
+                console.log(`Attempting to create worker ${type} from ${scriptUrl}`);
                 const worker = new Worker(scriptUrl);
                 let isReady = false;
 
@@ -89,13 +90,14 @@ class WorkerManager {
                     }
                 };
 
-                // Timeout for worker initialization
+                // Timeout for worker initialization (increased to 10 seconds)
                 setTimeout(() => {
                     if (!isReady) {
+                        console.error(`Worker ${type} timeout - terminating`);
                         worker.terminate();
                         resolve({ success: false, error: `Worker ${type} initialization timeout` });
                     }
-                }, 5000);
+                }, 10000);
 
             } catch (error) {
                 resolve({ success: false, error: `Failed to create worker ${type}: ${error.message}` });

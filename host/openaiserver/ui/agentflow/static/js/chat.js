@@ -100,32 +100,41 @@ class ChatUI {
     async initializeWorkers() {
         try {
             console.log('Initializing web workers...');
-            const result = await this.workerManager.init();
+
+            // Add timeout protection to prevent hanging on worker init
+            const workerInitPromise = this.workerManager.init();
+            const timeoutPromise = new Promise(resolve => {
+                setTimeout(() => resolve({ success: false, error: 'Worker initialization timeout (8s)' }), 8000);
+            });
+
+            const result = await Promise.race([workerInitPromise, timeoutPromise]);
 
             if (result.success) {
                 this.workerReady = true;
                 console.log('Workers initialized successfully');
+            } else {
+                console.warn('Workers failed to initialize, continuing with fallback mode:', result.error);
+                this.workerReady = false;
+            }
+        } catch (error) {
+            console.warn('Error during worker initialization, using fallback mode:', error);
+            this.workerReady = false;
+        }
 
-                // Now load conversations using workers
-                await this.loadConversationsFromWorker();
+        // Always continue with loading conversations and initialization
+        // (workers are optional enhancement, not required for core functionality)
+        try {
+            await this.loadConversationsFromWorker();
+            this.initializeConversation();
 
-                // Initialize conversation after loading
-                this.initializeConversation();
-
-                // Set up auto-save using workers
+            if (this.workerReady) {
                 this.setupAutoSaveWithWorkers();
             } else {
-                console.error('Worker initialization failed:', result.error);
-                // Fallback to synchronous mode
-                this.workerReady = false;
-                this.conversations = this.loadConversationsFallback();
-                this.initializeConversation();
                 this.setupAutoSave();
             }
         } catch (error) {
-            console.error('Error initializing workers:', error);
-            // Fallback to synchronous mode
-            this.workerReady = false;
+            console.error('Error during conversation loading:', error);
+            // Final fallback
             this.conversations = this.loadConversationsFallback();
             this.initializeConversation();
             this.setupAutoSave();
