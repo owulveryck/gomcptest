@@ -31,9 +31,9 @@ class WorkerManager {
 
         try {
             const workerPromises = [
-                this.initWorker('conversation', `${this.baseUrl}/ui/static/js/workers/conversationWorker.js`),
-                this.initWorker('storage', `${this.baseUrl}/ui/static/js/workers/storageWorker.js`),
-                this.initWorker('message', `${this.baseUrl}/ui/static/js/workers/messageWorker.js`)
+                this.initWorker('conversation', `${this.baseUrl}/static/js/workers/conversationWorker.js`),
+                this.initWorker('storage', `${this.baseUrl}/static/js/workers/storageWorker.js`),
+                this.initWorker('message', `${this.baseUrl}/static/js/workers/messageWorker.js`)
             ];
 
             const results = await Promise.all(workerPromises);
@@ -153,9 +153,9 @@ class WorkerManager {
             }
 
             const scriptUrls = {
-                conversation: `${this.baseUrl}/ui/static/js/workers/conversationWorker.js`,
-                storage: `${this.baseUrl}/ui/static/js/workers/storageWorker.js`,
-                message: `${this.baseUrl}/ui/static/js/workers/messageWorker.js`
+                conversation: `${this.baseUrl}/static/js/workers/conversationWorker.js`,
+                storage: `${this.baseUrl}/static/js/workers/storageWorker.js`,
+                message: `${this.baseUrl}/static/js/workers/messageWorker.js`
             };
 
             const result = await this.initWorker(type, scriptUrls[type]);
