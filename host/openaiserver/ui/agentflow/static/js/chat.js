@@ -2020,6 +2020,30 @@ class ChatUI {
         }
     }
 
+    // Update the current conversation data in the conversations object
+    updateCurrentConversation() {
+        if (this.currentConversationId && this.messages && this.messages.length > 0) {
+            // Update the conversation object with current messages
+            if (!this.conversations[this.currentConversationId]) {
+                // Generate title from first user message or use default
+                const firstUserMessage = this.messages.find(msg => msg.role === 'user');
+                const title = firstUserMessage ?
+                    firstUserMessage.content.substring(0, 50).trim() + (firstUserMessage.content.length > 50 ? '...' : '') :
+                    'New Conversation';
+
+                this.conversations[this.currentConversationId] = {
+                    title: title,
+                    timestamp: Date.now(),
+                    messages: []
+                };
+            }
+
+            // Update messages and timestamp
+            this.conversations[this.currentConversationId].messages = [...this.messages];
+            this.conversations[this.currentConversationId].timestamp = Date.now();
+        }
+    }
+
     // New worker-based save method
     async saveConversationsViaWorker() {
         if (!this.workerReady) {
