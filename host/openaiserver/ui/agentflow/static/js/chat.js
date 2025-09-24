@@ -471,10 +471,7 @@ class ChatUI {
         // Reset button state
         button.className = 'copy-selection-button';
         button.innerHTML = `
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
+            <span class="material-icons" style="font-size: 16px; margin-right: 4px;">content_copy</span>
             Copy
         `;
     }
@@ -500,9 +497,7 @@ class ChatUI {
             const button = this.copySelectionButton;
             button.className = 'copy-selection-button success';
             button.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
-                    <polyline points="20,6 9,17 4,12"></polyline>
-                </svg>
+                <span class="material-icons" style="font-size: 16px; margin-right: 4px;">check</span>
                 Copied!
             `;
 
@@ -1074,9 +1069,7 @@ class ChatUI {
                 `<div class="artifact-badge" style="position: absolute; top: -2px; left: 2px; background: #dc2626; color: white; padding: 1px 3px; border-radius: 2px; font-size: 7px; font-weight: bold;">SERVER</div>` : '';
             preview.innerHTML = `
                 <div class="pdf-icon" title="${fileName}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                    </svg>
+                    <span class="material-icons" style="font-size: 24px;">picture_as_pdf</span>
                     <div style="word-wrap: break-word; font-size: 10px;">${fileName.length > 12 ? fileName.substring(0, 12) + '...' : fileName}</div>
                     <div style="font-size: 8px; color: #666; margin-top: 2px;">${formattedSize}</div>
                 </div>
@@ -1090,9 +1083,7 @@ class ChatUI {
 
             preview.innerHTML = `
                 <div class="audio-icon ${fileData.isArtifact ? 'artifact' : ''}" title="${fileName}${fileData.isArtifact ? ' (Server Storage)' : ''}">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
-                    </svg>
+                    <span class="material-icons" style="font-size: 20px;">audiotrack</span>
                     <div style="word-wrap: break-word; font-size: 8px;">${fileName.length > 8 ? fileName.substring(0, 8) + '...' : fileName}</div>
                     <div style="font-size: 7px; color: #ccc; margin-top: 1px;">${formattedSize}</div>
                     ${artifactBadge}
@@ -3274,10 +3265,7 @@ class ChatUI {
                 <div class="code-block-wrapper">
                     <pre class="code-block"><code id="${codeId}" class="language-${prismLang}" data-original-code="${escapedCode}">${escapedCode}</code></pre>
                     <button class="code-copy-btn" onclick="chatUI.copyCodeBlock('${codeId}', this)" title="Copy code">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
+                        <span class="material-icons">content_copy</span>
                     </button>
                 </div>
             </div>`;
@@ -3349,9 +3337,7 @@ class ChatUI {
             // Visual feedback
             const originalContent = buttonElement.innerHTML;
             buttonElement.innerHTML = `
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20,6 9,17 4,12"></polyline>
-                </svg>
+                <span class="material-icons" style="font-size: 14px;">check</span>
                 Copied!
             `;
             buttonElement.classList.add('copied');
@@ -3368,10 +3354,7 @@ class ChatUI {
             buttonElement.innerHTML = 'Failed';
             setTimeout(() => {
                 buttonElement.innerHTML = `
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <span class="material-icons" style="font-size: 14px;">content_copy</span>
                     Copy
                 `;
             }, 2000);
@@ -3393,11 +3376,7 @@ class ChatUI {
                     // Check if image data was stripped from localStorage
                     if (item.image_url.url === '[Large image data removed to save storage space]') {
                         html += `<div class="message-image-placeholder" style="display: inline-flex; align-items: center; padding: 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 8px 0; gap: 8px; color: #6b7280;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <polyline points="21,15 16,10 5,21"/>
-                            </svg>
+                            <span class="material-icons" style="color: #9ca3af; font-size: 20px;">image</span>
                             <span style="font-size: 14px; font-style: italic;">Image not available (removed to save storage space)</span>
                         </div>`;
                     } else {
@@ -3417,17 +3396,13 @@ class ChatUI {
 
                     if (isPlaceholder) {
                         html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                            </svg>
+                            <span class="material-icons" style="color: #9ca3af; font-size: 16px;">description</span>
                             <span style="font-size: 14px; color: #6b7280; font-style: italic;">${filename} (removed to save storage space)</span>
                         </div>`;
                     } else {
                         const sizeInfo = this.getAttachmentSizeInfo(item);
                         html += `<div class="message-file" style="display: inline-flex; align-items: center; padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                            </svg>
+                            <span class="material-icons" style="color: #dc2626; font-size: 16px;">description</span>
                             <span style="font-size: 14px; color: #374151; flex: 1;">${filename}</span>
                             <span style="font-size: 11px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                                 ${sizeInfo.formattedSize}
@@ -3438,18 +3413,14 @@ class ChatUI {
                     // Check if audio data was stripped from localStorage
                     if (item.audio.data === '[Large audio data removed to save storage space]') {
                         html += `<div class="message-audio-placeholder" style="display: flex; align-items: center; padding: 8px 12px; background: #f9f9f9; border: 2px dashed #d1d5db; border-radius: 8px; margin: 4px 0; gap: 8px; color: #6b7280; width: 100%; max-width: 100%;">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#9ca3af" stroke-width="1.5">
-                                <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
-                            </svg>
+                            <span class="material-icons" style="color: #9ca3af; font-size: 16px;">audiotrack</span>
                             <span style="font-size: 13px; font-style: italic;">Audio file not available (removed to save storage space)</span>
                         </div>`;
                     } else {
                         // Display audio attachment with playback controls and size info
                         const sizeInfo = this.getAttachmentSizeInfo(item);
                         html += `<div class="message-audio" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; max-height: 7vh; box-sizing: border-box;">
-                            <svg width="16" height="2" viewBox="0 0 16 16" fill="none" stroke="#059669" stroke-width="1.5">
-                                <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
-                            </svg>
+                            <span class="material-icons" style="color: #059669; font-size: 16px;">audiotrack</span>
                             <span style="font-size: 13px; color: #374151; font-weight: 500;">Audio file</span>
                             <span style="font-size: 10px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                                 ${sizeInfo.formattedSize}
@@ -3471,9 +3442,7 @@ class ChatUI {
                     const artifactUrl = `${this.baseUrl}/artifact/${artifactId}`;
 
                     html += `<div class="message-audio artifact" style="display: flex; align-items: center; padding: 8px 12px; background: #f0f9ff; border: 1px solid #059669; border-radius: 8px; margin: 4px 0; gap: 10px; width: 100%; max-width: 100%; max-height: 7vh; box-sizing: border-box;">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#059669" stroke-width="1.5">
-                            <path d="M1 8h1l1-2 2 4 2-4 2 2h1"/>
-                        </svg>
+                        <span class="material-icons" style="color: #059669; font-size: 16px;">audiotrack</span>
                         <span style="font-size: 13px; color: #374151; font-weight: 500;">Audio file</span>
                         <span style="font-size: 10px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                             ${formattedSize}
@@ -3555,9 +3524,7 @@ class ChatUI {
                 toolNotification.className = 'tool-notification';
                 toolNotification.style.animation = 'fadeIn 0.3s ease-in';
                 toolNotification.innerHTML = `
-                    <svg class="tool-notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                    </svg>
+                    <span class="material-icons tool-notification-icon">build</span>
                     <span>${msg.content}</span>
                     <span style="margin-left: auto; font-size: 11px; opacity: 0.7;">Click to view details</span>
                 `;
@@ -3588,18 +3555,11 @@ class ChatUI {
             // Use professional icons instead of letters
             if (msg.role === 'user') {
                 avatar.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
+                    <span class="material-icons">person</span>
                 `;
             } else {
                 avatar.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-                        <path d="M2 17L12 22L22 17"/>
-                        <path d="M2 12L12 17L22 12"/>
-                    </svg>
+                    <span class="material-icons">smart_toy</span>
                 `;
             }
 
@@ -3740,11 +3700,7 @@ class ChatUI {
 
                 if (attachment.type === 'image_url') {
                     attachmentItem.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21,15 16,10 5,21"/>
-                        </svg>
+                        <span class="material-icons" style="color: #059669; font-size: 16px;">image</span>
                         <span style="flex: 1; font-size: 14px; color: #374151;">Image attachment</span>
                         <span style="font-size: 11px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                             ${sizeInfo.formattedSize}
@@ -3767,9 +3723,7 @@ class ChatUI {
                 } else if (attachment.type === 'file') {
                     const filename = attachment.file?.filename || 'Unknown file';
                     attachmentItem.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                        </svg>
+                        <span class="material-icons" style="color: #dc2626; font-size: 16px;">description</span>
                         <span style="flex: 1; font-size: 14px; color: #374151;">${filename}</span>
                         <span style="font-size: 11px; color: #6b7280; background: #e5e7eb; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                             ${sizeInfo.formattedSize}
@@ -3791,10 +3745,7 @@ class ChatUI {
                     `;
                 } else if (attachment.type === 'audio') {
                     attachmentItem.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
-                            <path d="m9 9 3-3m-3 3v6a3 3 0 1 0 6 0V9m-6 0h6"/>
-                            <circle cx="12" cy="4" r="2"/>
-                        </svg>
+                        <span class="material-icons" style="color: #059669; font-size: 16px;">mic</span>
                         <span style="flex: 1; font-size: 14px; color: #374151;">Audio file</span>
                         <span style="font-size: 11px; color: #059669; background: #dcfce7; padding: 2px 6px; border-radius: 3px; font-weight: 500;">
                             ${sizeInfo.formattedSize}
@@ -3855,11 +3806,7 @@ class ChatUI {
             transition: all 0.2s;
         `;
         addImageButton.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21,15 16,10 5,21"/>
-            </svg>
+            <span class="material-icons" style="font-size: 14px;">image</span>
             Add Image/PDF
         `;
 
@@ -3868,12 +3815,7 @@ class ChatUI {
         addAudioButton.className = 'attachment-button';
         addAudioButton.style.cssText = addImageButton.style.cssText;
         addAudioButton.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                <path d="m19 10v2a7 7 0 0 1-14 0v-2"/>
-                <line x1="12" x2="12" y1="19" y2="23"/>
-                <line x1="8" x2="16" y1="23" y2="23"/>
-            </svg>
+            <span class="material-icons" style="font-size: 14px;">mic</span>
             Add Audio
         `;
 
@@ -4438,11 +4380,7 @@ class ChatUI {
                 if (content) {
                     content.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFA500" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12" y2="16"></line>
-                            </svg>
+                            <span class="material-icons" style="color: #FFA500; font-size: 20px;">warning</span>
                             <span style="font-size: 14px; color: #FFA500; font-weight: 500;">
                                 Tool execution timeout - no response received
                             </span>
@@ -4487,18 +4425,11 @@ class ChatUI {
         if (iconElement) {
             if (hasError) {
                 iconElement.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
+                    <span class="material-icons" style="color: #FF3B30; font-size: 20px;">error</span>
                 `;
             } else {
                 iconElement.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9 12l2 2 4-4"></path>
-                    </svg>
+                    <span class="material-icons" style="color: #34C759; font-size: 20px;">check_circle</span>
                 `;
             }
         }
@@ -4576,16 +4507,9 @@ class ChatUI {
         popup.id = `popup-${popupId}`;
 
         const iconHtml = hasError ? `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-            </svg>
+            <span class="material-icons" style="color: #FF3B30; font-size: 20px;">error</span>
         ` : `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9 12l2 2 4-4"></path>
-            </svg>
+            <span class="material-icons" style="color: #34C759; font-size: 20px;">check_circle</span>
         `;
 
         // Create popup HTML
@@ -4728,9 +4652,7 @@ class ChatUI {
             <div class="tool-popup-header">
                 <div class="tool-popup-title">
                     <div class="tool-popup-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2">
-                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                        </svg>
+                        <span class="material-icons" style="color: #34C759; font-size: 20px;">build</span>
                     </div>
                     Tool Details: ${toolMessage.toolName}
                 </div>
