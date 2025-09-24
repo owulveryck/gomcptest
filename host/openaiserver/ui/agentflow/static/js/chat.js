@@ -100,6 +100,7 @@ class ChatUI {
     async initializeWorkers() {
         try {
             console.log('Initializing web workers...');
+            this.updateWorkerStatus('loading', 'Initializing web workers...');
 
             // Add timeout protection to prevent hanging on worker init
             const workerInitPromise = this.workerManager.init();
@@ -112,13 +113,16 @@ class ChatUI {
             if (result.success) {
                 this.workerReady = true;
                 console.log('Workers initialized successfully');
+                this.updateWorkerStatus('ready', 'Workers ready - enhanced performance enabled');
             } else {
                 console.warn('Workers failed to initialize, continuing with fallback mode:', result.error);
                 this.workerReady = false;
+                this.updateWorkerStatus('fallback', 'Using fallback mode - core functionality available');
             }
         } catch (error) {
             console.warn('Error during worker initialization, using fallback mode:', error);
             this.workerReady = false;
+            this.updateWorkerStatus('error', 'Worker initialization failed - using fallback mode');
         }
 
         // Always continue with loading conversations and initialization
@@ -138,6 +142,42 @@ class ChatUI {
             this.conversations = this.loadConversationsFallback();
             this.initializeConversation();
             this.setupAutoSave();
+        }
+    }
+
+    // Update worker status in the UI
+    updateWorkerStatus(status, message) {
+        const statusIndicator = document.querySelector('.status-indicator');
+        if (statusIndicator) {
+            // Remove existing status classes
+            statusIndicator.classList.remove('worker-loading', 'worker-ready', 'worker-fallback', 'worker-error');
+
+            // Add new status class
+            switch (status) {
+                case 'loading':
+                    statusIndicator.classList.add('worker-loading');
+                    statusIndicator.title = message;
+                    break;
+                case 'ready':
+                    statusIndicator.classList.add('worker-ready');
+                    statusIndicator.title = message;
+                    break;
+                case 'fallback':
+                    statusIndicator.classList.add('worker-fallback');
+                    statusIndicator.title = message;
+                    break;
+                case 'error':
+                    statusIndicator.classList.add('worker-error');
+                    statusIndicator.title = message;
+                    break;
+            }
+        }
+
+        // Also show a brief notification for status changes
+        if (status !== 'loading') {
+            setTimeout(() => {
+                this.showNotification(message, status === 'ready' ? 'success' : 'info');
+            }, 100);
         }
     }
 

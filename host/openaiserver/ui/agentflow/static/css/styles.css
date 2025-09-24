@@ -315,6 +315,51 @@ body {
     }
 }
 
+/* Worker status indicators */
+.status-indicator.worker-loading {
+    background: #fbbf24;
+    animation: workerPulse 1.5s infinite;
+}
+
+.status-indicator.worker-ready {
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.worker-fallback {
+    background: #f59e0b;
+    animation: none;
+}
+
+.status-indicator.worker-error {
+    background: #ef4444;
+    animation: errorPulse 2s infinite;
+}
+
+@keyframes workerPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+    }
+}
+
+@keyframes errorPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
 .chat-messages {
     flex: 1;
     overflow-y: auto;
