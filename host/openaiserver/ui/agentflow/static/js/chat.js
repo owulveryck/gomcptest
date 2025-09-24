@@ -39,6 +39,9 @@ class ChatUI {
         this.audioContext = null;  // Web Audio API context for mixing
         this.originalStreams = null;  // Store original streams for "both" mode cleanup
 
+        // Debounced save to prevent excessive save operations during file uploads and tool calls
+        this.saveTimeout = null;
+
         // DOM elements (must be initialized first)
         this.chatMessages = document.getElementById('chatMessages');
         this.chatInput = document.getElementById('chatInput');
@@ -101,7 +104,7 @@ class ChatUI {
     // Initialize web workers for heavy operations
     async initializeWorkers() {
         try {
-            console.log('Initializing web workers...');
+            // console.log('Initializing web workers...');
             this.updateWorkerStatus('loading', 'Initializing web workers...');
 
             // Add timeout protection to prevent hanging on worker init
@@ -114,7 +117,7 @@ class ChatUI {
 
             if (result.success) {
                 this.workerReady = true;
-                console.log('Workers initialized successfully');
+                // console.log('Workers initialized successfully');
                 this.updateWorkerStatus('ready', 'Workers ready - enhanced performance enabled');
             } else {
                 console.warn('Workers failed to initialize, continuing with fallback mode:', result.error);
@@ -188,7 +191,7 @@ class ChatUI {
         // CRITICAL FIX: Always use fallback for loading since workers don't handle storage
         // Workers are only for data processing, not actual storage operations
         this.conversations = this.loadConversationsFallback();
-        console.log(`Loaded ${Object.keys(this.conversations).length} conversations from localStorage fallback`);
+        // console.log(`Loaded ${Object.keys(this.conversations).length} conversations from localStorage fallback`);
         return;
     }
 
@@ -205,19 +208,32 @@ class ChatUI {
 
     // Set up auto-save using workers
     setupAutoSaveWithWorkers() {
-        // Save every 30 seconds using workers
+        // Save every 30 seconds using workers - but only if no storage quota issues
         this.autoSaveInterval = setInterval(async () => {
+            // Skip auto-save if storage quota is exceeded to prevent spamming
+            if (this.storageQuotaExceeded || this.hasRecentQuotaError()) {
+                console.debug('Skipping auto-save due to storage quota issues');
+                return;
+            }
+
             if (this.messages && this.messages.length > 0 && this.workerReady) {
                 try {
                     await this.saveConversationsViaWorker();
                 } catch (error) {
                     console.error('Auto-save via worker failed:', error);
-                    // Fallback to synchronous save
-                    this.saveConversationsFallback();
+                    // Don't fall back to sync for auto-save to avoid blocking UI during quota issues
                 }
             }
         }, 30000);
+    }
 
+    // Check if we've had recent quota errors to avoid auto-save spam
+    hasRecentQuotaError() {
+        return this.lastCleanupAttempt && (Date.now() - this.lastCleanupAttempt) < 60000; // Within last minute
+    }
+
+    // Set up traditional auto-save (fallback when workers not available)
+    setupAutoSave() {
         // Save on page unload
         window.addEventListener('beforeunload', async () => {
             if (this.workerReady) {
@@ -240,7 +256,7 @@ class ChatUI {
                 this.saveConversations().catch(error => {
                     console.warn('Periodic auto-save failed:', error);
                 });
-                console.log('Periodic auto-save completed');
+                // console.log('Periodic auto-save completed');
             }
         }, 30000); // 30 seconds
 
@@ -260,7 +276,7 @@ class ChatUI {
             }
         });
 
-        console.log('Auto-save mechanisms initialized');
+        // console.log('Auto-save mechanisms initialized');
     }
 
     // Check if artifact storage server is available at startup
@@ -277,7 +293,7 @@ class ChatUI {
             clearTimeout(timeoutId);
 
             if (response.ok) {
-                console.log('Artifact storage server is available');
+                // console.log('Artifact storage server is available');
                 this.artifactServerUnavailable = false;
             } else {
                 console.warn('Artifact storage server returned error:', response.status);
@@ -957,16 +973,16 @@ class ChatUI {
     }
 
     async handleFileSelection(files) {
-        const SIZE_THRESHOLD = 50 * 1024; // 50KB threshold for artifact storage - much more aggressive
+        const SIZE_THRESHOLD = 25 * 1024; // 25KB threshold for artifact storage - very aggressive to prevent quota issues
 
         for (const file of files) {
             if (file.type.startsWith('image/') ||
                 file.type === 'application/pdf' ||
                 file.type.startsWith('audio/')) {
                 try {
-                    // Check file size and use artifact storage for large files
+                    // Check file size and use artifact storage for larger files
                     if (file.size > SIZE_THRESHOLD && !this.artifactServerUnavailable) {
-                        console.log(`Large file detected (${file.size} bytes), using artifact storage:`, file.name);
+                        // console.log(`File detected (${file.size} bytes), using artifact storage:`, file.name);
                         try {
                             const artifactId = await this.uploadToArtifactStorage(file, file.name);
                             this.addFilePreview(`artifact:${artifactId}`, file.name, file.type, {
@@ -974,7 +990,7 @@ class ChatUI {
                                 artifactId: artifactId,
                                 size: file.size
                             });
-                            console.log('File uploaded to artifact storage:', artifactId);
+                            // console.log('File uploaded to artifact storage:', artifactId);
                         } catch (uploadError) {
                             console.warn('Artifact upload failed, falling back to base64:', uploadError);
                             // Fallback to base64 if artifact upload fails
@@ -982,7 +998,7 @@ class ChatUI {
                             this.addFilePreview(dataURL, file.name, file.type);
                         }
                     } else {
-                        // Use base64 for small files or when artifact server unavailable
+                        // Use base64 for very small files or when artifact server unavailable
                         const dataURL = await this.fileToDataURL(file);
                         this.addFilePreview(dataURL, file.name, file.type);
                     }
@@ -995,6 +1011,9 @@ class ChatUI {
 
         // Clear the file input so the same file can be selected again
         this.attachmentInput.value = '';
+
+        // Use debounced save to prevent immediate saves during file upload
+        this.debouncedSave();
     }
 
     // Keep backward compatibility
@@ -1570,7 +1589,7 @@ class ChatUI {
             this.updateRecordingUI(true);
             this.startRecordingTimer();
 
-            console.log('Recording started with format:', options.mimeType);
+            // console.log('Recording started with format:', options.mimeType);
 
         } catch (error) {
             console.error('Failed to start recording:', error);
@@ -1756,11 +1775,11 @@ class ChatUI {
             const SIZE_THRESHOLD = 500 * 1024; // 500KB
             const DURATION_THRESHOLD = 30 * 1000; // 30 seconds in milliseconds
 
-            console.log(`Recording stats: size=${blob.size}, duration=${recordingDuration}ms`);
+            // console.log(`Recording stats: size=${blob.size}, duration=${recordingDuration}ms`);
 
             if (blob.size > SIZE_THRESHOLD || recordingDuration > DURATION_THRESHOLD) {
                 // Use artifact storage for large/long recordings
-                console.log('Using artifact storage for large recording');
+                // console.log('Using artifact storage for large recording');
                 try {
                     const artifactId = await this.uploadToArtifactStorage(blob, filename);
 
@@ -1772,7 +1791,7 @@ class ChatUI {
                         duration: recordingDuration
                     });
 
-                    console.log('Recording uploaded to artifact storage:', artifactId);
+                    // console.log('Recording uploaded to artifact storage:', artifactId);
                 } catch (uploadError) {
                     console.warn('Artifact upload failed, falling back to base64:', uploadError);
                     // Fallback to base64 if artifact upload fails
@@ -1781,7 +1800,7 @@ class ChatUI {
                 }
             } else {
                 // Use base64 for small recordings (current behavior)
-                console.log('Using base64 storage for small recording');
+                // console.log('Using base64 storage for small recording');
                 const dataURL = await this.blobToDataURL(blob);
                 this.addFilePreview(dataURL, filename, blob.type);
             }
@@ -1789,7 +1808,7 @@ class ChatUI {
             // Hide processing indicator
             this.hideProcessingIndicator();
 
-            console.log('Recording processed successfully:', filename);
+            // console.log('Recording processed successfully:', filename);
 
             // If this was a lap, start a new recording immediately using the existing stream
             if (this.isCreatingLap) {
@@ -1845,10 +1864,10 @@ class ChatUI {
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
             const uploadUrl = `${this.baseUrl}/artifact`;
-            console.log('Uploading to:', uploadUrl);
-            console.log('Upload blob type:', blob.type, 'size:', blob.size);
-            console.log('Upload filename:', filename);
-            console.log('Request method: POST');
+            // console.log('Uploading to:', uploadUrl);
+            // console.log('Upload blob type:', blob.type, 'size:', blob.size);
+            // console.log('Upload filename:', filename);
+            // console.log('Request method: POST');
 
             const response = await fetch(uploadUrl, {
                 method: 'POST',
@@ -1862,8 +1881,8 @@ class ChatUI {
 
             clearTimeout(timeoutId);
 
-            console.log('Upload response status:', response.status, response.statusText);
-            console.log('Upload response headers:', [...response.headers.entries()]);
+            // console.log('Upload response status:', response.status, response.statusText);
+            // console.log('Upload response headers:', [...response.headers.entries()]);
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -1872,14 +1891,14 @@ class ChatUI {
             }
 
             const result = await response.json();
-            console.log('Artifact upload response:', result);
+            // console.log('Artifact upload response:', result);
 
             if (!result.artifactId) {
                 console.error('Server response structure:', JSON.stringify(result, null, 2));
                 throw new Error('Server response missing artifactId field');
             }
 
-            console.log('Artifact uploaded successfully:', result.artifactId);
+            // console.log('Artifact uploaded successfully:', result.artifactId);
             return result.artifactId;
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -2045,6 +2064,20 @@ class ChatUI {
 
     // Conversation Management Methods
 
+    // Debounced save method to prevent excessive saves during file uploads and rapid operations
+    debouncedSave() {
+        // Clear any existing timeout
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+
+        // Set a new timeout to save after a brief delay
+        this.saveTimeout = setTimeout(() => {
+            this.saveCurrentConversation();
+            this.saveTimeout = null;
+        }, 500); // 500ms delay to group rapid operations
+    }
+
     async saveConversations() {
         // CRITICAL FIX: Always attempt to save conversations - never skip due to quota
         // Multiple fallback mechanisms ensure conversations are never lost
@@ -2062,7 +2095,7 @@ class ChatUI {
             this.storageQuotaExceeded = false;
             this.consecutiveSaveFailures = 0;
 
-            console.log('Conversations saved successfully to localStorage');
+            // console.log('Conversations saved successfully to localStorage');
             return;
         } catch (error) {
             console.warn('Primary localStorage save failed:', error.message);
@@ -2079,7 +2112,7 @@ class ChatUI {
             try {
                 const reducedData = this.createReducedConversationsForSave();
                 localStorage.setItem('chat_conversations', JSON.stringify(reducedData));
-                console.log('Conversations saved with reduced data to localStorage');
+                // console.log('Conversations saved with reduced data to localStorage');
 
                 // Save the full data to backup location
                 this.saveToBackupLocation();
@@ -2092,7 +2125,7 @@ class ChatUI {
         // Fallback 2: Save to IndexedDB
         try {
             await this.saveToIndexedDB();
-            console.log('Conversations saved to IndexedDB fallback');
+            // console.log('Conversations saved to IndexedDB fallback');
             return;
         } catch (error) {
             console.warn('IndexedDB save failed:', error.message);
@@ -2101,7 +2134,7 @@ class ChatUI {
         // Fallback 3: Save to browser memory (session storage)
         try {
             sessionStorage.setItem('chat_conversations_backup', JSON.stringify(this.conversations));
-            console.log('Conversations saved to sessionStorage as emergency backup');
+            // console.log('Conversations saved to sessionStorage as emergency backup');
         } catch (error) {
             console.warn('SessionStorage save failed:', error.message);
         }
@@ -2156,7 +2189,7 @@ class ChatUI {
                     return this.saveOptimizedConversations(result.data);
                 }
             } catch (error) {
-                console.log('Worker optimization failed, using fallback:', error.message);
+                // console.log('Worker optimization failed, using fallback:', error.message);
             }
         }
 
@@ -2168,7 +2201,7 @@ class ChatUI {
     saveOptimizedConversations(optimizedData) {
         try {
             localStorage.setItem('chat_conversations', JSON.stringify(optimizedData));
-            console.log('Conversations saved with worker optimization');
+            // console.log('Conversations saved with worker optimization');
             this.storageQuotaExceeded = false;
             this.consecutiveSaveFailures = 0;
             return true;
@@ -2187,7 +2220,7 @@ class ChatUI {
             // First try with reduced data
             const reducedData = this.createReducedConversationsForSave();
             localStorage.setItem('chat_conversations', JSON.stringify(reducedData));
-            console.log('Conversations saved via fallback with local optimization');
+            // console.log('Conversations saved via fallback with local optimization');
             this.storageQuotaExceeded = false;
             this.consecutiveSaveFailures = 0;
             return true;
@@ -2202,7 +2235,7 @@ class ChatUI {
 
     // Handle quota exceeded errors - should be rare with aggressive prevention
     handleQuotaExceeded() {
-        console.log('Storage quota exceeded despite prevention measures...');
+        // console.log('Storage quota exceeded despite prevention measures...');
         this.storageQuotaExceeded = true;
         this.consecutiveSaveFailures++;
 
@@ -3079,11 +3112,11 @@ class ChatUI {
     }
 
     renderMarkdown(text) {
-        console.log('🔍 renderMarkdown called with:', text?.substring(0, 200) + '...');
+        // console.log('🔍 renderMarkdown called with:', text?.substring(0, 200) + '...');
 
         // Configure marked to allow HTML (including SVG)
         const customRenderer = this.getCustomRenderer();
-        console.log('🎨 Custom renderer created:', !!customRenderer.code);
+        // console.log('🎨 Custom renderer created:', !!customRenderer.code);
 
         // Try new marked.js API first, then fall back to old API
         let html;
@@ -3106,7 +3139,7 @@ class ChatUI {
             });
             html = marked.parse ? marked.parse(text || '') : marked(text || '');
         }
-        console.log('📝 Marked output:', html?.substring(0, 300) + '...');
+        // console.log('📝 Marked output:', html?.substring(0, 300) + '...');
 
         // Handle SVG URLs - convert them to object tags for better compatibility (including PlantUML)
         html = html.replace(/<img([^>]*?)src=["']([^"']*(?:\.svg|\/plantuml\/svg\/)[^"']*?)["']([^>]*?)>/g, (match, attrs1, src, attrs2) => {
@@ -3177,13 +3210,13 @@ class ChatUI {
         // Custom code block renderer with copy button and syntax highlighting
         // Support both old and new marked.js API signatures
         renderer.code = function(code, infoString, escaped) {
-            console.log('🔧 Code renderer called with:', {
-                code: typeof code === 'string' ? code.substring(0, 100) + '...' : code,
-                infoString,
-                escaped,
-                codeType: typeof code,
-                arguments: Array.from(arguments)
-            });
+            // console.log('🔧 Code renderer called with:', {
+            //     code: typeof code === 'string' ? code.substring(0, 100) + '...' : code,
+            //     infoString,
+            //     escaped,
+            //     codeType: typeof code,
+            //     arguments: Array.from(arguments)
+            // });
 
             // Handle the case where code might be an object (modern marked.js)
             let codeText;
@@ -3193,11 +3226,11 @@ class ChatUI {
                 // Modern marked.js passes a token object
                 codeText = code.text || code.raw || String(code);
                 language = code.lang || infoString;
-                console.log('🔧 Modern API detected - code object:', {
-                    text: code.text,
-                    lang: code.lang,
-                    raw: code.raw
-                });
+                // console.log('🔧 Modern API detected - code object:', {
+                //     text: code.text,
+                //     lang: code.lang,
+                //     raw: code.raw
+                // });
             } else if (typeof code === 'string') {
                 // Legacy API or simple string
                 codeText = code;
@@ -3223,13 +3256,13 @@ class ChatUI {
                 codeText = 'Code content not available';
             }
 
-            console.log('🎯 Final processing:', {
-                validLang,
-                prismLang,
-                codeLength: codeText.length,
-                rawLanguage: language,
-                rawInfoString: infoString
-            });
+            // console.log('🎯 Final processing:', {
+            //     validLang,
+            //     prismLang,
+            //     codeLength: codeText.length,
+            //     rawLanguage: language,
+            //     rawInfoString: infoString
+            // });
 
             // Escape HTML to prevent XSS
             const escapedCode = chatUI.escapeHtml(codeText);
@@ -3474,23 +3507,14 @@ class ChatUI {
         } else {
             this.messages.push(messageData);
             index = this.messages.length - 1;
-
-            // CRITICAL: Save immediately after adding message using workers
-            if (this.workerReady) {
-                this.saveConversationsViaWorker().catch(error => {
-                    console.error('Failed to save after adding message (worker):', error);
-                    // Fallback to synchronous save
-                    this.saveConversationsFallback();
-                });
-            } else {
-                this.saveConversations().catch(error => {
-                    console.error('Failed to save after adding message:', error);
-                });
-            }
         }
 
         this.renderMessages();
-        this.saveCurrentConversation(); // Auto-save after adding message
+
+        // Only save once at the end, and only for non-tool messages to avoid excessive saves during file uploads
+        if (role !== 'tool') {
+            this.saveCurrentConversation();
+        }
     }
 
     // Process message content to store artifact references efficiently
@@ -4339,15 +4363,12 @@ class ChatUI {
 
         this.messages.push(toolMessage);
 
-        // CRITICAL: Save immediately after adding tool message
-        this.saveConversations().catch(error => {
-            console.error('Failed to save after adding tool message:', error);
-        });
-
         // Force re-render to show the tool notification immediately
         this.renderMessages();
-        this.saveCurrentConversation(); // Save tool notification
         this.scrollToBottom();
+
+        // Debounced save to avoid excessive saves during rapid tool calls
+        this.debouncedSave();
 
         return this.messages.length - 1; // Return the index of the tool message
     }
@@ -4782,7 +4803,7 @@ class ChatUI {
                     }
 
                     this.updateMessageContent(messageIndex, assistantMessage, false);
-                    this.saveCurrentConversation(); // Save when streaming completes
+                    this.debouncedSave(); // Use debounced save when streaming completes
                     break;
                 }
 
@@ -4817,7 +4838,7 @@ class ChatUI {
                             }
 
                             this.updateMessageContent(messageIndex, assistantMessage, false);
-                            this.saveCurrentConversation(); // Save when streaming completes
+                            this.debouncedSave(); // Use debounced save when streaming completes
                             return;
                         }
 
@@ -4826,18 +4847,18 @@ class ChatUI {
 
                             // Enhanced debugging with more details
                             if (parsed.event_type) {
-                                console.log('🔧 Tool event received:', {
-                                    type: parsed.event_type,
-                                    object: parsed.object,
-                                    data: parsed
-                                });
+                                // console.log('🔧 Tool event received:', {
+                                //     type: parsed.event_type,
+                                //     object: parsed.object,
+                                //     data: parsed
+                                // });
                             }
 
                             // Check for tool events with comprehensive validation
                             if (parsed.event_type === 'tool_call') {
-                                console.log('🚀 Tool call event detected:', parsed);
+                                // console.log('🚀 Tool call event detected:', parsed);
                                 if (parsed.tool_call && parsed.tool_call.name && parsed.tool_call.id) {
-                                    console.log('✅ Valid tool call, adding notification and popup');
+                                    // console.log('✅ Valid tool call, adding notification and popup');
                                     this.addToolNotification(parsed.tool_call.name, parsed);
                                     this.showToolCallPopup(parsed);
                                 } else {
@@ -4849,9 +4870,9 @@ class ChatUI {
                                     });
                                 }
                             } else if (parsed.event_type === 'tool_response') {
-                                console.log('📥 Tool response event detected:', parsed);
+                                // console.log('📥 Tool response event detected:', parsed);
                                 if (parsed.tool_response && parsed.tool_response.id) {
-                                    console.log('✅ Valid tool response, updating popup');
+                                    // console.log('✅ Valid tool response, updating popup');
                                     this.updateToolResponsePopup(parsed);
                                     this.storeToolResponse(parsed);
                                 } else {
@@ -4862,9 +4883,9 @@ class ChatUI {
                                     });
                                 }
                             } else if (parsed.event_type === 'error') {
-                                console.log('🚨 Error event detected:', parsed);
+                                // console.log('🚨 Error event detected:', parsed);
                                 if (parsed.error && parsed.error.message) {
-                                    console.log('✅ Valid error event, displaying error');
+                                    // console.log('✅ Valid error event, displaying error');
                                     this.showErrorNotification(parsed);
                                 } else {
                                     console.warn('❌ Invalid error event structure:', {
@@ -4882,10 +4903,8 @@ class ChatUI {
                                         this.messages.push({ role: 'assistant', content: '', isTyping: true });
                                         messageIndex = this.messages.length - 1;
 
-                                        // CRITICAL: Save immediately after adding assistant message
-                                        this.saveConversations().catch(error => {
-                                            console.error('Failed to save after adding assistant message:', error);
-                                        });
+                                        // Use debounced save to prevent excessive saves during streaming
+                                        this.debouncedSave();
                                         this.renderMessages();
                                     }
 
@@ -4906,22 +4925,18 @@ class ChatUI {
                                         this.messages.push({ role: 'assistant', content: assistantMessage, isTyping: false });
                                         messageIndex = this.messages.length - 1;
 
-                                        // CRITICAL: Save immediately after adding assistant message
-                                        this.saveConversations().catch(error => {
-                                            console.error('Failed to save after adding assistant message:', error);
-                                        });
+                                        // Use debounced save to prevent excessive saves
+                                        this.debouncedSave();
                                     } else {
                                         // Update final message content and save
                                         this.messages[messageIndex].content = assistantMessage;
                                         this.messages[messageIndex].isTyping = false;
 
-                                        // CRITICAL: Save immediately after updating assistant message
-                                        this.saveConversations().catch(error => {
-                                            console.error('Failed to save after updating assistant message:', error);
-                                        });
+                                        // Use debounced save to prevent excessive saves
+                                        this.debouncedSave();
                                     }
                                     this.renderMessages();
-                                    this.saveCurrentConversation();
+                                    this.debouncedSave();
                                     // Ensure syntax highlighting is applied after streaming completes
                                     setTimeout(() => {
                                         this.highlightCodeBlocks();
@@ -4951,7 +4966,7 @@ class ChatUI {
             if (messageIndex !== null) {
                 this.updateMessageContent(messageIndex, assistantMessage, false);
             }
-            this.saveCurrentConversation(); // Save even on error/stop
+            this.debouncedSave(); // Save even on error/stop
 
             // Close any remaining tool popups
             this.closeAllToolPopups();
@@ -5083,11 +5098,11 @@ class ChatUI {
     // Apply Prism.js highlighting to code blocks
     highlightCodeBlocks() {
         this.waitForPrism().then(() => {
-            console.log('Prism.js ready, applying highlighting...');
+            // console.log('Prism.js ready, applying highlighting...');
 
             // Find all code blocks that need highlighting
             const codeBlocks = document.querySelectorAll('.code-block-container code[class*="language-"]');
-            console.log('Found', codeBlocks.length, 'code blocks to highlight');
+            // console.log('Found', codeBlocks.length, 'code blocks to highlight');
 
             // Clear any existing highlighting classes
             codeBlocks.forEach(block => {
@@ -5097,7 +5112,7 @@ class ChatUI {
 
             // Highlight each block individually for better control
             codeBlocks.forEach((block, index) => {
-                console.log(`Highlighting block ${index}:`, block.className, 'Language:', block.classList.toString().match(/language-(\w+)/)?.[1]);
+                // console.log(`Highlighting block ${index}:`, block.className, 'Language:', block.classList.toString().match(/language-(\w+)/)?.[1]);
                 try {
                     Prism.highlightElement(block);
                     block.classList.add('highlighted');
@@ -5171,7 +5186,7 @@ class ChatUI {
         this.closeAllToolPopups();
 
         // Save the conversation state
-        this.saveCurrentConversation();
+        this.debouncedSave();
 
         console.log('🛑 Streaming stopped successfully');
     }
@@ -5246,16 +5261,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configure Prism.js autoloader if available
     if (typeof Prism !== 'undefined' && Prism.plugins && Prism.plugins.autoloader) {
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
-        console.log('Prism.js autoloader configured');
+        // console.log('Prism.js autoloader configured');
     }
 
     // Debug: Show what we have available
-    console.log('Prism availability:', {
-        Prism: typeof Prism,
-        highlightElement: typeof Prism?.highlightElement,
-        highlightAll: typeof Prism?.highlightAll,
-        languages: Object.keys(Prism?.languages || {})
-    });
+    // console.log('Prism availability:', {
+    //     Prism: typeof Prism,
+    //     highlightElement: typeof Prism?.highlightElement,
+    //     highlightAll: typeof Prism?.highlightAll,
+    //     languages: Object.keys(Prism?.languages || {})
+    // });
 
     // Initialize the chat UI
     window.chatUI = new ChatUI();

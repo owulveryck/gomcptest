@@ -10,6 +10,25 @@ class StorageManager {
     }
 
     /**
+     * Safely truncate content - handles both string and array/object types
+     */
+    truncateContent(content, maxLength) {
+        if (!content) return '';
+
+        if (typeof content === 'string') {
+            return content.substring(0, maxLength);
+        }
+
+        // For array/object content (multipart messages), convert to string first
+        if (Array.isArray(content) || typeof content === 'object') {
+            const stringified = JSON.stringify(content);
+            return stringified.substring(0, maxLength);
+        }
+
+        return String(content).substring(0, maxLength);
+    }
+
+    /**
      * Process conversations for storage optimization
      */
     processConversationsForStorage(conversations) {
@@ -45,7 +64,7 @@ class StorageManager {
                 timestamp: conv.timestamp,
                 messages: conv.messages ? conv.messages.map(msg => ({
                     role: msg.role,
-                    content: msg.content ? msg.content.substring(0, 1000) : '', // Limit content
+                    content: this.truncateContent(msg.content, 1000), // Safely limit content
                     timestamp: msg.timestamp,
                     // Skip large attachments
                     attachments: msg.attachments ? msg.attachments.filter(att =>
@@ -79,7 +98,7 @@ class StorageManager {
                 timestamp: conv.timestamp,
                 messages: conv.messages ? conv.messages.slice(-10).map(msg => ({ // Only last 10 messages
                     role: msg.role,
-                    content: msg.content ? msg.content.substring(0, 500) : '', // Heavily truncated
+                    content: this.truncateContent(msg.content, 500), // Heavily truncated
                     timestamp: msg.timestamp
                 })) : []
             };
