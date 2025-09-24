@@ -659,88 +659,99 @@ class ChatUI {
     }
 
     mapSelectionToMarkdown(markdownContent, selectedText, range) {
-        // First, try to reconstruct markdown from the actual selected DOM elements
-        const reconstructedMarkdown = this.reconstructMarkdownFromRange(range);
-        if (reconstructedMarkdown) {
-            return reconstructedMarkdown;
+        // Get the character positions in the original markdown that correspond to the selection
+        const markdownPositions = this.getMarkdownPositionsFromSelection(markdownContent, range);
+
+        if (markdownPositions) {
+            const { start, end } = markdownPositions;
+            return markdownContent.substring(start, end);
         }
 
-        // Fallback to the original text-based approach
-        // Clean up the selected text for comparison
-        const cleanSelection = selectedText.replace(/\s+/g, ' ').trim();
+        // Simple fallback - clean the selected text and try direct match
+        const cleanSelection = this.cleanSelectedText(selectedText);
 
-        // If the selection is very small or empty, return as is
-        if (cleanSelection.length < 3) {
-            return selectedText;
-        }
-
-        // Remove action buttons from selection if present
-        const cleanSelectionNoButtons = cleanSelection
-            .replace(/\s*Edit\s*Replay from here\s*/g, '')
-            .replace(/\s*Edit\s*/g, '')
-            .replace(/\s*Replay from here\s*/g, '')
-            .trim();
-
-        // Try exact substring match first (for simple cases)
-        if (markdownContent.includes(cleanSelectionNoButtons)) {
-            const startIndex = markdownContent.indexOf(cleanSelectionNoButtons);
-            const endIndex = startIndex + cleanSelectionNoButtons.length;
-            return markdownContent.substring(startIndex, endIndex);
-        }
-
-        // Try direct match with cleaned selection
+        // Try exact match in markdown
         if (markdownContent.includes(cleanSelection)) {
             const startIndex = markdownContent.indexOf(cleanSelection);
-            const endIndex = startIndex + cleanSelection.length;
-            return markdownContent.substring(startIndex, endIndex);
+            return markdownContent.substring(startIndex, startIndex + cleanSelection.length);
         }
 
-        // Split into words and look for word sequences
-        const selectionWords = cleanSelectionNoButtons.split(/\s+/).filter(w => w.length > 0);
+        // Last resort: return cleaned selection as-is
+        return cleanSelection || selectedText;
+    }
 
-        if (selectionWords.length >= 2) {
-            // Look for the first few and last few words to find boundaries
-            const numWordsToMatch = Math.min(3, Math.floor(selectionWords.length / 2));
-            const firstWords = selectionWords.slice(0, numWordsToMatch).join(' ');
-            const lastWords = selectionWords.slice(-numWordsToMatch).join(' ');
+    /**
+     * Map DOM selection range to original markdown character positions
+     * This method attempts to find the exact positions in the markdown source
+     * that correspond to the selected text in the rendered DOM
+     */
+    getMarkdownPositionsFromSelection(markdownContent, range) {
+        try {
+            // Get the selected text from the range
+            const selectedText = range.toString().trim();
+            if (!selectedText) return null;
 
-            const startPos = markdownContent.indexOf(firstWords);
-            const endPos = markdownContent.lastIndexOf(lastWords);
+            // Clean the selected text for matching (remove extra whitespace, copy buttons, etc.)
+            const cleanSelection = this.cleanSelectedText(selectedText);
+            if (!cleanSelection) return null;
 
-            if (startPos >= 0 && endPos >= 0 && endPos >= startPos) {
-                return markdownContent.substring(startPos, endPos + lastWords.length).trim();
+            // Try to find exact match in markdown
+            const exactMatchIndex = markdownContent.indexOf(cleanSelection);
+            if (exactMatchIndex !== -1) {
+                return {
+                    start: exactMatchIndex,
+                    end: exactMatchIndex + cleanSelection.length
+                };
             }
-        }
 
-        // Fallback: try to find any substantial portion of the text
-        if (selectionWords.length >= 5) {
-            const middleWords = selectionWords.slice(1, -1).join(' ');
-            const middlePos = markdownContent.indexOf(middleWords);
-            if (middlePos >= 0) {
-                // Expand around the middle match
-                let start = middlePos;
-                let end = middlePos + middleWords.length;
+            // If no exact match, try word-based matching
+            const words = cleanSelection.split(/\s+/).filter(word => word.length > 2);
+            if (words.length === 0) return null;
 
-                // Try to expand backwards
-                const wordBefore = selectionWords[0];
-                const expandedStart = markdownContent.lastIndexOf(wordBefore, start);
-                if (expandedStart >= 0 && start - expandedStart < 50) {
-                    start = expandedStart;
+            // Find the first and last significant words in the markdown
+            const firstWord = words[0];
+            const lastWord = words[words.length - 1];
+
+            const firstWordIndex = markdownContent.indexOf(firstWord);
+            const lastWordIndex = markdownContent.lastIndexOf(lastWord);
+
+            if (firstWordIndex !== -1 && lastWordIndex !== -1 && firstWordIndex <= lastWordIndex) {
+                // Try to find the most likely boundaries
+                let start = firstWordIndex;
+                let end = lastWordIndex + lastWord.length;
+
+                // Refine the boundaries by looking for word boundaries
+                // Go backwards from firstWordIndex to find a good start
+                while (start > 0 && /\w/.test(markdownContent[start - 1])) {
+                    start--;
                 }
 
-                // Try to expand forwards
-                const wordAfter = selectionWords[selectionWords.length - 1];
-                const expandedEnd = markdownContent.indexOf(wordAfter, end);
-                if (expandedEnd >= 0 && expandedEnd - end < 50) {
-                    end = expandedEnd + wordAfter.length;
+                // Go forwards from lastWordIndex + lastWord.length to find a good end
+                while (end < markdownContent.length && /\w/.test(markdownContent[end])) {
+                    end++;
                 }
 
-                return markdownContent.substring(start, end).trim();
+                return { start, end };
             }
-        }
 
-        // If all else fails, return the original selection
-        return selectedText;
+            return null;
+        } catch (error) {
+            console.warn('Error mapping selection to markdown positions:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Clean selected text by removing copy buttons and normalizing whitespace
+     */
+    cleanSelectedText(text) {
+        return text
+            .replace(/\s*Copy\s*/g, '') // Remove copy button text
+            .replace(/\s*Edit\s*Replay from here\s*/g, '') // Remove action button combinations
+            .replace(/\s*Edit\s*/g, '') // Remove edit button text
+            .replace(/\s*Replay from here\s*/g, '') // Remove replay button text
+            .replace(/\s+/g, ' ') // Normalize whitespace
+            .trim();
     }
 
     reconstructMarkdownFromRange(range) {
