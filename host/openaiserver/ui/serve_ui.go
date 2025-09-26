@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"flag"
 	"fmt"
 	"html/template"
@@ -16,49 +15,72 @@ import (
 	"strings"
 )
 
-//go:embed agentflow/templates/chat-ui.html.tmpl
-var chatUITemplate string
-
-//go:embed agentflow/static
-var staticFiles embed.FS
-
 // UIData represents data passed to the HTML template
 type UIData struct {
 	BaseURL string
 	APIURL  string
 }
 
-// serveStaticFile serves static files from the embedded filesystem
-func serveStaticFile(w http.ResponseWriter, r *http.Request, urlPath string) {
-	// Convert URL path to embedded filesystem path
-	// Remove leading "/static/" and prepend "agentflow/static/"
-	embeddedPath := "agentflow/static/" + strings.TrimPrefix(urlPath, "/static/")
 
-	log.Printf("DEBUG: Serving static file - URL: %s, Embedded path: %s", urlPath, embeddedPath)
+// serveStaticAssets handles static assets that should be served at root level (favicon, manifest, etc.)
+func serveStaticAssets(w http.ResponseWriter, r *http.Request, urlPath string) {
+	log.Printf("DEBUG: Serving static asset - URL: %s", urlPath)
 
-	// Read the file from embedded filesystem
-	fileData, err := staticFiles.ReadFile(embeddedPath)
-	if err != nil {
-		log.Printf("DEBUG: Failed to read file %s: %v", embeddedPath, err)
+	// Map root-level paths to their filesystem file paths
+	var filePath string
+	switch urlPath {
+	case "/favicon.svg":
+		filePath = "agentflow/static/images/favicon.svg"
+	case "/favicon.ico":
+		filePath = "agentflow/static/images/favicon.ico"
+	case "/favicon-96x96.png":
+		filePath = "agentflow/static/images/favicon-96x96.png"
+	case "/apple-touch-icon.png":
+		filePath = "agentflow/static/images/apple-touch-icon.png"
+	case "/apple-touch-icon-180x180.png":
+		filePath = "agentflow/static/images/apple-touch-icon-180x180.png"
+	case "/site.webmanifest":
+		filePath = "agentflow/static/site.webmanifest"
+	case "/web-app-manifest-192x192.png":
+		filePath = "agentflow/static/images/web-app-manifest-192x192.png"
+	case "/web-app-manifest-512x512.png":
+		filePath = "agentflow/static/images/web-app-manifest-512x512.png"
+	default:
 		http.NotFound(w, r)
 		return
 	}
 
-	log.Printf("DEBUG: Successfully read %d bytes for %s", len(fileData), embeddedPath)
+	log.Printf("DEBUG: Serving static asset - File path: %s", filePath)
 
-	// Determine content type based on file extension
-	contentType := mime.TypeByExtension(filepath.Ext(embeddedPath))
-	if contentType == "" {
-		// Default content type for unknown extensions
-		contentType = "application/octet-stream"
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Printf("DEBUG: Static asset not found: %s", filePath)
+		http.NotFound(w, r)
+		return
 	}
 
-	// Set headers
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=31536000") // Cache for 1 year
+	// Determine content type based on file extension
+	contentType := mime.TypeByExtension(filepath.Ext(filePath))
+	if contentType == "" {
+		// Set specific content types for known files that mime doesn't detect
+		switch filepath.Ext(filePath) {
+		case ".webmanifest":
+			contentType = "application/manifest+json"
+		default:
+			contentType = "application/octet-stream"
+		}
+	}
 
-	// Write the file content
-	w.Write(fileData)
+	// Set headers for development (no caching)
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+
+	log.Printf("DEBUG: Serving static asset %s with content-type: %s", filePath, contentType)
+
+	// Serve the file directly from filesystem
+	http.ServeFile(w, r, filePath)
 }
 
 func main() {
@@ -96,33 +118,62 @@ func main() {
 		return nil
 	}
 
-	// Parse and prepare the template
-	tmpl, err := template.New("chat-ui").Parse(chatUITemplate)
-	if err != nil {
-		log.Fatalf("Failed to parse template: %v", err)
-	}
+	// Create file server for static assets with no-cache headers
+	staticDir := http.Dir("agentflow/static")
+	staticFileServer := http.FileServer(staticDir)
+
+	// Middleware to add no-cache headers to file server responses
+	staticHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Add no-cache headers for development
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
+		log.Printf("DEBUG: Serving static file via FileServer - URL: %s", r.URL.Path)
+		staticFileServer.ServeHTTP(w, r)
+	})
 
 	// Set up routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("DEBUG: Request received - Path: %s, Method: %s", r.URL.Path, r.Method)
+
+		// Redirect root to /ui to match openaiserver behavior
 		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/ui", http.StatusFound)
+			return
+		} else if r.URL.Path == "/ui" || r.URL.Path == "/ui/" {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-			// BaseURL empty for static assets (same server), APIURL for API calls
+			// Set no-cache headers for template
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+
+			// Parse template from filesystem on each request (live development)
+			tmpl, err := template.ParseFiles("agentflow/templates/chat-ui.html.tmpl")
+			if err != nil {
+				log.Printf("ERROR: Failed to parse template: %v", err)
+				http.Error(w, "Failed to parse template", http.StatusInternalServerError)
+				return
+			}
+
+			// BaseURL with /ui prefix for static assets, APIURL for API calls
 			data := UIData{
-				BaseURL: "", // Static assets served from same server
+				BaseURL: "/ui", // Static assets served from /ui prefix to match openaiserver
 				APIURL:  *apiURL,
 			}
 
-			err := tmpl.Execute(w, data)
+			err = tmpl.Execute(w, data)
 			if err != nil {
+				log.Printf("ERROR: Failed to execute template: %v", err)
 				http.Error(w, "Failed to execute template", http.StatusInternalServerError)
 				return
 			}
-		} else if strings.HasPrefix(r.URL.Path, "/static/") {
-			// Serve static files from embedded filesystem
-			serveStaticFile(w, r, r.URL.Path)
-		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" {
+		} else if strings.HasPrefix(r.URL.Path, "/ui/static/") {
+			// Serve static files using http.FileServer (live development)
+			// Strip "/ui/static" prefix to serve from agentflow/static directory
+			http.StripPrefix("/ui/static", staticHandler).ServeHTTP(w, r)
+		} else if r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/models" || r.URL.Path == "/v1/tools" {
 			// Add CORS headers
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
@@ -185,6 +236,21 @@ func main() {
 			if err != nil {
 				log.Printf("Error copying PlantUML response: %v", err)
 			}
+		} else if r.URL.Path == "/ui/favicon.svg" || r.URL.Path == "/ui/favicon.ico" ||
+			r.URL.Path == "/ui/favicon-96x96.png" || r.URL.Path == "/ui/apple-touch-icon.png" ||
+			r.URL.Path == "/ui/apple-touch-icon-180x180.png" || r.URL.Path == "/ui/site.webmanifest" ||
+			r.URL.Path == "/ui/web-app-manifest-192x192.png" || r.URL.Path == "/ui/web-app-manifest-512x512.png" ||
+			r.URL.Path == "/favicon.svg" || r.URL.Path == "/favicon.ico" ||
+			r.URL.Path == "/favicon-96x96.png" || r.URL.Path == "/apple-touch-icon.png" ||
+			r.URL.Path == "/apple-touch-icon-180x180.png" || r.URL.Path == "/site.webmanifest" ||
+			r.URL.Path == "/web-app-manifest-192x192.png" || r.URL.Path == "/web-app-manifest-512x512.png" {
+			// Serve root-level static assets (favicon, manifest, etc.)
+			// Handle both /ui/ prefixed and root paths for compatibility
+			actualPath := strings.TrimPrefix(r.URL.Path, "/ui")
+			if actualPath == "" {
+				actualPath = r.URL.Path
+			}
+			serveStaticAssets(w, r, actualPath)
 		} else {
 			http.NotFound(w, r)
 		}

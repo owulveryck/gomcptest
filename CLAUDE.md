@@ -373,3 +373,53 @@ Avoid the temptation to use reference material to instruct in how to achieve thi
 
 These descriptions must be accurate and kept up-to-date. Any discrepancy between the machinery and your description of it will inevitably lead a user astray.
 - remember that to test the ui, you need to use "go run" even on the openaiserver or the ui serve_ui
+
+
+## Testing and Developing the AgentFlow UI
+
+This guide explains how to serve the UI files for development, enabling live-reloading to speed up your workflow.
+
+### Background
+
+The UI source files are located at `@host/openaiserver/ui/agentflow`. There are two ways to serve them:
+
+| Method | Description | Use Case |
+| :--- | :--- | :--- |
+| **Production** | UI files are embedded directly into the `openaiserver` binary. | Final builds, testing production-like behavior. |
+| **Development** | UI files are served by a separate, lightweight Go server (`serve_ui.go`). | **Recommended for all UI development.** |
+
+The development method is strongly preferred as it avoids the need to recompile the entire application for every small UI change.
+
+### Development Workflow Steps
+
+Follow these steps to run the UI in development mode.
+
+**1. Run the Backend Server**
+
+The main `openaiserver` must be running to handle API requests. If it's not already running, start it in a terminal. It typically runs on port 4000.
+
+```bash
+# Example command to start the backend server (replace with your actual command)
+./openaiserver
+```
+> **Note:** Leave this server running in its own terminal.
+
+**2. Run the UI Development Server**
+
+example: to make the server listen on port 8081, and connect to the backend present in localhost:4000
+```bash
+cd host/openaiserver/ui && go run . -ui-port=8081 -api-url=http://localhost:4000
+```
+
+After running the command, the console will show which port the UI is being served on.
+
+```
+# Expected Output:
+Serving UI on http://localhost:8080
+```
+
+**3. View in Browser**
+
+Open a web browser and navigate to the URL from the output, likely **`http://localhost:8080`**.
+
+You can now edit the UI files in `@host/openaiserver/ui/agentflow`, and your changes will be visible immediately after refreshing the browser page.
