@@ -334,10 +334,14 @@ class ChatUI {
             }
         });
 
-        // Auto-resize textarea
+        // Auto-resize textarea (respects manual resize)
+        this.isManuallyResized = false;
         this.chatInput.addEventListener('input', () => {
-            this.chatInput.style.height = 'auto';
-            this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 150) + 'px';
+            // Only auto-resize if not manually resized
+            if (!this.isManuallyResized) {
+                this.chatInput.style.height = 'auto';
+                this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 150) + 'px';
+            }
         });
 
         // Model selector events
@@ -414,6 +418,9 @@ class ChatUI {
 
         // Audio recording functionality
         this.initAudioRecording();
+
+        // Input resize functionality
+        this.initInputResize();
     }
 
     // Text selection and copy functionality
@@ -1507,6 +1514,101 @@ class ChatUI {
         // Load user's preferred audio source
         const preferredSource = localStorage.getItem('preferredAudioSource') || 'microphone';
         this.selectAudioSource(preferredSource);
+    }
+
+    initInputResize() {
+        const resizeHandle = document.getElementById('inputResizeHandle');
+        const chatInput = document.getElementById('chatInput');
+
+        if (!resizeHandle || !chatInput) {
+            console.warn('Resize handle or chat input not found');
+            return;
+        }
+
+        let isResizing = false;
+        let startY = 0;
+        let startHeight = 0;
+        let previewHeight = 0;
+
+        const startResize = (e) => {
+            isResizing = true;
+            startY = e.clientY || e.touches[0].clientY;
+            startHeight = parseInt(document.defaultView.getComputedStyle(chatInput).height, 10);
+            previewHeight = startHeight;
+
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+            document.addEventListener('touchmove', doResize);
+            document.addEventListener('touchend', stopResize);
+
+            // Prevent text selection while resizing
+            document.body.style.userSelect = 'none';
+            chatInput.style.pointerEvents = 'none';
+
+            e.preventDefault();
+        };
+
+        const doResize = (e) => {
+            if (!isResizing) return;
+
+            const clientY = e.clientY || e.touches[0].clientY;
+
+            // Fix direction: up = increase, down = decrease
+            const heightDiff = startY - clientY;
+            const newHeight = startHeight + heightDiff;
+
+            // Respect min and max height constraints
+            const minHeight = 44;
+            const maxHeight = 300;
+            const constrainedHeight = Math.min(Math.max(newHeight, minHeight), maxHeight);
+
+            // Store preview height but don't apply rows yet
+            previewHeight = constrainedHeight;
+
+            // Show visual preview with temporary height change
+            chatInput.style.height = constrainedHeight + 'px';
+            chatInput.style.opacity = '0.8';
+            chatInput.style.transition = 'opacity 0.1s';
+
+            e.preventDefault();
+        };
+
+        const stopResize = (e) => {
+            if (!isResizing) return;
+
+            // Set flag to prevent auto-resize
+            this.isManuallyResized = true;
+
+            // Apply the final height with proper CSS
+            chatInput.style.height = previewHeight + 'px';
+            chatInput.style.setProperty('height', previewHeight + 'px', 'important');
+
+            // Calculate and set rows based on final height
+            const lineHeight = 20; // Approximate line height
+            const padding = 22; // Approximate padding (11px top + 11px bottom)
+            const contentHeight = previewHeight - padding;
+            const rows = Math.max(1, Math.floor(contentHeight / lineHeight));
+            chatInput.rows = rows;
+
+            // Restore normal appearance
+            chatInput.style.opacity = '';
+            chatInput.style.transition = '';
+
+            isResizing = false;
+
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+            document.removeEventListener('touchmove', doResize);
+            document.removeEventListener('touchend', stopResize);
+
+            // Restore normal behavior
+            document.body.style.userSelect = '';
+            chatInput.style.pointerEvents = '';
+        };
+
+        // Add event listeners for mouse and touch
+        resizeHandle.addEventListener('mousedown', startResize);
+        resizeHandle.addEventListener('touchstart', startResize);
     }
 
     selectAudioSource(source) {
@@ -4149,7 +4251,10 @@ class ChatUI {
 
         // Clear inputs
         this.chatInput.value = '';
-        this.chatInput.style.height = 'auto';
+        // Only reset height if not manually resized
+        if (!this.isManuallyResized) {
+            this.chatInput.style.height = 'auto';
+        }
         this.clearFilePreviews();
 
         this.addMessage('user', messageContent);

@@ -857,12 +857,12 @@ body {
 .chat-input {
     flex: 1;
     min-height: 44px;
-    max-height: 120px;
+    max-height: 300px;
     padding: 11px 14px;
     border: 1px solid #d1d5db;
     border-radius: 10px;
     font-size: 14px;
-    resize: vertical;
+    resize: none;
     transition: all 0.2s;
     font-family: inherit;
     background: #f9fafb;
@@ -874,6 +874,39 @@ body {
     background: white;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
+
+/* Custom resize handle */
+.input-resize-handle {
+    width: 40px;
+    height: 6px;
+    background: #d1d5db;
+    border-radius: 3px;
+    margin: 0 auto 8px auto;
+    cursor: ns-resize;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.input-resize-handle:hover {
+    background: #9ca3af;
+    transform: scaleY(1.2);
+}
+
+.input-resize-handle:active {
+    background: #3b82f6;
+    transform: scaleY(1.5);
+}
+
+.input-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: transparent;
+}
+
 
 .send-button {
     padding: 11px 20px;
